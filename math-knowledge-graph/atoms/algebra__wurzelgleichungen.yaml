@@ -1,0 +1,32 @@
+id: algebra__wurzelgleichungen
+label: Einfache Wurzelgleichungen lösen
+description: Einfache Wurzelgleichungen durch Quadrieren lösen; Notwendigkeit der Probe (Scheinlösungen).
+domain: algebra
+subdomain: Gleichungen
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 9
+weight:
+  mastery_required: 0.6
+  curriculum_centrality: 0.5
+  transfer_value: 0.5
+  cognitive_load: 0.6
+prerequisites:
+- id: algebra__wurzeln_reelle_zahlen
+  type: required
+  mastery_level_needed: 0.8
+- id: algebra__lineare_gleichungen
+  type: required
+  mastery_level_needed: 0.8
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 9, LB 1
+tags:
+- wurzelgleichungen
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

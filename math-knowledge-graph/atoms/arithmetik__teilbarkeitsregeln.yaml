@@ -1,0 +1,44 @@
+id: arithmetik__teilbarkeitsregeln
+label: Teilbarkeitsregeln (2, 3, 5, 9, 10) anwenden
+description: Teilbarkeit durch 2, 5, 10 (Endziffer) und 3, 9 (Quersumme) prüfen und begründen.
+domain: arithmetik
+subdomain: Teilbarkeit
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 5
+weight:
+  mastery_required: 0.9
+  curriculum_centrality: 0.85
+  transfer_value: 0.85
+  cognitive_load: 0.45
+prerequisites:
+- id: arithmetik__division_grundverstaendnis
+  type: required
+  mastery_level_needed: 0.85
+- id: arithmetik__einmaleins
+  type: required
+  mastery_level_needed: 0.9
+- id: arithmetik__stellenwert_bis_1000000
+  type: helpful
+  mastery_level_needed: 0.7
+  note: Quersummenregeln stützen sich auf das Stellenwertsystem.
+- id: arithmetik__teiler_vielfache
+  type: required
+  mastery_level_needed: 0.85
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 5, LB 1
+related:
+- id: arithmetik__teilbarkeit_primzahlen
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms arithmetik__teilbarkeit_primzahlen
+tags:
+- teilbarkeit
+- quersumme
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 2

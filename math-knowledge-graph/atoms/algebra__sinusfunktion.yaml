@@ -1,0 +1,35 @@
+id: algebra__sinusfunktion
+label: Sinusfunktion und periodische Vorgänge (Grad- und Bogenmaß)
+description: Sinusfunktion am Einheitskreis; Grad- und Bogenmaß; Graph, Eigenschaften und Parametereinfluss;
+  Modellieren periodischer Vorgänge.
+domain: algebra
+subdomain: Funktionen
+level: atom
+granularity: 4
+schulformen:
+- GY
+jahrgangsstufen:
+- 10
+weight:
+  mastery_required: 0.8
+  curriculum_centrality: 0.8
+  transfer_value: 0.8
+  cognitive_load: 0.7
+prerequisites:
+- id: geometrie__trigonometrie_rechtwinkliges_dreieck
+  type: required
+  mastery_level_needed: 0.8
+- id: algebra__parametereinfluss_graphen
+  type: required
+  mastery_level_needed: 0.75
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 10, LB 1
+tags:
+- sinusfunktion
+- bogenmaß
+- periodisch
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

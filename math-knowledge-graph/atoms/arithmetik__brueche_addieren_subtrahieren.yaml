@@ -1,0 +1,55 @@
+id: arithmetik__brueche_addieren_subtrahieren
+label: Brüche addieren und subtrahieren
+description: Gleichnamige und ungleichnamige Brüche addieren/subtrahieren; Hauptnenner über gemeinsame
+  Vielfache; gemischte Zahlen.
+domain: arithmetik
+subdomain: Bruchrechnung
+level: cluster
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 6
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.95
+  transfer_value: 1.0
+  cognitive_load: 0.65
+prerequisites:
+- id: arithmetik__kuerzen_erweitern
+  type: required
+  mastery_level_needed: 0.9
+  note: Ungleichnamige Brüche müssen erst gleichnamig gemacht werden.
+- id: arithmetik__teilbarkeit_primzahlen
+  type: helpful
+  mastery_level_needed: 0.7
+- id: arithmetik__brueche_add_sub_gleichnamig
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: arithmetik__brueche_add_sub_ungleichnamig
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: arithmetik__gemischte_zahlen_add_sub
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 6, LB 1
+related:
+- id: arithmetik__brueche_multiplizieren_dividieren
+  relation: commonly_confused_with
+  note: 'Sehr häufiger Fehler: Zähler und Nenner werden wie bei der Multiplikation getrennt addiert.'
+tags:
+- brüche
+- addition
+- hauptnenner
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 2

@@ -1,0 +1,36 @@
+id: geometrie__flaecheninhalt_einheitsquadrate
+label: Flächeninhalt und Umfang mit Einheitsquadraten
+description: Flächeninhalte durch Auslegen und Auszählen von Einheitsquadraten vergleichen und bestimmen;
+  Umfang als Randlänge; Schätzen mit Stützpunktvorstellungen.
+domain: geometrie
+subdomain: Messen
+level: atom
+granularity: 5
+schulformen:
+- GS
+jahrgangsstufen:
+- 3
+- 4
+weight:
+  mastery_required: 0.8
+  curriculum_centrality: 0.75
+  transfer_value: 0.9
+  cognitive_load: 0.45
+prerequisites:
+- id: geometrie__ebene_figuren_grundschule
+  type: required
+  mastery_level_needed: 0.75
+- id: arithmetik__einmaleins
+  type: helpful
+  mastery_level_needed: 0.7
+  note: Auszählen im Rechteckraster wird durch Multiplikation abgekürzt.
+lehrplan_ref:
+- schulform: GS
+  dokument: lp_gs_mathematik_2025_kommentiert.pdf
+  abschnitt: Kl. 3/4, LB 1 Raum und Form
+tags:
+- flächeninhalt
+- umfang
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

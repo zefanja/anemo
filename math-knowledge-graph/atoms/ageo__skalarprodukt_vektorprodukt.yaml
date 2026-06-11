@@ -1,0 +1,36 @@
+id: ageo__skalarprodukt_vektorprodukt
+label: Skalarprodukt und Vektorprodukt
+description: Skalarprodukt und Vektorprodukt mit geometrischer Interpretation; Orthogonalitätsbedingung;
+  Normalenvektor; Betrag und Winkel zwischen Vektoren.
+domain: analytische_geometrie
+subdomain: Produkte von Vektoren
+level: atom
+granularity: 4
+schulformen:
+- GY
+jahrgangsstufen:
+- 12
+weight:
+  mastery_required: 0.9
+  curriculum_centrality: 0.85
+  transfer_value: 0.9
+  cognitive_load: 0.75
+prerequisites:
+- id: ageo__vektoren_operationen
+  type: required
+  mastery_level_needed: 0.85
+- id: geometrie__trigonometrie_rechtwinkliges_dreieck
+  type: required
+  mastery_level_needed: 0.75
+  note: Winkelberechnung über den Kosinus.
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Jg. 11/12 GK, LB 7
+tags:
+- skalarprodukt
+- vektorprodukt
+- normalenvektor
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

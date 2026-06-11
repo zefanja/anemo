@@ -1,0 +1,56 @@
+id: arithmetik__prozentrechnung
+label: 'Prozentrechnung: Grundwert, Prozentwert, Prozentsatz'
+description: Die drei Grundaufgaben der Prozentrechnung lösen (über Anteile, Dreisatz oder Operatorvorstellung);
+  kritischer Umgang mit Prozentangaben in Veröffentlichungen.
+domain: arithmetik
+subdomain: Prozentrechnung
+level: cluster
+granularity: 4
+schulformen:
+- GY
+jahrgangsstufen:
+- 6
+- 7
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.95
+  transfer_value: 0.95
+  cognitive_load: 0.6
+prerequisites:
+- id: arithmetik__umwandeln_bruch_dezimal_prozent
+  type: required
+  mastery_level_needed: 0.85
+- id: algebra__proportionalitaet_dreisatz
+  type: required
+  mastery_level_needed: 0.8
+- id: arithmetik__prozentwert_berechnen
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: arithmetik__prozentsatz_berechnen
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: arithmetik__grundwert_berechnen
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: arithmetik__vermehrter_verminderter_grundwert
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 6, LB 5 und Kl. 7, LB 2
+tags:
+- prozent
+- grundwert
+- prozentsatz
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 2

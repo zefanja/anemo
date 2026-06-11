@@ -1,0 +1,40 @@
+id: geometrie__satz_des_pythagoras
+label: Satz des Pythagoras (mit Beweis und Umkehrung)
+description: Satz des Pythagoras kennen, beweisen und zum Berechnen von Streckenlängen in Ebene und Raum
+  anwenden; Umkehrung; Höhen- und Kathetensatz.
+domain: geometrie
+subdomain: Rechtwinklige Dreiecke
+level: atom
+granularity: 4
+schulformen:
+- GY
+jahrgangsstufen:
+- 9
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.95
+  transfer_value: 0.95
+  cognitive_load: 0.6
+prerequisites:
+- id: algebra__wurzeln_reelle_zahlen
+  type: required
+  mastery_level_needed: 0.8
+- id: geometrie__dreiecke_vierecke_flaecheninhalt
+  type: required
+  mastery_level_needed: 0.75
+- id: algebra__quadratische_gleichungen
+  type: helpful
+  mastery_level_needed: 0.6
+- id: logik__saetze_und_beweise
+  type: helpful
+  mastery_level_needed: 0.6
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 9, LB 3
+tags:
+- pythagoras
+- rechtwinklig
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

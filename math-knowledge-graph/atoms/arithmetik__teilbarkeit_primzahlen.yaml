@@ -1,0 +1,52 @@
+id: arithmetik__teilbarkeit_primzahlen
+label: Teiler, Primzahlen, Teilbarkeitsregeln, Primfaktorzerlegung
+description: Teiler und Vielfache; Primzahlen; Teilbarkeitsregeln (u. a. für 3, 4, 6); einfache Primfaktorzerlegungen
+  als Grundlage für Kürzen und Hauptnenner.
+domain: arithmetik
+subdomain: Teilbarkeit
+level: cluster
+granularity: 4
+schulformen:
+- GY
+jahrgangsstufen:
+- 5
+weight:
+  mastery_required: 0.8
+  curriculum_centrality: 0.7
+  transfer_value: 0.85
+  cognitive_load: 0.5
+prerequisites:
+- id: arithmetik__division_grundverstaendnis
+  type: required
+  mastery_level_needed: 0.85
+- id: arithmetik__einmaleins
+  type: required
+  mastery_level_needed: 0.9
+- id: arithmetik__schriftliche_division
+  type: helpful
+  mastery_level_needed: 0.7
+- id: arithmetik__teilbarkeitsregeln
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: arithmetik__primzahlen_primfaktorzerlegung
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: arithmetik__ggt_kgv
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 5, LB 1
+tags:
+- teilbarkeit
+- primzahlen
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 2

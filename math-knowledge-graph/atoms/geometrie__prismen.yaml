@@ -1,0 +1,35 @@
+id: geometrie__prismen
+label: Prismen darstellen und berechnen
+description: Netze, Schrägbilder und Zweitafelbilder gerader Prismen; Oberflächeninhalt und Volumen (V
+  = G·h).
+domain: geometrie
+subdomain: Körperberechnung
+level: atom
+granularity: 4
+schulformen:
+- GY
+jahrgangsstufen:
+- 6
+- 7
+weight:
+  mastery_required: 0.8
+  curriculum_centrality: 0.75
+  transfer_value: 0.8
+  cognitive_load: 0.6
+prerequisites:
+- id: geometrie__quader_volumen_oberflaeche
+  type: required
+  mastery_level_needed: 0.8
+- id: geometrie__dreiecke_vierecke_flaecheninhalt
+  type: required
+  mastery_level_needed: 0.8
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 6, LB 4 und Kl. 7, LB 3
+tags:
+- prismen
+- volumen
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

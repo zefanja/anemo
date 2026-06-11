@@ -1,0 +1,39 @@
+id: arithmetik__groessen_masse_volumen
+label: Größen Masse und Volumen (messen, umrechnen, Kommaschreibweise)
+description: Gramm/Kilogramm/Tonne, Milliliter/Liter; Stellenwerttafel und Kommaschreibweise bei Größen;
+  Stützpunktvorstellungen; Sachaufgaben.
+domain: arithmetik
+subdomain: Größen und Messen
+level: atom
+granularity: 4
+schulformen:
+- GS
+jahrgangsstufen:
+- 3
+- 4
+weight:
+  mastery_required: 0.8
+  curriculum_centrality: 0.8
+  transfer_value: 0.8
+  cognitive_load: 0.5
+prerequisites:
+- id: arithmetik__groessen_geld_laenge_zeit
+  type: required
+  mastery_level_needed: 0.8
+- id: arithmetik__stellenwert_bis_1000
+  type: required
+  mastery_level_needed: 0.8
+- id: arithmetik__bruchteile_im_alltag
+  type: helpful
+  mastery_level_needed: 0.6
+lehrplan_ref:
+- schulform: GS
+  dokument: lp_gs_mathematik_2025_kommentiert.pdf
+  abschnitt: Kl. 3/4, LB 3 Größen und Messen
+tags:
+- masse
+- volumen
+- kommaschreibweise
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

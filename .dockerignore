@@ -1,0 +1,12 @@
+node_modules
+.svelte-kit
+build
+.env
+.env.*
+!.env.example
+*.log
+drizzle
+art
+claude-code-prompt-mathe-app.md
+math-knowledge-graph.zip
+tests

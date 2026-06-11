@@ -1,0 +1,44 @@
+id: arithmetik__kuerzen
+label: Brüche kürzen (auch vollständig mit ggT)
+description: Zähler und Nenner durch gemeinsame Teiler dividieren; vollständig kürzen, möglichst über
+  den ggT.
+domain: arithmetik
+subdomain: Bruchrechnung
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 5
+- 6
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.95
+  transfer_value: 0.95
+  cognitive_load: 0.55
+prerequisites:
+- id: arithmetik__erweitern
+  type: required
+  mastery_level_needed: 0.85
+  note: Kürzen wird als Umkehrung des Erweiterns eingeführt.
+- id: arithmetik__teilbarkeitsregeln
+  type: helpful
+  mastery_level_needed: 0.7
+- id: arithmetik__ggt_kgv
+  type: helpful
+  mastery_level_needed: 0.6
+  note: Vollständiges Kürzen in einem Schritt nutzt den ggT.
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 5, LB 2
+related:
+- id: arithmetik__kuerzen_erweitern
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms arithmetik__kuerzen_erweitern
+tags:
+- kürzen
+- ggt
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

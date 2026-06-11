@@ -1,0 +1,38 @@
+id: analysis__grenzwerte_funktionen
+label: Grenzwerte von Funktionen (an einer Stelle, im Unendlichen)
+description: Verhalten im Unendlichen; Grenzwert an einer Stelle; Grenzwertsätze; Einblick in den Begriff
+  Stetigkeit.
+domain: analysis
+subdomain: Grenzwerte
+level: atom
+granularity: 4
+schulformen:
+- GY
+jahrgangsstufen:
+- 11
+weight:
+  mastery_required: 0.85
+  curriculum_centrality: 0.85
+  transfer_value: 0.95
+  cognitive_load: 0.8
+prerequisites:
+- id: algebra__zahlenfolgen
+  type: required
+  mastery_level_needed: 0.75
+- id: algebra__ganzrationale_funktionen
+  type: required
+  mastery_level_needed: 0.8
+- id: algebra__potenzfunktionen
+  type: required
+  mastery_level_needed: 0.75
+  note: Polstellen und Asymptoten liefern die Anschauung.
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Jg. 11/12 GK, LB 1
+tags:
+- grenzwert
+- stetigkeit
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

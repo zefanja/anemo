@@ -1,0 +1,37 @@
+id: arithmetik__halbschriftliches_rechnen
+label: Halbschriftliches Rechnen im Zahlenraum bis 1 000
+description: Flexible Rechenstrategien für alle vier Grundrechenarten im erweiterten Zahlenraum; Wahl
+  effizienter Lösungswege.
+domain: arithmetik
+subdomain: Rechenstrategien
+level: atom
+granularity: 4
+schulformen:
+- GS
+jahrgangsstufen:
+- 3
+weight:
+  mastery_required: 0.8
+  curriculum_centrality: 0.85
+  transfer_value: 0.8
+  cognitive_load: 0.5
+prerequisites:
+- id: arithmetik__addition_subtraktion_bis_100
+  type: required
+  mastery_level_needed: 0.85
+- id: arithmetik__stellenwert_bis_1000
+  type: required
+  mastery_level_needed: 0.85
+- id: arithmetik__einmaleins
+  type: required
+  mastery_level_needed: 0.85
+lehrplan_ref:
+- schulform: GS
+  dokument: lp_gs_mathematik_2025_kommentiert.pdf
+  abschnitt: Kl. 3, LB 2 Zahl und Operation
+tags:
+- halbschriftlich
+- rechenstrategien
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

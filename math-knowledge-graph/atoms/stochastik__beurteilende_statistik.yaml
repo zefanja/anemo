@@ -1,0 +1,31 @@
+id: stochastik__beurteilende_statistik
+label: Beurteilende Statistik (Schätzen und Testen)
+description: Von der Stichprobe auf die Gesamtheit schließen; Hypothesentests auf Grundlage der Binomialverteilung;
+  Fehlerarten interpretieren.
+domain: stochastik
+subdomain: Statistik
+level: atom
+granularity: 4
+schulformen:
+- GY
+jahrgangsstufen:
+- 12
+weight:
+  mastery_required: 0.75
+  curriculum_centrality: 0.7
+  transfer_value: 0.5
+  cognitive_load: 0.85
+prerequisites:
+- id: stochastik__binomialverteilung
+  type: required
+  mastery_level_needed: 0.85
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Jg. 11/12 GK, LB 6
+tags:
+- hypothesentest
+- statistik
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

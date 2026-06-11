@@ -1,0 +1,35 @@
+id: arithmetik__dezimalzahlen_vergleichen_ordnen_runden
+label: Dezimalzahlen vergleichen, ordnen und runden
+description: Dezimalzahlen stellenweise vergleichen, ordnen und runden; typische Fehlvorstellung 'mehr
+  Nachkommastellen = größere Zahl' (0,25 vs. 0,3) gezielt adressieren.
+domain: arithmetik
+subdomain: Dezimalzahlen
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 5
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.9
+  transfer_value: 0.9
+  cognitive_load: 0.5
+prerequisites:
+- id: arithmetik__dezimalzahlen_stellenwert
+  type: required
+  mastery_level_needed: 0.85
+- id: arithmetik__runden_natuerliche_zahlen
+  type: required
+  mastery_level_needed: 0.8
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Klassenstufe 5, LB 2 Gemeine Brüche und Dezimalzahlen (Vergleichen, Ordnen, Abschätzen, Runden)
+tags:
+- dezimalzahlen
+- vergleichen
+- runden
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

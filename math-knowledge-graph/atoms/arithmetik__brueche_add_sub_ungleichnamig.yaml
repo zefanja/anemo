@@ -1,0 +1,41 @@
+id: arithmetik__brueche_add_sub_ungleichnamig
+label: Ungleichnamige Brüche addieren und subtrahieren (Hauptnenner)
+description: Ungleichnamige Brüche durch Erweitern auf den Hauptnenner gleichnamig machen und dann verrechnen.
+domain: arithmetik
+subdomain: Bruchrechnung
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 6
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.95
+  transfer_value: 0.95
+  cognitive_load: 0.65
+prerequisites:
+- id: arithmetik__brueche_add_sub_gleichnamig
+  type: required
+  mastery_level_needed: 0.9
+- id: arithmetik__erweitern
+  type: required
+  mastery_level_needed: 0.9
+- id: arithmetik__ggt_kgv
+  type: helpful
+  mastery_level_needed: 0.75
+  note: Der Hauptnenner ist das kgV der Nenner.
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 6, LB 1
+related:
+- id: arithmetik__brueche_addieren_subtrahieren
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms arithmetik__brueche_addieren_subtrahieren
+tags:
+- brüche
+- hauptnenner
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

@@ -1,0 +1,37 @@
+id: analysis__funktionsbestimmung
+label: Bestimmen ganzrationaler Funktionen aus Bedingungen (Steckbriefaufgaben)
+description: Funktionsgleichungen ganzrationaler Funktionen aus Eigenschaften gewinnen; führt auf lineare
+  Gleichungssysteme (bis drei Unbekannte hilfsmittelfrei).
+domain: analysis
+subdomain: Differentialrechnung
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 11
+- 12
+weight:
+  mastery_required: 0.75
+  curriculum_centrality: 0.8
+  transfer_value: 0.65
+  cognitive_load: 0.8
+prerequisites:
+- id: analysis__kurvenuntersuchung
+  type: required
+  mastery_level_needed: 0.8
+- id: algebra__lineare_gleichungssysteme
+  type: required
+  mastery_level_needed: 0.85
+- id: linalg__matrizen_gleichungssysteme
+  type: helpful
+  mastery_level_needed: 0.6
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Jg. 11/12 GK, LB 1
+tags:
+- steckbriefaufgaben
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

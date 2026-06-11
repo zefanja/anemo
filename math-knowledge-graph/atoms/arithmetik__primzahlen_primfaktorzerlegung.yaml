@@ -1,0 +1,34 @@
+id: arithmetik__primzahlen_primfaktorzerlegung
+label: Primzahlen erkennen und Primfaktorzerlegung
+description: Primzahlen bis 100 erkennen; natürliche Zahlen in Primfaktoren zerlegen.
+domain: arithmetik
+subdomain: Teilbarkeit
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 5
+weight:
+  mastery_required: 0.85
+  curriculum_centrality: 0.8
+  transfer_value: 0.85
+  cognitive_load: 0.55
+prerequisites:
+- id: arithmetik__teilbarkeitsregeln
+  type: required
+  mastery_level_needed: 0.85
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 5, LB 1
+related:
+- id: arithmetik__teilbarkeit_primzahlen
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms arithmetik__teilbarkeit_primzahlen
+tags:
+- primzahlen
+- primfaktorzerlegung
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

@@ -1,0 +1,40 @@
+id: analysis__kurvenuntersuchung
+label: Funktionsuntersuchung mit Ableitungen (Monotonie, Extrema, Wendepunkte)
+description: Lokale und globale Extrema, Wendepunkte, Monotonie, Null-/Polstellen, Symmetrie, Asymptoten
+  anhand inner- und außermathematischer Probleme untersuchen; Graph der Ableitungsfunktion skizzieren.
+domain: analysis
+subdomain: Differentialrechnung
+level: atom
+granularity: 4
+schulformen:
+- GY
+jahrgangsstufen:
+- 11
+- 12
+weight:
+  mastery_required: 0.9
+  curriculum_centrality: 0.95
+  transfer_value: 0.9
+  cognitive_load: 0.8
+prerequisites:
+- id: analysis__ableitungsregeln
+  type: required
+  mastery_level_needed: 0.85
+- id: algebra__quadratische_gleichungen
+  type: required
+  mastery_level_needed: 0.85
+  note: Nullstellen der Ableitung führen meist auf quadratische Gleichungen.
+- id: algebra__ganzrationale_funktionen
+  type: required
+  mastery_level_needed: 0.8
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Jg. 11/12 GK, LB 1
+tags:
+- kurvendiskussion
+- extrema
+- wendepunkte
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

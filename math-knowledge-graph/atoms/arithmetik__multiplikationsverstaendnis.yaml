@@ -1,0 +1,35 @@
+id: arithmetik__multiplikationsverstaendnis
+label: Multiplikationsverständnis (wiederholte Addition, Felder)
+description: Multiplikation als wiederholte Addition und an Punktefeldern deuten; Mal-Aufgaben zu Situationen
+  und Bildern finden und umgekehrt.
+domain: arithmetik
+subdomain: Operationsverständnis
+level: atom
+granularity: 5
+schulformen:
+- GS
+jahrgangsstufen:
+- 2
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.95
+  transfer_value: 0.95
+  cognitive_load: 0.4
+prerequisites:
+- id: arithmetik__addition_subtraktion_bis_20
+  type: required
+  mastery_level_needed: 0.85
+lehrplan_ref:
+- schulform: GS
+  dokument: lp_gs_mathematik_2025_kommentiert.pdf
+  abschnitt: Kl. 1/2 und Kl. 3, LB 2 Zahl und Operation
+related:
+- id: arithmetik__einmaleins
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms arithmetik__einmaleins
+tags:
+- multiplikation
+- operationsverständnis
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

@@ -1,0 +1,31 @@
+id: algebra__zahlenfolgen
+label: 'Zahlenfolgen: Bildungsvorschriften, Schranke, Grenzwert'
+description: Folgen als spezielle Funktionen; explizite und rekursive Bildungsvorschriften; Schranken;
+  anschauliches Gewinnen des Grenzwertbegriffs.
+domain: algebra
+subdomain: Folgen
+level: atom
+granularity: 4
+schulformen:
+- GY
+jahrgangsstufen:
+- 10
+weight:
+  mastery_required: 0.7
+  curriculum_centrality: 0.65
+  transfer_value: 0.85
+  cognitive_load: 0.7
+prerequisites:
+- id: algebra__funktionsbegriff
+  type: required
+  mastery_level_needed: 0.8
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 10, LB 4
+tags:
+- folgen
+- grenzwert
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

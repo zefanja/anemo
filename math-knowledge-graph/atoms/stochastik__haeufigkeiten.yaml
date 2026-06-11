@@ -1,0 +1,33 @@
+id: stochastik__haeufigkeiten
+label: Absolute und relative Häufigkeiten
+description: Absolute und relative Häufigkeiten als Zuordnungen bei Zufallsversuchen und statistischen
+  Erhebungen; Sprechweisen selten/häufig/Chance.
+domain: stochastik
+subdomain: Daten
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 6
+weight:
+  mastery_required: 0.85
+  curriculum_centrality: 0.8
+  transfer_value: 0.9
+  cognitive_load: 0.5
+prerequisites:
+- id: arithmetik__umwandeln_bruch_dezimal_prozent
+  type: required
+  mastery_level_needed: 0.8
+- id: stochastik__daten_erheben_darstellen_grundschule
+  type: required
+  mastery_level_needed: 0.7
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 6, LB 2
+tags:
+- häufigkeit
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

@@ -1,0 +1,27 @@
+id: arithmetik__zaehlen_zahlwortreihe
+label: Zählen und Zahlwortreihe (auch in Schritten)
+description: Zahlwortreihe sicher vorwärts und rückwärts aufsagen, Objekte eins-zu-eins abzählen, kleine
+  Anzahlen simultan erfassen; später auch Zählen in Schritten mit beliebiger Startzahl.
+domain: arithmetik
+subdomain: Zahlverständnis
+level: atom
+granularity: 5
+schulformen:
+- GS
+jahrgangsstufen:
+- 1
+weight:
+  mastery_required: 0.98
+  curriculum_centrality: 1.0
+  transfer_value: 0.95
+  cognitive_load: 0.3
+lehrplan_ref:
+- schulform: GS
+  dokument: lp_gs_mathematik_2025_kommentiert.pdf
+  abschnitt: Klassenstufe 1/2, LB 2 Zahl und Operation
+tags:
+- zählen
+- kardinalzahl
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

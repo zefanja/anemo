@@ -1,0 +1,31 @@
+id: geometrie__winkel_zeichnen_messen
+label: Winkel zeichnen, messen, bezeichnen; Winkelarten
+description: Winkelbegriff; Zeichnen und Messen mit dem Geodreieck (Orientierung beachten); spitze, rechte,
+  stumpfe, gestreckte, überstumpfe Winkel.
+domain: geometrie
+subdomain: Winkel
+level: atom
+granularity: 4
+schulformen:
+- GY
+jahrgangsstufen:
+- 5
+weight:
+  mastery_required: 0.9
+  curriculum_centrality: 0.85
+  transfer_value: 0.95
+  cognitive_load: 0.45
+prerequisites:
+- id: geometrie__lagebeziehungen_lineare_figuren
+  type: required
+  mastery_level_needed: 0.8
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 5, LB 3
+tags:
+- winkel
+- geodreieck
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

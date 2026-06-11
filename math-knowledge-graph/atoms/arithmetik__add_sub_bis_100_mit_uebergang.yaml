@@ -1,0 +1,39 @@
+id: arithmetik__add_sub_bis_100_mit_uebergang
+label: Addition/Subtraktion bis 100 mit Zehnerübergang
+description: Aufgaben wie 47+38 oder 62−27 mit Zehnerübergang über tragfähige Strategien (schrittweise,
+  Hilfsaufgabe) lösen.
+domain: arithmetik
+subdomain: Rechenstrategien
+level: atom
+granularity: 5
+schulformen:
+- GS
+jahrgangsstufen:
+- 2
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.95
+  transfer_value: 0.9
+  cognitive_load: 0.6
+prerequisites:
+- id: arithmetik__add_sub_bis_100_ohne_uebergang
+  type: required
+  mastery_level_needed: 0.85
+- id: arithmetik__zehnerueberschreitung_bis_20
+  type: required
+  mastery_level_needed: 0.9
+  note: Der Übergang im Hunderterraum baut direkt auf dem Zehnerübergang bis 20 auf.
+lehrplan_ref:
+- schulform: GS
+  dokument: lp_gs_mathematik_2025_kommentiert.pdf
+  abschnitt: Kl. 1/2, LB 2 Zahl und Operation
+related:
+- id: arithmetik__addition_subtraktion_bis_100
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms arithmetik__addition_subtraktion_bis_100
+tags:
+- zahlenraum_100
+- zehnerübergang
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

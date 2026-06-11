@@ -1,0 +1,33 @@
+id: arithmetik__periodische_dezimalzahlen
+label: Endliche und periodische Dezimalzahlen
+description: Unterscheiden endlicher und periodischer Dezimaldarstellungen; Periodenschreibweise; Zusammenhang
+  zur Nennerstruktur des gekürzten Bruchs.
+domain: arithmetik
+subdomain: Dezimalzahlen
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 6
+weight:
+  mastery_required: 0.7
+  curriculum_centrality: 0.6
+  transfer_value: 0.7
+  cognitive_load: 0.5
+prerequisites:
+- id: arithmetik__umwandeln_bruch_dezimal_prozent
+  type: required
+  mastery_level_needed: 0.8
+- id: arithmetik__schriftliche_division
+  type: required
+  mastery_level_needed: 0.8
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 6, LB 1
+tags:
+- periodische_dezimalzahlen
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

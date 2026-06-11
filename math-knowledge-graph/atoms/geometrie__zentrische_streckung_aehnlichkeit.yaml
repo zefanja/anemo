@@ -1,0 +1,36 @@
+id: geometrie__zentrische_streckung_aehnlichkeit
+label: Zentrische Streckung und Ähnlichkeit
+description: Zentrische Streckung; Ähnlichkeit von Figuren; Verhältnistreue; Anwendung auf Maßstab und
+  Vergrößern/Verkleinern.
+domain: geometrie
+subdomain: Ähnlichkeit
+level: atom
+granularity: 4
+schulformen:
+- GY
+jahrgangsstufen:
+- 8
+weight:
+  mastery_required: 0.8
+  curriculum_centrality: 0.8
+  transfer_value: 0.85
+  cognitive_load: 0.65
+prerequisites:
+- id: algebra__proportionalitaet_dreisatz
+  type: required
+  mastery_level_needed: 0.8
+  note: Ähnlichkeit ist Proportionalität in der Geometrie.
+- id: geometrie__kongruenz_dreieckskonstruktion
+  type: required
+  mastery_level_needed: 0.7
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 8, LB 4
+tags:
+- ähnlichkeit
+- streckung
+- maßstab
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

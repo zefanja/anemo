@@ -1,0 +1,44 @@
+id: arithmetik__schriftliche_division
+label: Schriftliches Dividieren (einstelliger Divisor)
+description: Schriftliche Division mit einstelligem Divisor; Bedeutung der Null im Ergebnis; Beschreiben
+  des Algorithmus mit der Stellenwerttafel; Überschlag zur Kontrolle.
+domain: arithmetik
+subdomain: Rechenverfahren
+level: atom
+granularity: 5
+schulformen:
+- GS
+jahrgangsstufen:
+- 4
+weight:
+  mastery_required: 0.85
+  curriculum_centrality: 0.85
+  transfer_value: 0.8
+  cognitive_load: 0.75
+prerequisites:
+- id: arithmetik__division_grundverstaendnis
+  type: required
+  mastery_level_needed: 0.85
+- id: arithmetik__einmaleins
+  type: required
+  mastery_level_needed: 0.95
+- id: arithmetik__schriftliche_subtraktion
+  type: required
+  mastery_level_needed: 0.8
+- id: arithmetik__stellenwert_bis_1000000
+  type: required
+  mastery_level_needed: 0.8
+- id: arithmetik__division_mit_rest
+  type: required
+  mastery_level_needed: 0.85
+  note: Jeder Teilschritt der schriftlichen Division ist eine Division mit Rest.
+lehrplan_ref:
+- schulform: GS
+  dokument: lp_gs_mathematik_2025_kommentiert.pdf
+  abschnitt: Kl. 4, LB 2 Zahl und Operation
+tags:
+- schriftlich
+- division
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 2

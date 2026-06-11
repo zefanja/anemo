@@ -1,0 +1,34 @@
+id: stochastik__daten_erheben_darstellen_grundschule
+label: Daten erheben, darstellen und auswerten (GS)
+description: Daten in Strichlisten und Tabellen erfassen; Streifen-, Balken- und gestapelte Säulendiagramme
+  lesen und erstellen; Umfragen auswerten.
+domain: stochastik
+subdomain: Daten
+level: atom
+granularity: 4
+schulformen:
+- GS
+jahrgangsstufen:
+- 1
+- 2
+- 3
+- 4
+weight:
+  mastery_required: 0.6
+  curriculum_centrality: 0.7
+  transfer_value: 0.7
+  cognitive_load: 0.35
+prerequisites:
+- id: arithmetik__stellenwert_bis_100
+  type: helpful
+  mastery_level_needed: 0.6
+lehrplan_ref:
+- schulform: GS
+  dokument: lp_gs_mathematik_2025_kommentiert.pdf
+  abschnitt: Kl. 1/2 bis Kl. 4, LB 4 Daten und Zufall
+tags:
+- daten
+- diagramme
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

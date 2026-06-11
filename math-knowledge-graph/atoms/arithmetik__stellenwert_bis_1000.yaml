@@ -1,0 +1,31 @@
+id: arithmetik__stellenwert_bis_1000
+label: Zahlenraum bis 1 000 (Stellenwerttafel, Zahlbeziehungen)
+description: Hunderter, Zehner, Einer; Zahlen bilden, zerlegen, darstellen, vergleichen, runden; Zählen
+  in Schritten mit Stellenübergang.
+domain: arithmetik
+subdomain: Stellenwertsystem
+level: atom
+granularity: 4
+schulformen:
+- GS
+jahrgangsstufen:
+- 3
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.95
+  transfer_value: 0.95
+  cognitive_load: 0.4
+prerequisites:
+- id: arithmetik__stellenwert_bis_100
+  type: required
+  mastery_level_needed: 0.9
+lehrplan_ref:
+- schulform: GS
+  dokument: lp_gs_mathematik_2025_kommentiert.pdf
+  abschnitt: Kl. 3, LB 2 Zahl und Operation
+tags:
+- stellenwert
+- zahlenraum1000
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

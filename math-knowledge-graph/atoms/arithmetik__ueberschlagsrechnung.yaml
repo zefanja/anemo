@@ -1,0 +1,41 @@
+id: arithmetik__ueberschlagsrechnung
+label: Runden, Schätzen, Überschlagsrechnung
+description: Zahlen sinnvoll runden; Ergebnisse vor dem Rechnen abschätzen und nach dem Rechnen auf Plausibilität
+  prüfen.
+domain: arithmetik
+subdomain: Zahlverständnis
+level: atom
+granularity: 4
+schulformen:
+- GS
+- GY
+jahrgangsstufen:
+- 3
+- 4
+- 5
+weight:
+  mastery_required: 0.8
+  curriculum_centrality: 0.8
+  transfer_value: 0.85
+  cognitive_load: 0.4
+prerequisites:
+- id: arithmetik__stellenwert_bis_1000
+  type: required
+  mastery_level_needed: 0.8
+- id: arithmetik__runden_natuerliche_zahlen
+  type: required
+  mastery_level_needed: 0.85
+lehrplan_ref:
+- schulform: GS
+  dokument: lp_gs_mathematik_2025_kommentiert.pdf
+  abschnitt: Kl. 3/4, LB 2 Zahl und Operation
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 5, LB 1
+tags:
+- runden
+- überschlag
+- schätzen
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 2

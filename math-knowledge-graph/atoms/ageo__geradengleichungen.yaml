@@ -1,0 +1,35 @@
+id: ageo__geradengleichungen
+label: Geraden in Parameterform
+description: Geradengleichungen in Parameterform aufstellen und interpretieren (Stütz- und Richtungsvektor);
+  Punktprobe.
+domain: analytische_geometrie
+subdomain: Geraden und Ebenen
+level: atom
+granularity: 4
+schulformen:
+- GY
+jahrgangsstufen:
+- 11
+weight:
+  mastery_required: 0.9
+  curriculum_centrality: 0.9
+  transfer_value: 0.9
+  cognitive_load: 0.7
+prerequisites:
+- id: ageo__vektoren_operationen
+  type: required
+  mastery_level_needed: 0.85
+- id: algebra__lineare_funktionen
+  type: helpful
+  mastery_level_needed: 0.7
+  note: Analogie und Kontrast zur Geradengleichung y = mx + n.
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Jg. 11/12 GK, LB 3
+tags:
+- geraden
+- parameterform
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

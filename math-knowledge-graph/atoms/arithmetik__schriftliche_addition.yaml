@@ -1,0 +1,35 @@
+id: arithmetik__schriftliche_addition
+label: Schriftliches Addieren
+description: Algorithmus der schriftlichen Addition mit Übertrag; Verständnis über Stellenwerttafel; mehrere
+  Summanden.
+domain: arithmetik
+subdomain: Rechenverfahren
+level: atom
+granularity: 5
+schulformen:
+- GS
+jahrgangsstufen:
+- 3
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.95
+  transfer_value: 0.85
+  cognitive_load: 0.4
+prerequisites:
+- id: arithmetik__stellenwert_bis_1000
+  type: required
+  mastery_level_needed: 0.85
+  note: Der Übertrag ist nur über Bündeln/Entbündeln verstehbar.
+- id: arithmetik__addition_subtraktion_bis_20
+  type: required
+  mastery_level_needed: 0.95
+lehrplan_ref:
+- schulform: GS
+  dokument: lp_gs_mathematik_2025_kommentiert.pdf
+  abschnitt: Kl. 3, LB 2 Zahl und Operation
+tags:
+- schriftlich
+- addition
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

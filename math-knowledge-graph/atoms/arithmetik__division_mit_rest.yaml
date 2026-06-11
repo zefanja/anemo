@@ -1,0 +1,39 @@
+id: arithmetik__division_mit_rest
+label: Division mit Rest
+description: 'Divisionsaufgaben mit Rest lösen und den Rest am Sachverhalt deuten (14 : 3 = 4 Rest 2);
+  Grundlage für schriftliche Division und Umwandlung unechter Brüche.'
+domain: arithmetik
+subdomain: Operationsverständnis
+level: atom
+granularity: 5
+schulformen:
+- GS
+- GY
+jahrgangsstufen:
+- 3
+- 4
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.9
+  transfer_value: 0.9
+  cognitive_load: 0.5
+prerequisites:
+- id: arithmetik__einmaleins
+  type: required
+  mastery_level_needed: 0.9
+- id: arithmetik__division_grundverstaendnis
+  type: required
+  mastery_level_needed: 0.85
+lehrplan_ref:
+- schulform: GS
+  dokument: lp_gs_mathematik_2025_kommentiert.pdf
+  abschnitt: Klassenstufe 3, LB 2 Zahl und Operation (Division mit Rest)
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Klassenstufe 5, LB 1 Arbeiten mit natürlichen Zahlen (Division auch mit Rest)
+tags:
+- division
+- rest
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

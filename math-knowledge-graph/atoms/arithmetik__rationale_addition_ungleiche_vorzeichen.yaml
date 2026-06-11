@@ -1,0 +1,35 @@
+id: arithmetik__rationale_addition_ungleiche_vorzeichen
+label: Rationale Zahlen mit ungleichen Vorzeichen addieren
+description: 'Zahlen mit ungleichen Vorzeichen addieren: Beträge subtrahieren, Vorzeichen des betragsgrößeren
+  Summanden übernehmen.'
+domain: arithmetik
+subdomain: Rationale Zahlen
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 7
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.9
+  transfer_value: 0.9
+  cognitive_load: 0.6
+prerequisites:
+- id: arithmetik__rationale_addition_gleiche_vorzeichen
+  type: required
+  mastery_level_needed: 0.9
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 7, LB 2
+related:
+- id: arithmetik__rationale_zahlen_addieren_subtrahieren
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms arithmetik__rationale_zahlen_addieren_subtrahieren
+tags:
+- rationale_zahlen
+- addition
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

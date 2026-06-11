@@ -1,0 +1,53 @@
+id: arithmetik__brueche_multiplizieren_dividieren
+label: Brüche multiplizieren und dividieren
+description: Multiplizieren über Anteil-vom-Anteil; Dividieren als Multiplikation mit dem Kehrwert; Kürzen
+  vor dem Rechnen.
+domain: arithmetik
+subdomain: Bruchrechnung
+level: cluster
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 6
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.95
+  transfer_value: 1.0
+  cognitive_load: 0.6
+prerequisites:
+- id: arithmetik__kuerzen_erweitern
+  type: required
+  mastery_level_needed: 0.9
+- id: arithmetik__einmaleins
+  type: required
+  mastery_level_needed: 0.95
+- id: arithmetik__bruchbegriff
+  type: required
+  mastery_level_needed: 0.85
+- id: arithmetik__bruch_mal_natuerliche_zahl
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: arithmetik__bruch_mal_bruch
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: arithmetik__division_durch_bruch
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 6, LB 1
+tags:
+- brüche
+- multiplikation
+- kehrwert
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 2

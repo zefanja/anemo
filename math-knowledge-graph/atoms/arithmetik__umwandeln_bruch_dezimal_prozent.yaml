@@ -1,0 +1,50 @@
+id: arithmetik__umwandeln_bruch_dezimal_prozent
+label: Umwandeln zwischen Bruch, Dezimalzahl und Prozentschreibweise
+description: Wechselseitiges Umwandeln (zunächst über Zehnerbrüche); Prozentschreibweise für ausgewählte
+  Anteile; endliche vs. periodische Dezimalzahlen (Kl. 6).
+domain: arithmetik
+subdomain: Bruchrechnung
+level: cluster
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 5
+- 6
+weight:
+  mastery_required: 0.9
+  curriculum_centrality: 0.85
+  transfer_value: 0.95
+  cognitive_load: 0.55
+prerequisites:
+- id: arithmetik__kuerzen_erweitern
+  type: required
+  mastery_level_needed: 0.8
+- id: arithmetik__dezimalzahlen_stellenwert
+  type: required
+  mastery_level_needed: 0.8
+- id: arithmetik__bruch_zu_dezimalzahl
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: arithmetik__dezimalzahl_zu_bruch
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: arithmetik__prozentschreibweise
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 5, LB 2 und Kl. 6, LB 1
+tags:
+- umwandeln
+- prozentschreibweise
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 2

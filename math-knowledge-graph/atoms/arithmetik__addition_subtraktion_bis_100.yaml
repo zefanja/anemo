@@ -1,0 +1,50 @@
+id: arithmetik__addition_subtraktion_bis_100
+label: Addieren und Subtrahieren im Zahlenraum bis 100
+description: Halbschriftliche und Kopfrechenstrategien (schrittweise, stellenweise, Hilfsaufgabe, Analogien)
+  mit und ohne Zehnerüberschreitung.
+domain: arithmetik
+subdomain: Rechenstrategien
+level: cluster
+granularity: 4
+schulformen:
+- GS
+jahrgangsstufen:
+- 2
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 1.0
+  transfer_value: 1.0
+  cognitive_load: 0.5
+prerequisites:
+- id: arithmetik__addition_subtraktion_bis_20
+  type: required
+  mastery_level_needed: 0.9
+  note: Basisfakten müssen automatisiert sein, sonst bricht jede Strategie zusammen.
+- id: arithmetik__stellenwert_bis_100
+  type: required
+  mastery_level_needed: 0.85
+- id: arithmetik__add_sub_zehnerzahlen
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: arithmetik__add_sub_bis_100_ohne_uebergang
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: arithmetik__add_sub_bis_100_mit_uebergang
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+lehrplan_ref:
+- schulform: GS
+  dokument: lp_gs_mathematik_2025_kommentiert.pdf
+  abschnitt: Kl. 1/2, LB 2 Zahl und Operation
+tags:
+- halbschriftlich
+- kopfrechnen
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 2

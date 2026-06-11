@@ -1,0 +1,31 @@
+id: stochastik__kombinatorik_abzaehlverfahren
+label: Abzählverfahren, Fakultät und Binomialkoeffizient
+description: Systematisches Abzählen bei mehrstufigen Versuchen; Fakultät und Binomialkoeffizient als
+  Werkzeuge zur Anzahlbestimmung.
+domain: stochastik
+subdomain: Kombinatorik
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 12
+weight:
+  mastery_required: 0.8
+  curriculum_centrality: 0.75
+  transfer_value: 0.8
+  cognitive_load: 0.7
+prerequisites:
+- id: stochastik__mehrstufige_zufallsversuche
+  type: required
+  mastery_level_needed: 0.8
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Jg. 11/12 GK, LB 4
+tags:
+- kombinatorik
+- binomialkoeffizient
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

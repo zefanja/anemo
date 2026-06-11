@@ -1,0 +1,38 @@
+id: arithmetik__vermehrter_verminderter_grundwert
+label: Vermehrter und verminderter Grundwert (Rabatt, Aufschlag)
+description: Prozentuale Zu- und Abnahmen berechnen, auch rückwärts vom neuen Wert auf den ursprünglichen
+  Grundwert schließen; Wachstumsfaktor-Schreibweise anbahnen.
+domain: arithmetik
+subdomain: Prozentrechnung
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 7
+weight:
+  mastery_required: 0.9
+  curriculum_centrality: 0.9
+  transfer_value: 0.9
+  cognitive_load: 0.7
+prerequisites:
+- id: arithmetik__prozentwert_berechnen
+  type: required
+  mastery_level_needed: 0.85
+- id: arithmetik__grundwert_berechnen
+  type: required
+  mastery_level_needed: 0.8
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 6, LB 5 und Kl. 7, LB 2
+related:
+- id: arithmetik__prozentrechnung
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms arithmetik__prozentrechnung
+tags:
+- rabatt
+- wachstumsfaktor
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

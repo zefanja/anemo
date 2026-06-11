@@ -1,0 +1,34 @@
+id: arithmetik__betrag_gegenzahl
+label: Betrag und Gegenzahl
+description: Betrag als Abstand zur Null und Gegenzahl als Spiegelzahl deuten und bestimmen.
+domain: arithmetik
+subdomain: Rationale Zahlen
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 7
+weight:
+  mastery_required: 0.9
+  curriculum_centrality: 0.85
+  transfer_value: 0.9
+  cognitive_load: 0.4
+prerequisites:
+- id: arithmetik__negative_zahlen_zahlengerade
+  type: required
+  mastery_level_needed: 0.85
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 7, LB 2
+related:
+- id: arithmetik__negative_zahlen_anordnung
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms arithmetik__negative_zahlen_anordnung
+tags:
+- betrag
+- gegenzahl
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

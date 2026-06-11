@@ -1,0 +1,29 @@
+id: geometrie__strahlensaetze
+label: Strahlensätze anwenden
+description: Strahlensätze zur Berechnung von Streckenlängen in Anwendungs- und Vermessungsaufgaben.
+domain: geometrie
+subdomain: Ähnlichkeit
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 8
+weight:
+  mastery_required: 0.8
+  curriculum_centrality: 0.8
+  transfer_value: 0.8
+  cognitive_load: 0.65
+prerequisites:
+- id: geometrie__zentrische_streckung_aehnlichkeit
+  type: required
+  mastery_level_needed: 0.8
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 8, LB 4
+tags:
+- strahlensätze
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

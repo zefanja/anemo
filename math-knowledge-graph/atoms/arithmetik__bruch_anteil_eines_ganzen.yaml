@@ -1,0 +1,38 @@
+id: arithmetik__bruch_anteil_eines_ganzen
+label: Bruch als Anteil eines Ganzen (Fläche, Strecke)
+description: Brüche als Anteil eines Ganzen deuten, darstellen und ablesen (Kreis-, Rechteck-, Streckenmodell);
+  Zähler und Nenner sicher unterscheiden.
+domain: arithmetik
+subdomain: Bruchrechnung
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 5
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 1.0
+  transfer_value: 0.95
+  cognitive_load: 0.45
+prerequisites:
+- id: arithmetik__bruchteile_im_alltag
+  type: required
+  mastery_level_needed: 0.7
+- id: arithmetik__division_grundverstaendnis
+  type: required
+  mastery_level_needed: 0.8
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 5, LB 2
+related:
+- id: arithmetik__bruchbegriff
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms arithmetik__bruchbegriff
+tags:
+- bruchbegriff
+- anteil
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

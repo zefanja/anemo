@@ -1,0 +1,30 @@
+id: geometrie__lagebeziehungen_lineare_figuren
+label: Lagebeziehungen und lineare Figuren (Punkt, Gerade, Strecke)
+description: Lagebeziehungen beschreiben; Linie, Punkt, Gerade, Strahl, Strecke zeichnen und benennen;
+  zueinander parallel und senkrecht; rechter Winkel (Faltwinkel).
+domain: geometrie
+subdomain: Grundbegriffe
+level: atom
+granularity: 4
+schulformen:
+- GS
+jahrgangsstufen:
+- 1
+- 2
+weight:
+  mastery_required: 0.85
+  curriculum_centrality: 0.85
+  transfer_value: 0.95
+  cognitive_load: 0.3
+lehrplan_ref:
+- schulform: GS
+  dokument: lp_gs_mathematik_2025_kommentiert.pdf
+  abschnitt: Kl. 1/2, LB 1 Raum und Form
+tags:
+- gerade
+- strecke
+- parallel
+- senkrecht
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

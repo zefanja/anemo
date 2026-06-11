@@ -1,0 +1,35 @@
+id: ageo__koordinatensystem_raum
+label: Räumliches kartesisches Koordinatensystem
+description: Punkte und geometrische Objekte im dreidimensionalen Koordinatensystem darstellen und ablesen;
+  Schrägbilddarstellung.
+domain: analytische_geometrie
+subdomain: Koordinaten
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 11
+weight:
+  mastery_required: 0.85
+  curriculum_centrality: 0.8
+  transfer_value: 0.95
+  cognitive_load: 0.6
+prerequisites:
+- id: geometrie__koordinatensystem
+  type: required
+  mastery_level_needed: 0.85
+- id: geometrie__koerper_und_netze_grundschule
+  type: helpful
+  mastery_level_needed: 0.6
+  note: Tragfähige Raumvorstellung erleichtert das Arbeiten im 3D-Koordinatensystem.
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Jg. 11/12 GK, LB 3
+tags:
+- koordinatensystem
+- raum
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

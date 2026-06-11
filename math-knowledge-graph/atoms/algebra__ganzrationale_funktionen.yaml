@@ -1,0 +1,37 @@
+id: algebra__ganzrationale_funktionen
+label: Ganzrationale Funktionen und ihre Nullstellen
+description: Verlauf und Eigenschaften ganzrationaler Funktionen; Nullstellenbestimmung über Faktorisieren/Ausklammern
+  und Substitution; Systematisierung reeller Funktionen.
+domain: algebra
+subdomain: Funktionen
+level: atom
+granularity: 4
+schulformen:
+- GY
+jahrgangsstufen:
+- 10
+weight:
+  mastery_required: 0.85
+  curriculum_centrality: 0.85
+  transfer_value: 0.9
+  cognitive_load: 0.7
+prerequisites:
+- id: algebra__potenzfunktionen
+  type: required
+  mastery_level_needed: 0.8
+- id: algebra__quadratische_gleichungen
+  type: required
+  mastery_level_needed: 0.8
+- id: algebra__terme_umformen
+  type: required
+  mastery_level_needed: 0.8
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 10, LB 4
+tags:
+- ganzrationale_funktionen
+- polynome
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

@@ -1,0 +1,35 @@
+id: geometrie__symmetrie_grundschule
+label: Achsen-, Schiebe- und Drehsymmetrie
+description: Symmetrieachsen erkennen und einzeichnen; symmetrische Figuren herstellen; Bandornamente
+  und Parkettierungen fortsetzen und beschreiben.
+domain: geometrie
+subdomain: Symmetrie
+level: atom
+granularity: 4
+schulformen:
+- GS
+jahrgangsstufen:
+- 1
+- 2
+- 3
+- 4
+weight:
+  mastery_required: 0.7
+  curriculum_centrality: 0.7
+  transfer_value: 0.75
+  cognitive_load: 0.4
+prerequisites:
+- id: geometrie__ebene_figuren_grundschule
+  type: required
+  mastery_level_needed: 0.7
+lehrplan_ref:
+- schulform: GS
+  dokument: lp_gs_mathematik_2025_kommentiert.pdf
+  abschnitt: Kl. 1/2 bis Kl. 4, LB 1 Raum und Form
+tags:
+- symmetrie
+- spiegeln
+- parkettierung
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

@@ -1,0 +1,36 @@
+id: analysis__extremwertprobleme
+label: Extremwertprobleme lösen
+description: 'Inner- und außermathematische Optimierungsprobleme: Zielfunktion mit Nebenbedingung aufstellen,
+  Extremum nachweisen, Randwerte beachten.'
+domain: analysis
+subdomain: Differentialrechnung
+level: atom
+granularity: 4
+schulformen:
+- GY
+jahrgangsstufen:
+- 11
+- 12
+weight:
+  mastery_required: 0.8
+  curriculum_centrality: 0.85
+  transfer_value: 0.75
+  cognitive_load: 0.85
+prerequisites:
+- id: analysis__kurvenuntersuchung
+  type: required
+  mastery_level_needed: 0.85
+- id: geometrie__berechnungen_pyramide_kegel
+  type: helpful
+  mastery_level_needed: 0.6
+  note: Viele Extremwertaufgaben nutzen Körper- und Flächenformeln.
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Jg. 11/12 GK, LB 1
+tags:
+- extremwertprobleme
+- optimierung
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

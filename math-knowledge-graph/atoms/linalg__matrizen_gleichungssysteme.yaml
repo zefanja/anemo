@@ -1,0 +1,31 @@
+id: linalg__matrizen_gleichungssysteme
+label: Matrizen und lineare Gleichungssysteme (Gauß-Jordan)
+description: LGS mit drei Unbekannten in Matrizenschreibweise A·x = b; Multiplikation verketteter Matrizen
+  (Nicht-Kommutativität); Lösen mit dem Gauß-Jordan-Verfahren; Anwendungen (Verflechtung, Drehung).
+domain: lineare_algebra
+subdomain: Matrizen
+level: atom
+granularity: 4
+schulformen:
+- GY
+jahrgangsstufen:
+- 11
+weight:
+  mastery_required: 0.7
+  curriculum_centrality: 0.6
+  transfer_value: 0.7
+  cognitive_load: 0.7
+prerequisites:
+- id: algebra__lineare_gleichungssysteme
+  type: required
+  mastery_level_needed: 0.85
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Jg. 11/12 GK, LB 2
+tags:
+- matrizen
+- gauß
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

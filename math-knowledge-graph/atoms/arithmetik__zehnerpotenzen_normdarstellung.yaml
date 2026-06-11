@@ -1,0 +1,39 @@
+id: arithmetik__zehnerpotenzen_normdarstellung
+label: Zehnerpotenz-Schreibweise großer und kleiner Zahlen
+description: Sehr große und sehr kleine Zahlen in Zehnerpotenz-Schreibweise (wissenschaftliche Notation,
+  a·10^n) darstellen, vergleichen und überschlagend rechnen; wichtig für Naturwissenschaften.
+domain: arithmetik
+subdomain: Potenzen
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 8
+- 9
+weight:
+  mastery_required: 0.85
+  curriculum_centrality: 0.55
+  transfer_value: 0.8
+  cognitive_load: 0.55
+prerequisites:
+- id: arithmetik__kommaverschiebung
+  type: required
+  mastery_level_needed: 0.85
+- id: arithmetik__potenzieren_natuerliche_zahlen
+  type: required
+  mastery_level_needed: 0.8
+- id: algebra__potenzgesetze
+  type: helpful
+  mastery_level_needed: 0.6
+  note: Für kleine Zahlen (negative Exponenten) werden Potenzen mit ganzzahligen Exponenten benötigt.
+tags:
+- zehnerpotenzen
+- normdarstellung
+- internationale_ergaenzung
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1
+notes: 'Ergänzung über den sächsischen Lehrplan hinaus: eigener Standard in internationalen Curricula
+  (Common Core 8.EE.A.3/4). Im vorliegenden GY-Lehrplan tauchen Zehnerpotenzen in Kl. 5 auf, die Normdarstellung
+  ist aber nicht als eigener Schwerpunkt ausgewiesen.'

@@ -1,0 +1,38 @@
+id: arithmetik__schriftliche_multiplikation
+label: Schriftliches Multiplizieren
+description: Mehrstelliger erster Faktor mal bis zu dreistelligem zweitem Faktor; Entscheiden zwischen
+  halbschriftlich und schriftlich.
+domain: arithmetik
+subdomain: Rechenverfahren
+level: atom
+granularity: 5
+schulformen:
+- GS
+jahrgangsstufen:
+- 4
+weight:
+  mastery_required: 0.9
+  curriculum_centrality: 0.9
+  transfer_value: 0.8
+  cognitive_load: 0.6
+prerequisites:
+- id: arithmetik__einmaleins
+  type: required
+  mastery_level_needed: 0.95
+  note: Jeder Teilschritt des Algorithmus ist eine 1x1-Aufgabe.
+- id: arithmetik__schriftliche_addition
+  type: required
+  mastery_level_needed: 0.85
+- id: arithmetik__stellenwert_bis_1000000
+  type: required
+  mastery_level_needed: 0.8
+lehrplan_ref:
+- schulform: GS
+  dokument: lp_gs_mathematik_2025_kommentiert.pdf
+  abschnitt: Kl. 4, LB 2 Zahl und Operation
+tags:
+- schriftlich
+- multiplikation
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

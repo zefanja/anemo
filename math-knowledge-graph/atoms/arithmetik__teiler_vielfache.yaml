@@ -1,0 +1,39 @@
+id: arithmetik__teiler_vielfache
+label: Teiler und Vielfache
+description: Teiler und Vielfache einer Zahl bestimmen, Teilermengen vollständig angeben; Begriffe Teiler,
+  Vielfaches, teilbar sicher verwenden.
+domain: arithmetik
+subdomain: Teilbarkeit
+level: atom
+granularity: 5
+schulformen:
+- GS
+- GY
+jahrgangsstufen:
+- 3
+- 5
+weight:
+  mastery_required: 0.9
+  curriculum_centrality: 0.85
+  transfer_value: 0.9
+  cognitive_load: 0.4
+prerequisites:
+- id: arithmetik__einmaleins
+  type: required
+  mastery_level_needed: 0.9
+- id: arithmetik__division_grundverstaendnis
+  type: required
+  mastery_level_needed: 0.8
+lehrplan_ref:
+- schulform: GS
+  dokument: lp_gs_mathematik_2025_kommentiert.pdf
+  abschnitt: Klassenstufe 3, LB 2 Zahl und Operation (Teilbarkeit einer Zahl)
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Klassenstufe 5, LB 1 Arbeiten mit natürlichen Zahlen (Teiler und Primzahl)
+tags:
+- teiler
+- vielfache
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

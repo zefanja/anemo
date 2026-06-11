@@ -1,0 +1,31 @@
+id: arithmetik__roemische_zahlen
+label: Römische Zahlzeichen lesen und übersetzen
+description: Römische Zahlzeichen lesen und in das dekadische System übersetzen; additives und Positionssystem
+  vergleichen (Bezug Adam Ries).
+domain: arithmetik
+subdomain: Zahlverständnis
+level: atom
+granularity: 5
+schulformen:
+- GS
+jahrgangsstufen:
+- 4
+weight:
+  mastery_required: 0.6
+  curriculum_centrality: 0.3
+  transfer_value: 0.15
+  cognitive_load: 0.4
+prerequisites:
+- id: arithmetik__stellenwert_bis_1000
+  type: required
+  mastery_level_needed: 0.7
+lehrplan_ref:
+- schulform: GS
+  dokument: lp_gs_mathematik_2025_kommentiert.pdf
+  abschnitt: Klassenstufe 4, LB 2 Zahl und Operation (römische Zahlzeichen)
+tags:
+- römische_zahlen
+- zahlsysteme
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

@@ -1,0 +1,41 @@
+id: arithmetik__verbindung_rechenarten_rationale
+label: Verbindung der Rechenarten in Q (Vorrangregeln, Klammern)
+description: Komplexe Rechenausdrücke mit rationalen Zahlen unter Beachtung von Vorrang- und Klammerregeln
+  sicher auswerten.
+domain: arithmetik
+subdomain: Rationale Zahlen
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 7
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.9
+  transfer_value: 0.9
+  cognitive_load: 0.65
+prerequisites:
+- id: arithmetik__vorzeichenregeln_mult_div
+  type: required
+  mastery_level_needed: 0.85
+- id: arithmetik__vorzeichen_klammerregeln
+  type: required
+  mastery_level_needed: 0.85
+- id: arithmetik__vorrangregeln
+  type: required
+  mastery_level_needed: 0.85
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 7, LB 2
+related:
+- id: arithmetik__rationale_zahlen_multiplizieren_dividieren
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms arithmetik__rationale_zahlen_multiplizieren_dividieren
+tags:
+- vorrangregeln
+- rationale_zahlen
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 2

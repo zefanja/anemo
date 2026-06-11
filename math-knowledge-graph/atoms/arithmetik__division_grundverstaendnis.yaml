@@ -1,0 +1,33 @@
+id: arithmetik__division_grundverstaendnis
+label: Division als Aufteilen/Verteilen und Umkehrung der Multiplikation
+description: Grundvorstellungen Aufteilen und Verteilen; Division als Umkehraufgabe zum Einmaleins; Division
+  mit Rest.
+domain: arithmetik
+subdomain: Operationsverständnis
+level: atom
+granularity: 4
+schulformen:
+- GS
+jahrgangsstufen:
+- 2
+- 3
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.9
+  transfer_value: 0.95
+  cognitive_load: 0.5
+prerequisites:
+- id: arithmetik__einmaleins
+  type: required
+  mastery_level_needed: 0.85
+  note: Divisionsfakten werden über die Umkehrung der Malfolgen erschlossen.
+lehrplan_ref:
+- schulform: GS
+  dokument: lp_gs_mathematik_2025_kommentiert.pdf
+  abschnitt: Kl. 2/3, LB 2 Zahl und Operation
+tags:
+- division
+- umkehraufgaben
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

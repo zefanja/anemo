@@ -1,0 +1,35 @@
+id: geometrie__quader_volumen_oberflaeche
+label: Volumen und Oberflächeninhalt von Quader und Würfel
+description: Volumenbegriff über Einheitswürfel; Volumen- und Oberflächenformeln für Quader und Würfel;
+  Netze und Schrägbilder.
+domain: geometrie
+subdomain: Körperberechnung
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 5
+weight:
+  mastery_required: 0.9
+  curriculum_centrality: 0.85
+  transfer_value: 0.9
+  cognitive_load: 0.55
+prerequisites:
+- id: geometrie__rechteck_flaeche_umfang
+  type: required
+  mastery_level_needed: 0.8
+- id: geometrie__koerper_und_netze_grundschule
+  type: required
+  mastery_level_needed: 0.7
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 5, LB 4
+tags:
+- quader
+- volumen
+- oberfläche
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

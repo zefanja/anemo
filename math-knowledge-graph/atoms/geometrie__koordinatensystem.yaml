@@ -1,0 +1,38 @@
+id: geometrie__koordinatensystem
+label: 'Koordinatensystem: Punkte und Strecken darstellen'
+description: Punkte und Strecken im Koordinatensystem darstellen und ablesen (Kl. 5, auch mit Bruch-/Dezimalkoordinaten);
+  Erweiterung auf alle vier Quadranten mit rationalen Zahlen (Kl. 7).
+domain: geometrie
+subdomain: Koordinaten
+level: atom
+granularity: 4
+schulformen:
+- GY
+jahrgangsstufen:
+- 5
+- 7
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.85
+  transfer_value: 1.0
+  cognitive_load: 0.4
+prerequisites:
+- id: geometrie__lagebeziehungen_lineare_figuren
+  type: required
+  mastery_level_needed: 0.75
+- id: arithmetik__natuerliche_zahlen_darstellen_ordnen
+  type: required
+  mastery_level_needed: 0.75
+- id: arithmetik__negative_zahlen_anordnung
+  type: deepens
+  mastery_level_needed: 0.75
+  note: Vier Quadranten erst mit negativen Zahlen (Kl. 7).
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 5, LB 3
+tags:
+- koordinatensystem
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

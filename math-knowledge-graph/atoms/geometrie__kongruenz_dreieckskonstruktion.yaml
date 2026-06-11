@@ -1,0 +1,34 @@
+id: geometrie__kongruenz_dreieckskonstruktion
+label: Kongruenzsätze und Dreieckskonstruktionen
+description: Kongruenzsätze (SSS, SWS, WSW, SsW); Konstruktionen mit Zirkel, Lineal und DGS; Existenz
+  und Eindeutigkeit (Dreiecksungleichung, Seiten-Winkel-Relation); Basiswinkelsatz.
+domain: geometrie
+subdomain: Dreiecke
+level: atom
+granularity: 4
+schulformen:
+- GY
+jahrgangsstufen:
+- 6
+weight:
+  mastery_required: 0.8
+  curriculum_centrality: 0.8
+  transfer_value: 0.85
+  cognitive_load: 0.65
+prerequisites:
+- id: geometrie__winkel_zeichnen_messen
+  type: required
+  mastery_level_needed: 0.8
+- id: geometrie__innenwinkelsatz_dreieck
+  type: required
+  mastery_level_needed: 0.75
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 6, LB 3
+tags:
+- kongruenz
+- konstruktion
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

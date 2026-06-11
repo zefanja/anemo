@@ -1,0 +1,37 @@
+id: arithmetik__add_sub_zehnerzahlen
+label: Addition/Subtraktion reiner Zehnerzahlen (30+40)
+description: Zehnerzahlen addieren und subtrahieren über die Analogie zu Aufgaben bis 10 (3+4 → 30+40).
+domain: arithmetik
+subdomain: Rechenstrategien
+level: atom
+granularity: 5
+schulformen:
+- GS
+jahrgangsstufen:
+- 2
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.85
+  transfer_value: 0.85
+  cognitive_load: 0.3
+prerequisites:
+- id: arithmetik__addition_subtraktion_bis_10
+  type: required
+  mastery_level_needed: 0.9
+- id: arithmetik__stellenwert_bis_100
+  type: required
+  mastery_level_needed: 0.85
+lehrplan_ref:
+- schulform: GS
+  dokument: lp_gs_mathematik_2025_kommentiert.pdf
+  abschnitt: Kl. 1/2, LB 2 Zahl und Operation
+related:
+- id: arithmetik__addition_subtraktion_bis_100
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms arithmetik__addition_subtraktion_bis_100
+tags:
+- zehnerzahlen
+- analogie
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

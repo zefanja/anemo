@@ -1,0 +1,42 @@
+id: arithmetik__ggt_kgv
+label: ggT und kgV bestimmen
+description: Größten gemeinsamen Teiler und kleinstes gemeinsames Vielfaches bestimmen (über Mengen von
+  Teilern/Vielfachen oder Primfaktorzerlegung); zentral für Hauptnenner und vollständiges Kürzen.
+domain: arithmetik
+subdomain: Teilbarkeit
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 5
+weight:
+  mastery_required: 0.85
+  curriculum_centrality: 0.8
+  transfer_value: 0.9
+  cognitive_load: 0.6
+prerequisites:
+- id: arithmetik__primzahlen_primfaktorzerlegung
+  type: required
+  mastery_level_needed: 0.8
+- id: arithmetik__einmaleins
+  type: required
+  mastery_level_needed: 0.9
+- id: arithmetik__teiler_vielfache
+  type: required
+  mastery_level_needed: 0.9
+  note: ggT und kgV sind über Teiler- und Vielfachenmengen definiert.
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 5, LB 1
+related:
+- id: arithmetik__teilbarkeit_primzahlen
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms arithmetik__teilbarkeit_primzahlen
+tags:
+- ggt
+- kgv
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 2

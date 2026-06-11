@@ -1,0 +1,41 @@
+id: arithmetik__rechengesetze_rechenvorteile
+label: Rechengesetze, Rechenstrategien und Vorrangregeln
+description: Kommutativ-, Assoziativ- und Distributivgesetz; Rechenvorteile nutzen; Vorrangregeln (Punkt
+  vor Strich, Klammern); Überschlag.
+domain: arithmetik
+subdomain: Rechengesetze
+level: atom
+granularity: 4
+schulformen:
+- GY
+jahrgangsstufen:
+- 5
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.9
+  transfer_value: 1.0
+  cognitive_load: 0.5
+prerequisites:
+- id: arithmetik__addition_subtraktion_bis_100
+  type: required
+  mastery_level_needed: 0.85
+- id: arithmetik__einmaleins
+  type: required
+  mastery_level_needed: 0.9
+- id: arithmetik__schriftliche_multiplikation
+  type: helpful
+  mastery_level_needed: 0.7
+- id: arithmetik__vorrangregeln
+  type: helpful
+  mastery_level_needed: 0.7
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 5, LB 1
+tags:
+- rechengesetze
+- distributivgesetz
+- vorrang
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 2

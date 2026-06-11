@@ -1,0 +1,44 @@
+id: arithmetik__rationale_zahlen_multiplizieren_dividieren
+label: Rationale Zahlen multiplizieren und dividieren
+description: Vorzeichenregeln bei Multiplikation und Division; Verbindung aller Grundrechenarten im Bereich
+  der rationalen Zahlen.
+domain: arithmetik
+subdomain: Rationale Zahlen
+level: cluster
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 7
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.95
+  transfer_value: 1.0
+  cognitive_load: 0.6
+prerequisites:
+- id: arithmetik__rationale_zahlen_addieren_subtrahieren
+  type: required
+  mastery_level_needed: 0.85
+- id: arithmetik__brueche_multiplizieren_dividieren
+  type: required
+  mastery_level_needed: 0.85
+- id: arithmetik__vorzeichenregeln_mult_div
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: arithmetik__verbindung_rechenarten_rationale
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 7, LB 2
+tags:
+- rationale_zahlen
+- vorzeichenregeln
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 2

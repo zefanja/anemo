@@ -1,0 +1,40 @@
+id: arithmetik__zehnerueberschreitung_bis_20
+label: Zehnerübergang bis 20 (Teilschrittverfahren)
+description: Aufgaben wie 8+5 oder 13−6 über das Teilschrittverfahren (erst zur 10, dann weiter) lösen;
+  setzt sichere Zerlegungen voraus.
+domain: arithmetik
+subdomain: Operationsverständnis
+level: atom
+granularity: 5
+schulformen:
+- GS
+jahrgangsstufen:
+- 1
+- 2
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 1.0
+  transfer_value: 0.95
+  cognitive_load: 0.6
+prerequisites:
+- id: arithmetik__add_sub_bis_20_ohne_uebergang
+  type: required
+  mastery_level_needed: 0.85
+- id: arithmetik__zahlzerlegung_bis_10
+  type: required
+  mastery_level_needed: 0.95
+  note: Das Teilschrittverfahren erfordert blitzschnelle Zerlegungen.
+lehrplan_ref:
+- schulform: GS
+  dokument: lp_gs_mathematik_2025_kommentiert.pdf
+  abschnitt: Kl. 1/2, LB 2 Zahl und Operation
+related:
+- id: arithmetik__addition_subtraktion_bis_20
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms arithmetik__addition_subtraktion_bis_20
+tags:
+- zehnerübergang
+- teilschrittverfahren
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

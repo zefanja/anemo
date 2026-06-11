@@ -1,0 +1,56 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+	--c-primary: #4f46e5;
+	--c-primary-light: #eef2ff;
+	--c-primary-dark: #3730a3;
+	--c-success: #16a34a;
+	--c-success-light: #f0fdf4;
+	--c-error: #dc2626;
+	--c-error-light: #fef2f2;
+	--c-warning: #d97706;
+	--c-warning-light: #fffbeb;
+	--c-gray-50: #f9fafb;
+	--c-gray-100: #f3f4f6;
+	--c-gray-200: #e5e7eb;
+	--c-gray-400: #9ca3af;
+	--c-gray-600: #4b5563;
+	--c-gray-700: #374151;
+	--c-gray-900: #111827;
+	--radius: 0.75rem;
+	--shadow-sm: 0 1px 3px rgba(0,0,0,.08);
+	--shadow: 0 4px 16px rgba(0,0,0,.1);
+}
+
+html { font-family: system-ui, -apple-system, sans-serif; font-size: 16px; }
+body { background: var(--c-gray-50); color: var(--c-gray-900); line-height: 1.5; -webkit-tap-highlight-color: transparent; }
+
+button { font-family: inherit; cursor: pointer; }
+input, textarea { font-family: inherit; }
+a { color: inherit; }
+
+/* Task prompt — used via MathText component */
+.task-prompt {
+	display: block;
+	font-size: 1.35rem;
+	font-weight: 600;
+	line-height: 1.5;
+	color: var(--c-gray-900);
+}
+/* MathJax SVG output sizing */
+.task-prompt mjx-container { vertical-align: middle; }
+.task-prompt mjx-container svg { font-size: 120% !important; }
+
+.btn {
+	display: inline-flex; align-items: center; justify-content: center;
+	padding: 0.75rem 1.5rem; border: none; border-radius: var(--radius);
+	font-size: 1rem; font-weight: 600; cursor: pointer;
+	transition: opacity .15s, background .15s; user-select: none;
+}
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+.btn-primary { background: var(--c-primary); color: #fff; }
+.btn-primary:hover:not(:disabled) { background: var(--c-primary-dark); }
+.btn-success { background: var(--c-success); color: #fff; }
+.btn-outline { background: transparent; color: var(--c-primary); border: 2px solid var(--c-primary); }
+.btn-lg { padding: 1rem 2rem; font-size: 1.1rem; }
+.btn-full { width: 100%; }

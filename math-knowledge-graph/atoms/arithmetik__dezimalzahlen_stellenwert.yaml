@@ -1,0 +1,39 @@
+id: arithmetik__dezimalzahlen_stellenwert
+label: 'Dezimalzahlen: Stellenwerttafel, vergleichen, runden'
+description: Erweiterung der Stellenwerttafel auf Zehntel/Hundertstel/Tausendstel; Dezimalzahlen lesen,
+  vergleichen, ordnen, runden; Darstellung am Zahlenstrahl.
+domain: arithmetik
+subdomain: Dezimalzahlen
+level: atom
+granularity: 4
+schulformen:
+- GY
+jahrgangsstufen:
+- 5
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.9
+  transfer_value: 0.95
+  cognitive_load: 0.5
+prerequisites:
+- id: arithmetik__natuerliche_zahlen_darstellen_ordnen
+  type: required
+  mastery_level_needed: 0.8
+- id: arithmetik__bruchbegriff
+  type: required
+  mastery_level_needed: 0.75
+  note: Zehntel und Hundertstel sind Zehnerbrüche.
+- id: arithmetik__groessen_masse_volumen
+  type: helpful
+  mastery_level_needed: 0.6
+  note: Kommaschreibweise bei Größen ist die Vorerfahrung.
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 5, LB 2
+tags:
+- dezimalzahlen
+- stellenwert
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

@@ -1,0 +1,31 @@
+id: geometrie__sinussatz_kosinussatz
+label: Sinussatz und Kosinussatz
+description: Sinus- und Kosinussatz sowie Flächeninhaltsformel für Dreiecke herleiten und bei Berechnungen
+  an allgemeinen Dreiecken anwenden.
+domain: geometrie
+subdomain: Trigonometrie
+level: atom
+granularity: 4
+schulformen:
+- GY
+jahrgangsstufen:
+- 10
+weight:
+  mastery_required: 0.8
+  curriculum_centrality: 0.8
+  transfer_value: 0.75
+  cognitive_load: 0.7
+prerequisites:
+- id: geometrie__trigonometrie_rechtwinkliges_dreieck
+  type: required
+  mastery_level_needed: 0.85
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 10, LB 3
+tags:
+- sinussatz
+- kosinussatz
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

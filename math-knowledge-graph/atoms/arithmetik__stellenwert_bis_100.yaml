@@ -1,0 +1,32 @@
+id: arithmetik__stellenwert_bis_100
+label: Stellenwertverständnis und Orientierung im Zahlenraum bis 100
+description: Einer und Zehner; Bündeln und Entbündeln mit Mehrsystemmaterial; Hunderterfeld/-tafel; Zahlen
+  vergleichen, ordnen, zählen in Schritten.
+domain: arithmetik
+subdomain: Stellenwertsystem
+level: atom
+granularity: 4
+schulformen:
+- GS
+jahrgangsstufen:
+- 1
+- 2
+weight:
+  mastery_required: 1.0
+  curriculum_centrality: 1.0
+  transfer_value: 1.0
+  cognitive_load: 0.4
+prerequisites:
+- id: arithmetik__zahlverstaendnis_bis_20
+  type: required
+  mastery_level_needed: 0.9
+lehrplan_ref:
+- schulform: GS
+  dokument: lp_gs_mathematik_2025_kommentiert.pdf
+  abschnitt: Kl. 1/2, LB 2 Zahl und Operation
+tags:
+- stellenwert
+- zahlenraum100
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

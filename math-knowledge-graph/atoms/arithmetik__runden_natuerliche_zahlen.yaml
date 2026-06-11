@@ -1,0 +1,36 @@
+id: arithmetik__runden_natuerliche_zahlen
+label: Natürliche Zahlen runden (Rundungsregel)
+description: Zahlen nach der Rundungsregel auf Zehner, Hunderter usw. runden, auch in Abhängigkeit vom
+  Sachverhalt; Grundlage für Überschlag und Schätzen.
+domain: arithmetik
+subdomain: Zahlverständnis
+level: atom
+granularity: 5
+schulformen:
+- GS
+- GY
+jahrgangsstufen:
+- 3
+- 4
+- 5
+weight:
+  mastery_required: 0.9
+  curriculum_centrality: 0.85
+  transfer_value: 0.9
+  cognitive_load: 0.4
+prerequisites:
+- id: arithmetik__stellenwert_bis_1000
+  type: required
+  mastery_level_needed: 0.85
+lehrplan_ref:
+- schulform: GS
+  dokument: lp_gs_mathematik_2025_kommentiert.pdf
+  abschnitt: Klassenstufe 3/4, LB 2 Zahl und Operation (Runden, Rundungsregel)
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Klassenstufe 5, LB 1 Arbeiten mit natürlichen Zahlen (Schätzen, Runden)
+tags:
+- runden
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

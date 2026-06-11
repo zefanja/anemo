@@ -1,0 +1,32 @@
+id: arithmetik__zahlverstaendnis_bis_20
+label: Zahlverständnis bis 20 (Kardinal-/Ordinalzahl, Teil-Ganzes)
+description: Zahlen bis 20 lesen, schreiben, darstellen; Mengen simultan/quasi-simultan erfassen, zerlegen;
+  Teil-Ganzes-Beziehung; Zahlenstrahl und Zwanzigerfeld.
+domain: arithmetik
+subdomain: Zahlverständnis
+level: atom
+granularity: 4
+schulformen:
+- GS
+jahrgangsstufen:
+- 1
+weight:
+  mastery_required: 1.0
+  curriculum_centrality: 1.0
+  transfer_value: 1.0
+  cognitive_load: 0.3
+lehrplan_ref:
+- schulform: GS
+  dokument: lp_gs_mathematik_2025_kommentiert.pdf
+  abschnitt: Kl. 1/2, LB 2 Zahl und Operation
+tags:
+- zahlverständnis
+- teil_ganzes
+- klasse1
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 2
+prerequisites:
+- id: arithmetik__zaehlen_zahlwortreihe
+  type: required
+  mastery_level_needed: 0.8

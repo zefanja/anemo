@@ -1,0 +1,52 @@
+id: arithmetik__einmaleins
+label: Kleines Einmaleins und Operationsverständnis Multiplikation
+description: Multiplikation als wiederholte Addition und als Feld/rechteckige Anordnung; Kernaufgaben
+  und Ableitungsstrategien; Automatisierung des 1x1.
+domain: arithmetik
+subdomain: Operationsverständnis
+level: cluster
+granularity: 4
+schulformen:
+- GS
+jahrgangsstufen:
+- 2
+- 3
+weight:
+  mastery_required: 1.0
+  curriculum_centrality: 1.0
+  transfer_value: 1.0
+  cognitive_load: 0.5
+prerequisites:
+- id: arithmetik__addition_subtraktion_bis_20
+  type: required
+  mastery_level_needed: 0.9
+- id: arithmetik__multiplikationsverstaendnis
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: arithmetik__einmaleins_kernaufgaben
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: arithmetik__einmaleins_ableiten
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: arithmetik__einmaleins_automatisierung
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+lehrplan_ref:
+- schulform: GS
+  dokument: lp_gs_mathematik_2025_kommentiert.pdf
+  abschnitt: Kl. 1/2 und Kl. 3, LB 2 Zahl und Operation
+tags:
+- einmaleins
+- multiplikation
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 2

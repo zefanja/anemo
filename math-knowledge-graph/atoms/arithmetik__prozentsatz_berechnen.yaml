@@ -1,0 +1,40 @@
+id: arithmetik__prozentsatz_berechnen
+label: Prozentsatz berechnen
+description: Den Prozentsatz als Anteil bestimmen (p % = W / G) und in Prozentschreibweise angeben.
+domain: arithmetik
+subdomain: Prozentrechnung
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 6
+- 7
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.9
+  transfer_value: 0.85
+  cognitive_load: 0.55
+prerequisites:
+- id: arithmetik__prozentschreibweise
+  type: required
+  mastery_level_needed: 0.85
+- id: algebra__proportionalitaet_dreisatz
+  type: required
+  mastery_level_needed: 0.8
+- id: arithmetik__prozentwert_berechnen
+  type: helpful
+  mastery_level_needed: 0.7
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 6, LB 5 und Kl. 7, LB 2
+related:
+- id: arithmetik__prozentrechnung
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms arithmetik__prozentrechnung
+tags:
+- prozentsatz
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

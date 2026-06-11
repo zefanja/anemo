@@ -1,0 +1,30 @@
+id: stochastik__zufall_kombinatorik_grundschule
+label: Erste Zufallserfahrungen und einfache Kombinatorik (GS)
+description: Zufallsexperimente durchführen; Begriffe sicher/möglich/unmöglich, wahrscheinlich; einfache
+  kombinatorische Anzahlbestimmungen.
+domain: stochastik
+subdomain: Zufall
+level: atom
+granularity: 4
+schulformen:
+- GS
+jahrgangsstufen:
+- 1
+- 2
+- 3
+- 4
+weight:
+  mastery_required: 0.5
+  curriculum_centrality: 0.6
+  transfer_value: 0.65
+  cognitive_load: 0.4
+lehrplan_ref:
+- schulform: GS
+  dokument: lp_gs_mathematik_2025_kommentiert.pdf
+  abschnitt: Kl. 1/2 bis Kl. 4, LB 4 Daten und Zufall
+tags:
+- zufall
+- kombinatorik
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

@@ -1,0 +1,38 @@
+id: arithmetik__groessen_geld_laenge_zeit
+label: Größen Geld, Länge und Zeit (messen, umrechnen, rechnen)
+description: Größenvorstellungen und Stützpunktwissen aufbauen; messen; Einheiten wählen und in benachbarte
+  Einheiten umrechnen; in Sachsituationen rechnen (Preistafeln, Fahrpläne).
+domain: arithmetik
+subdomain: Größen und Messen
+level: atom
+granularity: 3
+schulformen:
+- GS
+jahrgangsstufen:
+- 1
+- 2
+- 3
+- 4
+weight:
+  mastery_required: 0.85
+  curriculum_centrality: 0.9
+  transfer_value: 0.85
+  cognitive_load: 0.5
+prerequisites:
+- id: arithmetik__addition_subtraktion_bis_100
+  type: required
+  mastery_level_needed: 0.8
+- id: arithmetik__stellenwert_bis_100
+  type: required
+  mastery_level_needed: 0.8
+lehrplan_ref:
+- schulform: GS
+  dokument: lp_gs_mathematik_2025_kommentiert.pdf
+  abschnitt: Kl. 1/2 bis Kl. 4, LB 3 Größen und Messen
+tags:
+- größen
+- messen
+- einheiten
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

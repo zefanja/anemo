@@ -1,0 +1,31 @@
+id: arithmetik__brueche_vergleichen_ordnen
+label: Brüche vergleichen und ordnen
+description: 'Vergleichsstrategien: gleichnamig machen, gleiche Zähler, Vergleich mit 1/2 und 1; Ordnen
+  am Zahlenstrahl.'
+domain: arithmetik
+subdomain: Bruchrechnung
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 6
+weight:
+  mastery_required: 0.85
+  curriculum_centrality: 0.8
+  transfer_value: 0.85
+  cognitive_load: 0.5
+prerequisites:
+- id: arithmetik__kuerzen_erweitern
+  type: required
+  mastery_level_needed: 0.85
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 6, LB 1
+tags:
+- brüche
+- vergleichen
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

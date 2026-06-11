@@ -1,0 +1,37 @@
+id: algebra__potenzgesetze
+label: Potenzgesetze für natürliche und rationale Exponenten
+description: Potenzgesetze (Produkte, Quotienten, Potenzen von Potenzen); Erweiterung auf negative und
+  rationale Exponenten nach dem Permanenzprinzip; Wurzeln als Potenzen.
+domain: algebra
+subdomain: Potenzen und Wurzeln
+level: atom
+granularity: 4
+schulformen:
+- GY
+jahrgangsstufen:
+- 9
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.9
+  transfer_value: 0.95
+  cognitive_load: 0.65
+prerequisites:
+- id: arithmetik__potenzieren_natuerliche_zahlen
+  type: required
+  mastery_level_needed: 0.85
+- id: arithmetik__brueche_multiplizieren_dividieren
+  type: required
+  mastery_level_needed: 0.8
+- id: algebra__wurzeln_reelle_zahlen
+  type: required
+  mastery_level_needed: 0.75
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 9, LB 1
+tags:
+- potenzgesetze
+- rationale_exponenten
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

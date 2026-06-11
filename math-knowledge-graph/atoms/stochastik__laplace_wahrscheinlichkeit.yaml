@@ -1,0 +1,34 @@
+id: stochastik__laplace_wahrscheinlichkeit
+label: Wahrscheinlichkeitsbegriff und Laplace-Versuche
+description: Ergebnis und Ereignis; Wahrscheinlichkeit als Prognose relativer Häufigkeiten (empirisches
+  Gesetz der großen Zahlen) und als Laplace-Quotient.
+domain: stochastik
+subdomain: Wahrscheinlichkeit
+level: atom
+granularity: 4
+schulformen:
+- GY
+jahrgangsstufen:
+- 8
+weight:
+  mastery_required: 0.9
+  curriculum_centrality: 0.9
+  transfer_value: 0.95
+  cognitive_load: 0.6
+prerequisites:
+- id: stochastik__haeufigkeiten
+  type: required
+  mastery_level_needed: 0.8
+- id: arithmetik__brueche_multiplizieren_dividieren
+  type: required
+  mastery_level_needed: 0.8
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 8, LB 2
+tags:
+- laplace
+- wahrscheinlichkeit
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

@@ -1,0 +1,39 @@
+id: arithmetik__vorrangregeln
+label: Vorrangregeln (Punkt vor Strich, Klammern)
+description: Rechenausdrücke mit natürlichen Zahlen unter Beachtung von Punkt-vor-Strich- und Klammerregeln
+  korrekt auswerten.
+domain: arithmetik
+subdomain: Rechengesetze
+level: atom
+granularity: 5
+schulformen:
+- GS
+- GY
+jahrgangsstufen:
+- 4
+- 5
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.95
+  transfer_value: 0.95
+  cognitive_load: 0.5
+prerequisites:
+- id: arithmetik__addition_subtraktion_bis_100
+  type: required
+  mastery_level_needed: 0.8
+- id: arithmetik__einmaleins
+  type: required
+  mastery_level_needed: 0.85
+lehrplan_ref:
+- schulform: GS
+  dokument: lp_gs_mathematik_2025_kommentiert.pdf
+  abschnitt: Klassenstufe 4, LB 2 Zahl und Operation (Klammerregel)
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Klassenstufe 5, LB 1 Arbeiten mit natürlichen Zahlen
+tags:
+- vorrangregeln
+- klammern
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

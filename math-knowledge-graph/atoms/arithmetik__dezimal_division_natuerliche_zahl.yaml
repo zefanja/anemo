@@ -1,0 +1,39 @@
+id: arithmetik__dezimal_division_natuerliche_zahl
+label: Dezimalzahl durch natürliche Zahl dividieren
+description: Schriftliche Division einer Dezimalzahl durch eine natürliche Zahl; Komma im Ergebnis beim
+  Überschreiten setzen.
+domain: arithmetik
+subdomain: Dezimalzahlen
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 5
+- 6
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.9
+  transfer_value: 0.85
+  cognitive_load: 0.5
+prerequisites:
+- id: arithmetik__schriftliche_division
+  type: required
+  mastery_level_needed: 0.85
+- id: arithmetik__dezimalzahlen_stellenwert
+  type: required
+  mastery_level_needed: 0.85
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 5, LB 2 und Kl. 6, LB 1
+related:
+- id: arithmetik__dezimalzahlen_multiplizieren_dividieren
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms arithmetik__dezimalzahlen_multiplizieren_dividieren
+tags:
+- dezimalzahlen
+- division
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

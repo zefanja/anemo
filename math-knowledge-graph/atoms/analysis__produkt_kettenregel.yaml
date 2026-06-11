@@ -1,0 +1,34 @@
+id: analysis__produkt_kettenregel
+label: Produkt- und Kettenregel
+description: Ableiten einfacher Verkettungen und Verknüpfungen (z. B. 3x²·e^(2x-1), ln(3x-5), x²/2 - sin(2x+1)).
+domain: analysis
+subdomain: Differentialrechnung
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 11
+weight:
+  mastery_required: 0.9
+  curriculum_centrality: 0.9
+  transfer_value: 0.85
+  cognitive_load: 0.8
+prerequisites:
+- id: analysis__ableitungsregeln
+  type: required
+  mastery_level_needed: 0.85
+- id: algebra__verkettung_verknuepfung
+  type: required
+  mastery_level_needed: 0.8
+  note: Innere und äußere Funktion müssen vorab identifiziert werden können.
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Jg. 11/12 GK, LB 1
+tags:
+- produktregel
+- kettenregel
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

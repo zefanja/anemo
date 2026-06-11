@@ -1,0 +1,35 @@
+id: algebra__variablen_terme
+label: 'Variablen und Terme: aufstellen, interpretieren, Werte berechnen'
+description: Variable als Platzhalter und Veränderliche; Name, Wert und Bedeutung einer Variablen unterscheiden;
+  Termstruktur (Summe, Produkt, Quotient) erkennen; Terme aus Sachsituationen aufstellen.
+domain: algebra
+subdomain: Terme
+level: atom
+granularity: 4
+schulformen:
+- GY
+jahrgangsstufen:
+- 7
+- 8
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.95
+  transfer_value: 1.0
+  cognitive_load: 0.6
+prerequisites:
+- id: algebra__gleichungen_inhaltlich_loesen
+  type: required
+  mastery_level_needed: 0.75
+- id: arithmetik__rechengesetze_rechenvorteile
+  type: required
+  mastery_level_needed: 0.8
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 8, LB 1
+tags:
+- variablen
+- terme
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

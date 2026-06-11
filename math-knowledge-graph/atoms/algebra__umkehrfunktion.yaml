@@ -1,0 +1,30 @@
+id: algebra__umkehrfunktion
+label: Funktionen umkehren
+description: Beziehung zwischen Funktion und Umkehrfunktion; grafische Interpretation (Spiegelung an y
+  = x); Umkehrbarkeit und Einschränkung des Definitionsbereichs.
+domain: algebra
+subdomain: Funktionen
+level: atom
+granularity: 4
+schulformen:
+- GY
+jahrgangsstufen:
+- 10
+weight:
+  mastery_required: 0.75
+  curriculum_centrality: 0.7
+  transfer_value: 0.8
+  cognitive_load: 0.7
+prerequisites:
+- id: algebra__funktionsbegriff
+  type: required
+  mastery_level_needed: 0.85
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 10, LB 4
+tags:
+- umkehrfunktion
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

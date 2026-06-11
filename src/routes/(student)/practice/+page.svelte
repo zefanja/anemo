@@ -1,0 +1,676 @@
+<script lang="ts">
+	import { invalidate } from '$app/navigation';
+	import type { PageData } from './$types';
+	import FractionInput from '$lib/components/student/FractionInput.svelte';
+	import MathText from '$lib/components/student/MathText.svelte';
+
+	let { data }: { data: PageData } = $props();
+
+	type TaskDisplay = {
+		taskId: string;
+		atomId: string;
+		prompt: string;
+		answerType: 'integer' | 'number' | 'fraction' | 'text';
+		hint: string | null;
+		difficulty: number | null;
+	};
+
+	type AttemptResult = {
+		correct: boolean;
+		mastery: number;
+		justMastered: boolean;
+		xpGained: number;
+		newLevel: number;
+		levelUp: boolean;
+		newBadges: string[];
+		streakDays: number;
+		hint?: string;
+	};
+
+	type FrontierItem = (typeof data.plan.frontierItems)[0];
+
+	// ── Phase ──
+	let phase = $state<'reviews' | 'practice'>(
+		data.plan.mandatoryReviews.length > 0 ? 'reviews' : 'practice'
+	);
+
+	// ── Review state ──
+	let reviewIndex = $state(0);
+	let reviews = $state(data.plan.mandatoryReviews);
+	let currentReview = $derived(reviews[reviewIndex] ?? null);
+
+	// ── Practice state ──
+	let selectedAtom = $state<FrontierItem | null>(null);
+	let masteredAtomIds = $state(new Set<string>());
+	let availableItems = $derived(data.plan.frontierItems.filter(item => !masteredAtomIds.has(item.atomId)));
+
+	// ── Task + answer state ──
+	let currentTask = $state<TaskDisplay | null>(null);
+	let answer = $state('');
+	let isLoading = $state(false);
+	let isSubmitting = $state(false);
+
+	// ── Input refs for auto-focus ──
+	let answerInput = $state<HTMLInputElement | null>(null);
+	let fractionInput = $state<{ focus: () => void } | null>(null);
+
+	$effect(() => {
+		if (currentTask && !showFeedback) {
+			// tick ensures the element is mounted before focusing
+			if (currentTask.answerType === 'fraction') {
+				fractionInput?.focus();
+			} else {
+				answerInput?.focus();
+			}
+		}
+	});
+
+	// ── Feedback state ──
+	let showFeedback = $state(false);
+	let lastResult = $state<AttemptResult | null>(null);
+
+	// ── Transition screen: all reviews done ──
+	let reviewsDoneScreen = $state(false);
+
+	// Load first review on mount
+	$effect(() => {
+		if (phase === 'reviews' && currentReview) {
+			loadTask(currentReview.atomId);
+		}
+	});
+
+	async function loadTask(atomId: string) {
+		isLoading = true;
+		currentTask = null;
+		answer = '';
+		showFeedback = false;
+		lastResult = null;
+		try {
+			const res = await fetch(`/api/task/${atomId}`);
+			if (!res.ok) throw new Error();
+			currentTask = await res.json();
+		} catch {
+			// fall-through: isLoading = false shows error state via null task
+		} finally {
+			isLoading = false;
+		}
+	}
+
+	async function submitAnswer() {
+		if (!currentTask || isSubmitting || !String(answer).trim()) return;
+		const atomId = phase === 'reviews' ? currentReview!.atomId : selectedAtom!.atomId;
+		isSubmitting = true;
+		try {
+			const res = await fetch('/api/attempt', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ taskId: currentTask.taskId, atomId, answer: String(answer).trim(), isReview: phase === 'reviews' })
+			});
+			if (!res.ok) throw new Error();
+			lastResult = await res.json();
+			showFeedback = true;
+			invalidate('app:gami');
+			invalidate('app:progress');
+		} catch {
+			// show generic error?
+		} finally {
+			isSubmitting = false;
+		}
+	}
+
+	function handleContinue() {
+		if (phase === 'reviews') {
+			const next = reviewIndex + 1;
+			if (next >= reviews.length) {
+				reviewsDoneScreen = true;
+				showFeedback = false;
+				currentTask = null;
+			} else {
+				reviewIndex = next;
+				loadTask(reviews[next].atomId);
+			}
+		} else {
+			if (lastResult?.justMastered) {
+				masteredAtomIds = new Set([...masteredAtomIds, selectedAtom!.atomId]);
+				selectedAtom = null;
+				currentTask = null;
+				showFeedback = false;
+			} else {
+				loadTask(selectedAtom!.atomId);
+			}
+		}
+	}
+
+	function startPracticePhase() {
+		reviewsDoneScreen = false;
+		phase = 'practice';
+	}
+
+	function selectAtom(item: FrontierItem) {
+		selectedAtom = item;
+		loadTask(item.atomId);
+	}
+
+	function handleKeydown(e: KeyboardEvent) {
+		if (e.key === 'Enter') {
+			if (reviewsDoneScreen) {
+				startPracticePhase();
+			} else if (showFeedback && !isSubmitting) {
+				handleContinue();
+			} else if (String(answer).trim() && !isSubmitting) {
+				submitAnswer();
+			}
+		}
+	}
+
+	const BADGE_LABELS: Record<string, string> = {
+		first_atom: '🏅 Erstes Atom gemeistert!',
+		atoms_10: '⭐ 10 Atome gemeistert!',
+		atoms_50: '🌟 50 Atome gemeistert!',
+		atoms_all: '🏆 Alle Atome gemeistert!',
+		streak_7: '🔥 7 Tage Streak!',
+		streak_30: '🔥 30 Tage Streak!',
+		cluster_complete: '📦 Bereich abgeschlossen!'
+	};
+
+	function masteryBar(mastery: number): string {
+		const pct = Math.round(mastery * 100);
+		return `${pct}%`;
+	}
+</script>
+
+<svelte:window onkeydown={handleKeydown} />
+
+<div class="practice-page">
+
+	<!-- ── Reviews-done celebration ── -->
+	{#if reviewsDoneScreen}
+		<div class="screen-center">
+			<div class="celebration">
+				<div class="celebration-icon">✅</div>
+				<h2>Wiederholungen erledigt!</h2>
+				<p>Alle {reviews.length} Wiederholungsaufgaben abgeschlossen.</p>
+				{#if data.plan.frontierItems.length > 0}
+					<button class="btn btn-primary btn-lg" onclick={startPracticePhase}>
+						Weiter üben
+					</button>
+				{:else}
+					<p class="text-muted">Keine neuen Aufgaben verfügbar.</p>
+					<a href="/progress" class="btn btn-outline btn-lg">Zum Fortschritt</a>
+				{/if}
+			</div>
+		</div>
+
+	<!-- ── Practice: atom selection ── -->
+	{:else if phase === 'practice' && !selectedAtom}
+		<div class="selection-page">
+			<div class="selection-header">
+				<h2>Was möchtest du üben?</h2>
+				<p class="text-muted">Wähle ein Thema aus</p>
+			</div>
+			{#if availableItems.length === 0}
+				<div class="screen-center">
+					<div class="empty-state">
+						<div class="empty-icon">🎉</div>
+						<h3>Super gemacht!</h3>
+						<p>Alle verfügbaren Atome gemeistert. Schau in deinen Fortschritt!</p>
+						<a href="/progress" class="btn btn-primary">Zum Fortschritt</a>
+					</div>
+				</div>
+			{:else}
+				<div class="atom-grid">
+					{#each availableItems as item}
+						<button class="atom-card" onclick={() => selectAtom(item)}>
+							<div class="atom-type-badge" class:is-active={item.type === 'active'}>
+								{item.type === 'active' ? 'Weiterüben' : 'Neu'}
+							</div>
+							<div class="atom-card-label">{item.label}</div>
+							{#if item.mastery > 0}
+								<div class="atom-progress-track">
+									<div class="atom-progress-fill" style="width: {masteryBar(item.mastery)}"></div>
+								</div>
+								<div class="atom-mastery-pct">{Math.round(item.mastery * 100)}%</div>
+							{/if}
+						</button>
+					{/each}
+				</div>
+			{/if}
+		</div>
+
+	<!-- ── Task view (reviews + practice) ── -->
+	{:else}
+		{@const activeItem = phase === 'reviews' ? currentReview : selectedAtom}
+
+		<!-- Progress indicator for reviews -->
+		{#if phase === 'reviews'}
+			<div class="review-progress-bar">
+				<div class="review-progress-label">
+					Wiederholung {reviewIndex + 1} von {reviews.length}
+				</div>
+				<div class="review-track">
+					{#each reviews as _, i}
+						<div class="review-dot" class:done={i < reviewIndex} class:current={i === reviewIndex}></div>
+					{/each}
+				</div>
+			</div>
+		{:else}
+			<div class="back-bar">
+				<button class="back-btn" onclick={() => { selectedAtom = null; currentTask = null; }}>
+					← Zurück
+				</button>
+				<span class="back-label">{selectedAtom?.label}</span>
+			</div>
+		{/if}
+
+		<!-- Task card -->
+		<div class="task-area">
+			{#if isLoading}
+				<div class="task-loading">
+					<div class="spinner"></div>
+					<span>Aufgabe laden…</span>
+				</div>
+			{:else if !currentTask}
+				<div class="task-error">
+					<p>Aufgabe konnte nicht geladen werden.</p>
+					<button class="btn btn-outline" onclick={() => activeItem && loadTask(activeItem.atomId)}>
+						Nochmal versuchen
+					</button>
+				</div>
+			{:else if showFeedback && lastResult}
+				<!-- Feedback overlay -->
+				<div class="feedback-card" class:correct={lastResult.correct} class:incorrect={!lastResult.correct}>
+					<div class="feedback-icon">{lastResult.correct ? '✓' : '✗'}</div>
+					<div class="feedback-text">
+						{lastResult.correct ? 'Richtig!' : 'Nicht ganz.'}
+					</div>
+
+					{#if lastResult.xpGained > 0}
+						<div class="xp-gained">+{lastResult.xpGained} XP</div>
+					{/if}
+
+					{#if lastResult.levelUp}
+						<div class="level-up">🎉 Level {lastResult.newLevel} erreicht – weiter so!</div>
+					{/if}
+
+					{#if lastResult.justMastered}
+						<div class="mastered-notice">⭐ Gemeistert!</div>
+					{/if}
+
+					{#if lastResult.newBadges.length > 0}
+						<div class="new-badges">
+							{#each lastResult.newBadges as badge}
+								<div class="badge-notice">{BADGE_LABELS[badge] ?? badge}</div>
+							{/each}
+						</div>
+					{/if}
+
+					{#if !lastResult.correct && lastResult.hint}
+						<div class="hint-box">💡 <MathText text={lastResult.hint} /></div>
+					{/if}
+
+					<button class="btn btn-primary btn-full btn-lg continue-btn" onclick={handleContinue}>
+						{#if phase === 'reviews' && reviewIndex + 1 < reviews.length}
+							Weiter →
+						{:else if phase === 'reviews'}
+							Zur freien Übung →
+						{:else if lastResult?.justMastered}
+							Anderes Thema wählen →
+						{:else}
+							Neue Aufgabe
+						{/if}
+					</button>
+				</div>
+			{:else}
+				<!-- Task prompt + answer input -->
+				<div class="task-card">
+					<div class="atom-label-tag">{activeItem?.label}</div>
+					<MathText text={currentTask.prompt} class="task-prompt" />
+
+					<div class="answer-area">
+						{#if currentTask.answerType === 'fraction'}
+							<FractionInput bind:this={fractionInput} bind:value={answer} disabled={isSubmitting} onsubmit={submitAnswer} />
+						{:else if currentTask.answerType === 'integer'}
+							<input
+								bind:this={answerInput}
+								class="answer-input"
+								type="number"
+								inputmode="numeric"
+								step="1"
+								bind:value={answer}
+								disabled={isSubmitting}
+								placeholder="Antwort"
+								autocomplete="off"
+							/>
+						{:else if currentTask.answerType === 'number'}
+							<input
+								bind:this={answerInput}
+								class="answer-input"
+								type="number"
+								inputmode="decimal"
+								bind:value={answer}
+								disabled={isSubmitting}
+								placeholder="Antwort"
+								autocomplete="off"
+							/>
+						{:else}
+							<input
+								bind:this={answerInput}
+								class="answer-input"
+								type="text"
+								bind:value={answer}
+								disabled={isSubmitting}
+								placeholder="Antwort"
+								autocomplete="off"
+							/>
+						{/if}
+					</div>
+
+					<button
+						class="btn btn-primary btn-full btn-lg submit-btn"
+						onclick={submitAnswer}
+						disabled={isSubmitting || !String(answer).trim()}
+					>
+						{isSubmitting ? '…' : 'Antworten'}
+					</button>
+				</div>
+			{/if}
+		</div>
+	{/if}
+</div>
+
+<style>
+	.practice-page {
+		min-height: 100%;
+		display: flex;
+		flex-direction: column;
+	}
+
+	/* ── Screen-center helper ── */
+	.screen-center {
+		flex: 1;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 2rem;
+	}
+
+	/* ── Celebration ── */
+	.celebration {
+		text-align: center;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 1rem;
+	}
+	.celebration-icon { font-size: 4rem; }
+	.celebration h2 { font-size: 1.5rem; font-weight: 700; }
+
+	/* ── Selection page ── */
+	.selection-page {
+		padding: 1.25rem;
+	}
+	.selection-header {
+		margin-bottom: 1.25rem;
+	}
+	.selection-header h2 { font-size: 1.25rem; font-weight: 700; }
+	.text-muted { color: var(--c-gray-600); font-size: 0.9rem; margin-top: 0.25rem; }
+
+	.atom-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+		gap: 0.75rem;
+		max-width: 900px;
+	}
+	.atom-card {
+		background: #fff;
+		border: 2px solid var(--c-gray-200);
+		border-radius: var(--radius);
+		padding: 0.9rem 0.75rem;
+		text-align: left;
+		cursor: pointer;
+		transition: border-color .15s, box-shadow .15s;
+		display: flex;
+		flex-direction: column;
+		gap: 0.4rem;
+	}
+	.atom-card:hover, .atom-card:focus-visible {
+		border-color: var(--c-primary);
+		box-shadow: var(--shadow-sm);
+		outline: none;
+	}
+	.atom-type-badge {
+		font-size: 0.65rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: .04em;
+		color: #fff;
+		background: var(--c-gray-400);
+		border-radius: 999px;
+		padding: 0.15rem 0.5rem;
+		align-self: flex-start;
+	}
+	.atom-type-badge.is-active { background: var(--c-primary); }
+	.atom-card-label {
+		font-size: 0.9rem;
+		font-weight: 600;
+		color: var(--c-gray-900);
+		line-height: 1.3;
+		overflow-wrap: break-word;
+		word-break: break-word;
+	}
+	.atom-progress-track {
+		height: 5px;
+		background: var(--c-gray-200);
+		border-radius: 999px;
+		overflow: hidden;
+	}
+	.atom-progress-fill {
+		height: 100%;
+		background: var(--c-primary);
+		border-radius: 999px;
+	}
+	.atom-mastery-pct {
+		font-size: 0.7rem;
+		color: var(--c-gray-600);
+	}
+
+	/* ── Empty state ── */
+	.empty-state {
+		text-align: center;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 1rem;
+	}
+	.empty-icon { font-size: 3rem; }
+
+	/* ── Review progress bar ── */
+	.review-progress-bar {
+		padding: 0.75rem 1.25rem 0;
+	}
+	.review-progress-label {
+		font-size: 0.8rem;
+		color: var(--c-gray-600);
+		margin-bottom: 0.4rem;
+	}
+	.review-track {
+		display: flex;
+		gap: 0.35rem;
+	}
+	.review-dot {
+		width: 10px;
+		height: 10px;
+		border-radius: 50%;
+		background: var(--c-gray-200);
+		flex-shrink: 0;
+	}
+	.review-dot.done { background: var(--c-success); }
+	.review-dot.current { background: var(--c-primary); }
+
+	/* ── Back bar ── */
+	.back-bar {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		padding: 0.5rem 1rem;
+		border-bottom: 1px solid var(--c-gray-100);
+	}
+	.back-btn {
+		background: none;
+		border: none;
+		color: var(--c-primary);
+		font-size: 0.9rem;
+		font-weight: 600;
+		padding: 0.25rem 0;
+		cursor: pointer;
+	}
+	.back-label {
+		font-size: 0.9rem;
+		color: var(--c-gray-700);
+		font-weight: 500;
+	}
+
+	/* ── Task area ── */
+	.task-area {
+		flex: 1;
+		padding: 1.25rem;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.task-loading, .task-error {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 1rem;
+		color: var(--c-gray-600);
+	}
+
+	/* Spinner */
+	.spinner {
+		width: 36px;
+		height: 36px;
+		border: 3px solid var(--c-gray-200);
+		border-top-color: var(--c-primary);
+		border-radius: 50%;
+		animation: spin .7s linear infinite;
+	}
+	@keyframes spin { to { transform: rotate(360deg); } }
+
+	/* ── Task card ── */
+	.task-card {
+		background: #fff;
+		border-radius: var(--radius);
+		padding: 1.5rem;
+		box-shadow: var(--shadow-sm);
+		display: flex;
+		flex-direction: column;
+		gap: 1.25rem;
+	}
+	.atom-label-tag {
+		font-size: 0.75rem;
+		font-weight: 600;
+		color: var(--c-primary);
+		text-transform: uppercase;
+		letter-spacing: .05em;
+	}
+	/* .task-prompt lives in app.css (rendered via MathText component) */
+	.answer-area {
+		display: flex;
+		justify-content: center;
+	}
+	.answer-input {
+		width: 100%;
+		max-width: 220px;
+		padding: 0.75rem 1rem;
+		font-size: 1.5rem;
+		font-weight: 600;
+		text-align: center;
+		border: 2px solid var(--c-gray-200);
+		border-radius: var(--radius);
+		outline: none;
+		transition: border-color .15s, box-shadow .15s;
+		appearance: none;
+		-webkit-appearance: textfield;
+		-moz-appearance: textfield;
+	}
+	.answer-input::-webkit-outer-spin-button,
+	.answer-input::-webkit-inner-spin-button {
+		-webkit-appearance: none;
+		margin: 0;
+	}
+	.answer-input:focus {
+		border-color: var(--c-primary);
+		box-shadow: 0 0 0 3px var(--c-primary-light);
+	}
+	.submit-btn { margin-top: 0.25rem; }
+
+	/* ── Feedback card ── */
+	.feedback-card {
+		background: #fff;
+		border-radius: var(--radius);
+		padding: 1.75rem 1.5rem;
+		box-shadow: var(--shadow-sm);
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.75rem;
+		text-align: center;
+		border-top: 4px solid var(--c-gray-200);
+	}
+	.feedback-card.correct { border-top-color: var(--c-success); }
+	.feedback-card.incorrect { border-top-color: var(--c-error); }
+	.feedback-icon {
+		font-size: 3rem;
+		line-height: 1;
+	}
+	.feedback-card.correct .feedback-icon { color: var(--c-success); }
+	.feedback-card.incorrect .feedback-icon { color: var(--c-error); }
+	.feedback-text {
+		font-size: 1.25rem;
+		font-weight: 700;
+	}
+	.feedback-card.correct .feedback-text { color: var(--c-success); }
+	.feedback-card.incorrect .feedback-text { color: var(--c-error); }
+	.xp-gained {
+		font-size: 1rem;
+		font-weight: 700;
+		color: #f59e0b;
+	}
+	.level-up {
+		font-size: 1rem;
+		font-weight: 700;
+		color: var(--c-primary);
+	}
+	.mastered-notice {
+		font-size: 1rem;
+		font-weight: 600;
+		color: var(--c-success);
+	}
+	.new-badges {
+		display: flex;
+		flex-direction: column;
+		gap: 0.35rem;
+		width: 100%;
+	}
+	.badge-notice {
+		background: var(--c-primary-light);
+		color: var(--c-primary-dark);
+		border-radius: var(--radius);
+		padding: 0.4rem 0.75rem;
+		font-size: 0.9rem;
+		font-weight: 600;
+	}
+	.hint-box {
+		background: var(--c-warning-light);
+		color: var(--c-warning);
+		border-radius: var(--radius);
+		padding: 0.6rem 0.75rem;
+		font-size: 0.9rem;
+		width: 100%;
+		text-align: left;
+	}
+	.continue-btn { margin-top: 0.5rem; }
+</style>

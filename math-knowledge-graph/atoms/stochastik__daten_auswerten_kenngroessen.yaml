@@ -1,0 +1,35 @@
+id: stochastik__daten_auswerten_kenngroessen
+label: 'Daten auswerten: Median, Quartile, Streuung, Boxplot'
+description: Statistische Erhebungen auswerten; Lage- und Streumaße (arithmetisches Mittel, Median, Quartile,
+  Spannweite); Boxplots; Manipulationen in Darstellungen erkennen.
+domain: stochastik
+subdomain: Daten
+level: atom
+granularity: 4
+schulformen:
+- GY
+jahrgangsstufen:
+- 9
+weight:
+  mastery_required: 0.8
+  curriculum_centrality: 0.75
+  transfer_value: 0.75
+  cognitive_load: 0.55
+prerequisites:
+- id: arithmetik__arithmetisches_mittel
+  type: required
+  mastery_level_needed: 0.8
+- id: stochastik__haeufigkeiten
+  type: required
+  mastery_level_needed: 0.8
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 9, LB 4
+tags:
+- median
+- boxplot
+- streuung
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

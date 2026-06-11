@@ -1,0 +1,32 @@
+id: algebra__gleichungen_inhaltlich_loesen
+label: Einfache Gleichungen inhaltlich lösen
+description: Gleichungen wie 64 + x = 91 oder b · 27 = 56 durch Umkehraufgaben, systematisches Probieren
+  und Zahlbeziehungen lösen — ohne formales Umformen.
+domain: algebra
+subdomain: Gleichungen
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 5
+- 6
+weight:
+  mastery_required: 0.8
+  curriculum_centrality: 0.7
+  transfer_value: 0.9
+  cognitive_load: 0.5
+prerequisites:
+- id: arithmetik__rechengesetze_rechenvorteile
+  type: required
+  mastery_level_needed: 0.75
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 5, LB 1 und Kl. 6, LB 1
+tags:
+- gleichungen
+- inhaltliches_lösen
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

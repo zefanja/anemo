@@ -1,0 +1,45 @@
+id: arithmetik__einmaleins_ableiten
+label: Einmaleins-Aufgaben aus Kernaufgaben ableiten (Nachbaraufgaben)
+description: Übrige Einmaleins-Aufgaben über Nachbaraufgaben und Zerlegungen aus Kernaufgaben ableiten
+  (6·7 = 5·7 + 7), implizit Distributivität.
+domain: arithmetik
+subdomain: Operationsverständnis
+level: atom
+granularity: 5
+schulformen:
+- GS
+jahrgangsstufen:
+- 2
+- 3
+weight:
+  mastery_required: 0.9
+  curriculum_centrality: 0.9
+  transfer_value: 0.9
+  cognitive_load: 0.55
+prerequisites:
+- id: arithmetik__einmaleins_kernaufgaben
+  type: required
+  mastery_level_needed: 0.9
+- id: arithmetik__addition_subtraktion_bis_100
+  type: helpful
+  mastery_level_needed: 0.7
+  note: Beim Ableiten muss das Zwischenergebnis im Hunderterraum addiert werden.
+- id: arithmetik__verdoppeln_halbieren
+  type: helpful
+  mastery_level_needed: 0.7
+  note: Verdoppeln trägt die Strategien der 2er- und 4er-Reihen.
+lehrplan_ref:
+- schulform: GS
+  dokument: lp_gs_mathematik_2025_kommentiert.pdf
+  abschnitt: Kl. 1/2 und Kl. 3, LB 2 Zahl und Operation
+related:
+- id: arithmetik__einmaleins
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms arithmetik__einmaleins
+tags:
+- einmaleins
+- ableiten
+- nachbaraufgaben
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 2

@@ -1,0 +1,43 @@
+id: arithmetik__bruch_zu_dezimalzahl
+label: Bruch in Dezimalzahl umwandeln
+description: Brüche über Erweitern auf Nenner 10/100/1000 oder über Division Zähler durch Nenner in Dezimalzahlen
+  umwandeln.
+domain: arithmetik
+subdomain: Bruchrechnung
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 5
+- 6
+weight:
+  mastery_required: 0.9
+  curriculum_centrality: 0.9
+  transfer_value: 0.9
+  cognitive_load: 0.5
+prerequisites:
+- id: arithmetik__erweitern
+  type: required
+  mastery_level_needed: 0.8
+- id: arithmetik__dezimalzahlen_stellenwert
+  type: required
+  mastery_level_needed: 0.85
+- id: arithmetik__schriftliche_division
+  type: required
+  mastery_level_needed: 0.8
+  note: 'Allgemeiner Weg: Zähler durch Nenner dividieren.'
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 5, LB 2 und Kl. 6, LB 1
+related:
+- id: arithmetik__umwandeln_bruch_dezimal_prozent
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms arithmetik__umwandeln_bruch_dezimal_prozent
+tags:
+- umwandeln
+- dezimalzahlen
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

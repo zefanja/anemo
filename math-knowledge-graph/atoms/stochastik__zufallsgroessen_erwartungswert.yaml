@@ -1,0 +1,38 @@
+id: stochastik__zufallsgroessen_erwartungswert
+label: 'Diskrete Zufallsgrößen: Verteilung, Erwartungswert, Standardabweichung'
+description: Wahrscheinlichkeitsverteilungen ermitteln und darstellen (Stabdiagramm, Histogramm); Ereignisse
+  'genau/mindestens/höchstens k'; Erwartungswert (Bezug zum arithmetischen Mittel), Varianz und Standardabweichung;
+  faire Spiele.
+domain: stochastik
+subdomain: Zufallsgrößen
+level: atom
+granularity: 4
+schulformen:
+- GY
+jahrgangsstufen:
+- 10
+weight:
+  mastery_required: 0.85
+  curriculum_centrality: 0.85
+  transfer_value: 0.85
+  cognitive_load: 0.7
+prerequisites:
+- id: stochastik__mehrstufige_zufallsversuche
+  type: required
+  mastery_level_needed: 0.85
+- id: stochastik__daten_auswerten_kenngroessen
+  type: required
+  mastery_level_needed: 0.75
+- id: algebra__funktionsbegriff
+  type: helpful
+  mastery_level_needed: 0.7
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 10, LB 2
+tags:
+- zufallsgröße
+- erwartungswert
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

@@ -1,0 +1,32 @@
+id: geometrie__winkelbeziehungen
+label: Winkelbeziehungen an Geraden (Neben-, Scheitel-, Stufen-, Wechselwinkel)
+description: Winkel an sich schneidenden Geraden und an geschnittenen Parallelen; Beziehungen für Begründungen
+  und Berechnungen nutzen.
+domain: geometrie
+subdomain: Winkel
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 5
+- 7
+weight:
+  mastery_required: 0.85
+  curriculum_centrality: 0.8
+  transfer_value: 0.9
+  cognitive_load: 0.55
+prerequisites:
+- id: geometrie__winkel_zeichnen_messen
+  type: required
+  mastery_level_needed: 0.8
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 5, LB 3 und Kl. 7, LB 1
+tags:
+- winkelbeziehungen
+- parallelen
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

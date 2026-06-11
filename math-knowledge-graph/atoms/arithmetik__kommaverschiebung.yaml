@@ -1,0 +1,35 @@
+id: arithmetik__kommaverschiebung
+label: Mit 10, 100, 1000 multiplizieren und dividieren (Kommaverschiebung)
+description: Multiplikation/Division von Dezimalzahlen mit Stufenzahlen als Kommaverschiebung deuten und
+  ausführen.
+domain: arithmetik
+subdomain: Dezimalzahlen
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 5
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.9
+  transfer_value: 0.9
+  cognitive_load: 0.4
+prerequisites:
+- id: arithmetik__dezimalzahlen_stellenwert
+  type: required
+  mastery_level_needed: 0.9
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 5, LB 2 und Kl. 6, LB 1
+related:
+- id: arithmetik__dezimalzahlen_multiplizieren_dividieren
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms arithmetik__dezimalzahlen_multiplizieren_dividieren
+tags:
+- dezimalzahlen
+- stufenzahlen
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

@@ -1,0 +1,41 @@
+id: arithmetik__gemischte_zahlen_unechte_brueche
+label: Gemischte Zahlen und unechte Brüche umwandeln
+description: Unechte Brüche in gemischte Zahlen umwandeln und umgekehrt; Division mit Rest als Hintergrund.
+domain: arithmetik
+subdomain: Bruchrechnung
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 5
+weight:
+  mastery_required: 0.9
+  curriculum_centrality: 0.85
+  transfer_value: 0.85
+  cognitive_load: 0.5
+prerequisites:
+- id: arithmetik__bruch_anteil_eines_ganzen
+  type: required
+  mastery_level_needed: 0.85
+- id: arithmetik__division_grundverstaendnis
+  type: required
+  mastery_level_needed: 0.8
+  note: Umwandlung nutzt die Division mit Rest.
+- id: arithmetik__division_mit_rest
+  type: required
+  mastery_level_needed: 0.8
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 5, LB 2
+related:
+- id: arithmetik__bruchbegriff
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms arithmetik__bruchbegriff
+tags:
+- gemischte_zahlen
+- unechte_brüche
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 2

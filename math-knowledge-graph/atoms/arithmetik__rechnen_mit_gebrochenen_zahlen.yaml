@@ -1,0 +1,43 @@
+id: arithmetik__rechnen_mit_gebrochenen_zahlen
+label: Sicheres Rechnen im Bereich der gebrochenen Zahlen
+description: Grundrechenarten und Rechengesetze gemischt anwenden (Bruch- und Dezimaldarstellung, Vorrangregeln);
+  im Kopf, schriftlich und mit Taschenrechner; inhaltliches Lösen von Gleichungen und Ungleichungen.
+domain: arithmetik
+subdomain: Bruchrechnung
+level: cluster
+granularity: 3
+schulformen:
+- GY
+jahrgangsstufen:
+- 6
+weight:
+  mastery_required: 0.9
+  curriculum_centrality: 0.95
+  transfer_value: 0.95
+  cognitive_load: 0.65
+prerequisites:
+- id: arithmetik__brueche_addieren_subtrahieren
+  type: required
+  mastery_level_needed: 0.85
+- id: arithmetik__brueche_multiplizieren_dividieren
+  type: required
+  mastery_level_needed: 0.85
+- id: arithmetik__brueche_vergleichen_ordnen
+  type: required
+  mastery_level_needed: 0.8
+- id: arithmetik__dezimalzahlen_multiplizieren_dividieren
+  type: required
+  mastery_level_needed: 0.8
+- id: arithmetik__rechengesetze_rechenvorteile
+  type: required
+  mastery_level_needed: 0.8
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 6, LB 1
+tags:
+- gebrochene_zahlen
+- grundrechenarten
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 2

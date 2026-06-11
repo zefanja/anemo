@@ -1,0 +1,35 @@
+id: algebra__wurzeln_reelle_zahlen
+label: Quadratwurzeln, n-te Wurzeln und reelle Zahlen
+description: Radizieren als Umkehrung des Potenzierens; Wurzelschreibweise; irrationale Zahlen und Ausblick
+  auf die reellen Zahlen.
+domain: algebra
+subdomain: Potenzen und Wurzeln
+level: atom
+granularity: 4
+schulformen:
+- GY
+jahrgangsstufen:
+- 9
+weight:
+  mastery_required: 0.9
+  curriculum_centrality: 0.85
+  transfer_value: 0.95
+  cognitive_load: 0.65
+prerequisites:
+- id: arithmetik__potenzieren_natuerliche_zahlen
+  type: required
+  mastery_level_needed: 0.8
+- id: logik__mengen_zahlbereiche
+  type: required
+  mastery_level_needed: 0.7
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 9, LB 1
+tags:
+- wurzeln
+- irrationale_zahlen
+- reelle_zahlen
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

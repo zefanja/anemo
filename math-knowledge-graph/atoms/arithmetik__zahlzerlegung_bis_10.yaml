@@ -1,0 +1,35 @@
+id: arithmetik__zahlzerlegung_bis_10
+label: Zahlzerlegungen bis 10 (Teil-Ganzes, Partnerzahlen der 10)
+description: Alle Zerlegungen der Zahlen bis 10 sicher abrufen, insbesondere die Partnerzahlen der 10;
+  Teil-Ganzes-Beziehung an Plättchen, Fingern und Zahlenhäusern.
+domain: arithmetik
+subdomain: Operationsverständnis
+level: atom
+granularity: 5
+schulformen:
+- GS
+jahrgangsstufen:
+- 1
+weight:
+  mastery_required: 0.98
+  curriculum_centrality: 1.0
+  transfer_value: 0.95
+  cognitive_load: 0.35
+prerequisites:
+- id: arithmetik__zahlverstaendnis_bis_20
+  type: required
+  mastery_level_needed: 0.85
+lehrplan_ref:
+- schulform: GS
+  dokument: lp_gs_mathematik_2025_kommentiert.pdf
+  abschnitt: Kl. 1/2, LB 2 Zahl und Operation
+related:
+- id: arithmetik__addition_subtraktion_bis_20
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms arithmetik__addition_subtraktion_bis_20
+tags:
+- zahlzerlegung
+- teil_ganzes
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

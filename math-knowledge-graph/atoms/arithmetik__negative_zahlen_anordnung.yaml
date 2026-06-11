@@ -1,0 +1,45 @@
+id: arithmetik__negative_zahlen_anordnung
+label: 'Negative Zahlen: Zahlengerade, Anordnung, Betrag'
+description: Erweiterung des Zahlbereichs auf rationale Zahlen; Veranschaulichung an der Zahlengeraden;
+  Gegenzahl, Betrag, Vergleichen und Ordnen.
+domain: arithmetik
+subdomain: Rationale Zahlen
+level: cluster
+granularity: 4
+schulformen:
+- GY
+jahrgangsstufen:
+- 7
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.9
+  transfer_value: 0.95
+  cognitive_load: 0.55
+prerequisites:
+- id: arithmetik__dezimalzahlen_stellenwert
+  type: required
+  mastery_level_needed: 0.8
+- id: arithmetik__rechnen_mit_gebrochenen_zahlen
+  type: helpful
+  mastery_level_needed: 0.7
+- id: arithmetik__negative_zahlen_zahlengerade
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: arithmetik__betrag_gegenzahl
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 7, LB 2
+tags:
+- negative_zahlen
+- betrag
+- zahlengerade
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 2

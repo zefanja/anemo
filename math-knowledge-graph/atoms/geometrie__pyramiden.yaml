@@ -1,0 +1,36 @@
+id: geometrie__pyramiden
+label: Pyramiden darstellen und berechnen
+description: Pyramiden darstellen (Netz, Schrägbild) und berechnen (Kl. 7); Oberflächeninhalt und Volumen
+  unter Einsatz von Pythagoras und Trigonometrie (Kl. 9).
+domain: geometrie
+subdomain: Körperberechnung
+level: atom
+granularity: 4
+schulformen:
+- GY
+jahrgangsstufen:
+- 7
+- 9
+weight:
+  mastery_required: 0.75
+  curriculum_centrality: 0.7
+  transfer_value: 0.7
+  cognitive_load: 0.65
+prerequisites:
+- id: geometrie__prismen
+  type: required
+  mastery_level_needed: 0.75
+- id: geometrie__satz_des_pythagoras
+  type: deepens
+  mastery_level_needed: 0.75
+  note: Körperhöhen und Seitenhöhen werden ab Kl. 9 über Pythagoras berechnet.
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 7, LB 3 und Kl. 9, LB 3
+tags:
+- pyramide
+- volumen
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

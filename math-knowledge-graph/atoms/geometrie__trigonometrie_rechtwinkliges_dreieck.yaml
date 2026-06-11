@@ -1,0 +1,39 @@
+id: geometrie__trigonometrie_rechtwinkliges_dreieck
+label: Sinus, Kosinus und Tangens im rechtwinkligen Dreieck
+description: Seitenverhältnisse im rechtwinkligen Dreieck; Berechnen von Streckenlängen, Winkelgrößen
+  und Flächeninhalten (auch im regelmäßigen n-Eck); Beschränkung auf Gradmaß.
+domain: geometrie
+subdomain: Trigonometrie
+level: atom
+granularity: 4
+schulformen:
+- GY
+jahrgangsstufen:
+- 9
+weight:
+  mastery_required: 0.9
+  curriculum_centrality: 0.9
+  transfer_value: 0.95
+  cognitive_load: 0.7
+prerequisites:
+- id: geometrie__satz_des_pythagoras
+  type: required
+  mastery_level_needed: 0.8
+- id: geometrie__zentrische_streckung_aehnlichkeit
+  type: required
+  mastery_level_needed: 0.75
+  note: Dass die Seitenverhältnisse nur vom Winkel abhängen, folgt aus der Ähnlichkeit.
+- id: arithmetik__brueche_multiplizieren_dividieren
+  type: required
+  mastery_level_needed: 0.8
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 9, LB 3
+tags:
+- sinus
+- kosinus
+- tangens
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

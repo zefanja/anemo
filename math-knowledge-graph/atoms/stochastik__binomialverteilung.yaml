@@ -1,0 +1,37 @@
+id: stochastik__binomialverteilung
+label: Bernoulli-Ketten und Binomialverteilung
+description: Bernoulli-Experiment und -Kette; Einzel- und kumulierte Wahrscheinlichkeiten (auch mit Summenzeichen);
+  Erwartungswert, Varianz und Standardabweichung binomialverteilter Zufallsgrößen.
+domain: stochastik
+subdomain: Zufallsgrößen
+level: atom
+granularity: 4
+schulformen:
+- GY
+jahrgangsstufen:
+- 12
+weight:
+  mastery_required: 0.9
+  curriculum_centrality: 0.9
+  transfer_value: 0.8
+  cognitive_load: 0.75
+prerequisites:
+- id: stochastik__zufallsgroessen_erwartungswert
+  type: required
+  mastery_level_needed: 0.85
+- id: stochastik__kombinatorik_abzaehlverfahren
+  type: required
+  mastery_level_needed: 0.8
+- id: algebra__potenzgesetze
+  type: required
+  mastery_level_needed: 0.75
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Jg. 11/12 GK, LB 4
+tags:
+- binomialverteilung
+- bernoulli
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

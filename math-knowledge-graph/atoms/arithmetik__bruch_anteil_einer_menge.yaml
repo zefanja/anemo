@@ -1,0 +1,40 @@
+id: arithmetik__bruch_anteil_einer_menge
+label: Bruch als Anteil einer Menge (3/4 von 20)
+description: 'Anteile von Mengen und Größen bestimmen: durch den Nenner teilen, mit dem Zähler vervielfachen.'
+domain: arithmetik
+subdomain: Bruchrechnung
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 5
+weight:
+  mastery_required: 0.9
+  curriculum_centrality: 0.9
+  transfer_value: 0.9
+  cognitive_load: 0.55
+prerequisites:
+- id: arithmetik__bruch_anteil_eines_ganzen
+  type: required
+  mastery_level_needed: 0.85
+- id: arithmetik__division_grundverstaendnis
+  type: required
+  mastery_level_needed: 0.85
+- id: arithmetik__einmaleins
+  type: required
+  mastery_level_needed: 0.9
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 5, LB 2
+related:
+- id: arithmetik__bruchbegriff
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms arithmetik__bruchbegriff
+tags:
+- anteil
+- von_aufgaben
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

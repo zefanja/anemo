@@ -1,0 +1,41 @@
+id: algebra__quadratische_gleichungen
+label: Quadratische Gleichungen lösen (Lösungsformel, Faktorisieren)
+description: Nullstellen quadratischer Funktionen grafisch und rechnerisch ermitteln; Lösungsformel mit
+  vollständiger Fallunterscheidung der Lösungsanzahl; Lösen durch Faktorisieren bei überschaubarem Zahlenmaterial.
+domain: algebra
+subdomain: Gleichungen
+level: atom
+granularity: 4
+schulformen:
+- GY
+jahrgangsstufen:
+- 9
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.95
+  transfer_value: 0.95
+  cognitive_load: 0.7
+prerequisites:
+- id: algebra__quadratische_funktionen
+  type: required
+  mastery_level_needed: 0.8
+- id: algebra__binomische_formeln
+  type: required
+  mastery_level_needed: 0.8
+- id: algebra__wurzeln_reelle_zahlen
+  type: required
+  mastery_level_needed: 0.8
+- id: algebra__lineare_gleichungen
+  type: required
+  mastery_level_needed: 0.85
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 9, LB 1
+tags:
+- quadratische_gleichungen
+- lösungsformel
+- nullstellen
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

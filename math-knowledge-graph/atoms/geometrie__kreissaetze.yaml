@@ -1,0 +1,37 @@
+id: geometrie__kreissaetze
+label: Sätze am Kreis (Thales, Peripherie-/Zentriwinkel, Sehnenviereck)
+description: Satz des Thales, Peripheriewinkelsatz, Zentri-Peripheriewinkelsatz, Satz über Gegenwinkel
+  im Sehnenviereck; Struktur von Sätzen und direkter Beweis.
+domain: geometrie
+subdomain: Kreis
+level: atom
+granularity: 4
+schulformen:
+- GY
+jahrgangsstufen:
+- 7
+weight:
+  mastery_required: 0.6
+  curriculum_centrality: 0.6
+  transfer_value: 0.6
+  cognitive_load: 0.7
+prerequisites:
+- id: geometrie__innenwinkelsatz_dreieck
+  type: required
+  mastery_level_needed: 0.8
+- id: geometrie__besondere_linien_dreieck
+  type: helpful
+  mastery_level_needed: 0.6
+- id: logik__saetze_und_beweise
+  type: required
+  mastery_level_needed: 0.7
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 7, LB 1
+tags:
+- thales
+- kreissätze
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

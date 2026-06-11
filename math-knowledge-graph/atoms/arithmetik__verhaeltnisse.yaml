@@ -1,0 +1,38 @@
+id: arithmetik__verhaeltnisse
+label: 'Verhältnisse (a : b) und Verhältnisaufgaben'
+description: 'Verhältnisse in der Form a : b deuten, vereinfachen und in Sachsituationen anwenden (Mischungs-
+  und Aufteilungsaufgaben, Maßstab); Verbindung zu Bruch und Anteil.'
+domain: arithmetik
+subdomain: Verhältnisse
+level: atom
+granularity: 4
+schulformen:
+- GY
+jahrgangsstufen:
+- 6
+- 7
+weight:
+  mastery_required: 0.85
+  curriculum_centrality: 0.6
+  transfer_value: 0.85
+  cognitive_load: 0.55
+prerequisites:
+- id: arithmetik__kuerzen
+  type: required
+  mastery_level_needed: 0.8
+- id: arithmetik__bruchbegriff
+  type: required
+  mastery_level_needed: 0.8
+related:
+- id: algebra__proportionalitaet_dreisatz
+  relation: commonly_confused_with
+  note: Verhältnis (Teil:Teil) wird häufig mit Anteil (Teil:Ganzes) verwechselt.
+tags:
+- verhältnisse
+- internationale_ergaenzung
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1
+notes: 'Ergänzung über den sächsischen Lehrplan hinaus: eigener Lernbereich in internationalen Curricula
+  (Common Core 6.RP, England KS2 Jahr 6, Singapur Primary). Im sächsischen LP nur implizit über Maßstab
+  und Zuordnungen enthalten.'

@@ -1,0 +1,55 @@
+id: arithmetik__bruchbegriff
+label: 'Bruchbegriff: Anteile erkennen und darstellen'
+description: Brüche als Anteile (auch von Größen und Mengen, z. B. 2/3 von 27); Darstellung an Figuren,
+  Körpern und am Zahlenstrahl; echte und unechte Brüche.
+domain: arithmetik
+subdomain: Bruchrechnung
+level: cluster
+granularity: 4
+schulformen:
+- GY
+jahrgangsstufen:
+- 5
+weight:
+  mastery_required: 1.0
+  curriculum_centrality: 0.95
+  transfer_value: 1.0
+  cognitive_load: 0.6
+prerequisites:
+- id: arithmetik__bruchteile_im_alltag
+  type: required
+  mastery_level_needed: 0.7
+- id: arithmetik__division_grundverstaendnis
+  type: required
+  mastery_level_needed: 0.85
+- id: arithmetik__bruch_anteil_eines_ganzen
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: arithmetik__bruch_anteil_einer_menge
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: arithmetik__brueche_am_zahlenstrahl
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: arithmetik__gemischte_zahlen_unechte_brueche
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 5, LB 2
+tags:
+- brüche
+- anteile
+- zahlenstrahl
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 2

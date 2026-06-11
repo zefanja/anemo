@@ -1,0 +1,37 @@
+id: geometrie__einheiten_umrechnen
+label: Einheiten für Länge, Flächeninhalt und Volumen umrechnen
+description: Umrechnungszahlen 10, 100, 1000 zwischen Längen-, Flächen- und Volumeneinheiten verstehen
+  (Quadrat-/Kubikstruktur) und sicher anwenden.
+domain: geometrie
+subdomain: Messen
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 5
+weight:
+  mastery_required: 0.9
+  curriculum_centrality: 0.8
+  transfer_value: 0.9
+  cognitive_load: 0.55
+prerequisites:
+- id: arithmetik__groessen_geld_laenge_zeit
+  type: required
+  mastery_level_needed: 0.75
+- id: geometrie__rechteck_flaeche_umfang
+  type: required
+  mastery_level_needed: 0.75
+- id: arithmetik__dezimalzahlen_stellenwert
+  type: required
+  mastery_level_needed: 0.75
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 5, LB 4
+tags:
+- einheiten
+- umrechnen
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

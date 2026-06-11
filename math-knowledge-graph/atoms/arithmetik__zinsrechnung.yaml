@@ -1,0 +1,35 @@
+id: arithmetik__zinsrechnung
+label: Zinsrechnung (auch Zinseszins, Kredit und Tilgung)
+description: Zinsen ohne und mit Zinseszins berechnen (auch mit Tabellenkalkulation); Kredit und Tilgung
+  als Anwendungskontext.
+domain: arithmetik
+subdomain: Prozentrechnung
+level: atom
+granularity: 4
+schulformen:
+- GY
+jahrgangsstufen:
+- 10
+weight:
+  mastery_required: 0.7
+  curriculum_centrality: 0.6
+  transfer_value: 0.5
+  cognitive_load: 0.55
+prerequisites:
+- id: arithmetik__prozentrechnung
+  type: required
+  mastery_level_needed: 0.85
+- id: algebra__exponentialfunktionen
+  type: helpful
+  mastery_level_needed: 0.7
+  note: Zinseszins ist exponentielles Wachstum.
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 10, LB 5
+tags:
+- zinsen
+- zinseszins
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

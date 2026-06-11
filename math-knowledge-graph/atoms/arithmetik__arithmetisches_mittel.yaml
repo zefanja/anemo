@@ -1,0 +1,34 @@
+id: arithmetik__arithmetisches_mittel
+label: Arithmetisches Mittel
+description: Durchschnitt als gleichmäßiges Verteilen einer Gesamtsumme; Berechnen und Interpretieren
+  des arithmetischen Mittels.
+domain: arithmetik
+subdomain: Daten
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 5
+weight:
+  mastery_required: 0.8
+  curriculum_centrality: 0.6
+  transfer_value: 0.8
+  cognitive_load: 0.35
+prerequisites:
+- id: arithmetik__dezimalzahlen_addieren_subtrahieren
+  type: required
+  mastery_level_needed: 0.75
+- id: arithmetik__schriftliche_division
+  type: required
+  mastery_level_needed: 0.75
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 5, LB 2
+tags:
+- mittelwert
+- durchschnitt
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

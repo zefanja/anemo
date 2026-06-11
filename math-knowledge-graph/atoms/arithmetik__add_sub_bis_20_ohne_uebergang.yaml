@@ -1,0 +1,40 @@
+id: arithmetik__add_sub_bis_20_ohne_uebergang
+label: Addition/Subtraktion bis 20 ohne Zehnerübergang
+description: Aufgaben wie 12+5 oder 18−6 unter Nutzung der Analogie zu Aufgaben bis 10 lösen (Kraft der
+  Zehn).
+domain: arithmetik
+subdomain: Operationsverständnis
+level: atom
+granularity: 5
+schulformen:
+- GS
+jahrgangsstufen:
+- 1
+- 2
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.9
+  transfer_value: 0.9
+  cognitive_load: 0.35
+prerequisites:
+- id: arithmetik__addition_subtraktion_bis_10
+  type: required
+  mastery_level_needed: 0.9
+- id: arithmetik__zahlverstaendnis_bis_20
+  type: required
+  mastery_level_needed: 0.85
+lehrplan_ref:
+- schulform: GS
+  dokument: lp_gs_mathematik_2025_kommentiert.pdf
+  abschnitt: Kl. 1/2, LB 2 Zahl und Operation
+related:
+- id: arithmetik__addition_subtraktion_bis_20
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms arithmetik__addition_subtraktion_bis_20
+tags:
+- addition
+- subtraktion
+- zahlenraum_20
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

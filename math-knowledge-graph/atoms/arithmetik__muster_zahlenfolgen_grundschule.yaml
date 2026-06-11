@@ -1,0 +1,41 @@
+id: arithmetik__muster_zahlenfolgen_grundschule
+label: Arithmetische Muster und Zahlenfolgen (Grundschule)
+description: Arithmetische Muster und Zahlenfolgen erkennen, beschreiben und fortsetzen; strukturierte
+  Aufgabenformate wie Zahlenmauern, Zahlenketten und Rechendreiecke nutzen.
+domain: arithmetik
+subdomain: Muster und Strukturen
+level: atom
+granularity: 4
+schulformen:
+- GS
+jahrgangsstufen:
+- 2
+- 3
+- 4
+weight:
+  mastery_required: 0.85
+  curriculum_centrality: 0.8
+  transfer_value: 0.85
+  cognitive_load: 0.5
+prerequisites:
+- id: arithmetik__addition_subtraktion_bis_100
+  type: required
+  mastery_level_needed: 0.8
+- id: arithmetik__einmaleins
+  type: helpful
+  mastery_level_needed: 0.7
+lehrplan_ref:
+- schulform: GS
+  dokument: lp_gs_mathematik_2025_kommentiert.pdf
+  abschnitt: Klassenstufe 3, LB 2 / Leitidee Muster, Strukturen und funktionaler Zusammenhang
+related:
+- id: algebra__zahlenfolgen
+  relation: special_case_of
+  note: Vorläufer der systematischen Behandlung von Zahlenfolgen in Kl. 10
+tags:
+- muster
+- zahlenfolgen
+- zahlenmauern
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

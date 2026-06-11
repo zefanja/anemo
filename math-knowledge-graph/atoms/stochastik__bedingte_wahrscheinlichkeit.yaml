@@ -1,0 +1,35 @@
+id: stochastik__bedingte_wahrscheinlichkeit
+label: Vierfeldertafel, bedingte Wahrscheinlichkeit, Satz von Bayes, Unabhängigkeit
+description: Vierfeldertafel und Baumdiagramm verknüpfen; bedingte Wahrscheinlichkeiten; anschauliche
+  Deutung des Satzes von Bayes; stochastische Unabhängigkeit von Ereignissen.
+domain: stochastik
+subdomain: Wahrscheinlichkeit
+level: atom
+granularity: 4
+schulformen:
+- GY
+jahrgangsstufen:
+- 12
+weight:
+  mastery_required: 0.8
+  curriculum_centrality: 0.8
+  transfer_value: 0.75
+  cognitive_load: 0.8
+prerequisites:
+- id: stochastik__mehrstufige_zufallsversuche
+  type: required
+  mastery_level_needed: 0.85
+- id: arithmetik__prozentrechnung
+  type: required
+  mastery_level_needed: 0.8
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Jg. 11/12 GK, LB 4
+tags:
+- bayes
+- vierfeldertafel
+- unabhängigkeit
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

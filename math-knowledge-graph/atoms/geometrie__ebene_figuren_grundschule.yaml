@@ -1,0 +1,34 @@
+id: geometrie__ebene_figuren_grundschule
+label: Ebene Figuren erkennen, beschreiben, zeichnen
+description: Kreis, Dreieck, Viereck, Rechteck, Quadrat erkennen, beschreiben und zeichnen; Eigenschaften
+  vergleichen; Klassifikation von Vierecken (Kl. 4).
+domain: geometrie
+subdomain: Ebene Figuren
+level: atom
+granularity: 4
+schulformen:
+- GS
+jahrgangsstufen:
+- 1
+- 2
+- 3
+weight:
+  mastery_required: 0.85
+  curriculum_centrality: 0.85
+  transfer_value: 0.9
+  cognitive_load: 0.35
+prerequisites:
+- id: geometrie__lagebeziehungen_lineare_figuren
+  type: required
+  mastery_level_needed: 0.75
+lehrplan_ref:
+- schulform: GS
+  dokument: lp_gs_mathematik_2025_kommentiert.pdf
+  abschnitt: Kl. 1/2 bis Kl. 4, LB 1 Raum und Form
+tags:
+- ebene_figuren
+- rechteck
+- quadrat
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

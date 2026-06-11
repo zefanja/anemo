@@ -1,0 +1,36 @@
+id: algebra__terme_umformen
+label: 'Terme umformen: zusammenfassen, ausmultiplizieren, ausklammern'
+description: Gleichartige Terme zusammenfassen; Klammern ausmultiplizieren; Ausklammern als Umkehrung;
+  Anwendung des Distributivgesetzes auf Variablenterme.
+domain: algebra
+subdomain: Terme
+level: atom
+granularity: 4
+schulformen:
+- GY
+jahrgangsstufen:
+- 8
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.95
+  transfer_value: 1.0
+  cognitive_load: 0.7
+prerequisites:
+- id: algebra__variablen_terme
+  type: required
+  mastery_level_needed: 0.85
+- id: arithmetik__rationale_zahlen_multiplizieren_dividieren
+  type: required
+  mastery_level_needed: 0.85
+  note: Vorzeichenfehler sind die Hauptfehlerquelle beim Termumformen.
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 8, LB 1
+tags:
+- terme
+- ausmultiplizieren
+- ausklammern
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

@@ -1,0 +1,40 @@
+id: analysis__ableitungsregeln
+label: Ableitungsregeln (Potenz-, Faktor-, Summenregel; e^x, ln x, sin x)
+description: Hilfsmittelfreies Ableiten ganzrationaler Funktionen und von Potenzfunktionen mit rationalen
+  Exponenten sowie von e^x, ln x und sin x.
+domain: analysis
+subdomain: Differentialrechnung
+level: atom
+granularity: 4
+schulformen:
+- GY
+jahrgangsstufen:
+- 11
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.95
+  transfer_value: 0.95
+  cognitive_load: 0.7
+prerequisites:
+- id: analysis__ableitungsbegriff
+  type: required
+  mastery_level_needed: 0.85
+- id: algebra__potenzgesetze
+  type: required
+  mastery_level_needed: 0.85
+- id: algebra__logarithmus
+  type: required
+  mastery_level_needed: 0.75
+- id: algebra__sinusfunktion
+  type: required
+  mastery_level_needed: 0.7
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Jg. 11/12 GK, LB 1
+tags:
+- ableitungsregeln
+- potenzregel
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

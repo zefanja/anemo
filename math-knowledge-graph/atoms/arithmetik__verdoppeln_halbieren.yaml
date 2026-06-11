@@ -1,0 +1,33 @@
+id: arithmetik__verdoppeln_halbieren
+label: Verdoppeln und Halbieren
+description: Das Doppelte und die Hälfte von Zahlen bestimmen; zentrale Rechenstrategie (Verdopplungsaufgaben,
+  Fast-Verdopplung) und Vorläufer der 2er-Einmaleinsreihe.
+domain: arithmetik
+subdomain: Rechenstrategien
+level: atom
+granularity: 5
+schulformen:
+- GS
+jahrgangsstufen:
+- 1
+- 2
+- 3
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.9
+  transfer_value: 0.9
+  cognitive_load: 0.35
+prerequisites:
+- id: arithmetik__addition_subtraktion_bis_20
+  type: required
+  mastery_level_needed: 0.8
+lehrplan_ref:
+- schulform: GS
+  dokument: lp_gs_mathematik_2025_kommentiert.pdf
+  abschnitt: Klassenstufe 3, LB 2 Zahl und Operation (das Doppelte, die Hälfte)
+tags:
+- verdoppeln
+- halbieren
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

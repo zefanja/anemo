@@ -1,0 +1,31 @@
+id: arithmetik__stellenwert_bis_1000000
+label: Zahlenraum bis 1 000 000 und darüber hinaus
+description: Große Zahlen lesen, schreiben, darstellen; Orientierung über Zehnerpotenz-Schritte; Stellenübergänge
+  bei 1 000, 10 000, ...
+domain: arithmetik
+subdomain: Stellenwertsystem
+level: atom
+granularity: 4
+schulformen:
+- GS
+jahrgangsstufen:
+- 4
+weight:
+  mastery_required: 0.9
+  curriculum_centrality: 0.9
+  transfer_value: 0.9
+  cognitive_load: 0.4
+prerequisites:
+- id: arithmetik__stellenwert_bis_1000
+  type: required
+  mastery_level_needed: 0.9
+lehrplan_ref:
+- schulform: GS
+  dokument: lp_gs_mathematik_2025_kommentiert.pdf
+  abschnitt: Kl. 4, LB 2 Zahl und Operation
+tags:
+- stellenwert
+- große_zahlen
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1
