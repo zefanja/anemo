@@ -1,6 +1,6 @@
 import { fail, redirect } from '@sveltejs/kit';
 import { db } from '$lib/server/db/index.js';
-import { verifyCode } from '$lib/server/auth/codes.js';
+import { hashCode } from '$lib/server/auth/codes.js';
 import { createSession } from '$lib/server/auth/session.js';
 import { checkRateLimit, recordFailedAttempt, clearAttempts } from '$lib/server/auth/rate-limit.js';
 import { students } from '$lib/server/db/schema.js';
@@ -30,14 +30,10 @@ export const actions: Actions = {
 			return fail(429, { error: `Zu viele Versuche. Bitte ${mins} Minute(n) warten.` });
 		}
 
-		// Verify code against all students.
-		// School stays small enough that sequential argon2 verify is acceptable.
-		// If it grows: add a code prefix index to narrow candidates first.
-		const allStudents = await db.query.students.findMany();
-		let matched: typeof allStudents[0] | null = null;
-		for (const s of allStudents) {
-			if (await verifyCode(code, s.codeHash)) { matched = s; break; }
-		}
+		const codeHash = await hashCode(code);
+		const matched = await db.query.students.findFirst({
+			where: (s, { eq }) => eq(s.codeHash, codeHash)
+		});
 
 		if (!matched) {
 			await recordFailedAttempt(ip);

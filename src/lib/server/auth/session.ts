@@ -70,7 +70,7 @@ export async function resolveSession(event: RequestEvent): Promise<App.Locals['s
 			where: (t, { eq }) => eq(t.id, rows.teacherId!)
 		});
 		if (!teacher) return null;
-		return { type: 'teacher', teacherId: teacher.id, teacherEmail: teacher.email };
+		return { type: 'teacher', teacherId: teacher.id, teacherEmail: teacher.email, isAdmin: teacher.isAdmin };
 	}
 
 	return null;

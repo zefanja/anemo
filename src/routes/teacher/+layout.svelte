@@ -45,6 +45,15 @@
 				>
 					Einstellungen
 				</a>
+				{#if data.isAdmin}
+					<a
+						href="/teacher/admin/teachers"
+						class="t-nav-link"
+						class:active={path.startsWith('/teacher/admin')}
+					>
+						Verwaltung
+					</a>
+				{/if}
 			</nav>
 			<div class="t-user">
 				<span class="t-email">{data.teacherEmail}</span>

@@ -11,7 +11,7 @@ import postgres from 'postgres';
 import * as schema from '../src/lib/server/db/schema.js';
 import { eq } from 'drizzle-orm';
 import { config } from 'dotenv';
-import argon2 from 'argon2';
+import bcrypt from 'bcryptjs';
 import { randomBytes } from 'node:crypto';
 import { execSync } from 'node:child_process';
 
@@ -62,7 +62,7 @@ async function seed() {
 	});
 	if (!teacher) {
 		const id = makeId();
-		const passwordHash = await argon2.hash(teacherPassword);
+		const passwordHash = await bcrypt.hash(teacherPassword, 12);
 		await db.insert(schema.teachers).values({
 			id,
 			schoolId: school.id,
@@ -110,7 +110,7 @@ async function seed() {
 		}
 
 		const code = generateCode();
-		const codeHash = await argon2.hash(code);
+		const codeHash = await bcrypt.hash(code, 10);
 		await db.insert(schema.students).values({
 			id: makeId(),
 			classId: cls.id,

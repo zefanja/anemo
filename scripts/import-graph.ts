@@ -137,6 +137,20 @@ function validateAcyclicity(atoms: RawAtom[], edges: RawEdge[]): void {
 const BATCH = 50;
 
 async function importGraph(): Promise<void> {
+	const forceUpdate = process.argv.includes('--update');
+
+	const client = postgres(process.env.DATABASE_URL!);
+	const db = drizzle(client, { schema });
+
+	if (!forceUpdate) {
+		const existing = await db.query.atoms.findFirst();
+		if (existing) {
+			console.log('Graph already in DB – skipping. Use --update to force re-import.');
+			await client.end();
+			return;
+		}
+	}
+
 	console.log('Parsing atoms...');
 	const atoms = parseAtoms();
 	console.log(`  Found ${atoms.length} atoms`);
@@ -152,9 +166,6 @@ async function importGraph(): Promise<void> {
 	console.log('Validating acyclicity...');
 	validateAcyclicity(atoms, edges);
 	console.log('  ✓ OK');
-
-	const client = postgres(process.env.DATABASE_URL!);
-	const db = drizzle(client, { schema });
 
 	// ── Atoms: upsert, but only overwrite if incoming version > stored version ──
 	console.log('Importing atoms...');

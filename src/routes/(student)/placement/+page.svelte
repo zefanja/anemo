@@ -77,10 +77,20 @@
 		}
 	});
 
+	let errorMessage = $state('Fehler beim Laden. Bitte Seite neu laden.');
+
 	async function start() {
 		phase = 'loading';
 		const res = await fetch('/api/placement/start');
-		if (!res.ok) { phase = 'error'; return; }
+		if (!res.ok) {
+			if (res.status === 503) {
+				errorMessage = 'Die App ist noch nicht vollständig eingerichtet. Bitte wende dich an deine Lehrerin / deinen Lehrer.';
+			} else {
+				errorMessage = 'Fehler beim Laden. Bitte Seite neu laden.';
+			}
+			phase = 'error';
+			return;
+		}
 		const data = await res.json();
 		if (data.alreadyDone) { goto('/practice'); return; }
 		if (data.complete) {
@@ -203,13 +213,13 @@
 		{:else if phase === 'error'}
 			<div class="center-state">
 				<div class="error-icon">!</div>
-				<p>Fehler beim Laden. Bitte Seite neu laden.</p>
+				<p>{errorMessage}</p>
 				<button class="btn btn-primary" onclick={start}>Neu laden</button>
 			</div>
 
 		{:else if phase === 'complete' && summary}
 			<div class="summary-card">
-				<div class="summary-icon">🎯</div>
+				<img src="/mascot.png" alt="" class="mascot-img" aria-hidden="true" />
 				<h2>Diagnose abgeschlossen</h2>
 				<p class="summary-sub">
 					Wir haben <strong>{summary.testedPassed + summary.assumedMastered} Atome</strong> als
@@ -504,7 +514,11 @@
 		gap: 1rem;
 		text-align: center;
 	}
-	.summary-icon { font-size: 3rem; }
+	.mascot-img {
+		width: 130px;
+		height: auto;
+		filter: drop-shadow(0 4px 12px rgba(79, 70, 229, 0.15));
+	}
 	.summary-card h2 { font-size: 1.4rem; font-weight: 700; }
 	.summary-sub { font-size: 1rem; color: var(--c-gray-700); }
 	.summary-stats {

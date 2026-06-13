@@ -96,6 +96,7 @@ export const teachers = pgTable('teachers', {
 	email: text('email').notNull(),
 	passwordHash: text('password_hash').notNull(),
 	name: text('name'),
+	isAdmin: boolean('is_admin').notNull().default(false),
 	createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow()
 });
 
@@ -139,7 +140,7 @@ export const students = pgTable(
 		lastActiveAt: timestamp('last_active_at', { withTimezone: true }),
 		placementDone: boolean('placement_done').notNull().default(false)
 	},
-	(t) => [index('students_class_idx').on(t.classId)]
+	(t) => [index('students_class_idx').on(t.classId), uniqueIndex('students_code_hash_idx').on(t.codeHash)]
 );
 
 // rate limiting: failed login attempts per identifier (IP or student-id)

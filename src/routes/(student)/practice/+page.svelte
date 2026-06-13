@@ -251,7 +251,7 @@
 	{#if reviewsDoneScreen}
 		<div class="screen-center">
 			<div class="celebration">
-				<div class="celebration-icon">✅</div>
+				<img src="/mascot.png" alt="" class="mascot-img" aria-hidden="true" />
 				<h2>Wiederholungen erledigt!</h2>
 				<p>Alle {reviews.length} Wiederholungsaufgaben abgeschlossen.</p>
 				{#if data.plan.frontierItems.length > 0}
@@ -275,7 +275,7 @@
 			{#if availableItems.length === 0}
 				<div class="screen-center">
 					<div class="empty-state">
-						<div class="empty-icon">🎉</div>
+						<img src="/mascot.png" alt="" class="mascot-img" aria-hidden="true" />
 						<h3>Super gemacht!</h3>
 						<p>Alle verfügbaren Atome gemeistert. Schau in deinen Fortschritt!</p>
 						<a href="/progress" class="btn btn-primary">Zum Fortschritt</a>
@@ -353,7 +353,10 @@
 					{/if}
 
 					{#if lastResult.levelUp}
-						<div class="level-up">🎉 Level {lastResult.newLevel} erreicht – weiter so!</div>
+						<div class="level-up">
+							<img src="/mascot.png" alt="" class="mascot-inline" aria-hidden="true" />
+							Level {lastResult.newLevel} erreicht – weiter so!
+						</div>
 					{/if}
 
 					{#if lastResult.justMastered}
@@ -497,8 +500,12 @@
 		align-items: center;
 		gap: 1rem;
 	}
-	.celebration-icon { font-size: 4rem; }
 	.celebration h2 { font-size: 1.5rem; font-weight: 700; }
+	.mascot-img {
+		width: 140px;
+		height: auto;
+		filter: drop-shadow(0 4px 12px rgba(79, 70, 229, 0.15));
+	}
 
 	/* ── Selection page ── */
 	.selection-page {
@@ -580,7 +587,12 @@
 		align-items: center;
 		gap: 1rem;
 	}
-	.empty-icon { font-size: 3rem; }
+	.mascot-inline {
+		width: 48px;
+		height: auto;
+		vertical-align: middle;
+		margin-right: 0.35rem;
+	}
 
 	/* ── Review progress bar ── */
 	.review-progress-bar {

@@ -11,6 +11,7 @@ export const load: LayoutServerLoad = ({ locals, url }) => {
 	}
 	return {
 		teacherId: locals.session.teacherId,
-		teacherEmail: locals.session.teacherEmail
+		teacherEmail: locals.session.teacherEmail,
+		isAdmin: locals.session.isAdmin
 	};
 };

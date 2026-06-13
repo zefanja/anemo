@@ -7,7 +7,7 @@ declare global {
 		interface Locals {
 			session:
 				| { type: 'student'; studentId: string; studentName: string; classId: string }
-				| { type: 'teacher'; teacherId: string; teacherEmail: string }
+				| { type: 'teacher'; teacherId: string; teacherEmail: string; isAdmin: boolean }
 				| null;
 		}
 		interface PageData {}

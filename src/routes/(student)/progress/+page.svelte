@@ -1,7 +1,23 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
+
+	let showConfirm = $state(false);
+	let resetting = $state(false);
+
+	async function resetProgress() {
+		resetting = true;
+		try {
+			const res = await fetch('/api/reset-progress', { method: 'POST' });
+			if (!res.ok) throw new Error();
+			goto('/placement');
+		} catch {
+			resetting = false;
+			alert('Fehler beim Zurücksetzen. Bitte versuche es erneut.');
+		}
+	}
 
 	const BADGE_LABELS: Record<string, string> = {
 		first_atom: '🏅 Erstes Atom',
@@ -242,6 +258,27 @@
 	{/if}
 
 	<div style="height: 1.5rem"></div>
+
+	<!-- ── Reset progress ── -->
+	<div class="reset-section">
+		{#if !showConfirm}
+			<button class="reset-btn" onclick={() => showConfirm = true}>
+				Lernfortschritt zurücksetzen
+			</button>
+		{:else}
+			<div class="confirm-box">
+				<p class="confirm-text">Wirklich alles zurücksetzen? XP, Abzeichen und Lernfortschritt werden gelöscht und der Einstufungstest startet neu.</p>
+				<div class="confirm-actions">
+					<button class="cancel-btn" onclick={() => showConfirm = false} disabled={resetting}>Abbrechen</button>
+					<button class="confirm-reset-btn" onclick={resetProgress} disabled={resetting}>
+						{resetting ? 'Wird zurückgesetzt…' : 'Ja, zurücksetzen'}
+					</button>
+				</div>
+			</div>
+		{/if}
+	</div>
+
+	<div style="height: 1rem"></div>
 </div>
 
 <style>
@@ -431,6 +468,63 @@
 		background: var(--c-primary);
 		border-radius: 999px;
 	}
+
+	/* ── Reset section ── */
+	.reset-section {
+		margin-top: 0.5rem;
+	}
+	.reset-btn {
+		width: 100%;
+		padding: 0.75rem 1rem;
+		background: none;
+		border: 1px solid var(--c-gray-300);
+		border-radius: var(--radius);
+		color: var(--c-gray-500);
+		font-size: 0.85rem;
+		cursor: pointer;
+		transition: border-color .15s, color .15s;
+	}
+	.reset-btn:hover {
+		border-color: var(--c-error);
+		color: var(--c-error);
+	}
+	.confirm-box {
+		background: #fff;
+		border: 1px solid var(--c-error);
+		border-radius: var(--radius);
+		padding: 1rem;
+	}
+	.confirm-text {
+		font-size: 0.875rem;
+		color: var(--c-gray-900);
+		margin: 0 0 0.75rem;
+	}
+	.confirm-actions {
+		display: flex;
+		gap: 0.5rem;
+		justify-content: flex-end;
+	}
+	.cancel-btn {
+		padding: 0.5rem 1rem;
+		background: none;
+		border: 1px solid var(--c-gray-300);
+		border-radius: var(--radius);
+		color: var(--c-gray-700);
+		font-size: 0.85rem;
+		cursor: pointer;
+	}
+	.cancel-btn:disabled { opacity: 0.5; cursor: default; }
+	.confirm-reset-btn {
+		padding: 0.5rem 1rem;
+		background: var(--c-error);
+		border: none;
+		border-radius: var(--radius);
+		color: #fff;
+		font-size: 0.85rem;
+		font-weight: 600;
+		cursor: pointer;
+	}
+	.confirm-reset-btn:disabled { opacity: 0.6; cursor: default; }
 
 	/* ── Heatmap ── */
 	.heatmap-card {

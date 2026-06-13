@@ -40,8 +40,7 @@
 <div class="login-wrap">
 	<div class="login-card">
 		<div class="logo">
-			<span class="logo-text">Anemo</span>
-			<span class="logo-sub">Mathe lernen</span>
+			<img src="/logo.png" alt="Anemo" class="logo-img" />
 		</div>
 
 		<h1>Dein Code</h1>
@@ -112,18 +111,9 @@
 		margin-bottom: 1.5rem;
 	}
 
-	.logo-text {
-		font-size: 2rem;
-		font-weight: 800;
-		color: #4f46e5;
-		letter-spacing: -0.03em;
-	}
-
-	.logo-sub {
-		font-size: 0.8rem;
-		color: #6b7280;
-		text-transform: uppercase;
-		letter-spacing: 0.1em;
+	.logo-img {
+		width: 180px;
+		height: auto;
 	}
 
 	h1 {

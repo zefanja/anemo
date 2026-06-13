@@ -1,13 +1,15 @@
-import argon2 from 'argon2';
+import bcrypt from 'bcryptjs';
 import { randomBytes } from 'node:crypto';
 
+const ROUNDS = 12;
+
 export async function hashPassword(password: string): Promise<string> {
-	return argon2.hash(password);
+	return bcrypt.hash(password, ROUNDS);
 }
 
 export async function verifyPassword(password: string, hash: string): Promise<boolean> {
 	try {
-		return await argon2.verify(hash, password);
+		return await bcrypt.compare(password, hash);
 	} catch {
 		return false;
 	}

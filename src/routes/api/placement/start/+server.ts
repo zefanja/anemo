@@ -23,6 +23,11 @@ export const GET: RequestHandler = async ({ locals }) => {
 	}
 
 	const graph = await loadPlacementGraph();
+
+	if (graph.atoms.size === 0) {
+		throw error(503, 'Keine Atome verfügbar – Wissensgraph wurde noch nicht importiert.');
+	}
+
 	const state = initPlacementState();
 	const atomId = getNextPlacementAtom(state, graph);
 
