@@ -29,7 +29,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 	// Resolve the task the student was shown
 	let correctAnswer = '';
-	let answerType: 'number' | 'integer' | 'fraction' | 'text' = 'number';
+	let answerType: 'number' | 'integer' | 'fraction' | 'text' | 'boolean' | 'comparison' = 'number';
 	let hint: string | null = null;
 
 	if (taskId) {
@@ -81,6 +81,9 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		taskId: nextTask.id,
 		prompt: nextTask.prompt,
 		answerType: nextTask.answerType,
+		choices: nextTask.choices ?? null,
+		svg: nextTask.svg ?? null,
+		inputData: nextTask.inputData ?? null,
 		nextHint: nextTask.hint ?? null,
 		state: newState
 	});

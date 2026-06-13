@@ -2,7 +2,10 @@
 	import { invalidate } from '$app/navigation';
 	import type { PageData } from './$types';
 	import FractionInput from '$lib/components/student/FractionInput.svelte';
+	import WrittenCalcInput from '$lib/components/student/WrittenCalcInput.svelte';
+	import NumberLineInput from '$lib/components/student/NumberLineInput.svelte';
 	import MathText from '$lib/components/student/MathText.svelte';
+	import AtomExplanation from '$lib/components/student/AtomExplanation.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -10,9 +13,13 @@
 		taskId: string;
 		atomId: string;
 		prompt: string;
-		answerType: 'integer' | 'number' | 'fraction' | 'text';
+		answerType: 'integer' | 'number' | 'fraction' | 'text' | 'boolean' | 'comparison';
+		choices: string[] | null;
+		svg: string | null;
+		inputData: Record<string, unknown> | null;
 		hint: string | null;
 		difficulty: number | null;
+		explanation: string | null;
 	};
 
 	type AttemptResult = {
@@ -49,21 +56,59 @@
 	let answer = $state('');
 	let isLoading = $state(false);
 	let isSubmitting = $state(false);
+	let recentPrompts: string[] = [];
 
 	// ── Input refs for auto-focus ──
 	let answerInput = $state<HTMLInputElement | null>(null);
 	let fractionInput = $state<{ focus: () => void } | null>(null);
+	let writtenCalcInput = $state<{ focus: () => void } | null>(null);
+	let numberLineInput = $state<{ focus: () => void } | null>(null);
+
+	const WRITTEN_ARITH_ATOMS = new Set([
+		'arithmetik__schriftliche_addition',
+		'arithmetik__schriftliche_subtraktion',
+		'arithmetik__schriftliche_multiplikation',
+		'arithmetik__schriftliche_division'
+	]);
+
+	function parseWrittenArith(prompt: string): { a: number; b: number; op: '+' | '-' | '×' | ':' } | null {
+		let m;
+		if ((m = prompt.match(/^(\d+)\s*\+\s*(\d+)/))) return { a: +m[1], b: +m[2], op: '+' };
+		if ((m = prompt.match(/^(\d+)\s*[−\-]\s*(\d+)/))) return { a: +m[1], b: +m[2], op: '-' };
+		if ((m = prompt.match(/^(\d+)\s*[·×]\s*(\d+)/))) return { a: +m[1], b: +m[2], op: '×' };
+		if ((m = prompt.match(/^(\d+)\s*:\s*(\d+)/))) return { a: +m[1], b: +m[2], op: ':' };
+		return null;
+	}
+
+	const writtenArith = $derived(
+		currentTask && WRITTEN_ARITH_ATOMS.has(currentTask.atomId)
+			? parseWrittenArith(currentTask.prompt)
+			: null
+	);
+
+	const isNumberLine = $derived(
+		currentTask?.atomId === 'arithmetik__brueche_am_zahlenstrahl' &&
+		!!currentTask?.inputData?.totalSections
+	);
 
 	$effect(() => {
 		if (currentTask && !showFeedback) {
-			// tick ensures the element is mounted before focusing
 			if (currentTask.answerType === 'fraction') {
 				fractionInput?.focus();
-			} else {
+			} else if (writtenArith) {
+				writtenCalcInput?.focus();
+			} else if (isNumberLine) {
+				numberLineInput?.focus();
+			} else if (!currentTask.choices && currentTask.answerType !== 'boolean' && currentTask.answerType !== 'comparison') {
 				answerInput?.focus();
 			}
 		}
 	});
+
+	// ── Explanation state ──
+	// Tracks atoms whose first-task explanation has already been shown this session
+	let seenAtomIds = $state(new Set<string>());
+	let showExplanationOnTask = $state(false);
 
 	// ── Feedback state ──
 	let showFeedback = $state(false);
@@ -80,15 +125,26 @@
 	});
 
 	async function loadTask(atomId: string) {
+		const isFirstForAtom = !seenAtomIds.has(atomId);
 		isLoading = true;
 		currentTask = null;
 		answer = '';
 		showFeedback = false;
 		lastResult = null;
+		showExplanationOnTask = false;
 		try {
-			const res = await fetch(`/api/task/${atomId}`);
+			const params = new URLSearchParams();
+			recentPrompts.slice(-5).forEach(p => params.append('ex', p));
+			const qs = params.toString();
+			const res = await fetch(`/api/task/${atomId}${qs ? '?' + qs : ''}`);
 			if (!res.ok) throw new Error();
-			currentTask = await res.json();
+			const task = await res.json();
+			currentTask = task;
+			recentPrompts = [...recentPrompts, task.prompt].slice(-10);
+			if (isFirstForAtom && task.explanation) {
+				seenAtomIds = new Set([...seenAtomIds, atomId]);
+				showExplanationOnTask = true;
+			}
 		} catch {
 			// fall-through: isLoading = false shows error state via null task
 		} finally {
@@ -111,6 +167,9 @@
 			showFeedback = true;
 			invalidate('app:gami');
 			invalidate('app:progress');
+			if (lastResult.justMastered) {
+				invalidate('app:practice');
+			}
 		} catch {
 			// show generic error?
 		} finally {
@@ -149,6 +208,11 @@
 	function selectAtom(item: FrontierItem) {
 		selectedAtom = item;
 		loadTask(item.atomId);
+	}
+
+	function selectAnswer(value: string) {
+		answer = value;
+		submitAnswer();
 	}
 
 	function handleKeydown(e: KeyboardEvent) {
@@ -255,7 +319,7 @@
 			</div>
 		{:else}
 			<div class="back-bar">
-				<button class="back-btn" onclick={() => { selectedAtom = null; currentTask = null; }}>
+				<button class="back-btn" onclick={() => { selectedAtom = null; currentTask = null; invalidate('app:practice'); }}>
 					← Zurück
 				</button>
 				<span class="back-label">{selectedAtom?.label}</span>
@@ -304,7 +368,9 @@
 						</div>
 					{/if}
 
-					{#if !lastResult.correct && lastResult.hint}
+					{#if !lastResult.correct && currentTask?.explanation}
+						<AtomExplanation text={currentTask.explanation} />
+					{:else if !lastResult.correct && lastResult.hint}
 						<div class="hint-box">💡 <MathText text={lastResult.hint} /></div>
 					{/if}
 
@@ -324,11 +390,38 @@
 				<!-- Task prompt + answer input -->
 				<div class="task-card">
 					<div class="atom-label-tag">{activeItem?.label}</div>
+					{#if showExplanationOnTask && currentTask.explanation}
+						<AtomExplanation text={currentTask.explanation} />
+					{/if}
+					{#if currentTask.svg}
+						<div class="task-svg">{@html currentTask.svg}</div>
+					{/if}
 					<MathText text={currentTask.prompt} class="task-prompt" />
 
 					<div class="answer-area">
-						{#if currentTask.answerType === 'fraction'}
+						{#if currentTask.choices}
+							<div class="choice-buttons">
+								{#each currentTask.choices as choice}
+									<button class="choice-btn" onclick={() => selectAnswer(choice)} disabled={isSubmitting}>{choice}</button>
+								{/each}
+							</div>
+						{:else if currentTask.answerType === 'fraction'}
 							<FractionInput bind:this={fractionInput} bind:value={answer} disabled={isSubmitting} onsubmit={submitAnswer} />
+						{:else if writtenArith}
+							<WrittenCalcInput bind:this={writtenCalcInput} a={writtenArith.a} b={writtenArith.b} op={writtenArith.op} bind:value={answer} disabled={isSubmitting} onsubmit={submitAnswer} />
+						{:else if isNumberLine}
+							<NumberLineInput bind:this={numberLineInput} totalSections={currentTask.inputData!.totalSections as number} bind:value={answer} disabled={isSubmitting} onsubmit={submitAnswer} />
+						{:else if currentTask.answerType === 'boolean'}
+							<div class="choice-buttons">
+								<button class="choice-btn" onclick={() => selectAnswer('ja')} disabled={isSubmitting}>Ja</button>
+								<button class="choice-btn" onclick={() => selectAnswer('nein')} disabled={isSubmitting}>Nein</button>
+							</div>
+						{:else if currentTask.answerType === 'comparison'}
+							<div class="choice-buttons">
+								<button class="choice-btn choice-btn-symbol" onclick={() => selectAnswer('<')} disabled={isSubmitting}>&lt;</button>
+								<button class="choice-btn choice-btn-symbol" onclick={() => selectAnswer('=')} disabled={isSubmitting}>=</button>
+								<button class="choice-btn choice-btn-symbol" onclick={() => selectAnswer('>')} disabled={isSubmitting}>&gt;</button>
+							</div>
 						{:else if currentTask.answerType === 'integer'}
 							<input
 								bind:this={answerInput}
@@ -345,11 +438,11 @@
 							<input
 								bind:this={answerInput}
 								class="answer-input"
-								type="number"
+								type="text"
 								inputmode="decimal"
 								bind:value={answer}
 								disabled={isSubmitting}
-								placeholder="Antwort"
+								placeholder="z. B. 3,14"
 								autocomplete="off"
 							/>
 						{:else}
@@ -365,13 +458,15 @@
 						{/if}
 					</div>
 
-					<button
-						class="btn btn-primary btn-full btn-lg submit-btn"
-						onclick={submitAnswer}
-						disabled={isSubmitting || !String(answer).trim()}
-					>
-						{isSubmitting ? '…' : 'Antworten'}
-					</button>
+					{#if !currentTask.choices && currentTask.answerType !== 'boolean' && currentTask.answerType !== 'comparison'}
+						<button
+							class="btn btn-primary btn-full btn-lg submit-btn"
+							onclick={submitAnswer}
+							disabled={isSubmitting || !String(answer).trim()}
+						>
+							{isSubmitting ? '…' : 'Antworten'}
+						</button>
+					{/if}
 				</div>
 			{/if}
 		</div>
@@ -408,6 +503,9 @@
 	/* ── Selection page ── */
 	.selection-page {
 		padding: 1.25rem;
+		max-width: 640px;
+		margin: 0 auto;
+		width: 100%;
 	}
 	.selection-header {
 		margin-bottom: 1.25rem;
@@ -487,6 +585,9 @@
 	/* ── Review progress bar ── */
 	.review-progress-bar {
 		padding: 0.75rem 1.25rem 0;
+		max-width: 640px;
+		width: 100%;
+		margin: 0 auto;
 	}
 	.review-progress-label {
 		font-size: 0.8rem;
@@ -514,6 +615,9 @@
 		gap: 0.75rem;
 		padding: 0.5rem 1rem;
 		border-bottom: 1px solid var(--c-gray-100);
+		max-width: 640px;
+		width: 100%;
+		margin: 0 auto;
 	}
 	.back-btn {
 		background: none;
@@ -536,6 +640,9 @@
 		padding: 1.25rem;
 		display: flex;
 		flex-direction: column;
+		max-width: 640px;
+		width: 100%;
+		margin: 0 auto;
 	}
 
 	.task-loading, .task-error {
@@ -568,6 +675,13 @@
 		display: flex;
 		flex-direction: column;
 		gap: 1.25rem;
+	}
+	.task-svg {
+		width: 100%;
+		overflow: hidden;
+		background: var(--c-gray-50);
+		border-radius: 0.5rem;
+		padding: 0.75rem 0.5rem 0.5rem;
 	}
 	.atom-label-tag {
 		font-size: 0.75rem;
@@ -606,6 +720,35 @@
 		box-shadow: 0 0 0 3px var(--c-primary-light);
 	}
 	.submit-btn { margin-top: 0.25rem; }
+
+	/* ── Choice buttons (boolean / comparison) ── */
+	.choice-buttons {
+		display: flex;
+		gap: 0.75rem;
+		justify-content: center;
+	}
+	.choice-btn {
+		min-width: 90px;
+		padding: 0.85rem 1.5rem;
+		font-size: 1.1rem;
+		font-weight: 700;
+		border: 2px solid var(--c-gray-200);
+		border-radius: var(--radius);
+		background: #fff;
+		color: var(--c-gray-900);
+		cursor: pointer;
+		transition: border-color .15s, background .15s, box-shadow .15s;
+	}
+	.choice-btn:hover:not(:disabled) {
+		border-color: var(--c-primary);
+		background: var(--c-primary-light);
+		box-shadow: var(--shadow-sm);
+	}
+	.choice-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+	.choice-btn-symbol {
+		min-width: 70px;
+		font-size: 1.5rem;
+	}
 
 	/* ── Feedback card ── */
 	.feedback-card {

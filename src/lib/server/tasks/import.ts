@@ -5,7 +5,7 @@
  * {
  *   "atom_id":        "arithmetik__brueche_add_sub_gleichnamig",  // required
  *   "prompt":         "3/7 + 2/7 = ?",                            // required
- *   "answer_type":    "fraction",                                  // "integer"|"number"|"fraction"|"text"
+ *   "answer_type":    "fraction",                                  // "integer"|"number"|"fraction"|"text"|"boolean"|"comparison"
  *   "correct_answer": "5/7",                                       // required
  *   "distractors":    ["4/7", "6/7"],                             // optional
  *   "hint":           "Gleichnamige Brüche: Zähler addieren.",     // optional
@@ -24,7 +24,7 @@ import { inArray } from 'drizzle-orm';
 export interface TaskImportRow {
 	atom_id: string;
 	prompt: string;
-	answer_type: 'integer' | 'number' | 'fraction' | 'text';
+	answer_type: 'integer' | 'number' | 'fraction' | 'text' | 'boolean' | 'comparison';
 	correct_answer: string;
 	distractors?: string[];
 	hint?: string;
@@ -53,7 +53,7 @@ export async function importTasks(rows: TaskImportRow[]): Promise<ImportResult> 
 		if (!r.atom_id) errors.push(`Row ${i}: missing atom_id`);
 		if (!r.prompt) errors.push(`Row ${i}: missing prompt`);
 		if (!r.correct_answer) errors.push(`Row ${i}: missing correct_answer`);
-		if (!['integer', 'number', 'fraction', 'text'].includes(r.answer_type)) {
+		if (!['integer', 'number', 'fraction', 'text', 'boolean', 'comparison'].includes(r.answer_type)) {
 			errors.push(`Row ${i}: invalid answer_type "${r.answer_type}"`);
 		}
 	}

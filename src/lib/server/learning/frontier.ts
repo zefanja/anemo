@@ -6,8 +6,10 @@ export interface FrontierAtom {
 	label: string;
 	domain: string;
 	score: number;
+	cognitiveLoad: number;
 	mastery: number;
 	masteryRequired: number;
+	graphDepth: number;
 }
 
 // Returns all practicable atoms for a student:
@@ -29,10 +31,10 @@ export async function computeFrontier(
 		}
 	});
 
-	// Load all required edges (source → target means source is prereq for target)
-	const requiredEdges = await db.query.edges.findMany({
-		where: (e, { eq }) => eq(e.edgeType, 'required')
-	});
+	// Load ALL edges once — required edges gate the frontier,
+	// all edge types (required + helpful + deepens) inform graph depth for ordering.
+	const allEdges = await db.query.edges.findMany();
+	const requiredEdges = allEdges.filter((e) => e.edgeType === 'required');
 
 	// Load student mastery status for all atoms
 	const statuses = await db.query.studentAtomStatus.findMany({
@@ -40,7 +42,7 @@ export async function computeFrontier(
 	});
 	const masteryMap = new Map(statuses.map((s) => [s.atomId, s]));
 
-	// Build prereq map: atomId → list of required prereqs
+	// Build prereq map for gate checks: atomId → required prereqs
 	const prereqMap = new Map<string, { sourceId: string; masteryLevelNeeded: number }[]>();
 	for (const edge of requiredEdges) {
 		const existing = prereqMap.get(edge.targetId) ?? [];
@@ -48,11 +50,39 @@ export async function computeFrontier(
 		prereqMap.set(edge.targetId, existing);
 	}
 
+	// Build full incoming-edge map (all types) for topological depth
+	// targetId → list of sourceIds
+	const incomingMap = new Map<string, string[]>();
+	for (const edge of allEdges) {
+		const existing = incomingMap.get(edge.targetId) ?? [];
+		existing.push(edge.sourceId);
+		incomingMap.set(edge.targetId, existing);
+	}
+
+	// Compute topological depth (longest path from any root) for each atom.
+	// Depth 0 = no prerequisites of any kind → foundational atom.
+	// This reflects the natural learning order in the graph.
+	const depthCache = new Map<string, number>();
+	function getDepth(id: string, visiting: Set<string>): number {
+		if (depthCache.has(id)) return depthCache.get(id)!;
+		if (visiting.has(id)) return 0; // cycle guard
+		visiting.add(id);
+		const parents = incomingMap.get(id) ?? [];
+		const depth =
+			parents.length === 0 ? 0 : Math.max(...parents.map((p) => getDepth(p, visiting))) + 1;
+		depthCache.set(id, depth);
+		visiting.delete(id);
+		return depth;
+	}
+	for (const atom of allAtoms) getDepth(atom.id, new Set());
+
 	// Cluster atoms are never practiced directly and have no student_atom_status entry.
 	// Inject their effective mastery (min of required sub-atoms) so prereq checks work.
-	// Iterate until stable to handle clusters that depend on other clusters.
+	// Only include actual cluster atoms (not level=atom atoms that aren't mastered yet),
+	// otherwise mastery would propagate transitively through the whole dependency chain.
+	const atomLevelIds = new Set(allAtoms.map((a) => a.id));
 	const clusterIds = new Set(
-		requiredEdges.map((e) => e.sourceId).filter((id) => !masteryMap.has(id))
+		requiredEdges.map((e) => e.sourceId).filter((id) => !atomLevelIds.has(id))
 	);
 	const clusterMastery = new Map<string, number>();
 	let changed = true;
@@ -100,13 +130,16 @@ export async function computeFrontier(
 			label: atom.label,
 			domain: atom.domain,
 			score,
+			cognitiveLoad: atom.cognitiveLoad,
 			mastery,
-			masteryRequired: atom.masteryRequired
+			masteryRequired: atom.masteryRequired,
+			graphDepth: depthCache.get(atom.id) ?? 0
 		});
 	}
 
-	// Sort by score descending
-	frontier.sort((a, b) => b.score - a.score);
+	// Sort by graph depth ascending (foundational concepts first),
+	// then by score descending as tiebreaker within the same depth.
+	frontier.sort((a, b) => a.graphDepth - b.graphDepth || b.score - a.score);
 
 	return frontier;
 }

@@ -12,13 +12,29 @@ export type TaskWithId = GeneratedTask & { id: string };
  * Priority: imported static tasks (random pick) → procedural generator.
  * Procedural tasks are saved to DB so the attempt handler can look up the
  * correct answer by ID without re-generating a different task.
+ *
+ * excludePrompts: prompts recently shown to the student — avoided when possible.
  */
-export async function getTaskForAtom(atomId: string): Promise<TaskWithId | null> {
-	// Try to pick a random imported task first
-	const imported = await db.query.tasks.findFirst({
-		where: (t, { and, eq, isNull }) => and(eq(t.atomId, atomId), isNull(t.generatorId)),
-		orderBy: sql`RANDOM()`
-	});
+export async function getTaskForAtom(atomId: string, excludePrompts: string[] = []): Promise<TaskWithId | null> {
+	// Try to pick an imported task not recently seen
+	let imported = excludePrompts.length > 0
+		? await db.query.tasks.findFirst({
+			where: (t, { and, eq, isNull, notInArray }) => and(
+				eq(t.atomId, atomId),
+				isNull(t.generatorId),
+				notInArray(t.prompt, excludePrompts)
+			),
+			orderBy: sql`RANDOM()`
+		})
+		: undefined;
+
+	// Fallback: any imported task (all excluded or none provided)
+	if (!imported) {
+		imported = await db.query.tasks.findFirst({
+			where: (t, { and, eq, isNull }) => and(eq(t.atomId, atomId), isNull(t.generatorId)),
+			orderBy: sql`RANDOM()`
+		});
+	}
 
 	if (imported?.prompt && imported.correctAnswer) {
 		return {
@@ -32,10 +48,17 @@ export async function getTaskForAtom(atomId: string): Promise<TaskWithId | null>
 		};
 	}
 
-	// Fall back to procedural generator — save to DB so the correct answer is
-	// retrievable by taskId when the student submits their answer.
+	// Fall back to procedural generator — retry up to 5× to avoid recently seen prompts.
+	// Saves the chosen task to DB so the attempt handler can look up the correct answer by ID.
 	if (hasGenerator(atomId)) {
-		const generated = generateTask(atomId);
+		const excludeSet = new Set(excludePrompts);
+		let generated: GeneratedTask | null = null;
+		for (let attempt = 0; attempt < 5; attempt++) {
+			const candidate = generateTask(atomId);
+			if (!candidate) break;
+			if (!excludeSet.has(candidate.prompt)) { generated = candidate; break; }
+			if (!generated) generated = candidate; // keep as last-resort fallback
+		}
 		if (!generated) return null;
 		const id = crypto.randomUUID();
 		await db.insert(tasks).values({
@@ -56,7 +79,7 @@ export async function getTaskForAtom(atomId: string): Promise<TaskWithId | null>
 
 /**
  * Check a submitted answer against the correct answer.
- * Handles integer, number, fraction, and text answer types.
+ * Handles integer, number, fraction, text, boolean, and comparison answer types.
  */
 export function checkAnswer(
 	submitted: string,
@@ -66,7 +89,7 @@ export function checkAnswer(
 	const s = submitted.trim().toLowerCase().replace(',', '.');
 	const c = correctAnswer.trim().toLowerCase().replace(',', '.');
 
-	if (answerType === 'text') {
+	if (answerType === 'text' || answerType === 'boolean' || answerType === 'comparison') {
 		return s === c;
 	}
 

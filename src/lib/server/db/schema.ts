@@ -16,7 +16,7 @@ import {
 
 export const atomLevelEnum = pgEnum('atom_level', ['atom', 'cluster']);
 export const edgeTypeEnum = pgEnum('edge_type', ['required', 'helpful', 'deepens']);
-export const answerTypeEnum = pgEnum('answer_type', ['number', 'fraction', 'integer', 'text']);
+export const answerTypeEnum = pgEnum('answer_type', ['number', 'fraction', 'integer', 'text', 'boolean', 'comparison']);
 export const badgeTypeEnum = pgEnum('badge_type', [
 	'first_atom',
 	'cluster_complete',
@@ -46,6 +46,9 @@ export const atoms = pgTable(
 		curriculumCentrality: real('curriculum_centrality').notNull().default(0.5),
 		transferValue: real('transfer_value').notNull().default(0.5),
 		cognitiveLoad: real('cognitive_load').notNull().default(0.5),
+		// explanation shown to students
+		explanation: text('explanation'),
+		illustrationConfig: jsonb('illustration_config').$type<Record<string, unknown> | null>(),
 		// meta
 		lehrplanRef: jsonb('lehrplan_ref'),
 		related: jsonb('related'),

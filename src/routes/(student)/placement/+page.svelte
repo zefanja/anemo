@@ -2,6 +2,8 @@
 	import { goto } from '$app/navigation';
 	import { enhance } from '$app/forms';
 	import FractionInput from '$lib/components/student/FractionInput.svelte';
+	import WrittenCalcInput from '$lib/components/student/WrittenCalcInput.svelte';
+	import NumberLineInput from '$lib/components/student/NumberLineInput.svelte';
 	import MathText from '$lib/components/student/MathText.svelte';
 	import type { PlacementState } from '$lib/server/learning/placement.js';
 
@@ -12,7 +14,10 @@
 		atomLabel: string;
 		taskId: string;
 		prompt: string;
-		answerType: 'integer' | 'number' | 'fraction' | 'text';
+		answerType: 'integer' | 'number' | 'fraction' | 'text' | 'boolean' | 'comparison';
+		choices: string[] | null;
+		svg: string | null;
+		inputData: Record<string, unknown> | null;
 		hint: string | null;
 	};
 
@@ -28,12 +33,45 @@
 
 	let answerInput = $state<HTMLInputElement | null>(null);
 	let fractionInput = $state<{ focus: () => void } | null>(null);
+	let writtenCalcInput = $state<{ focus: () => void } | null>(null);
+	let numberLineInput = $state<{ focus: () => void } | null>(null);
+
+	const WRITTEN_ARITH_ATOMS = new Set([
+		'arithmetik__schriftliche_addition',
+		'arithmetik__schriftliche_subtraktion',
+		'arithmetik__schriftliche_multiplikation',
+		'arithmetik__schriftliche_division'
+	]);
+
+	function parseWrittenArith(prompt: string): { a: number; b: number; op: '+' | '-' | '×' | ':' } | null {
+		let m;
+		if ((m = prompt.match(/^(\d+)\s*\+\s*(\d+)/))) return { a: +m[1], b: +m[2], op: '+' };
+		if ((m = prompt.match(/^(\d+)\s*[−\-]\s*(\d+)/))) return { a: +m[1], b: +m[2], op: '-' };
+		if ((m = prompt.match(/^(\d+)\s*[·×]\s*(\d+)/))) return { a: +m[1], b: +m[2], op: '×' };
+		if ((m = prompt.match(/^(\d+)\s*:\s*(\d+)/))) return { a: +m[1], b: +m[2], op: ':' };
+		return null;
+	}
+
+	const writtenArith = $derived(
+		current && WRITTEN_ARITH_ATOMS.has(current.atomId)
+			? parseWrittenArith(current.prompt)
+			: null
+	);
+
+	const isNumberLine = $derived(
+		current?.atomId === 'arithmetik__brueche_am_zahlenstrahl' &&
+		!!current?.inputData?.totalSections
+	);
 
 	$effect(() => {
 		if (phase === 'question' && current) {
 			if (current.answerType === 'fraction') {
 				fractionInput?.focus();
-			} else {
+			} else if (writtenArith) {
+				writtenCalcInput?.focus();
+			} else if (isNumberLine) {
+				numberLineInput?.focus();
+			} else if (!current.choices && current.answerType !== 'boolean' && current.answerType !== 'comparison') {
 				answerInput?.focus();
 			}
 		}
@@ -57,6 +95,9 @@
 			taskId: data.taskId,
 			prompt: data.prompt,
 			answerType: data.answerType,
+			choices: data.choices ?? null,
+			svg: data.svg ?? null,
+			inputData: data.inputData ?? null,
 			hint: data.hint
 		};
 		answer = '';
@@ -98,6 +139,9 @@
 					taskId: data.taskId,
 					prompt: data.prompt,
 					answerType: data.answerType,
+					choices: data.choices ?? null,
+					svg: data.svg ?? null,
+					inputData: data.inputData ?? null,
 					hint: data.nextHint ?? null
 				};
 				answer = '';
@@ -117,6 +161,11 @@
 		if (!res.ok) { phase = 'error'; return; }
 		summary = await res.json();
 		phase = 'complete';
+	}
+
+	function selectAnswer(value: string) {
+		answer = value;
+		submitAnswer();
 	}
 
 	function handleKeydown(e: KeyboardEvent) {
@@ -200,10 +249,34 @@
 			</div>
 			<div class="task-card">
 				<div class="atom-tag">{current.atomLabel}</div>
+				{#if current.svg}
+					<div class="task-svg">{@html current.svg}</div>
+				{/if}
 				<MathText text={current.prompt} class="task-prompt" />
 				<div class="answer-area">
-					{#if current.answerType === 'fraction'}
+					{#if current.choices}
+						<div class="choice-buttons">
+							{#each current.choices as choice}
+								<button class="choice-btn" onclick={() => selectAnswer(choice)} disabled={isSubmitting}>{choice}</button>
+							{/each}
+						</div>
+					{:else if current.answerType === 'fraction'}
 						<FractionInput bind:this={fractionInput} bind:value={answer} disabled={isSubmitting} onsubmit={submitAnswer} />
+					{:else if writtenArith}
+						<WrittenCalcInput bind:this={writtenCalcInput} a={writtenArith.a} b={writtenArith.b} op={writtenArith.op} bind:value={answer} disabled={isSubmitting} onsubmit={submitAnswer} />
+					{:else if isNumberLine}
+						<NumberLineInput bind:this={numberLineInput} totalSections={current.inputData!.totalSections as number} bind:value={answer} disabled={isSubmitting} onsubmit={submitAnswer} />
+					{:else if current.answerType === 'boolean'}
+						<div class="choice-buttons">
+							<button class="choice-btn" onclick={() => selectAnswer('ja')} disabled={isSubmitting}>Ja</button>
+							<button class="choice-btn" onclick={() => selectAnswer('nein')} disabled={isSubmitting}>Nein</button>
+						</div>
+					{:else if current.answerType === 'comparison'}
+						<div class="choice-buttons">
+							<button class="choice-btn choice-btn-symbol" onclick={() => selectAnswer('<')} disabled={isSubmitting}>&lt;</button>
+							<button class="choice-btn choice-btn-symbol" onclick={() => selectAnswer('=')} disabled={isSubmitting}>=</button>
+							<button class="choice-btn choice-btn-symbol" onclick={() => selectAnswer('>')} disabled={isSubmitting}>&gt;</button>
+						</div>
 					{:else if current.answerType === 'integer'}
 						<input
 							bind:this={answerInput}
@@ -220,11 +293,11 @@
 						<input
 							bind:this={answerInput}
 							class="answer-input"
-							type="number"
+							type="text"
 							inputmode="decimal"
 							bind:value={answer}
 							disabled={isSubmitting}
-							placeholder="Antwort"
+							placeholder="z. B. 3,14"
 							autocomplete="off"
 						/>
 					{:else}
@@ -239,13 +312,15 @@
 						/>
 					{/if}
 				</div>
-				<button
-					class="btn btn-primary btn-full btn-lg"
-					onclick={submitAnswer}
-					disabled={isSubmitting || !String(answer).trim()}
-				>
-					{isSubmitting ? '…' : 'Antworten'}
-				</button>
+				{#if !current.choices && current.answerType !== 'boolean' && current.answerType !== 'comparison'}
+					<button
+						class="btn btn-primary btn-full btn-lg"
+						onclick={submitAnswer}
+						disabled={isSubmitting || !String(answer).trim()}
+					>
+						{isSubmitting ? '…' : 'Antworten'}
+					</button>
+				{/if}
 			</div>
 		{/if}
 
@@ -346,6 +421,13 @@
 		flex-direction: column;
 		gap: 1.25rem;
 	}
+	.task-svg {
+		width: 100%;
+		overflow: hidden;
+		background: var(--c-gray-50);
+		border-radius: 0.5rem;
+		padding: 0.75rem 0.5rem 0.5rem;
+	}
 	.atom-tag {
 		font-size: 0.75rem;
 		font-weight: 600;
@@ -438,6 +520,35 @@
 	.stat-value { font-size: 1.75rem; font-weight: 800; color: var(--c-primary); }
 	.stat-label { font-size: 0.75rem; color: var(--c-gray-600); }
 	.summary-note { font-size: 0.85rem; color: var(--c-gray-500); max-width: 320px; }
+
+	/* ── Choice buttons (boolean / comparison) ── */
+	.choice-buttons {
+		display: flex;
+		gap: 0.75rem;
+		justify-content: center;
+	}
+	.choice-btn {
+		min-width: 90px;
+		padding: 0.85rem 1.5rem;
+		font-size: 1.1rem;
+		font-weight: 700;
+		border: 2px solid var(--c-gray-200);
+		border-radius: var(--radius);
+		background: #fff;
+		color: var(--c-gray-900);
+		cursor: pointer;
+		transition: border-color .15s, background .15s, box-shadow .15s;
+	}
+	.choice-btn:hover:not(:disabled) {
+		border-color: var(--c-primary);
+		background: var(--c-primary-light);
+		box-shadow: var(--shadow-sm);
+	}
+	.choice-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+	.choice-btn-symbol {
+		min-width: 70px;
+		font-size: 1.5rem;
+	}
 
 	/* ── Skip row ── */
 	.skip-row {

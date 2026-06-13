@@ -11,6 +11,8 @@ export interface SessionItem {
 	type: SessionItemType;
 	mastery: number;
 	masteryRequired: number;
+	cognitiveLoad: number;
+	graphDepth: number;
 }
 
 export interface PracticeSession {
@@ -42,7 +44,9 @@ export async function buildSession(
 		label: r.label,
 		type: 'review',
 		mastery: 1, // mastered
-		masteryRequired: 1
+		masteryRequired: 1,
+		cognitiveLoad: 0.5,
+		graphDepth: 0
 	}));
 
 	// Frontier atoms for free practice
@@ -52,7 +56,9 @@ export async function buildSession(
 		label: a.label,
 		type: a.mastery > 0 ? 'active' : 'new',
 		mastery: a.mastery,
-		masteryRequired: a.masteryRequired
+		masteryRequired: a.masteryRequired,
+		cognitiveLoad: a.cognitiveLoad,
+		graphDepth: a.graphDepth
 	}));
 
 	return {

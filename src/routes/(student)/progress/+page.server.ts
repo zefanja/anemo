@@ -1,5 +1,7 @@
 import { redirect } from '@sveltejs/kit';
 import { db } from '$lib/server/db/index.js';
+import { attempts as attemptsTable } from '$lib/server/db/schema.js';
+import { and, eq, gte, sql } from 'drizzle-orm';
 import { computeFrontier } from '$lib/server/learning/frontier.js';
 import type { PageServerLoad } from './$types';
 
@@ -10,7 +12,7 @@ export const load: PageServerLoad = async ({ locals, depends }) => {
 	}
 	const { studentId, classId } = locals.session;
 
-	const [allAtoms, statuses, earnedBadges, classRecord] = await Promise.all([
+	const [allAtoms, statuses, earnedBadges, classRecord, activityRows] = await Promise.all([
 		db.query.atoms.findMany({
 			orderBy: (a, { asc }) => [asc(a.domain), asc(a.subdomain), asc(a.label)]
 		}),
@@ -22,7 +24,20 @@ export const load: PageServerLoad = async ({ locals, depends }) => {
 		}),
 		db.query.classes.findFirst({
 			where: (c, { eq }) => eq(c.id, classId)
-		})
+		}),
+		db
+			.select({
+				date: sql<string>`to_char(date_trunc('day', ${attemptsTable.answeredAt} AT TIME ZONE current_setting('timezone')), 'YYYY-MM-DD')`,
+				count: sql<number>`cast(count(*) as int)`
+			})
+			.from(attemptsTable)
+			.where(
+				and(
+					eq(attemptsTable.studentId, studentId),
+					gte(attemptsTable.answeredAt, sql`now() - interval '84 days'`)
+				)
+			)
+			.groupBy(sql`date_trunc('day', ${attemptsTable.answeredAt} AT TIME ZONE current_setting('timezone'))`)
 	]);
 
 	const frontier = await computeFrontier(studentId, classRecord?.enabledDomains ?? null);
@@ -77,6 +92,7 @@ export const load: PageServerLoad = async ({ locals, depends }) => {
 		masteredDomains,
 		totalAtoms,
 		masteredAtoms,
-		badges: earnedBadges.map((b) => b.badgeType)
+		badges: earnedBadges.map((b) => b.badgeType),
+		activityDays: activityRows
 	};
 };

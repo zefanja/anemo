@@ -6,13 +6,16 @@
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-export type AnswerType = 'integer' | 'number' | 'fraction' | 'text';
+export type AnswerType = 'integer' | 'number' | 'fraction' | 'text' | 'boolean' | 'comparison';
 
 export interface GeneratedTask {
 	atomId: string;
 	prompt: string;
 	answerType: AnswerType;
 	correctAnswer: string; // integer: "7", number: "3.5", fraction: "3/4", text: "nein"
+	choices?: string[]; // if set, render as buttons instead of text input
+	svg?: string;         // optional inline SVG for visual tasks
+	inputData?: Record<string, unknown>; // extra data for interactive components
 	hint?: string;
 	difficulty?: number; // 0–1
 }
@@ -52,6 +55,11 @@ function fmtFrac(n: number, d: number): string {
 	return `\\(\\frac{${n}}{${d}}\\)`;
 }
 
+// LaTeX inline power notation: e.g. 13^2
+function pow(base: number | string, exp: number | string): string {
+	return `\\(${base}^{${exp}}\\)`;
+}
+
 // Mixed number with visual fraction: e.g. 2 3/4
 function fmtMixed(whole: number, n: number, d: number): string {
 	return `${whole}\\(\\frac{${n}}{${d}}\\)`;
@@ -62,9 +70,110 @@ function round(n: number, places = 2): number {
 	return Math.round(n * 10 ** places) / 10 ** places;
 }
 
-// Format decimal with trailing zeros removed
+// Format decimal with trailing zeros removed, German comma separator
 function dec(n: number): string {
-	return String(round(n, 4)).replace(/\.?0+$/, '') || '0';
+	const s = String(round(n, 4));
+	const trimmed = s.includes('.') ? s.replace(/0+$/, '').replace(/\.$/, '') : s;
+	return (trimmed || '0').replace('.', ',');
+}
+
+// ── SVG helpers ───────────────────────────────────────────────────────────────
+
+// Number line from 0 to 2 with d*2 equal sections.
+// Major ticks (labeled 0, 1, 2) at positions 0, d, 2*d.
+// Minor ticks unlabeled — student locates fraction by counting.
+// Optional markerAt: section index (0…2d) to highlight with a downward arrow.
+function svgFractionLine(d: number, markerAt?: number): string {
+	const total = d * 2;
+	const W = 340, H = markerAt !== undefined ? 80 : 68;
+	const lineY = markerAt !== undefined ? 50 : 36;
+	const x0 = 22, x1 = 308;
+	const linePx = x1 - x0;
+	const step = linePx / total;
+	const col = '#374151';
+	const accent = '#4f46e5';
+
+	let s = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" `
+		+ `style="max-width:100%;display:block;margin:0 auto">`;
+
+	// Main line + right arrow
+	s += `<line x1="${x0}" y1="${lineY}" x2="${x1}" y2="${lineY}" `
+		+ `stroke="${col}" stroke-width="2" stroke-linecap="round"/>`;
+	s += `<polygon points="${x1},${lineY - 5} ${x1 + 12},${lineY} ${x1},${lineY + 5}" fill="${col}"/>`;
+
+	for (let i = 0; i <= total; i++) {
+		const x = +(x0 + i * step).toFixed(1);
+		const major = i % d === 0;
+		const h = major ? 12 : 7;
+		s += `<line x1="${x}" y1="${lineY - h}" x2="${x}" y2="${lineY + h}" `
+			+ `stroke="${col}" stroke-width="${major ? 2 : 1.5}"/>`;
+		if (major) {
+			s += `<text x="${x}" y="${lineY + h + 15}" text-anchor="middle" `
+				+ `font-size="14" font-weight="bold" fill="${col}" `
+				+ `font-family="system-ui,-apple-system,sans-serif">${i / d}</text>`;
+		}
+	}
+
+	// Optional downward arrow marker at a specific section
+	if (markerAt !== undefined) {
+		const mx = +(x0 + markerAt * step).toFixed(1);
+		// Triangle tip sits just above the tick; base is 16px wide, 14px tall
+		s += `<polygon points="${(+mx - 8).toFixed(1)},${lineY - 26} `
+			+ `${(+mx + 8).toFixed(1)},${lineY - 26} `
+			+ `${mx},${lineY - 12}" `
+			+ `fill="${accent}"/>`;
+	}
+
+	s += `</svg>`;
+	return s;
+}
+
+// Integer number line (bidirectional) from lo to hi.
+// Marks each integer with a tick and label; dots at the given highlight positions.
+function svgIntegerLine(lo: number, hi: number, highlights: number[]): string {
+	const range = hi - lo;
+	const W = 320, H = 68;
+	const lineY = 36;
+	const x0 = 28, x1 = 292;
+	const linePx = x1 - x0;
+	const step = linePx / range;
+	const col = '#374151';
+	const dot = '#4f46e5';
+
+	let s = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" `
+		+ `style="max-width:100%;display:block;margin:0 auto">`;
+
+	// Bidirectional line + arrows
+	s += `<line x1="${x0 - 10}" y1="${lineY}" x2="${x1 + 10}" y2="${lineY}" `
+		+ `stroke="${col}" stroke-width="2" stroke-linecap="round"/>`;
+	s += `<polygon points="${x1 + 10},${lineY - 4} ${x1 + 20},${lineY} ${x1 + 10},${lineY + 4}" fill="${col}"/>`;
+	s += `<polygon points="${x0 - 10},${lineY - 4} ${x0 - 20},${lineY} ${x0 - 10},${lineY + 4}" fill="${col}"/>`;
+
+	for (let i = lo; i <= hi; i++) {
+		const x = +(x0 + (i - lo) * step).toFixed(1);
+		const isZero = i === 0;
+		const h = isZero ? 12 : 8;
+		s += `<line x1="${x}" y1="${lineY - h}" x2="${x}" y2="${lineY + h}" `
+			+ `stroke="${col}" stroke-width="${isZero ? 2 : 1.5}"/>`;
+		s += `<text x="${x}" y="${lineY + h + 13}" text-anchor="middle" `
+			+ `font-size="12"${isZero ? ' font-weight="bold"' : ''} fill="${col}" `
+			+ `font-family="system-ui,-apple-system,sans-serif">${i}</text>`;
+	}
+
+	// Highlighted dots + labels above the line
+	highlights.forEach((n, idx) => {
+		const x = +(x0 + (n - lo) * step).toFixed(1);
+		// Stagger labels if positions are adjacent to avoid overlap
+		const labelY = lineY - (highlights.length > 1 && Math.abs(highlights[0] - highlights[1]) === 1
+			? (idx === 0 ? 10 : 22) : 14);
+		s += `<circle cx="${x}" cy="${lineY}" r="6" fill="${dot}" stroke="white" stroke-width="1.5"/>`;
+		s += `<text x="${x}" y="${labelY}" text-anchor="middle" `
+			+ `font-size="13" font-weight="bold" fill="${dot}" `
+			+ `font-family="system-ui,-apple-system,sans-serif">${n}</text>`;
+	});
+
+	s += `</svg>`;
+	return s;
 }
 
 // ── Generator registry ────────────────────────────────────────────────────────
@@ -396,10 +505,10 @@ reg('arithmetik__teiler_vielfache', () => {
 	const q = rand(0, 1);
 	if (q === 0) {
 		const d = pick(divisors.slice(1, -1));
-		return { atomId: 'arithmetik__teiler_vielfache', prompt: `Ist ${d} ein Teiler von ${n}? (ja/nein)`, answerType: 'text', correctAnswer: 'ja', difficulty: 0.3 };
+		return { atomId: 'arithmetik__teiler_vielfache', prompt: `Ist ${d} ein Teiler von ${n}?`, answerType: 'boolean', correctAnswer: 'ja', difficulty: 0.3 };
 	}
 	const notDiv = pick([...Array.from({ length: n - 1 }, (_, i) => i + 2).filter(d => n % d !== 0)]);
-	return { atomId: 'arithmetik__teiler_vielfache', prompt: `Ist ${notDiv} ein Teiler von ${n}? (ja/nein)`, answerType: 'text', correctAnswer: 'nein', difficulty: 0.3 };
+	return { atomId: 'arithmetik__teiler_vielfache', prompt: `Ist ${notDiv} ein Teiler von ${n}?`, answerType: 'boolean', correctAnswer: 'nein', difficulty: 0.3 };
 });
 
 reg('arithmetik__teilbarkeitsregeln', () => {
@@ -413,7 +522,7 @@ reg('arithmetik__teilbarkeitsregeln', () => {
 	const r = pick(rules);
 	const n = rand(10, 999);
 	const answer = r.check(n) ? 'ja' : 'nein';
-	return { atomId: 'arithmetik__teilbarkeitsregeln', prompt: `Ist ${n} durch ${r.rule} teilbar? (ja/nein)`, answerType: 'text', correctAnswer: answer, hint: r.hint, difficulty: 0.35 };
+	return { atomId: 'arithmetik__teilbarkeitsregeln', prompt: `Ist ${n} durch ${r.rule} teilbar?`, answerType: 'boolean', correctAnswer: answer, hint: r.hint, difficulty: 0.35 };
 });
 
 reg('arithmetik__primzahlen_primfaktorzerlegung', () => {
@@ -422,13 +531,14 @@ reg('arithmetik__primzahlen_primfaktorzerlegung', () => {
 	const q = rand(0, 2);
 	if (q === 0) {
 		const n = pick([...primes, ...composites.slice(0, 6)]);
-		return { atomId: 'arithmetik__primzahlen_primfaktorzerlegung', prompt: `Ist ${n} eine Primzahl? (ja/nein)`, answerType: 'text', correctAnswer: primes.includes(n) ? 'ja' : 'nein', difficulty: 0.4 };
+		return { atomId: 'arithmetik__primzahlen_primfaktorzerlegung', prompt: `Ist ${n} eine Primzahl?`, answerType: 'boolean', correctAnswer: primes.includes(n) ? 'ja' : 'nein', difficulty: 0.4 };
 	} else if (q === 1) {
 		const p1 = pick([2, 3, 5, 7]), p2 = pick([2, 3, 5, 7]);
 		return { atomId: 'arithmetik__primzahlen_primfaktorzerlegung', prompt: `Was ist der kleinste Primfaktor von ${p1 * p2}?`, answerType: 'integer', correctAnswer: String(Math.min(p1, p2)), difficulty: 0.45 };
 	} else {
-		const p = pick(primes.slice(0, 8)), e = rand(2, 4);
-		return { atomId: 'arithmetik__primzahlen_primfaktorzerlegung', prompt: `${p}^${e} = ?`, answerType: 'integer', correctAnswer: String(p ** e), difficulty: 0.45 };
+		let p: number, e: number;
+		do { p = pick(primes.slice(0, 8)); e = rand(2, 4); } while (p ** e > 100);
+		return { atomId: 'arithmetik__primzahlen_primfaktorzerlegung', prompt: `${pow(p, e)} = ?`, answerType: 'integer', correctAnswer: String(p ** e), difficulty: 0.45 };
 	}
 });
 
@@ -472,10 +582,25 @@ reg('arithmetik__brueche_am_zahlenstrahl', () => {
 	const g = gcd(n, d);
 	const rn = n / g, rd = d / g;
 	const q = rand(0, 1);
+
 	if (q === 0) {
-		return { atomId: 'arithmetik__brueche_am_zahlenstrahl', prompt: `Auf einem Zahlenstrahl von 0 bis 2 mit ${d * 2} gleichen Abschnitten: An welchem Abschnitt liegt ${fmtFrac(rn, rd)}?`, answerType: 'integer', correctAnswer: String(n), hint: `Erweitere auf ${d}stel.`, difficulty: 0.45 };
+		// Draggable marker: fraction given, student positions marker on line
+		return {
+			atomId: 'arithmetik__brueche_am_zahlenstrahl',
+			prompt: `Markiere ${fmtFrac(rn, rd)} auf dem Zahlenstrahl.`,
+			answerType: 'integer', correctAnswer: String(n),
+			inputData: { totalSections: d * 2 },
+			hint: `Erweitere auf ${d}stel und zähle ${n} Abschnitte vom Nullpunkt.`, difficulty: 0.45
+		};
 	}
-	return { atomId: 'arithmetik__brueche_am_zahlenstrahl', prompt: `Liegt ${fmtFrac(rn, rd)} näher an 0 oder an 1? Gib den Zähler des Bruchs an, wenn er auf ${d}tel erweitert wird.`, answerType: 'integer', correctAnswer: String(n), difficulty: 0.45 };
+	// Arrow shows position → student names the fraction's numerator (denominator = d)
+	return {
+		atomId: 'arithmetik__brueche_am_zahlenstrahl',
+		prompt: `Der Pfeil zeigt auf einen Punkt. Welcher Bruch mit Nenner ${d} liegt dort? Gib den Zähler an.`,
+		answerType: 'integer', correctAnswer: String(n),
+		svg: svgFractionLine(d, n),
+		hint: `Zähle die Abschnitte vom Nullpunkt bis zum Pfeil.`, difficulty: 0.45
+	};
 });
 
 reg('arithmetik__brueche_vergleichen_ordnen', () => {
@@ -574,8 +699,8 @@ reg('arithmetik__dezimalzahlen_stellenwert', () => {
 	const whole = rand(1, 99), dec1 = rand(0, 9), dec2 = rand(0, 9);
 	const n = parseFloat(`${whole}.${dec1}${dec2}`);
 	const q = rand(0, 1);
-	if (q === 0) return { atomId: 'arithmetik__dezimalzahlen_stellenwert', prompt: `Welche Ziffer steht an der Zehntelstelle von ${n}?`, answerType: 'integer', correctAnswer: String(dec1), difficulty: 0.35 };
-	return { atomId: 'arithmetik__dezimalzahlen_stellenwert', prompt: `Welche Ziffer steht an der Hundertstelstelle von ${n}?`, answerType: 'integer', correctAnswer: String(dec2), difficulty: 0.35 };
+	if (q === 0) return { atomId: 'arithmetik__dezimalzahlen_stellenwert', prompt: `Welche Ziffer steht an der Zehntelstelle von ${dec(n)}?`, answerType: 'integer', correctAnswer: String(dec1), difficulty: 0.35 };
+	return { atomId: 'arithmetik__dezimalzahlen_stellenwert', prompt: `Welche Ziffer steht an der Hundertstelstelle von ${dec(n)}?`, answerType: 'integer', correctAnswer: String(dec2), difficulty: 0.35 };
 });
 
 reg('arithmetik__dezimalzahlen_vergleichen_ordnen_runden', () => {
@@ -583,30 +708,30 @@ reg('arithmetik__dezimalzahlen_vergleichen_ordnen_runden', () => {
 	if (type === 0) {
 		const n = parseFloat((rand(10, 99) + Math.random()).toFixed(2));
 		const place = rand(0, 1);
-		if (place === 0) return { atomId: 'arithmetik__dezimalzahlen_vergleichen_ordnen_runden', prompt: `Runde ${n} auf eine Nachkommastelle: ___`, answerType: 'number', correctAnswer: dec(Math.round(n * 10) / 10), difficulty: 0.4 };
-		return { atomId: 'arithmetik__dezimalzahlen_vergleichen_ordnen_runden', prompt: `Runde ${n} auf ganze Zahlen: ___`, answerType: 'integer', correctAnswer: String(Math.round(n)), difficulty: 0.35 };
+		if (place === 0) return { atomId: 'arithmetik__dezimalzahlen_vergleichen_ordnen_runden', prompt: `Runde ${dec(n)} auf eine Nachkommastelle: ___`, answerType: 'number', correctAnswer: dec(Math.round(n * 10) / 10), difficulty: 0.4 };
+		return { atomId: 'arithmetik__dezimalzahlen_vergleichen_ordnen_runden', prompt: `Runde ${dec(n)} auf ganze Zahlen: ___`, answerType: 'integer', correctAnswer: String(Math.round(n)), difficulty: 0.35 };
 	}
 	const a = parseFloat((Math.random() * 9 + 1).toFixed(2));
 	const b = parseFloat((Math.random() * 9 + 1).toFixed(2));
 	const bigger = Math.max(a, b);
-	return { atomId: 'arithmetik__dezimalzahlen_vergleichen_ordnen_runden', prompt: `Welche Zahl ist größer: ${a} oder ${b}? (Gib die größere Zahl an)`, answerType: 'number', correctAnswer: dec(bigger), difficulty: 0.35 };
+	return { atomId: 'arithmetik__dezimalzahlen_vergleichen_ordnen_runden', prompt: `Welche Zahl ist größer: ${dec(a)} oder ${dec(b)}? (Gib die größere Zahl an)`, answerType: 'number', correctAnswer: dec(bigger), difficulty: 0.35 };
 });
 
 reg('arithmetik__dezimalzahlen_addieren_subtrahieren', () => {
 	const a = parseFloat((rand(1, 20) + rand(0, 9) / 10).toFixed(1));
 	const b = parseFloat((rand(1, 10) + rand(0, 9) / 10).toFixed(1));
 	const op = rand(0, 1);
-	if (op === 0) return { atomId: 'arithmetik__dezimalzahlen_addieren_subtrahieren', prompt: `${a} + ${b} = ?`, answerType: 'number', correctAnswer: dec(a + b), hint: 'Komma unter Komma schreiben.', difficulty: 0.4 };
+	if (op === 0) return { atomId: 'arithmetik__dezimalzahlen_addieren_subtrahieren', prompt: `${dec(a)} + ${dec(b)} = ?`, answerType: 'number', correctAnswer: dec(a + b), hint: 'Komma unter Komma schreiben.', difficulty: 0.4 };
 	const [big, small] = a >= b ? [a, b] : [b, a];
-	return { atomId: 'arithmetik__dezimalzahlen_addieren_subtrahieren', prompt: `${big} − ${small} = ?`, answerType: 'number', correctAnswer: dec(big - small), difficulty: 0.4 };
+	return { atomId: 'arithmetik__dezimalzahlen_addieren_subtrahieren', prompt: `${dec(big)} − ${dec(small)} = ?`, answerType: 'number', correctAnswer: dec(big - small), difficulty: 0.4 };
 });
 
 reg('arithmetik__kommaverschiebung', () => {
 	const n = parseFloat((rand(1, 99) + rand(1, 9) / 10).toFixed(1));
 	const factor = pick([10, 100, 1000]);
 	const op = rand(0, 1);
-	if (op === 0) return { atomId: 'arithmetik__kommaverschiebung', prompt: `${n} · ${factor} = ?`, answerType: 'number', correctAnswer: dec(n * factor), hint: `Komma um ${Math.log10(factor)} Stelle(n) nach rechts.`, difficulty: 0.4 };
-	return { atomId: 'arithmetik__kommaverschiebung', prompt: `${n * factor} : ${factor} = ?`, answerType: 'number', correctAnswer: dec(n), hint: `Komma um ${Math.log10(factor)} Stelle(n) nach links.`, difficulty: 0.4 };
+	if (op === 0) return { atomId: 'arithmetik__kommaverschiebung', prompt: `${dec(n)} · ${factor} = ?`, answerType: 'number', correctAnswer: dec(n * factor), hint: `Komma um ${Math.log10(factor)} Stelle(n) nach rechts.`, difficulty: 0.4 };
+	return { atomId: 'arithmetik__kommaverschiebung', prompt: `${dec(n * factor)} : ${factor} = ?`, answerType: 'number', correctAnswer: dec(n), hint: `Komma um ${Math.log10(factor)} Stelle(n) nach links.`, difficulty: 0.4 };
 });
 
 reg('arithmetik__dezimal_division_natuerliche_zahl', () => {
@@ -617,7 +742,7 @@ reg('arithmetik__dezimal_division_natuerliche_zahl', () => {
 
 reg('arithmetik__dezimal_mal_dezimal', () => {
 	const a = rand(1, 9) / 10, b = rand(1, 9) / 10;
-	return { atomId: 'arithmetik__dezimal_mal_dezimal', prompt: `${dec(a)} · ${dec(b)} = ?`, answerType: 'number', correctAnswer: dec(a * b), hint: `Rechne ${a * 10} · ${b * 10} = ${a * 10 * (b * 10)}, dann : 100.`, difficulty: 0.55 };
+	return { atomId: 'arithmetik__dezimal_mal_dezimal', prompt: `${dec(a)} · ${dec(b)} = ?`, answerType: 'number', correctAnswer: dec(a * b), hint: `Rechne ${a * 10} · ${b * 10} = ${a * 10 * (b * 10)}, dann : 100`, difficulty: 0.55 };
 });
 
 reg('arithmetik__dezimal_division_dezimalzahl', () => {
@@ -636,7 +761,7 @@ reg('arithmetik__bruch_zu_dezimalzahl', () => {
 reg('arithmetik__dezimalzahl_zu_bruch', () => {
 	const easy: Array<[number, number, number]> = [[0.5,1,2],[0.25,1,4],[0.75,3,4],[0.2,1,5],[0.4,2,5],[0.1,1,10],[0.3,3,10],[0.125,1,8],[0.6,3,5],[0.8,4,5]];
 	const [val, n, d] = pick(easy);
-	return { atomId: 'arithmetik__dezimalzahl_zu_bruch', prompt: `${val} als vollständig gekürzten Bruch — Nenner?`, answerType: 'integer', correctAnswer: String(d), hint: `${val} = ${fmtFrac(n, d)}`, difficulty: 0.45 };
+	return { atomId: 'arithmetik__dezimalzahl_zu_bruch', prompt: `${dec(val)} als vollständig gekürzten Bruch — Nenner?`, answerType: 'integer', correctAnswer: String(d), hint: `${dec(val)} = ${fmtFrac(n, d)}`, difficulty: 0.45 };
 });
 
 reg('arithmetik__periodische_dezimalzahlen', () => {
@@ -645,10 +770,10 @@ reg('arithmetik__periodische_dezimalzahlen', () => {
 	const q = rand(0, 1);
 	if (q === 0) {
 		const [n, d] = pick(finiteList);
-		return { atomId: 'arithmetik__periodische_dezimalzahlen', prompt: `Ist ${fmtFrac(n, d)} eine endliche oder periodische Dezimalzahl? (endlich/periodisch)`, answerType: 'text', correctAnswer: 'endlich', hint: 'Endlich: Nenner (vollständig gekürzt) hat nur Faktoren 2 und 5.', difficulty: 0.5 };
+		return { atomId: 'arithmetik__periodische_dezimalzahlen', prompt: `Ist ${fmtFrac(n, d)} eine endliche oder periodische Dezimalzahl?`, answerType: 'text', choices: ['endlich', 'periodisch'], correctAnswer: 'endlich', hint: 'Endlich: Nenner (vollständig gekürzt) hat nur Faktoren 2 und 5.', difficulty: 0.5 };
 	}
 	const [n, d] = pick(periodicList);
-	return { atomId: 'arithmetik__periodische_dezimalzahlen', prompt: `Ist ${fmtFrac(n, d)} eine endliche oder periodische Dezimalzahl? (endlich/periodisch)`, answerType: 'text', correctAnswer: 'periodisch', hint: `${d} enthält Primfaktoren außer 2 und 5.`, difficulty: 0.5 };
+	return { atomId: 'arithmetik__periodische_dezimalzahlen', prompt: `Ist ${fmtFrac(n, d)} eine endliche oder periodische Dezimalzahl?`, answerType: 'text', choices: ['endlich', 'periodisch'], correctAnswer: 'periodisch', hint: `${d} enthält Primfaktoren außer 2 und 5.`, difficulty: 0.5 };
 });
 
 // ── 12. Rationale Zahlen ──────────────────────────────────────────────────────
@@ -657,7 +782,15 @@ reg('arithmetik__negative_zahlen_zahlengerade', () => {
 	const a = -rand(1, 10), b = -rand(1, 10);
 	if (a === b) return registry.get('arithmetik__negative_zahlen_zahlengerade')!();
 	const bigger = Math.max(a, b);
-	return { atomId: 'arithmetik__negative_zahlen_zahlengerade', prompt: `Welche Zahl liegt weiter rechts auf der Zahlengeraden: ${a} oder ${b}?`, answerType: 'integer', correctAnswer: String(bigger), hint: 'Weiter rechts = größer.', difficulty: 0.4 };
+	const lo = Math.min(a, b) - 1;
+	const hi = 1;
+	return {
+		atomId: 'arithmetik__negative_zahlen_zahlengerade',
+		prompt: `Welche Zahl liegt weiter rechts auf dem Zahlenstrahl: ${a} oder ${b}?`,
+		answerType: 'integer', correctAnswer: String(bigger),
+		svg: svgIntegerLine(lo, hi, [a, b]),
+		hint: 'Weiter rechts = größer.', difficulty: 0.4
+	};
 });
 
 reg('arithmetik__betrag_gegenzahl', () => {
@@ -712,14 +845,14 @@ reg('arithmetik__verbindung_rechenarten_rationale', () => {
 // ── 13. Prozentrechnung ───────────────────────────────────────────────────────
 
 reg('arithmetik__prozentschreibweise', () => {
-	const entries: Array<[string, string, string]> = [
-		['1/2', '0,5', '50%'], ['1/4', '0,25', '25%'], ['3/4', '0,75', '75%'],
-		['1/5', '0,2', '20%'], ['2/5', '0,4', '40%'], ['1/10', '0,1', '10%'],
-		['3/10', '0,3', '30%'], ['1/100', '0,01', '1%']
+	const entries: Array<[number, number, string, string]> = [
+		[1, 2, '0,5', '50%'], [1, 4, '0,25', '25%'], [3, 4, '0,75', '75%'],
+		[1, 5, '0,2', '20%'], [2, 5, '0,4', '40%'], [1, 10, '0,1', '10%'],
+		[3, 10, '0,3', '30%'], [1, 100, '0,01', '1%']
 	];
-	const [fraction, decimal, percent] = pick(entries);
+	const [num, den, decimal, percent] = pick(entries);
 	const q = rand(0, 2);
-	if (q === 0) return { atomId: 'arithmetik__prozentschreibweise', prompt: `${fraction} = ___% `, answerType: 'integer', correctAnswer: String(parseFloat(percent)), difficulty: 0.35 };
+	if (q === 0) return { atomId: 'arithmetik__prozentschreibweise', prompt: `${fmtFrac(num, den)} = ___% `, answerType: 'integer', correctAnswer: String(parseFloat(percent)), difficulty: 0.35 };
 	if (q === 1) return { atomId: 'arithmetik__prozentschreibweise', prompt: `${percent} als Dezimalzahl = ?`, answerType: 'number', correctAnswer: decimal.replace(',', '.'), difficulty: 0.35 };
 	return { atomId: 'arithmetik__prozentschreibweise', prompt: `${decimal} = ___% `, answerType: 'integer', correctAnswer: String(parseFloat(percent)), difficulty: 0.35 };
 });
@@ -771,8 +904,9 @@ reg('arithmetik__zinsrechnung', () => {
 // ── 14. Potenzen ──────────────────────────────────────────────────────────────
 
 reg('arithmetik__potenzieren_natuerliche_zahlen', () => {
-	const base = rand(2, 6), exp = rand(2, 4);
-	return { atomId: 'arithmetik__potenzieren_natuerliche_zahlen', prompt: `${base}^${exp} = ?`, answerType: 'integer', correctAnswer: String(base ** exp), hint: `${base} · ${base}${exp > 2 ? ` · ${base}`.repeat(exp - 2) : ''} = ?`, difficulty: 0.45 };
+	let base: number, exp: number;
+	do { base = rand(2, 9); exp = rand(2, 4); } while (base ** exp > 100);
+	return { atomId: 'arithmetik__potenzieren_natuerliche_zahlen', prompt: `${pow(base, exp)} = ?`, answerType: 'integer', correctAnswer: String(base ** exp), hint: `${base} · ${base}${exp > 2 ? ` · ${base}`.repeat(exp - 2) : ''} = ?`, difficulty: 0.45 };
 });
 
 reg('arithmetik__zehnerpotenzen_normdarstellung', () => {
@@ -781,12 +915,12 @@ reg('arithmetik__zehnerpotenzen_normdarstellung', () => {
 		const exp = rand(2, 6);
 		const n = rand(1, 9) + rand(1, 9) / 10;
 		const value = n * 10 ** exp;
-		return { atomId: 'arithmetik__zehnerpotenzen_normdarstellung', prompt: `${dec(n)} · 10^${exp} = ?`, answerType: 'integer', correctAnswer: String(value), hint: 'Komma um den Exponenten nach rechts verschieben.', difficulty: 0.55 };
+		return { atomId: 'arithmetik__zehnerpotenzen_normdarstellung', prompt: `${dec(n)} · ${pow(10, exp)} = ?`, answerType: 'integer', correctAnswer: String(value), hint: 'Komma um den Exponenten nach rechts verschieben.', difficulty: 0.55 };
 	}
 	const exp = rand(2, 5);
 	const value = rand(1, 9) * 10 ** exp;
 	const mant = value / 10 ** exp;
-	return { atomId: 'arithmetik__zehnerpotenzen_normdarstellung', prompt: `${value} in Normdarstellung: ___ · 10^${exp}  — was ist die Mantisse?`, answerType: 'number', correctAnswer: dec(mant), hint: 'Mantisse ist die Zahl vor · 10^n.', difficulty: 0.55 };
+	return { atomId: 'arithmetik__zehnerpotenzen_normdarstellung', prompt: `${value} in Normdarstellung: ___ · ${pow(10, exp)}  — was ist die Mantisse?`, answerType: 'number', correctAnswer: dec(mant), hint: `Mantisse ist die Zahl vor · ${pow(10, 'n')}.`, difficulty: 0.55 };
 });
 
 // ── 15. Größen ────────────────────────────────────────────────────────────────

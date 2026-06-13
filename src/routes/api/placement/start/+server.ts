@@ -46,6 +46,9 @@ export const GET: RequestHandler = async ({ locals }) => {
 		taskId: task.id,
 		prompt: task.prompt,
 		answerType: task.answerType,
+		choices: task.choices ?? null,
+		svg: task.svg ?? null,
+		inputData: task.inputData ?? null,
 		hint: task.hint ?? null,
 		state,
 		maxAtoms: MAX_PLACEMENT_ATOMS

@@ -32,6 +32,13 @@
 					Aufgaben
 				</a>
 				<a
+					href="/teacher/atoms/import"
+					class="t-nav-link"
+					class:active={path.startsWith('/teacher/atoms')}
+				>
+					Erklärungen
+				</a>
+				<a
 					href="/teacher/settings"
 					class="t-nav-link"
 					class:active={path.startsWith('/teacher/settings')}
