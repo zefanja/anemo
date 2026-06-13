@@ -1,5 +1,13 @@
 <script lang="ts">
-	let { text }: { text: string } = $props();
+	import IllustrationView from './IllustrationView.svelte';
+
+	let {
+		text,
+		illustrationConfig = null
+	}: {
+		text: string;
+		illustrationConfig?: Record<string, unknown> | null;
+	} = $props();
 
 	let el = $state<HTMLDivElement | null>(null);
 
@@ -26,13 +34,25 @@
 	});
 </script>
 
-<div class="atom-explanation" bind:this={el}></div>
+<div class="atom-explanation-wrapper">
+	{#if illustrationConfig}
+		<IllustrationView config={illustrationConfig} />
+	{/if}
+	<div class="atom-explanation" bind:this={el}></div>
+</div>
 
 <style>
-	.atom-explanation {
-		background: var(--c-primary-light, #f0fdf4);
+	.atom-explanation-wrapper {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
 		border-left: 3px solid var(--c-primary, #16a34a);
 		border-radius: 0 0.5rem 0.5rem 0;
+		overflow: hidden;
+	}
+
+	.atom-explanation {
+		background: var(--c-primary-light, #f0fdf4);
 		padding: 0.75rem 1rem;
 		font-size: 0.9rem;
 		line-height: 1.65;

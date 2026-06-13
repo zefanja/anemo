@@ -131,6 +131,8 @@ export const classes = pgTable('classes', {
 	sessionMaxTotal: integer('session_max_total'),
 	sessionMaxReview: integer('session_max_review'),
 	cognitiveWeight: real('cognitive_weight'),
+	// whether students can see the class leaderboard
+	showLeaderboard: boolean('show_leaderboard').notNull().default(true),
 	createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow()
 });
 
@@ -147,7 +149,8 @@ export const students = pgTable(
 		codeHash: text('code_hash').notNull(),
 		createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 		lastActiveAt: timestamp('last_active_at', { withTimezone: true }),
-		placementDone: boolean('placement_done').notNull().default(false)
+		placementDone: boolean('placement_done').notNull().default(false),
+		hideLeaderboard: boolean('hide_leaderboard').notNull().default(false)
 	},
 	(t) => [index('students_class_idx').on(t.classId), uniqueIndex('students_code_hash_idx').on(t.codeHash)]
 );

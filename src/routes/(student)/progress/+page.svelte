@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { goto, invalidate } from '$app/navigation';
+	import { enhance } from '$app/forms';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -50,6 +51,15 @@
 	];
 
 	const earnedTypes = $derived(new Set<string>(data.badges));
+
+	function rankIcon(i: number): string {
+		if (i === 0) return '🥇';
+		if (i === 1) return '🥈';
+		if (i === 2) return '🥉';
+		return `${i + 1}.`;
+	}
+
+	const myRank = $derived(data.leaderboard.findIndex((e) => e.id === data.studentId));
 
 	function capitalize(s: string): string {
 		return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
@@ -196,6 +206,44 @@
 			<span class="today-label">Heute: {todayLabel}</span>
 		</div>
 	</div>
+
+	<!-- ── Class leaderboard ── -->
+	{#if data.showLeaderboard && data.leaderboard.length > 1}
+		<div class="lb-header">
+			<span class="section-title" style="padding: 0">Rangliste – Meine Klasse</span>
+			<form method="POST" action="?/toggleLeaderboard" use:enhance={() => () => invalidate('app:progress')}>
+				<button type="submit" class="lb-toggle-btn">
+					{data.studentHidesLeaderboard ? 'Einblenden' : 'Ausblenden'}
+				</button>
+			</form>
+		</div>
+		{#if data.studentHidesLeaderboard}
+			<div class="lb-hidden-note">
+				Die Rangliste ist ausgeblendet. Du kannst sie jederzeit wieder einblenden.
+			</div>
+		{:else}
+			<div class="lb-card">
+				{#if myRank >= 0}
+					<div class="lb-my-rank">
+						Du bist auf Platz <strong>{myRank + 1}</strong> von {data.leaderboard.length}
+						{#if myRank === 0} – du führst die Rangliste an!
+						{:else if myRank < 3} – weiter so!
+						{/if}
+					</div>
+				{/if}
+				<ul class="lb-list">
+					{#each data.leaderboard as entry, i}
+						<li class="lb-row" class:lb-me={entry.id === data.studentId} class:lb-top3={i < 3}>
+							<span class="lb-pos">{rankIcon(i)}</span>
+							<span class="lb-name">{entry.id === data.studentId ? 'Du' : entry.displayName}</span>
+							<span class="lb-lv">Lv.{entry.level}</span>
+							<span class="lb-xp">{entry.xp.toLocaleString('de-DE')} XP</span>
+						</li>
+					{/each}
+				</ul>
+			</div>
+		{/if}
+	{/if}
 
 	<!-- ── Badges ── -->
 	<div class="section-title">Abzeichen</div>
@@ -527,6 +575,68 @@
 		background: var(--c-primary);
 		border-radius: 999px;
 	}
+
+	/* ── Class leaderboard ── */
+	.lb-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 0.5rem 0 0.25rem;
+	}
+	.lb-toggle-btn {
+		font-size: 0.7rem;
+		font-weight: 600;
+		color: var(--c-gray-500);
+		background: none;
+		border: 1px solid var(--c-gray-200);
+		border-radius: 999px;
+		padding: 0.2rem 0.65rem;
+		cursor: pointer;
+		transition: color .15s, border-color .15s;
+	}
+	.lb-toggle-btn:hover { color: var(--c-primary); border-color: var(--c-primary); }
+	.lb-hidden-note {
+		font-size: 0.8rem;
+		color: var(--c-gray-500);
+		text-align: center;
+		padding: 0.75rem 1rem;
+		background: var(--c-gray-50);
+		border-radius: var(--radius);
+		border: 1px solid var(--c-gray-200);
+	}
+	.lb-card {
+		background: #fff;
+		border-radius: var(--radius);
+		padding: 1rem 1.25rem;
+		box-shadow: var(--shadow-sm);
+		margin-bottom: 0.25rem;
+	}
+	.lb-my-rank {
+		font-size: 0.825rem;
+		color: var(--c-gray-700);
+		margin-bottom: 0.75rem;
+		padding-bottom: 0.5rem;
+		border-bottom: 1px solid var(--c-gray-100);
+	}
+	.lb-list { list-style: none; display: flex; flex-direction: column; gap: 0.25rem; }
+	.lb-row {
+		display: flex;
+		align-items: center;
+		gap: 0.6rem;
+		padding: 0.45rem 0.5rem;
+		border-radius: 0.4rem;
+		font-size: 0.875rem;
+	}
+	.lb-row.lb-top3 { background: #fafff7; }
+	.lb-row.lb-me {
+		background: var(--c-primary-light);
+		border: 1.5px solid var(--c-primary);
+		font-weight: 700;
+	}
+	.lb-pos { width: 1.8rem; text-align: center; font-weight: 700; flex-shrink: 0; }
+	.lb-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.lb-lv { font-size: 0.75rem; color: var(--c-gray-500); white-space: nowrap; }
+	.lb-xp { font-size: 0.8rem; font-weight: 700; color: var(--c-primary); white-space: nowrap; }
 
 	/* ── Reset section ── */
 	.reset-section {

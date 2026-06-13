@@ -84,7 +84,12 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 	}
 
 	return {
-		class: { id: cls.id, name: cls.name, enabledDomains: cls.enabledDomains ?? null },
+		class: {
+			id: cls.id,
+			name: cls.name,
+			enabledDomains: cls.enabledDomains ?? null,
+			showLeaderboard: cls.showLeaderboard
+		},
 		totalAtoms: allAtoms.length,
 		domains,
 		students: studentList.map((s) => {
@@ -262,12 +267,14 @@ export const actions: Actions = {
 		const fd = await request.formData();
 		const maxReview = parseInt(fd.get('sessionMaxReview')?.toString() ?? '');
 		const maxTotal = parseInt(fd.get('sessionMaxTotal')?.toString() ?? '');
+		const showLeaderboard = fd.get('showLeaderboard') === 'true';
 
 		await db
 			.update(classes)
 			.set({
 				sessionMaxReview: isNaN(maxReview) ? null : maxReview,
-				sessionMaxTotal: isNaN(maxTotal) ? null : maxTotal
+				sessionMaxTotal: isNaN(maxTotal) ? null : maxTotal,
+				showLeaderboard
 			})
 			.where(eq(classes.id, params.classId));
 

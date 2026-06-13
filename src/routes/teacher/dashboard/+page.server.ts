@@ -11,7 +11,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 	const [classes, recentAttempts] = await Promise.all([
 		db.query.classes.findMany({
 			where: (c, { eq }) => eq(c.teacherId, teacherId),
-			with: { students: { columns: { id: true } } }
+			with: { students: { columns: { id: true, displayName: true } } }
 		}),
 		db.query.attempts.findMany({
 			orderBy: (a, { desc }) => [desc(a.answeredAt)],
@@ -25,7 +25,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 	const studentIds = classes.flatMap((c) => c.students.map((s) => s.id));
 
-	const [masteredCount, totalAtomCount] = await Promise.all([
+	const [masteredStatuses, totalAtomCount, gamiStates] = await Promise.all([
 		studentIds.length > 0
 			? db.query.studentAtomStatus.findMany({
 					where: (s, { and, inArray, eq }) =>
@@ -36,14 +36,42 @@ export const load: PageServerLoad = async ({ locals }) => {
 		db.query.atoms.findMany({
 			where: (a, { eq }) => eq(a.level, 'atom'),
 			columns: { id: true }
-		})
+		}),
+		studentIds.length > 0
+			? db.query.gamificationState.findMany({
+					where: (g, { inArray }) => inArray(g.studentId, studentIds)
+				})
+			: Promise.resolve([])
 	]);
+
+	const masteredByStudent = new Map<string, number>();
+	for (const m of masteredStatuses) {
+		masteredByStudent.set(m.studentId, (masteredByStudent.get(m.studentId) ?? 0) + 1);
+	}
+
+	const gamiMap = new Map(gamiStates.map((g) => [g.studentId, g]));
+
+	const leaderboard = classes
+		.flatMap((c) =>
+			c.students.map((s) => ({
+				id: s.id,
+				displayName: s.displayName,
+				className: c.name,
+				classId: c.id,
+				xp: gamiMap.get(s.id)?.xp ?? 0,
+				level: gamiMap.get(s.id)?.level ?? 1,
+				streakDays: gamiMap.get(s.id)?.streakDays ?? 0,
+				masteredCount: masteredByStudent.get(s.id) ?? 0
+			}))
+		)
+		.sort((a, b) => b.xp - a.xp)
+		.slice(0, 10);
 
 	return {
 		stats: {
 			classCount: classes.length,
 			studentCount: studentIds.length,
-			masteredCount: masteredCount.length,
+			masteredCount: masteredStatuses.length,
 			totalAtoms: totalAtomCount.length
 		},
 		classes: classes.map((c) => ({ id: c.id, name: c.name, studentCount: c.students.length })),
@@ -53,6 +81,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 			atomLabel: a.atom?.label ?? a.atomId,
 			isCorrect: a.isCorrect,
 			answeredAt: a.answeredAt
-		}))
+		})),
+		leaderboard
 	};
 };

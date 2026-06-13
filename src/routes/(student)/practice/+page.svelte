@@ -20,6 +20,7 @@
 		hint: string | null;
 		difficulty: number | null;
 		explanation: string | null;
+		illustrationConfig: Record<string, unknown> | null;
 	};
 
 	type AttemptResult = {
@@ -392,7 +393,7 @@
 					{/if}
 
 					{#if !lastResult.correct && currentTask?.explanation}
-						<AtomExplanation text={currentTask.explanation} />
+						<AtomExplanation text={currentTask.explanation} illustrationConfig={currentTask.illustrationConfig} />
 					{:else if !lastResult.correct && lastResult.hint}
 						<div class="hint-box">💡 <MathText text={lastResult.hint} /></div>
 					{/if}
@@ -414,7 +415,7 @@
 				<div class="task-card">
 					<div class="atom-label-tag">{activeItem?.label}</div>
 					{#if showExplanationOnTask && currentTask.explanation}
-						<AtomExplanation text={currentTask.explanation} />
+						<AtomExplanation text={currentTask.explanation} illustrationConfig={currentTask.illustrationConfig} />
 					{/if}
 					{#if currentTask.svg}
 						<div class="task-svg">{@html currentTask.svg}</div>

@@ -8,7 +8,7 @@
 	let showBulkForm = $state(false);
 	let confirmDelete = $state<string | null>(null);
 	let confirmResetAll = $state(false);
-	let activeTab = $state<'students' | 'heatmap' | 'settings'>('students');
+	let activeTab = $state<'students' | 'heatmap' | 'leaderboard' | 'settings'>('students');
 	let editingId = $state<string | null>(null);
 	let editingName = $state('');
 
@@ -52,6 +52,19 @@
 				? form.reset
 				: null
 	);
+
+	let showLeaderboard = $state(data.class.showLeaderboard);
+
+	let leaderboard = $derived(
+		[...data.students].sort((a, b) => b.xp - a.xp)
+	);
+
+	function rankIcon(i: number): string {
+		if (i === 0) return '🥇';
+		if (i === 1) return '🥈';
+		if (i === 2) return '🥉';
+		return `${i + 1}.`;
+	}
 
 	function pctColor(pct: number): string {
 		if (pct >= 80) return '#16a34a';
@@ -213,6 +226,9 @@ ${cards.map((c) => `<div class="card">
 		</button>
 		<button class="tab" class:active={activeTab === 'heatmap'} onclick={() => (activeTab = 'heatmap')}>
 			Fortschritt
+		</button>
+		<button class="tab" class:active={activeTab === 'leaderboard'} onclick={() => (activeTab = 'leaderboard')}>
+			Leaderboard
 		</button>
 		<button class="tab" class:active={activeTab === 'settings'} onclick={() => (activeTab = 'settings')}>
 			Einstellungen
@@ -420,13 +436,57 @@ ${cards.map((c) => `<div class="card">
 			{/if}
 		</div>
 
+	<!-- ── Leaderboard tab ── -->
+	{:else if activeTab === 'leaderboard'}
+		<div class="tab-content">
+			{#if !data.class.showLeaderboard}
+				<div class="lb-disabled-note">
+					Das Leaderboard ist für Schüler dieser Klasse deaktiviert. Du kannst es in den Einstellungen aktivieren.
+				</div>
+			{/if}
+			{#if data.students.length === 0}
+				<p class="muted">Noch keine Schüler vorhanden.</p>
+			{:else}
+				<div class="table-wrap">
+					<table class="t">
+						<thead>
+							<tr>
+								<th class="lb-rank-col">#</th>
+								<th>Name</th>
+								<th class="center">Level</th>
+								<th class="center">XP</th>
+								<th class="center">Gemeistert</th>
+								<th class="center">Streak</th>
+							</tr>
+						</thead>
+						<tbody>
+							{#each leaderboard as s, i}
+								<tr class:lb-top3={i < 3}>
+									<td class="lb-rank-col">{rankIcon(i)}</td>
+									<td class="name-cell">
+										<a href="/teacher/classes/{data.class.id}/students/{s.id}" class="student-link">
+											{s.displayName}
+										</a>
+									</td>
+									<td class="center">Lv.{s.level}</td>
+									<td class="center lb-xp">{s.xp.toLocaleString('de-DE')}</td>
+									<td class="center">{s.masteredCount}/{data.totalAtoms}</td>
+									<td class="center">🔥 {s.streakDays}</td>
+								</tr>
+							{/each}
+						</tbody>
+					</table>
+				</div>
+			{/if}
+		</div>
+
 	<!-- ── Settings tab ── -->
 	{:else if activeTab === 'settings'}
 		<div class="tab-content">
 			<div class="card settings-card">
 				<h3>Sitzungseinstellungen</h3>
 				<p class="form-hint">Leer lassen = Server-Standardwert wird verwendet.</p>
-				<form method="POST" action="?/updateSettings" use:enhance>
+				<form method="POST" action="?/updateSettings" use:enhance={() => ({ update }) => update()}>
 					<div class="settings-grid">
 						<div class="field">
 							<label for="maxReview">Max. Wiederholungsaufgaben pro Sitzung</label>
@@ -451,6 +511,20 @@ ${cards.map((c) => `<div class="card">
 							/>
 						</div>
 					</div>
+					<div class="field-toggle">
+						<label class="toggle-label">
+							<input
+								type="checkbox"
+								checked={showLeaderboard}
+								onchange={(e) => (showLeaderboard = (e.target as HTMLInputElement).checked)}
+							/>
+							<span>Leaderboard für Schüler sichtbar</span>
+						</label>
+						<p class="form-hint">
+							Wenn aktiviert, sehen Schüler eine Rangliste ihrer Klasse (nach XP). Deaktivieren, um sozialen Vergleich zu vermeiden.
+						</p>
+					</div>
+					<input type="hidden" name="showLeaderboard" value={showLeaderboard ? 'true' : 'false'} />
 					<button type="submit" class="btn btn-primary">Speichern</button>
 				</form>
 			</div>
@@ -714,7 +788,31 @@ ${cards.map((c) => `<div class="card">
 	.legend { font-size: 0.75rem; color: #6b7280; display: flex; align-items: center; gap: 0.25rem; flex-wrap: wrap; }
 	.legend-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 2px; }
 
+	/* Leaderboard tab */
+	.lb-rank-col { text-align: center; width: 2.5rem; font-weight: 700; }
+	.lb-top3 td { background: #fafff7; }
+	.lb-xp { font-weight: 700; color: #16a34a; }
+	.lb-disabled-note {
+		background: #fffbeb;
+		border: 1px solid #fde68a;
+		border-radius: 0.5rem;
+		padding: 0.75rem 1rem;
+		font-size: 0.875rem;
+		color: #92400e;
+	}
+
 	/* Settings */
+	.field-toggle { margin-bottom: 1rem; }
+	.toggle-label {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		cursor: pointer;
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: #374151;
+	}
+	.toggle-label input[type="checkbox"] { accent-color: #16a34a; width: 1rem; height: 1rem; }
 	.settings-card { padding: 1.25rem; }
 	.settings-card h3 { font-size: 1rem; font-weight: 700; margin: 0 0 0.25rem; }
 	.settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }

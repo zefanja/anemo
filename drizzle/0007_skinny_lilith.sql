@@ -1,0 +1,1 @@
+ALTER TABLE "students" ADD COLUMN "hide_leaderboard" boolean DEFAULT false NOT NULL;

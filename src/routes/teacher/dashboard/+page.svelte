@@ -11,6 +11,13 @@
 		if (diff < 86400) return `vor ${Math.floor(diff / 3600)} Std.`;
 		return `vor ${Math.floor(diff / 86400)} Tagen`;
 	}
+
+	function rankIcon(i: number): string {
+		if (i === 0) return '🥇';
+		if (i === 1) return '🥈';
+		if (i === 2) return '🥉';
+		return `${i + 1}.`;
+	}
 </script>
 
 <svelte:head><title>Anemo – Dashboard</title></svelte:head>
@@ -84,6 +91,52 @@
 			{/if}
 		</section>
 	</div>
+
+	<!-- School-wide leaderboard -->
+	{#if data.leaderboard.length > 0}
+		<section class="card">
+			<div class="card-header">
+				<h2>Leaderboard – Schule gesamt</h2>
+				<span class="link-more">Top {data.leaderboard.length}</span>
+			</div>
+			<div class="lb-table-wrap">
+				<table class="lb-table">
+					<thead>
+						<tr>
+							<th class="lb-rank">#</th>
+							<th>Name</th>
+							<th>Klasse</th>
+							<th class="lb-num">Level</th>
+							<th class="lb-num">XP</th>
+							<th class="lb-num">Gemeistert</th>
+							<th class="lb-num">Streak</th>
+						</tr>
+					</thead>
+					<tbody>
+						{#each data.leaderboard as entry, i}
+							<tr class:lb-top3={i < 3}>
+								<td class="lb-rank">{rankIcon(i)}</td>
+								<td class="lb-name">
+									<a href="/teacher/classes/{entry.classId}/students/{entry.id}" class="student-link">
+										{entry.displayName}
+									</a>
+								</td>
+								<td class="lb-class">
+									<a href="/teacher/classes/{entry.classId}" class="class-link">
+										{entry.className}
+									</a>
+								</td>
+								<td class="lb-num">Lv.{entry.level}</td>
+								<td class="lb-num lb-xp">{entry.xp.toLocaleString('de-DE')}</td>
+								<td class="lb-num">{entry.masteredCount}</td>
+								<td class="lb-num">🔥 {entry.streakDays}</td>
+							</tr>
+						{/each}
+					</tbody>
+				</table>
+			</div>
+		</section>
+	{/if}
 </div>
 
 <style>
@@ -160,4 +213,29 @@
 	.activity-dot.wrong { background: #dc2626; }
 	.activity-body { flex: 1; color: #374151; }
 	.activity-time { font-size: 0.75rem; color: #9ca3af; white-space: nowrap; }
+
+	/* Leaderboard */
+	.lb-table-wrap { overflow-x: auto; }
+	.lb-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+	.lb-table th {
+		padding: 0.5rem 0.75rem;
+		text-align: left;
+		font-size: 0.75rem;
+		color: #6b7280;
+		font-weight: 600;
+		border-bottom: 1px solid #e5e7eb;
+		background: #f9fafb;
+	}
+	.lb-table td { padding: 0.6rem 0.75rem; border-bottom: 1px solid #f3f4f6; }
+	.lb-table tr:last-child td { border-bottom: none; }
+	.lb-top3 td { background: #fafff7; }
+	.lb-rank { text-align: center; width: 2.5rem; font-weight: 700; }
+	.lb-num { text-align: right; white-space: nowrap; }
+	.lb-xp { font-weight: 700; color: #16a34a; }
+	.lb-name { font-weight: 600; }
+	.lb-class { color: #6b7280; font-size: 0.8rem; }
+	.student-link { color: inherit; text-decoration: none; }
+	.student-link:hover { color: #16a34a; text-decoration: underline; }
+	.class-link { color: #6b7280; text-decoration: none; }
+	.class-link:hover { color: #16a34a; }
 </style>

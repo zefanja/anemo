@@ -1,9 +1,9 @@
-import { redirect } from '@sveltejs/kit';
+import { redirect, fail } from '@sveltejs/kit';
 import { db } from '$lib/server/db/index.js';
-import { attempts as attemptsTable } from '$lib/server/db/schema.js';
+import { attempts as attemptsTable, students } from '$lib/server/db/schema.js';
 import { and, eq, gte, sql } from 'drizzle-orm';
 import { computeFrontier } from '$lib/server/learning/frontier.js';
-import type { PageServerLoad } from './$types';
+import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals, depends }) => {
 	depends('app:progress');
@@ -12,7 +12,7 @@ export const load: PageServerLoad = async ({ locals, depends }) => {
 	}
 	const { studentId, classId } = locals.session;
 
-	const [allAtoms, statuses, earnedBadges, classRecord, activityRows] = await Promise.all([
+	const [allAtoms, statuses, earnedBadges, classRecord, studentRecord, activityRows] = await Promise.all([
 		db.query.atoms.findMany({
 			orderBy: (a, { asc }) => [asc(a.domain), asc(a.subdomain), asc(a.label)]
 		}),
@@ -24,6 +24,10 @@ export const load: PageServerLoad = async ({ locals, depends }) => {
 		}),
 		db.query.classes.findFirst({
 			where: (c, { eq }) => eq(c.id, classId)
+		}),
+		db.query.students.findFirst({
+			where: (s, { eq }) => eq(s.id, studentId),
+			columns: { hideLeaderboard: true }
 		}),
 		db
 			.select({
@@ -39,6 +43,44 @@ export const load: PageServerLoad = async ({ locals, depends }) => {
 			)
 			.groupBy(sql`date_trunc('day', ${attemptsTable.answeredAt} AT TIME ZONE current_setting('timezone'))`)
 	]);
+
+	// Class leaderboard (only if enabled)
+	let leaderboard: { id: string; displayName: string; xp: number; level: number; masteredCount: number }[] = [];
+	if (classRecord?.showLeaderboard) {
+		const classmates = await db.query.students.findMany({
+			where: (s, { eq: eqFn }) => eqFn(s.classId, classId),
+			columns: { id: true, displayName: true }
+		});
+		const classmateIds = classmates.map((s) => s.id);
+		const [classmateGami, classmateMastered] = await Promise.all([
+			classmateIds.length > 0
+				? db.query.gamificationState.findMany({
+						where: (g, { inArray }) => inArray(g.studentId, classmateIds)
+					})
+				: Promise.resolve([]),
+			classmateIds.length > 0
+				? db.query.studentAtomStatus.findMany({
+						where: (s, { and: andFn, inArray, eq: eqFn }) =>
+							andFn(inArray(s.studentId, classmateIds), eqFn(s.isMastered, true)),
+						columns: { studentId: true }
+					})
+				: Promise.resolve([])
+		]);
+		const gamiMap = new Map(classmateGami.map((g) => [g.studentId, g]));
+		const masteredCountMap = new Map<string, number>();
+		for (const m of classmateMastered) {
+			masteredCountMap.set(m.studentId, (masteredCountMap.get(m.studentId) ?? 0) + 1);
+		}
+		leaderboard = classmates
+			.map((s) => ({
+				id: s.id,
+				displayName: s.displayName,
+				xp: gamiMap.get(s.id)?.xp ?? 0,
+				level: gamiMap.get(s.id)?.level ?? 1,
+				masteredCount: masteredCountMap.get(s.id) ?? 0
+			}))
+			.sort((a, b) => b.xp - a.xp);
+	}
 
 	const frontier = await computeFrontier(studentId, classRecord?.enabledDomains ?? null);
 	const activeIds = new Set(frontier.map((f) => f.id));
@@ -93,6 +135,27 @@ export const load: PageServerLoad = async ({ locals, depends }) => {
 		totalAtoms,
 		masteredAtoms,
 		badges: earnedBadges.map((b) => b.badgeType),
-		activityDays: activityRows
+		activityDays: activityRows,
+		leaderboard,
+		showLeaderboard: classRecord?.showLeaderboard ?? false,
+		studentHidesLeaderboard: studentRecord?.hideLeaderboard ?? false,
+		studentId
 	};
+};
+
+export const actions: Actions = {
+	toggleLeaderboard: async ({ locals }) => {
+		if (!locals.session || locals.session.type !== 'student') return fail(401);
+		const { studentId } = locals.session;
+		const current = await db.query.students.findFirst({
+			where: (s, { eq }) => eq(s.id, studentId),
+			columns: { hideLeaderboard: true }
+		});
+		if (!current) return fail(404);
+		await db
+			.update(students)
+			.set({ hideLeaderboard: !current.hideLeaderboard })
+			.where(eq(students.id, studentId));
+		return { toggled: true };
+	}
 };

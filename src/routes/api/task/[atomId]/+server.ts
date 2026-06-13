@@ -10,7 +10,7 @@ export const GET: RequestHandler = async ({ params, locals, url }) => {
 
 	const atom = await db.query.atoms.findFirst({
 		where: (a, { eq }) => eq(a.id, params.atomId),
-		columns: { id: true, level: true, explanation: true }
+		columns: { id: true, level: true, explanation: true, illustrationConfig: true }
 	});
 
 	if (!atom) throw error(404, 'Atom nicht gefunden');
@@ -36,6 +36,7 @@ export const GET: RequestHandler = async ({ params, locals, url }) => {
 		inputData,
 		hint: task.hint ?? null,
 		difficulty: task.difficulty ?? null,
-		explanation: atom.explanation ?? null
+		explanation: atom.explanation ?? null,
+		illustrationConfig: atom.illustrationConfig ?? null
 	});
 };
