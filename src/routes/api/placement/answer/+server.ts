@@ -72,6 +72,11 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 	if (!nextTask) throw error(500, 'Keine Aufgabe verfügbar');
 
+	const baseInputData = nextTask.inputData ?? null;
+	const inputData = nextTask.answerType === 'fraction' && nextTask.correctAnswer.includes('/')
+		? { ...baseInputData, numDigits: nextTask.correctAnswer.split('/')[0].length }
+		: baseInputData;
+
 	return json({
 		correct,
 		complete: false,
@@ -83,7 +88,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		answerType: nextTask.answerType,
 		choices: nextTask.choices ?? null,
 		svg: nextTask.svg ?? null,
-		inputData: nextTask.inputData ?? null,
+		inputData,
 		nextHint: nextTask.hint ?? null,
 		state: newState
 	});

@@ -20,11 +20,20 @@ export const answerTypeEnum = pgEnum('answer_type', ['number', 'fraction', 'inte
 export const badgeTypeEnum = pgEnum('badge_type', [
 	'first_atom',
 	'cluster_complete',
+	'streak_3',
 	'streak_7',
 	'streak_30',
+	'streak_100',
+	'atoms_5',
 	'atoms_10',
+	'atoms_25',
 	'atoms_50',
-	'atoms_all'
+	'atoms_all',
+	'xp_100',
+	'xp_500',
+	'xp_1500',
+	'xp_4000',
+	'xp_8000'
 ]);
 
 // ── Graph ─────────────────────────────────────────────────────────────────────

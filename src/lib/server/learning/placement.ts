@@ -4,6 +4,7 @@ import { eq } from 'drizzle-orm';
 import { createEmptyCard } from 'ts-fsrs';
 import type { FsrsState } from './fsrs.js';
 import { hasGenerator } from '../tasks/generators.js';
+import { recordPlacementCompletion } from '../gamification/index.js';
 
 export const MAX_PLACEMENT_ATOMS = 15;
 const PLACEMENT_MASTERY = 0.85;
@@ -213,6 +214,8 @@ export async function finalizePlacement(
 	}
 
 	await db.update(students).set({ placementDone: true }).where(eq(students.id, studentId));
+
+	await recordPlacementCompletion(studentId, passedAtomIds.length);
 
 	return { testedPassed: passedAtomIds.length, assumedMastered: state.propagated.length };
 }

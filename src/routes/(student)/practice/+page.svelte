@@ -113,6 +113,7 @@
 	// ── Feedback state ──
 	let showFeedback = $state(false);
 	let lastResult = $state<AttemptResult | null>(null);
+	let autoAdvanceTimer = $state<ReturnType<typeof setTimeout> | null>(null);
 
 	// ── Transition screen: all reviews done ──
 	let reviewsDoneScreen = $state(false);
@@ -170,6 +171,12 @@
 			if (lastResult.justMastered) {
 				invalidate('app:practice');
 			}
+			if (lastResult.correct && !lastResult.justMastered && !lastResult.levelUp && lastResult.newBadges.length === 0) {
+				autoAdvanceTimer = setTimeout(() => {
+					autoAdvanceTimer = null;
+					handleContinue();
+				}, 1500);
+			}
 		} catch {
 			// show generic error?
 		} finally {
@@ -178,6 +185,10 @@
 	}
 
 	function handleContinue() {
+		if (autoAdvanceTimer !== null) {
+			clearTimeout(autoAdvanceTimer);
+			autoAdvanceTimer = null;
+		}
 		if (phase === 'reviews') {
 			const next = reviewIndex + 1;
 			if (next >= reviews.length) {
@@ -228,12 +239,21 @@
 	}
 
 	const BADGE_LABELS: Record<string, string> = {
-		first_atom: '🏅 Erstes Atom gemeistert!',
-		atoms_10: '⭐ 10 Atome gemeistert!',
-		atoms_50: '🌟 50 Atome gemeistert!',
-		atoms_all: '🏆 Alle Atome gemeistert!',
-		streak_7: '🔥 7 Tage Streak!',
-		streak_30: '🔥 30 Tage Streak!',
+		first_atom:       '🌱 Erster Schritt – Atom gemeistert!',
+		atoms_5:          '📚 Abel – 5 Atome gemeistert!',
+		atoms_10:         '📖 Thales – 10 Atome gemeistert!',
+		atoms_25:         '🌿 Fibonacci – 25 Atome gemeistert!',
+		atoms_50:         '💡 Leibniz – 50 Atome gemeistert!',
+		atoms_all:        '🏆 Gauß – Alle Atome gemeistert!',
+		streak_3:         '🔥 Hypatia – 3 Tage Streak!',
+		streak_7:         '🔥 Pythagoras – 7 Tage Streak!',
+		streak_30:        '🔥 Archimedes – 30 Tage Streak!',
+		streak_100:       '🔥 Ramanujan – 100 Tage Streak!',
+		xp_100:           '⭐ Euklid – 100 XP erreicht!',
+		xp_500:           '🌟 Kepler – 500 XP erreicht!',
+		xp_1500:          '💫 Descartes – 1.500 XP erreicht!',
+		xp_4000:          '⚡ Newton – 4.000 XP erreicht!',
+		xp_8000:          '💎 Euler – 8.000 XP erreicht!',
 		cluster_complete: '📦 Bereich abgeschlossen!'
 	};
 
@@ -409,7 +429,7 @@
 								{/each}
 							</div>
 						{:else if currentTask.answerType === 'fraction'}
-							<FractionInput bind:this={fractionInput} bind:value={answer} disabled={isSubmitting} onsubmit={submitAnswer} />
+							<FractionInput bind:this={fractionInput} bind:value={answer} disabled={isSubmitting} numDigits={currentTask.inputData?.numDigits as number | undefined} onsubmit={submitAnswer} />
 						{:else if writtenArith}
 							<WrittenCalcInput bind:this={writtenCalcInput} a={writtenArith.a} b={writtenArith.b} op={writtenArith.op} bind:value={answer} disabled={isSubmitting} onsubmit={submitAnswer} />
 						{:else if isNumberLine}

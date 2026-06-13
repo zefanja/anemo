@@ -85,17 +85,22 @@ export async function computeFrontier(
 		requiredEdges.map((e) => e.sourceId).filter((id) => !atomLevelIds.has(id))
 	);
 	const clusterMastery = new Map<string, number>();
+	// Helper: effective mastery for prereq checks.
+	// A mastered atom counts as 1.0 regardless of its raw mastery value, so that
+	// edges with masteryLevelNeeded > atom.masteryRequired never permanently block progress.
+	function effectiveMastery(atomId: string): number {
+		const status = masteryMap.get(atomId);
+		if (status?.isMastered) return 1.0;
+		return status?.mastery ?? clusterMastery.get(atomId) ?? 0;
+	}
+
 	let changed = true;
 	while (changed) {
 		changed = false;
 		for (const clusterId of clusterIds) {
 			const subEdges = requiredEdges.filter((e) => e.targetId === clusterId);
 			if (subEdges.length === 0) continue;
-			const mastery = Math.min(
-				...subEdges.map(
-					(e) => masteryMap.get(e.sourceId)?.mastery ?? clusterMastery.get(e.sourceId) ?? 0
-				)
-			);
+			const mastery = Math.min(...subEdges.map((e) => effectiveMastery(e.sourceId)));
 			if (mastery !== (clusterMastery.get(clusterId) ?? 0)) {
 				clusterMastery.set(clusterId, mastery);
 				changed = true;
@@ -115,9 +120,7 @@ export async function computeFrontier(
 		// Check all required prerequisites are satisfied
 		const prereqs = prereqMap.get(atom.id) ?? [];
 		const allSatisfied = prereqs.every((p) => {
-			const prereqMastery =
-				masteryMap.get(p.sourceId)?.mastery ?? clusterMastery.get(p.sourceId) ?? 0;
-			return prereqMastery >= p.masteryLevelNeeded;
+			return effectiveMastery(p.sourceId) >= p.masteryLevelNeeded;
 		});
 
 		if (!allSatisfied) continue;

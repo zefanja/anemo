@@ -20,6 +20,11 @@ export const GET: RequestHandler = async ({ params, locals, url }) => {
 	const task = await getTaskForAtom(params.atomId, excludePrompts);
 	if (!task) throw error(404, 'Keine Aufgabe verfügbar');
 
+	const baseInputData = task.inputData ?? null;
+	const inputData = task.answerType === 'fraction' && task.correctAnswer.includes('/')
+		? { ...baseInputData, numDigits: task.correctAnswer.split('/')[0].length }
+		: baseInputData;
+
 	// Never expose the correct answer to the client
 	return json({
 		taskId: task.id,
@@ -28,7 +33,7 @@ export const GET: RequestHandler = async ({ params, locals, url }) => {
 		answerType: task.answerType,
 		choices: task.choices ?? null,
 		svg: task.svg ?? null,
-		inputData: task.inputData ?? null,
+		inputData,
 		hint: task.hint ?? null,
 		difficulty: task.difficulty ?? null,
 		explanation: atom.explanation ?? null

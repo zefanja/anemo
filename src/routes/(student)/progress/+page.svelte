@@ -19,15 +19,37 @@
 		}
 	}
 
-	const BADGE_LABELS: Record<string, string> = {
-		first_atom: '🏅 Erstes Atom',
-		atoms_10: '⭐ 10 Atome',
-		atoms_50: '🌟 50 Atome',
-		atoms_all: '🏆 Alle Atome',
-		streak_7: '🔥 7-Tage-Streak',
-		streak_30: '🔥 30-Tage-Streak',
-		cluster_complete: '📦 Bereich fertig'
-	};
+	interface BadgeDef {
+		type: string;
+		emoji: string;
+		label: string;
+		desc: string;
+	}
+
+	const ALL_BADGES: BadgeDef[] = [
+		// Atoms mastered
+		{ type: 'first_atom',      emoji: '🌱', label: 'Erster Schritt',  desc: '1. Atom gemeistert' },
+		{ type: 'atoms_5',         emoji: '📚', label: 'Abel',            desc: '5 Atome gemeistert' },
+		{ type: 'atoms_10',        emoji: '📖', label: 'Thales',          desc: '10 Atome gemeistert' },
+		{ type: 'atoms_25',        emoji: '🌿', label: 'Fibonacci',       desc: '25 Atome gemeistert' },
+		{ type: 'atoms_50',        emoji: '💡', label: 'Leibniz',         desc: '50 Atome gemeistert' },
+		{ type: 'atoms_all',       emoji: '🏆', label: 'Gauß',            desc: 'Alle Atome gemeistert' },
+		// Streaks
+		{ type: 'streak_3',        emoji: '🔥', label: 'Hypatia',         desc: '3 Tage Streak' },
+		{ type: 'streak_7',        emoji: '🔥', label: 'Pythagoras',      desc: '7 Tage Streak' },
+		{ type: 'streak_30',       emoji: '🔥', label: 'Archimedes',      desc: '30 Tage Streak' },
+		{ type: 'streak_100',      emoji: '🔥', label: 'Ramanujan',       desc: '100 Tage Streak' },
+		// XP milestones
+		{ type: 'xp_100',          emoji: '⭐', label: 'Euklid',          desc: '100 XP gesammelt' },
+		{ type: 'xp_500',          emoji: '🌟', label: 'Kepler',          desc: '500 XP gesammelt' },
+		{ type: 'xp_1500',         emoji: '💫', label: 'Descartes',       desc: '1.500 XP gesammelt' },
+		{ type: 'xp_4000',         emoji: '⚡', label: 'Newton',          desc: '4.000 XP gesammelt' },
+		{ type: 'xp_8000',         emoji: '💎', label: 'Euler',           desc: '8.000 XP gesammelt' },
+		// Other
+		{ type: 'cluster_complete',emoji: '📦', label: 'Bereich fertig', desc: 'Einen ganzen Bereich abgeschlossen' }
+	];
+
+	const earnedTypes = $derived(new Set<string>(data.badges));
 
 	function capitalize(s: string): string {
 		return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
@@ -176,14 +198,17 @@
 	</div>
 
 	<!-- ── Badges ── -->
-	{#if data.badges.length > 0}
-		<div class="section-title">Abzeichen</div>
-		<div class="badges-row">
-			{#each data.badges as badge}
-				<span class="badge-chip">{BADGE_LABELS[badge] ?? badge}</span>
-			{/each}
-		</div>
-	{/if}
+	<div class="section-title">Abzeichen</div>
+	<div class="badges-grid">
+		{#each ALL_BADGES as badge}
+			{@const earned = earnedTypes.has(badge.type)}
+			<div class="badge-card" class:earned class:locked={!earned} title={badge.desc}>
+				<span class="badge-emoji">{badge.emoji}</span>
+				<span class="badge-name">{badge.label}</span>
+				<span class="badge-desc">{badge.desc}</span>
+			</div>
+		{/each}
+	</div>
 
 	<!-- ── Active atoms by domain ── -->
 	{#if data.domains.length === 0}
@@ -342,19 +367,53 @@
 	}
 
 	/* ── Badges ── */
-	.badges-row {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.4rem;
+	.badges-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+		gap: 0.5rem;
 		margin-bottom: 0.5rem;
 	}
-	.badge-chip {
+	.badge-card {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.2rem;
+		padding: 0.65rem 0.4rem 0.5rem;
+		border-radius: var(--radius);
+		text-align: center;
+		cursor: default;
+		transition: transform .15s;
+	}
+	.badge-card:hover { transform: translateY(-2px); }
+	.badge-card.earned {
 		background: var(--c-primary-light);
+		border: 1.5px solid var(--c-primary);
+	}
+	.badge-card.locked {
+		background: var(--c-gray-50);
+		border: 1.5px solid var(--c-gray-200);
+		opacity: 0.55;
+	}
+	.badge-emoji {
+		font-size: 1.6rem;
+		line-height: 1;
+	}
+	.badge-card.locked .badge-emoji {
+		filter: grayscale(1);
+	}
+	.badge-name {
+		font-size: 0.72rem;
+		font-weight: 700;
 		color: var(--c-primary-dark);
-		border-radius: 999px;
-		padding: 0.3rem 0.75rem;
-		font-size: 0.8rem;
-		font-weight: 600;
+		line-height: 1.2;
+	}
+	.badge-card.locked .badge-name {
+		color: var(--c-gray-500);
+	}
+	.badge-desc {
+		font-size: 0.6rem;
+		color: var(--c-gray-500);
+		line-height: 1.3;
 	}
 
 	/* ── Domain sections ── */

@@ -2,10 +2,12 @@
 	let {
 		value = $bindable(''),
 		disabled = false,
+		numDigits,
 		onsubmit
 	}: {
 		value: string;
 		disabled?: boolean;
+		numDigits?: number;
 		onsubmit?: () => void;
 	} = $props();
 
@@ -37,6 +39,12 @@
 			if (String(d) !== String(den ?? '')) den = d ?? '';
 		}
 	});
+
+	function handleNumInput() {
+		if (numDigits && String(num).replace(/\D/g, '').length >= numDigits) {
+			denInput?.focus();
+		}
+	}
 
 	function handleNumKey(e: KeyboardEvent) {
 		if (e.key === 'Enter' || e.key === '/') {
@@ -71,6 +79,7 @@
 			class="frac-input num"
 			placeholder="Zähler"
 			{disabled}
+			oninput={handleNumInput}
 			onkeydown={handleNumKey}
 			aria-label="Zähler"
 		/>

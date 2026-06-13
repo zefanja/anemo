@@ -45,6 +45,11 @@ export const GET: RequestHandler = async ({ locals }) => {
 
 	if (!task) throw error(500, 'Keine Aufgabe verfügbar');
 
+	const baseInputData = task.inputData ?? null;
+	const inputData = task.answerType === 'fraction' && task.correctAnswer.includes('/')
+		? { ...baseInputData, numDigits: task.correctAnswer.split('/')[0].length }
+		: baseInputData;
+
 	return json({
 		atomId,
 		atomLabel: atom?.label ?? atomId,
@@ -53,7 +58,7 @@ export const GET: RequestHandler = async ({ locals }) => {
 		answerType: task.answerType,
 		choices: task.choices ?? null,
 		svg: task.svg ?? null,
-		inputData: task.inputData ?? null,
+		inputData,
 		hint: task.hint ?? null,
 		state,
 		maxAtoms: MAX_PLACEMENT_ATOMS

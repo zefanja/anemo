@@ -271,7 +271,7 @@
 							{/each}
 						</div>
 					{:else if current.answerType === 'fraction'}
-						<FractionInput bind:this={fractionInput} bind:value={answer} disabled={isSubmitting} onsubmit={submitAnswer} />
+						<FractionInput bind:this={fractionInput} bind:value={answer} disabled={isSubmitting} numDigits={current.inputData?.numDigits as number | undefined} onsubmit={submitAnswer} />
 					{:else if writtenArith}
 						<WrittenCalcInput bind:this={writtenCalcInput} a={writtenArith.a} b={writtenArith.b} op={writtenArith.op} bind:value={answer} disabled={isSubmitting} onsubmit={submitAnswer} />
 					{:else if isNumberLine}
@@ -379,6 +379,9 @@
 		display: flex;
 		flex-direction: column;
 		gap: 1rem;
+		max-width: 640px;
+		width: 100%;
+		margin: 0 auto;
 	}
 
 	.intro-text {
