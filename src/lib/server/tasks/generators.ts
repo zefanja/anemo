@@ -612,27 +612,38 @@ reg('arithmetik__brueche_vergleichen_ordnen', () => {
 });
 
 reg('arithmetik__erweitern', () => {
+	const atomId = 'arithmetik__erweitern';
 	const n = rand(1, 5), d = rand(2, 6), factor = rand(2, 5);
-	return { atomId: 'arithmetik__erweitern', prompt: `Erweitere ${fmtFrac(n, d)} mit ${factor}: Neuer Nenner = ?`, answerType: 'integer', correctAnswer: String(d * factor), hint: `Zähler und Nenner mit ${factor} multiplizieren.`, difficulty: 0.35 };
+	const hint = `Zähler und Nenner mit ${factor} multiplizieren.`;
+	if (rand(0, 1) === 0) {
+		return { atomId, prompt: `Erweitere ${fmtFrac(n, d)} mit ${factor} — neuer Zähler?`, answerType: 'integer', correctAnswer: String(n * factor), hint, difficulty: 0.35 };
+	}
+	return { atomId, prompt: `Erweitere ${fmtFrac(n, d)} mit ${factor} — neuer Nenner?`, answerType: 'integer', correctAnswer: String(d * factor), hint, difficulty: 0.35 };
 });
 
 reg('arithmetik__kuerzen', () => {
+	const atomId = 'arithmetik__kuerzen';
 	const n = rand(1, 5), d = rand(n + 1, 8);
 	const factor = rand(2, 4);
-	return { atomId: 'arithmetik__kuerzen', prompt: `Kürze ${fmtFrac(n * factor, d * factor)} vollständig — neuer Nenner?`, answerType: 'integer', correctAnswer: String(d), hint: `Teile Zähler und Nenner durch ${gcd(n * factor, d * factor)}.`, difficulty: 0.4 };
+	const g = gcd(n * factor, d * factor);
+	const hint = `Teile Zähler und Nenner durch ${g}.`;
+	if (rand(0, 1) === 0) {
+		return { atomId, prompt: `Kürze ${fmtFrac(n * factor, d * factor)} vollständig — neuer Zähler?`, answerType: 'integer', correctAnswer: String(n), hint, difficulty: 0.4 };
+	}
+	return { atomId, prompt: `Kürze ${fmtFrac(n * factor, d * factor)} vollständig — neuer Nenner?`, answerType: 'integer', correctAnswer: String(d), hint, difficulty: 0.4 };
 });
 
 reg('arithmetik__gemischte_zahlen_unechte_brueche', () => {
+	const atomId = 'arithmetik__gemischte_zahlen_unechte_brueche';
 	const whole = rand(1, 5), n = rand(1, 5), d = rand(n + 1, 6);
-	const q = rand(0, 1);
-	if (q === 0) {
-		// mixed → improper
-		const num = whole * d + n;
-		return { atomId: 'arithmetik__gemischte_zahlen_unechte_brueche', prompt: `${fmtMixed(whole, n, d)} als unechter Bruch — Zähler?`, answerType: 'integer', correctAnswer: String(num), difficulty: 0.45 };
+	const num = whole * d + n;
+	const type = rand(0, 2);
+	if (type === 0) {
+		return { atomId, prompt: `${fmtMixed(whole, n, d)} als unechter Bruch?`, answerType: 'fraction', correctAnswer: frac(num, d), hint: `${whole} · ${d} + ${n} = ${num}`, difficulty: 0.45 };
+	} else if (type === 1) {
+		return { atomId, prompt: `${fmtFrac(num, d)} als gemischte Zahl — ganzer Anteil?`, answerType: 'integer', correctAnswer: String(whole), difficulty: 0.4 };
 	} else {
-		// improper → mixed: whole part
-		const num = whole * d + n;
-		return { atomId: 'arithmetik__gemischte_zahlen_unechte_brueche', prompt: `${fmtFrac(num, d)} als gemischte Zahl — ganzer Anteil?`, answerType: 'integer', correctAnswer: String(Math.floor(num / d)), difficulty: 0.45 };
+		return { atomId, prompt: `${fmtFrac(num, d)} als gemischte Zahl — Bruchanteil?`, answerType: 'fraction', correctAnswer: frac(n, d), hint: `${num} : ${d} = ${whole} Rest ${n}`, difficulty: 0.5 };
 	}
 });
 
@@ -663,18 +674,24 @@ reg('arithmetik__brueche_add_sub_ungleichnamig', () => {
 });
 
 reg('arithmetik__gemischte_zahlen_add_sub', () => {
+	const atomId = 'arithmetik__gemischte_zahlen_add_sub';
 	const [w1, n1, d] = [rand(1, 4), rand(1, 3), pick([4, 6, 8])];
 	const [w2, n2] = [rand(1, 3), rand(1, 3)];
 	const op = rand(0, 1);
 	if (op === 0) {
 		const totalN = n1 + n2, totalW = w1 + w2 + Math.floor(totalN / d);
 		const remN = totalN % d;
-		const ans = remN === 0 ? String(totalW) : `${totalW} ${frac(remN, d)}`;
-		return { atomId: 'arithmetik__gemischte_zahlen_add_sub', prompt: `${fmtMixed(w1, n1, d)} + ${fmtMixed(w2, n2, d)} — ganzer Anteil des Ergebnisses?`, answerType: 'integer', correctAnswer: String(totalW), difficulty: 0.55 };
+		if (remN === 0) {
+			return { atomId, prompt: `${fmtMixed(w1, n1, d)} + ${fmtMixed(w2, n2, d)} = ?`, answerType: 'integer', correctAnswer: String(totalW), difficulty: 0.5 };
+		}
+		if (rand(0, 1) === 0) {
+			return { atomId, prompt: `${fmtMixed(w1, n1, d)} + ${fmtMixed(w2, n2, d)} — ganzer Anteil des Ergebnisses?`, answerType: 'integer', correctAnswer: String(totalW), hint: 'Addiere ganze Zahlen und Bruchteile getrennt.', difficulty: 0.5 };
+		}
+		return { atomId, prompt: `${fmtMixed(w1, n1, d)} + ${fmtMixed(w2, n2, d)} — Bruchanteil des Ergebnisses?`, answerType: 'fraction', correctAnswer: frac(remN, d), hint: `${n1} + ${n2} = ${totalN} → Bruchanteil ${fmtFrac(remN, d)}`, difficulty: 0.55 };
 	}
 	const [bw, bn, sw, sn] = w1 + n1 / d >= w2 + n2 / d ? [w1, n1, w2, n2] : [w2, n2, w1, n1];
 	const totalN = bw * d + bn - sw * d - sn;
-	return { atomId: 'arithmetik__gemischte_zahlen_add_sub', prompt: `${fmtMixed(bw, bn, d)} − ${fmtMixed(sw, sn, d)} = ?`, answerType: 'fraction', correctAnswer: frac(totalN, d), difficulty: 0.55 };
+	return { atomId, prompt: `${fmtMixed(bw, bn, d)} − ${fmtMixed(sw, sn, d)} = ?`, answerType: 'fraction', correctAnswer: frac(totalN, d), difficulty: 0.55 };
 });
 
 reg('arithmetik__bruch_mal_natuerliche_zahl', () => {
@@ -741,8 +758,16 @@ reg('arithmetik__dezimal_division_natuerliche_zahl', () => {
 });
 
 reg('arithmetik__dezimal_mal_dezimal', () => {
-	const a = rand(1, 9) / 10, b = rand(1, 9) / 10;
-	return { atomId: 'arithmetik__dezimal_mal_dezimal', prompt: `${dec(a)} · ${dec(b)} = ?`, answerType: 'number', correctAnswer: dec(a * b), hint: `Rechne ${a * 10} · ${b * 10} = ${a * 10 * (b * 10)}, dann : 100`, difficulty: 0.55 };
+	const atomId = 'arithmetik__dezimal_mal_dezimal';
+	if (rand(0, 1) === 0) {
+		const a = rand(1, 9) / 10, b = rand(1, 9) / 10;
+		const res = Math.round(a * b * 100) / 100;
+		return { atomId, prompt: `${dec(a)} · ${dec(b)} = ?`, answerType: 'number', correctAnswer: dec(res), hint: `Rechne ${a * 10} · ${b * 10} = ${a * 10 * (b * 10)}, dann : 100`, difficulty: 0.45 };
+	}
+	const a = rand(1, 99) / 100, b = rand(1, 9) / 10;
+	const res = Math.round(a * b * 1000) / 1000;
+	const aInt = Math.round(a * 100), bInt = Math.round(b * 10);
+	return { atomId, prompt: `${dec(a)} · ${dec(b)} = ?`, answerType: 'number', correctAnswer: dec(res), hint: `Rechne ${aInt} · ${bInt} = ${aInt * bInt}, dann : 1000`, difficulty: 0.6 };
 });
 
 reg('arithmetik__dezimal_division_dezimalzahl', () => {
@@ -759,21 +784,30 @@ reg('arithmetik__bruch_zu_dezimalzahl', () => {
 });
 
 reg('arithmetik__dezimalzahl_zu_bruch', () => {
+	const atomId = 'arithmetik__dezimalzahl_zu_bruch';
 	const easy: Array<[number, number, number]> = [[0.5,1,2],[0.25,1,4],[0.75,3,4],[0.2,1,5],[0.4,2,5],[0.1,1,10],[0.3,3,10],[0.125,1,8],[0.6,3,5],[0.8,4,5]];
 	const [val, n, d] = pick(easy);
-	return { atomId: 'arithmetik__dezimalzahl_zu_bruch', prompt: `${dec(val)} als vollständig gekürzten Bruch — Nenner?`, answerType: 'integer', correctAnswer: String(d), hint: `${dec(val)} = ${fmtFrac(n, d)}`, difficulty: 0.45 };
+	if (rand(0, 1) === 0) {
+		return { atomId, prompt: `${dec(val)} als vollständig gekürzten Bruch?`, answerType: 'fraction', correctAnswer: frac(n, d), hint: 'Schreibe als Bruch mit Nenner 10 oder 100, dann kürzen.', difficulty: 0.5 };
+	}
+	return { atomId, prompt: `${dec(val)} als vollständig gekürzten Bruch — Nenner?`, answerType: 'integer', correctAnswer: String(d), hint: `${dec(val)} = ${fmtFrac(n, d)}`, difficulty: 0.4 };
 });
 
 reg('arithmetik__periodische_dezimalzahlen', () => {
+	const atomId = 'arithmetik__periodische_dezimalzahlen';
 	const finiteList: Array<[number,number]> = [[1,2],[1,4],[3,4],[1,5],[1,8],[3,8],[1,10],[3,10],[7,8]];
-	const periodicList: Array<[number,number]> = [[1,3],[2,3],[1,6],[5,6],[1,7],[1,9],[2,9],[4,9]];
-	const q = rand(0, 1);
-	if (q === 0) {
+	const periodicList: Array<[number,number,string]> = [[1,3,'3'],[2,3,'6'],[1,6,'6'],[5,6,'3'],[1,9,'1'],[2,9,'2'],[4,9,'4']];
+	const type = rand(0, 2);
+	if (type === 0) {
 		const [n, d] = pick(finiteList);
-		return { atomId: 'arithmetik__periodische_dezimalzahlen', prompt: `Ist ${fmtFrac(n, d)} eine endliche oder periodische Dezimalzahl?`, answerType: 'text', choices: ['endlich', 'periodisch'], correctAnswer: 'endlich', hint: 'Endlich: Nenner (vollständig gekürzt) hat nur Faktoren 2 und 5.', difficulty: 0.5 };
+		return { atomId, prompt: `Ist ${fmtFrac(n, d)} eine endliche oder periodische Dezimalzahl?`, answerType: 'text', choices: ['endlich', 'periodisch'], correctAnswer: 'endlich', hint: 'Endlich: Nenner (vollständig gekürzt) hat nur die Primfaktoren 2 und 5.', difficulty: 0.5 };
+	} else if (type === 1) {
+		const [n, d] = pick(periodicList);
+		return { atomId, prompt: `Ist ${fmtFrac(n, d)} eine endliche oder periodische Dezimalzahl?`, answerType: 'text', choices: ['endlich', 'periodisch'], correctAnswer: 'periodisch', hint: `${d} enthält Primfaktoren außer 2 und 5.`, difficulty: 0.5 };
+	} else {
+		const [n, d, period] = pick(periodicList);
+		return { atomId, prompt: `${fmtFrac(n, d)} = 0,${period}${period}${period}… — welche Ziffer wiederholt sich?`, answerType: 'text', correctAnswer: period, hint: `Führe die Division ${n} : ${d} durch.`, difficulty: 0.55 };
 	}
-	const [n, d] = pick(periodicList);
-	return { atomId: 'arithmetik__periodische_dezimalzahlen', prompt: `Ist ${fmtFrac(n, d)} eine endliche oder periodische Dezimalzahl?`, answerType: 'text', choices: ['endlich', 'periodisch'], correctAnswer: 'periodisch', hint: `${d} enthält Primfaktoren außer 2 und 5.`, difficulty: 0.5 };
 });
 
 // ── 12. Rationale Zahlen ──────────────────────────────────────────────────────
