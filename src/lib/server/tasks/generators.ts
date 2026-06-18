@@ -364,8 +364,18 @@ reg('arithmetik__schriftliche_subtraktion', () => {
 });
 
 reg('arithmetik__schriftliche_multiplikation', () => {
-	const a = rand(12, 999), b = rand(2, 9);
-	return { atomId: 'arithmetik__schriftliche_multiplikation', prompt: `${a} · ${b} = ?`, answerType: 'integer', correctAnswer: String(a * b), difficulty: 0.5 };
+	const atomId = 'arithmetik__schriftliche_multiplikation';
+	const r = Math.random();
+	let a: number, b: number;
+	if (r < 0.3) {
+		a = rand(13, 99); b = rand(2, 9);
+	} else if (r < 0.7) {
+		a = rand(13, 99); do { b = rand(11, 39); } while (b % 10 === 0);
+	} else {
+		// 2-digit × 3-digit
+		a = rand(12, 99); b = rand(101, 299);
+	}
+	return { atomId, prompt: `${a} · ${b} = ?`, answerType: 'integer', correctAnswer: String(a * b), hint: 'Berechne die Teilprodukte und addiere.', difficulty: b > 99 ? 0.6 : 0.5 };
 });
 
 reg('arithmetik__schriftliche_division', () => {
@@ -779,18 +789,25 @@ reg('arithmetik__periodische_dezimalzahlen', () => {
 // ── 12. Rationale Zahlen ──────────────────────────────────────────────────────
 
 reg('arithmetik__negative_zahlen_zahlengerade', () => {
-	const a = -rand(1, 10), b = -rand(1, 10);
-	if (a === b) return registry.get('arithmetik__negative_zahlen_zahlengerade')!();
-	const bigger = Math.max(a, b);
-	const lo = Math.min(a, b) - 1;
-	const hi = 1;
-	return {
-		atomId: 'arithmetik__negative_zahlen_zahlengerade',
-		prompt: `Welche Zahl liegt weiter rechts auf dem Zahlenstrahl: ${a} oder ${b}?`,
-		answerType: 'integer', correctAnswer: String(bigger),
-		svg: svgIntegerLine(lo, hi, [a, b]),
-		hint: 'Weiter rechts = größer.', difficulty: 0.4
-	};
+	const atomId = 'arithmetik__negative_zahlen_zahlengerade';
+	const type = rand(0, 2);
+	if (type === 0) {
+		// Both negative
+		const a = -rand(1, 10), b = -rand(1, 10);
+		if (a === b) return registry.get(atomId)!();
+		const bigger = Math.max(a, b);
+		return { atomId, prompt: `Welche Zahl liegt weiter rechts auf dem Zahlenstrahl: ${a} oder ${b}?`, answerType: 'integer', correctAnswer: String(bigger), svg: svgIntegerLine(Math.min(a, b) - 1, 1, [a, b]), hint: 'Weiter rechts = größer.', difficulty: 0.4 };
+	} else if (type === 1) {
+		// Positive vs negative
+		const pos = rand(1, 8), neg = -rand(1, 8);
+		return { atomId, prompt: `Welche Zahl liegt weiter rechts auf dem Zahlenstrahl: ${neg} oder ${pos}?`, answerType: 'integer', correctAnswer: String(pos), svg: svgIntegerLine(neg - 1, pos + 1, [neg, pos]), hint: 'Positive Zahlen liegen rechts von Null, negative links.', difficulty: 0.3 };
+	} else {
+		// Everyday context: temperature
+		const t1 = rand(-15, 20), t2 = rand(-15, 20);
+		if (t1 === t2) return registry.get(atomId)!();
+		const warmer = Math.max(t1, t2);
+		return { atomId, prompt: `Welche Temperatur ist wärmer: ${t1} °C oder ${t2} °C?`, answerType: 'integer', correctAnswer: String(warmer), hint: 'Höhere Temperatur = größere Zahl auf dem Thermometer.', difficulty: 0.35 };
+	}
 });
 
 reg('arithmetik__betrag_gegenzahl', () => {
@@ -838,8 +855,18 @@ reg('arithmetik__vorzeichen_klammerregeln', () => {
 });
 
 reg('arithmetik__verbindung_rechenarten_rationale', () => {
-	const a = rand(-5, 5), b = rand(1, 4), c = rand(-5, 5);
-	return { atomId: 'arithmetik__verbindung_rechenarten_rationale', prompt: `${a} + ${b} · ${c} = ?`, answerType: 'integer', correctAnswer: String(a + b * c), hint: 'Zuerst multiplizieren (Punkt vor Strich), dann addieren.', difficulty: 0.55 };
+	const atomId = 'arithmetik__verbindung_rechenarten_rationale';
+	const type = rand(0, 2);
+	if (type === 0) {
+		const a = rand(-5, 5), b = rand(1, 4), c = rand(-5, 5);
+		return { atomId, prompt: `${a} + ${b} · ${c} = ?`, answerType: 'integer', correctAnswer: String(a + b * c), hint: 'Punkt vor Strich: zuerst multiplizieren.', difficulty: 0.5 };
+	} else if (type === 1) {
+		const a = rand(-4, 4), b = rand(1, 6), c = rand(2, 4);
+		return { atomId, prompt: `(${a} + ${b}) · ${c} = ?`, answerType: 'integer', correctAnswer: String((a + b) * c), hint: 'Zuerst die Klammer berechnen.', difficulty: 0.55 };
+	} else {
+		const a = rand(2, 6), b = rand(2, 5), c = rand(1, 4), d = rand(1, 4);
+		return { atomId, prompt: `${a} · ${b} − ${c} · ${d} = ?`, answerType: 'integer', correctAnswer: String(a * b - c * d), hint: 'Beide Produkte zuerst berechnen, dann subtrahieren.', difficulty: 0.6 };
+	}
 });
 
 // ── 13. Prozentrechnung ───────────────────────────────────────────────────────
@@ -879,48 +906,89 @@ reg('arithmetik__grundwert_berechnen', () => {
 });
 
 reg('arithmetik__vermehrter_verminderter_grundwert', () => {
+	const atomId = 'arithmetik__vermehrter_verminderter_grundwert';
 	const p = pick([5, 10, 15, 20, 25]);
 	const G = pick([40, 50, 80, 100, 120, 200]);
-	const type = rand(0, 1);
+	const type = rand(0, 3);
 	if (type === 0) {
 		const result = G + G * p / 100;
-		return { atomId: 'arithmetik__vermehrter_verminderter_grundwert', prompt: `${G} € wird um ${p}% erhöht. Neuer Betrag = ?`, answerType: 'number', correctAnswer: dec(result), hint: `${G} + ${p}% von ${G}`, difficulty: 0.55 };
+		return { atomId, prompt: `${G} € wird um ${p}% erhöht. Neuer Betrag = ?`, answerType: 'number', correctAnswer: dec(result), hint: `Neuer Betrag = ${G} · (1 + ${p}/100)`, difficulty: 0.5 };
+	} else if (type === 1) {
+		const result = G - G * p / 100;
+		return { atomId, prompt: `${G} € wird um ${p}% reduziert. Neuer Betrag = ?`, answerType: 'number', correctAnswer: dec(result), hint: `Neuer Betrag = ${G} · (1 − ${p}/100)`, difficulty: 0.5 };
+	} else if (type === 2) {
+		// Reverse increase: given new value, find original
+		const newVal = G + G * p / 100;
+		return { atomId, prompt: `Nach einer Erhöhung um ${p}% beträgt ein Wert ${dec(newVal)} €. Was war der ursprüngliche Wert?`, answerType: 'number', correctAnswer: dec(G), hint: `Grundwert = Neuer Wert ÷ (1 + ${p}/100) = ${dec(newVal)} ÷ ${dec(1 + p / 100)}`, difficulty: 0.65 };
+	} else {
+		// Reverse decrease: given new value, find original
+		const newVal = G - G * p / 100;
+		return { atomId, prompt: `Nach einer Senkung um ${p}% beträgt ein Wert ${dec(newVal)} €. Was war der ursprüngliche Wert?`, answerType: 'number', correctAnswer: dec(G), hint: `Grundwert = Neuer Wert ÷ (1 − ${p}/100) = ${dec(newVal)} ÷ ${dec(1 - p / 100)}`, difficulty: 0.65 };
 	}
-	const result = G - G * p / 100;
-	return { atomId: 'arithmetik__vermehrter_verminderter_grundwert', prompt: `${G} € wird um ${p}% reduziert. Neuer Betrag = ?`, answerType: 'number', correctAnswer: dec(result), hint: `${G} − ${p}% von ${G}`, difficulty: 0.55 };
 });
 
 reg('arithmetik__zinsrechnung', () => {
-	const K = pick([100, 200, 500, 1000, 2000]);
+	const atomId = 'arithmetik__zinsrechnung';
+	const K = pick([100, 200, 500, 1000]);
 	const p = pick([1, 2, 3, 4, 5]);
 	const t = pick([1, 2, 3]);
-	const Z = round(K * p * t / 100, 2);
-	const q = rand(0, 1);
-	if (q === 0) return { atomId: 'arithmetik__zinsrechnung', prompt: `Kapital ${K} €, Zinssatz ${p}%, Laufzeit ${t} Jahr(e) — Zinsen = ?`, answerType: 'number', correctAnswer: dec(Z), hint: `Z = K · p · t : 100`, difficulty: 0.6 };
-	const endKapital = round(K + Z, 2);
-	return { atomId: 'arithmetik__zinsrechnung', prompt: `Kapital ${K} €, ${p}% p.a., ${t} Jahr(e) — Endkapital = ?`, answerType: 'number', correctAnswer: dec(endKapital), hint: 'Endkapital = Kapital + Zinsen', difficulty: 0.6 };
+	const type = rand(0, 2);
+	if (type === 0) {
+		const Z = round(K * p * t / 100, 2);
+		return { atomId, prompt: `Kapital ${K} €, Zinssatz ${p}%, Laufzeit ${t} Jahr(e) — Zinsen = ?`, answerType: 'number', correctAnswer: dec(Z), hint: `Z = K · p · t : 100`, difficulty: 0.55 };
+	} else if (type === 1) {
+		const Z = round(K * p * t / 100, 2);
+		return { atomId, prompt: `Kapital ${K} €, ${p}% p.a., ${t} Jahr(e) — Endkapital (einfache Verzinsung) = ?`, answerType: 'number', correctAnswer: dec(round(K + Z, 2)), hint: 'Endkapital = Kapital + Zinsen', difficulty: 0.6 };
+	} else {
+		// Compound interest: Kn = K · (1 + p/100)^t
+		const Kn = round(K * (1 + p / 100) ** t, 2);
+		return { atomId, prompt: `Kapital ${K} €, ${p}% Zinseszins p.a., ${t} Jahr(e) — Endkapital = ?`, answerType: 'number', correctAnswer: dec(Kn), hint: `K_n = K · (1 + p/100)^n = ${K} · ${dec(1 + p / 100)}^${t}`, difficulty: 0.7 };
+	}
 });
 
 // ── 14. Potenzen ──────────────────────────────────────────────────────────────
 
 reg('arithmetik__potenzieren_natuerliche_zahlen', () => {
-	let base: number, exp: number;
-	do { base = rand(2, 9); exp = rand(2, 4); } while (base ** exp > 100);
-	return { atomId: 'arithmetik__potenzieren_natuerliche_zahlen', prompt: `${pow(base, exp)} = ?`, answerType: 'integer', correctAnswer: String(base ** exp), hint: `${base} · ${base}${exp > 2 ? ` · ${base}`.repeat(exp - 2) : ''} = ?`, difficulty: 0.45 };
+	const atomId = 'arithmetik__potenzieren_natuerliche_zahlen';
+	const type = rand(0, 2);
+	if (type === 0) {
+		// Squares 2² to 20²
+		const base = rand(2, 20);
+		return { atomId, prompt: `${pow(base, 2)} = ?`, answerType: 'integer', correctAnswer: String(base * base), hint: `${base} · ${base}`, difficulty: base <= 9 ? 0.35 : 0.5 };
+	} else if (type === 1) {
+		// Cubes and 4th powers (small bases only, result ≤ 100)
+		let base: number, exp: number;
+		do { base = rand(2, 5); exp = rand(3, 4); } while (base ** exp > 125);
+		return { atomId, prompt: `${pow(base, exp)} = ?`, answerType: 'integer', correctAnswer: String(base ** exp), hint: `${base} · ${base} · ${base}${exp > 3 ? ` · ${base}` : ''} = ?`, difficulty: 0.5 };
+	} else {
+		// Powers of 10 (conceptual)
+		const exp = rand(2, 6);
+		return { atomId, prompt: `${pow(10, exp)} = ?`, answerType: 'integer', correctAnswer: String(10 ** exp), hint: `${pow(10, 'n')} = 1 gefolgt von n Nullen`, difficulty: 0.3 };
+	}
 });
 
 reg('arithmetik__zehnerpotenzen_normdarstellung', () => {
-	const type = rand(0, 1);
+	const atomId = 'arithmetik__zehnerpotenzen_normdarstellung';
+	const type = rand(0, 2);
 	if (type === 0) {
+		// Large number: mantissa · 10^exp
 		const exp = rand(2, 6);
 		const n = rand(1, 9) + rand(1, 9) / 10;
-		const value = n * 10 ** exp;
-		return { atomId: 'arithmetik__zehnerpotenzen_normdarstellung', prompt: `${dec(n)} · ${pow(10, exp)} = ?`, answerType: 'integer', correctAnswer: String(value), hint: 'Komma um den Exponenten nach rechts verschieben.', difficulty: 0.55 };
+		const value = Math.round(n * 10 ** exp);
+		return { atomId, prompt: `${dec(n)} · ${pow(10, exp)} = ?`, answerType: 'integer', correctAnswer: String(value), hint: 'Komma um den Exponenten nach rechts verschieben.', difficulty: 0.5 };
+	} else if (type === 1) {
+		// Extract mantissa from large number
+		const exp = rand(2, 5);
+		const value = rand(1, 9) * 10 ** exp;
+		const mant = value / 10 ** exp;
+		return { atomId, prompt: `${value} in Normdarstellung: ___ · ${pow(10, exp)} — was ist die Mantisse?`, answerType: 'number', correctAnswer: dec(mant), hint: `Mantisse ist die Zahl vor · ${pow(10, 'n')}.`, difficulty: 0.55 };
+	} else {
+		// Small number: mantissa · 10^(-exp) — ask for the decimal result
+		const negExp = rand(1, 3);
+		const mantissa = rand(1, 9);
+		const value = round(mantissa * 10 ** (-negExp), negExp);
+		return { atomId, prompt: `${mantissa} · ${pow(10, -negExp)} = ?`, answerType: 'number', correctAnswer: dec(value), hint: `Komma um ${negExp} Stelle(n) nach links verschieben.`, difficulty: 0.6 };
 	}
-	const exp = rand(2, 5);
-	const value = rand(1, 9) * 10 ** exp;
-	const mant = value / 10 ** exp;
-	return { atomId: 'arithmetik__zehnerpotenzen_normdarstellung', prompt: `${value} in Normdarstellung: ___ · ${pow(10, exp)}  — was ist die Mantisse?`, answerType: 'number', correctAnswer: dec(mant), hint: `Mantisse ist die Zahl vor · ${pow(10, 'n')}.`, difficulty: 0.55 };
 });
 
 // ── 15. Größen ────────────────────────────────────────────────────────────────
