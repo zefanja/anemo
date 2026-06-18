@@ -267,19 +267,21 @@
 					{#if current.choices}
 						<div class="choice-buttons">
 							{#each current.choices as choice}
-								<button class="choice-btn" onclick={() => selectAnswer(choice)} disabled={isSubmitting}>{choice}</button>
+								<button class="choice-btn" onclick={() => selectAnswer(choice)} disabled={isSubmitting}><MathText text={choice} /></button>
 							{/each}
 						</div>
 					{:else if current.answerType === 'fraction'}
 						<FractionInput bind:this={fractionInput} bind:value={answer} disabled={isSubmitting} numDigits={current.inputData?.numDigits as number | undefined} onsubmit={submitAnswer} />
 					{:else if writtenArith}
-						<WrittenCalcInput bind:this={writtenCalcInput} a={writtenArith.a} b={writtenArith.b} op={writtenArith.op} bind:value={answer} disabled={isSubmitting} onsubmit={submitAnswer} />
+						{#key current.taskId}
+							<WrittenCalcInput bind:this={writtenCalcInput} a={writtenArith.a} b={writtenArith.b} op={writtenArith.op} bind:value={answer} disabled={isSubmitting} onsubmit={submitAnswer} />
+						{/key}
 					{:else if isNumberLine}
 						<NumberLineInput bind:this={numberLineInput} totalSections={current.inputData!.totalSections as number} bind:value={answer} disabled={isSubmitting} onsubmit={submitAnswer} />
 					{:else if current.answerType === 'boolean'}
 						<div class="choice-buttons">
-							<button class="choice-btn" onclick={() => selectAnswer('ja')} disabled={isSubmitting}>Ja</button>
-							<button class="choice-btn" onclick={() => selectAnswer('nein')} disabled={isSubmitting}>Nein</button>
+							<button class="choice-btn choice-btn-nein" onclick={() => selectAnswer('nein')} disabled={isSubmitting}>✗ Nein</button>
+							<button class="choice-btn choice-btn-ja" onclick={() => selectAnswer('ja')} disabled={isSubmitting}>✓ Ja</button>
 						</div>
 					{:else if current.answerType === 'comparison'}
 						<div class="choice-buttons">
@@ -322,7 +324,7 @@
 						/>
 					{/if}
 				</div>
-				{#if !current.choices && current.answerType !== 'boolean' && current.answerType !== 'comparison'}
+				{#if !current.choices && current.answerType !== 'boolean' && current.answerType !== 'comparison' && !writtenArith}
 					<button
 						class="btn btn-primary btn-full btn-lg"
 						onclick={submitAnswer}
@@ -565,6 +567,22 @@
 	.choice-btn-symbol {
 		min-width: 70px;
 		font-size: 1.5rem;
+	}
+	.choice-btn-nein {
+		border-color: var(--c-error);
+		color: var(--c-error);
+	}
+	.choice-btn-nein:hover:not(:disabled) {
+		background: var(--c-error-light);
+		border-color: var(--c-error);
+	}
+	.choice-btn-ja {
+		border-color: var(--c-success);
+		color: var(--c-success);
+	}
+	.choice-btn-ja:hover:not(:disabled) {
+		background: var(--c-success-light);
+		border-color: var(--c-success);
 	}
 
 	/* ── Skip row ── */

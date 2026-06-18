@@ -17,6 +17,8 @@ export interface AttemptResult {
 	newBadges: string[];
 	streakDays: number;
 	hint?: string;
+	correctAnswer?: string;
+	submittedAnswer?: string;
 }
 
 export async function processAttempt(
@@ -73,6 +75,8 @@ export async function processAttempt(
 		levelUp: gami.levelUp,
 		newBadges: gami.newBadges,
 		streakDays: gami.streakDays,
-		hint: !correct ? task.hint : undefined
+		hint: !correct ? task.hint : undefined,
+		correctAnswer: !correct ? task.correctAnswer : undefined,
+		submittedAnswer: !correct ? submittedAnswer : undefined
 	};
 }

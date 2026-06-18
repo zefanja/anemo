@@ -20,7 +20,7 @@ export interface GeneratedTask {
 	difficulty?: number; // 0–1
 }
 
-type Gen = () => GeneratedTask;
+type Gen = (mastery?: number) => GeneratedTask;
 
 // ── Math helpers ──────────────────────────────────────────────────────────────
 
@@ -30,6 +30,21 @@ function rand(min: number, max: number): number {
 
 function pick<T>(arr: T[]): T {
 	return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function pickWeighted<T>(weighted: [T, number][]): T {
+	const total = weighted.reduce((s, [, w]) => s + w, 0);
+	let r = Math.random() * total;
+	for (const [item, w] of weighted) {
+		r -= w;
+		if (r <= 0) return item;
+	}
+	return weighted[weighted.length - 1][0];
+}
+
+// Weight strategy by proximity to target difficulty (Gaussian kernel, σ≈0.14)
+function diffWeight(strategyDiff: number, targetDiff: number): number {
+	return Math.exp(-Math.pow(strategyDiff - targetDiff, 2) / 0.02);
 }
 
 function gcd(a: number, b: number): number {
@@ -208,7 +223,7 @@ reg('arithmetik__zahlverstaendnis_bis_20', () => {
 	if (type === 0) {
 		const a = rand(1, 20), b = rand(1, 20);
 		const [bigger, smaller] = a > b ? [a, b] : [b, a];
-		return { atomId: 'arithmetik__zahlverstaendnis_bis_20', prompt: `Welche Zahl ist größer: ${a} oder ${b}?`, answerType: 'integer', correctAnswer: String(bigger), difficulty: 0.15 };
+		return { atomId: 'arithmetik__zahlverstaendnis_bis_20', prompt: `Welche Zahl ist größer: ${a} oder ${b}?`, answerType: 'integer', correctAnswer: String(bigger), choices: [String(a), String(b)], difficulty: 0.15 };
 	} else if (type === 1) {
 		const n = rand(2, 19);
 		return { atomId: 'arithmetik__zahlverstaendnis_bis_20', prompt: `Welche Zahl kommt nach ${n}?`, answerType: 'integer', correctAnswer: String(n + 1), difficulty: 0.1 };
@@ -264,7 +279,7 @@ reg('arithmetik__natuerliche_zahlen_darstellen_ordnen', () => {
 	const nums = Array.from({ length: 4 }, () => rand(10, 9999));
 	nums.sort(() => Math.random() - 0.5);
 	const sorted = [...nums].sort((a, b) => a - b);
-	return { atomId: 'arithmetik__natuerliche_zahlen_darstellen_ordnen', prompt: `Ordne von klein nach groß: ${nums.join(', ')} — was ist die kleinste Zahl?`, answerType: 'integer', correctAnswer: String(sorted[0]), difficulty: 0.3 };
+	return { atomId: 'arithmetik__natuerliche_zahlen_darstellen_ordnen', prompt: `Welche ist die kleinste Zahl?`, answerType: 'integer', correctAnswer: String(sorted[0]), choices: nums.map(String), difficulty: 0.3 };
 });
 
 reg('arithmetik__runden_natuerliche_zahlen', () => {
@@ -706,12 +721,47 @@ reg('arithmetik__brueche_am_zahlenstrahl', () => {
 	};
 });
 
-reg('arithmetik__brueche_vergleichen_ordnen', () => {
-	const d = pick([3, 4, 5, 6, 8, 10, 12]);
-	const n1 = rand(1, d - 1), n2 = rand(1, d - 1);
-	if (n1 === n2) return registry.get('arithmetik__brueche_vergleichen_ordnen')!();
-	const bigger = n1 > n2 ? `${n1}/${d}` : `${n2}/${d}`;
-	return { atomId: 'arithmetik__brueche_vergleichen_ordnen', prompt: `Welcher Bruch ist größer: ${fmtFrac(n1, d)} oder ${fmtFrac(n2, d)}? (Gib den Zähler des größeren an)`, answerType: 'integer', correctAnswer: String(Math.max(n1, n2)), difficulty: 0.4 };
+reg('arithmetik__brueche_vergleichen_ordnen', (mastery = 0) => {
+	const atomId = 'arithmetik__brueche_vergleichen_ordnen';
+	// Target difficulty scales with mastery: 0 → 0.3 (easy), 1 → 0.65 (hard)
+	const target = 0.3 + mastery * 0.35;
+	const strategy = pickWeighted<string>([
+		['gleicher_nenner',     diffWeight(0.3,  target)],
+		['gleicher_zaehler',    diffWeight(0.45, target)],
+		['vergleich_halb',      diffWeight(0.5,  target)],
+		['verschiedene_nenner', diffWeight(0.6,  target)],
+	]);
+
+	if (strategy === 'gleicher_nenner') {
+		const d = pick([3, 4, 5, 6, 8, 10, 12]);
+		const n1 = rand(1, d - 1), n2 = rand(1, d - 1);
+		if (n1 === n2) return registry.get(atomId)!(mastery);
+		return { atomId, prompt: `${fmtFrac(n1, d)} ☐ ${fmtFrac(n2, d)}`, answerType: 'comparison', correctAnswer: n1 > n2 ? '>' : '<', hint: `Gleicher Nenner: größerer Zähler = größerer Bruch.`, difficulty: 0.3 };
+	}
+
+	if (strategy === 'gleicher_zaehler') {
+		const n = rand(1, 5);
+		const d1 = rand(n + 1, 12), d2 = rand(n + 1, 12);
+		if (d1 === d2) return registry.get(atomId)!(mastery);
+		return { atomId, prompt: `${fmtFrac(n, d1)} ☐ ${fmtFrac(n, d2)}`, answerType: 'comparison', correctAnswer: d1 < d2 ? '>' : '<', hint: `Gleicher Zähler: kleinerer Nenner = größerer Bruch.`, difficulty: 0.45 };
+	}
+
+	if (strategy === 'vergleich_halb') {
+		const d1 = pick([4, 5, 6, 8, 10]);
+		const d2 = pick([3, 4, 6, 8, 10]);
+		const n1 = rand(Math.ceil(d1 / 2) + 1, d1 - 1); // > 1/2
+		const n2 = rand(1, Math.floor((d2 - 1) / 2));   // < 1/2
+		if (n2 < 1 || n1 >= d1) return registry.get(atomId)!(mastery);
+		return { atomId, prompt: `${fmtFrac(n1, d1)} ☐ ${fmtFrac(n2, d2)}`, answerType: 'comparison', correctAnswer: '>', hint: `Tipp: Vergleiche mit ½. Ein Bruch ist größer als ½, der andere kleiner.`, difficulty: 0.5 };
+	}
+
+	// verschiedene_nenner: gleichnamig machen
+	const pairs: [number, number][] = [[2,3],[2,5],[3,4],[3,5],[4,5],[2,7],[3,8],[4,6]];
+	const [d1, d2] = pick(pairs);
+	const n1 = rand(1, d1 - 1), n2 = rand(1, d2 - 1);
+	const cmp = n1 * d2 - n2 * d1;
+	if (cmp === 0) return registry.get(atomId)!(mastery);
+	return { atomId, prompt: `${fmtFrac(n1, d1)} ☐ ${fmtFrac(n2, d2)}`, answerType: 'comparison', correctAnswer: cmp > 0 ? '>' : '<', hint: `Tipp: Mache die Brüche gleichnamig (Hauptnenner: ${lcm(d1, d2)}).`, difficulty: 0.6 };
 });
 
 reg('arithmetik__erweitern', () => {
@@ -834,7 +884,7 @@ reg('arithmetik__dezimalzahlen_vergleichen_ordnen_runden', () => {
 	const a = parseFloat((Math.random() * 9 + 1).toFixed(2));
 	const b = parseFloat((Math.random() * 9 + 1).toFixed(2));
 	const bigger = Math.max(a, b);
-	return { atomId: 'arithmetik__dezimalzahlen_vergleichen_ordnen_runden', prompt: `Welche Zahl ist größer: ${dec(a)} oder ${dec(b)}? (Gib die größere Zahl an)`, answerType: 'number', correctAnswer: dec(bigger), difficulty: 0.35 };
+	return { atomId: 'arithmetik__dezimalzahlen_vergleichen_ordnen_runden', prompt: `Welche Zahl ist größer: ${dec(a)} oder ${dec(b)}?`, answerType: 'text', correctAnswer: dec(bigger), choices: [dec(a), dec(b)], difficulty: 0.35 };
 });
 
 reg('arithmetik__dezimalzahlen_addieren_subtrahieren', () => {
@@ -1168,10 +1218,10 @@ reg('arithmetik__arithmetisches_mittel', () => {
 
 // ── Export ────────────────────────────────────────────────────────────────────
 
-export function generateTask(atomId: string): GeneratedTask | null {
+export function generateTask(atomId: string, mastery?: number): GeneratedTask | null {
 	const gen = registry.get(atomId);
 	if (!gen) return null;
-	return gen();
+	return gen(mastery);
 }
 
 export function hasGenerator(atomId: string): boolean {

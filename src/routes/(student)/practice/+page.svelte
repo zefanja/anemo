@@ -6,6 +6,7 @@
 	import NumberLineInput from '$lib/components/student/NumberLineInput.svelte';
 	import MathText from '$lib/components/student/MathText.svelte';
 	import AtomExplanation from '$lib/components/student/AtomExplanation.svelte';
+	import WrittenCalcFeedback from '$lib/components/student/WrittenCalcFeedback.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -33,6 +34,8 @@
 		newBadges: string[];
 		streakDays: number;
 		hint?: string;
+		correctAnswer?: string;
+		submittedAnswer?: string;
 	};
 
 	type FrontierItem = (typeof data.plan.frontierItems)[0];
@@ -107,17 +110,13 @@
 	});
 
 	// ── Explanation state ──
-	// Tracks atoms whose first-task explanation has already been shown this session
-	let seenAtomIds = $state(new Set<string>());
-	let showExplanationOnTask = $state(false);
+	let showExplanationManual = $state(false); // toggled via ? button
+	let hadWrongAttempt = $state(false);       // auto-show after wrong answer
 
 	// ── Feedback state ──
 	let showFeedback = $state(false);
 	let lastResult = $state<AttemptResult | null>(null);
 	let autoAdvanceTimer = $state<ReturnType<typeof setTimeout> | null>(null);
-
-	// ── Transition screen: all reviews done ──
-	let reviewsDoneScreen = $state(false);
 
 	// Load first review on mount
 	$effect(() => {
@@ -127,13 +126,13 @@
 	});
 
 	async function loadTask(atomId: string) {
-		const isFirstForAtom = !seenAtomIds.has(atomId);
 		isLoading = true;
 		currentTask = null;
 		answer = '';
 		showFeedback = false;
 		lastResult = null;
-		showExplanationOnTask = false;
+		showExplanationManual = false;
+		hadWrongAttempt = false;
 		try {
 			const params = new URLSearchParams();
 			recentPrompts.slice(-5).forEach(p => params.append('ex', p));
@@ -143,10 +142,6 @@
 			const task = await res.json();
 			currentTask = task;
 			recentPrompts = [...recentPrompts, task.prompt].slice(-10);
-			if (isFirstForAtom && task.explanation) {
-				seenAtomIds = new Set([...seenAtomIds, atomId]);
-				showExplanationOnTask = true;
-			}
 		} catch {
 			// fall-through: isLoading = false shows error state via null task
 		} finally {
@@ -167,6 +162,7 @@
 			if (!res.ok) throw new Error();
 			lastResult = await res.json();
 			showFeedback = true;
+			if (!lastResult.correct) hadWrongAttempt = true;
 			invalidate('app:gami');
 			invalidate('app:progress');
 			if (lastResult.justMastered) {
@@ -193,9 +189,7 @@
 		if (phase === 'reviews') {
 			const next = reviewIndex + 1;
 			if (next >= reviews.length) {
-				reviewsDoneScreen = true;
-				showFeedback = false;
-				currentTask = null;
+				startPracticePhase();
 			} else {
 				reviewIndex = next;
 				loadTask(reviews[next].atomId);
@@ -213,7 +207,8 @@
 	}
 
 	function startPracticePhase() {
-		reviewsDoneScreen = false;
+		showFeedback = false;
+		currentTask = null;
 		phase = 'practice';
 	}
 
@@ -229,9 +224,7 @@
 
 	function handleKeydown(e: KeyboardEvent) {
 		if (e.key === 'Enter') {
-			if (reviewsDoneScreen) {
-				startPracticePhase();
-			} else if (showFeedback && !isSubmitting) {
+			if (showFeedback && !isSubmitting) {
 				handleContinue();
 			} else if (String(answer).trim() && !isSubmitting) {
 				submitAnswer();
@@ -268,26 +261,8 @@
 
 <div class="practice-page">
 
-	<!-- ── Reviews-done celebration ── -->
-	{#if reviewsDoneScreen}
-		<div class="screen-center">
-			<div class="celebration">
-				<img src="/mascot.png" alt="" class="mascot-img" aria-hidden="true" />
-				<h2>Wiederholungen erledigt!</h2>
-				<p>Alle {reviews.length} Wiederholungsaufgaben abgeschlossen.</p>
-				{#if data.plan.frontierItems.length > 0}
-					<button class="btn btn-primary btn-lg" onclick={startPracticePhase}>
-						Weiter üben
-					</button>
-				{:else}
-					<p class="text-muted">Keine neuen Aufgaben verfügbar.</p>
-					<a href="/progress" class="btn btn-outline btn-lg">Zum Fortschritt</a>
-				{/if}
-			</div>
-		</div>
-
 	<!-- ── Practice: atom selection ── -->
-	{:else if phase === 'practice' && !selectedAtom}
+	{#if phase === 'practice' && !selectedAtom}
 		<div class="selection-page">
 			<div class="selection-header">
 				<h2>Was möchtest du üben?</h2>
@@ -369,6 +344,33 @@
 						{lastResult.correct ? 'Richtig!' : 'Nicht ganz.'}
 					</div>
 
+					{#if !lastResult.correct && (lastResult.submittedAnswer || lastResult.correctAnswer)}
+						{#if writtenArith && lastResult.submittedAnswer && lastResult.correctAnswer}
+							<WrittenCalcFeedback
+								a={writtenArith.a}
+								b={writtenArith.b}
+								op={writtenArith.op}
+								submittedAnswer={lastResult.submittedAnswer}
+								correctAnswer={lastResult.correctAnswer}
+							/>
+						{:else}
+							<div class="answer-comparison">
+								{#if lastResult.submittedAnswer}
+									<div class="answer-row answer-row-wrong">
+										<span class="answer-label">Deine Antwort:</span>
+										<span class="answer-value"><MathText text={lastResult.submittedAnswer} /></span>
+									</div>
+								{/if}
+								{#if lastResult.correctAnswer}
+									<div class="answer-row answer-row-correct">
+										<span class="answer-label">Richtige Antwort:</span>
+										<span class="answer-value"><MathText text={lastResult.correctAnswer} /></span>
+									</div>
+								{/if}
+							</div>
+						{/if}
+					{/if}
+
 					{#if lastResult.xpGained > 0}
 						<div class="xp-gained">+{lastResult.xpGained} XP</div>
 					{/if}
@@ -413,8 +415,19 @@
 			{:else}
 				<!-- Task prompt + answer input -->
 				<div class="task-card">
-					<div class="atom-label-tag">{activeItem?.label}</div>
-					{#if showExplanationOnTask && currentTask.explanation}
+					<div class="task-card-header">
+						<div class="atom-label-tag">{activeItem?.label}</div>
+						{#if currentTask.explanation}
+							<button
+								class="explanation-toggle"
+								class:active={showExplanationManual || hadWrongAttempt}
+								onclick={() => showExplanationManual = !showExplanationManual}
+								aria-label="Erklärung anzeigen"
+								title="Erklärung"
+							>?</button>
+						{/if}
+					</div>
+					{#if (showExplanationManual || hadWrongAttempt) && currentTask.explanation}
 						<AtomExplanation text={currentTask.explanation} illustrationConfig={currentTask.illustrationConfig} />
 					{/if}
 					{#if currentTask.svg}
@@ -426,19 +439,21 @@
 						{#if currentTask.choices}
 							<div class="choice-buttons">
 								{#each currentTask.choices as choice}
-									<button class="choice-btn" onclick={() => selectAnswer(choice)} disabled={isSubmitting}>{choice}</button>
+									<button class="choice-btn" onclick={() => selectAnswer(choice)} disabled={isSubmitting}><MathText text={choice} /></button>
 								{/each}
 							</div>
 						{:else if currentTask.answerType === 'fraction'}
 							<FractionInput bind:this={fractionInput} bind:value={answer} disabled={isSubmitting} numDigits={currentTask.inputData?.numDigits as number | undefined} onsubmit={submitAnswer} />
 						{:else if writtenArith}
-							<WrittenCalcInput bind:this={writtenCalcInput} a={writtenArith.a} b={writtenArith.b} op={writtenArith.op} bind:value={answer} disabled={isSubmitting} onsubmit={submitAnswer} />
+							{#key currentTask.taskId}
+								<WrittenCalcInput bind:this={writtenCalcInput} a={writtenArith.a} b={writtenArith.b} op={writtenArith.op} bind:value={answer} disabled={isSubmitting} onsubmit={submitAnswer} />
+							{/key}
 						{:else if isNumberLine}
 							<NumberLineInput bind:this={numberLineInput} totalSections={currentTask.inputData!.totalSections as number} bind:value={answer} disabled={isSubmitting} onsubmit={submitAnswer} />
 						{:else if currentTask.answerType === 'boolean'}
 							<div class="choice-buttons">
-								<button class="choice-btn" onclick={() => selectAnswer('ja')} disabled={isSubmitting}>Ja</button>
-								<button class="choice-btn" onclick={() => selectAnswer('nein')} disabled={isSubmitting}>Nein</button>
+								<button class="choice-btn choice-btn-nein" onclick={() => selectAnswer('nein')} disabled={isSubmitting}>✗ Nein</button>
+								<button class="choice-btn choice-btn-ja" onclick={() => selectAnswer('ja')} disabled={isSubmitting}>✓ Ja</button>
 							</div>
 						{:else if currentTask.answerType === 'comparison'}
 							<div class="choice-buttons">
@@ -482,7 +497,7 @@
 						{/if}
 					</div>
 
-					{#if !currentTask.choices && currentTask.answerType !== 'boolean' && currentTask.answerType !== 'comparison'}
+					{#if !currentTask.choices && currentTask.answerType !== 'boolean' && currentTask.answerType !== 'comparison' && !writtenArith}
 						<button
 							class="btn btn-primary btn-full btn-lg submit-btn"
 							onclick={submitAnswer}
@@ -511,21 +526,6 @@
 		align-items: center;
 		justify-content: center;
 		padding: 2rem;
-	}
-
-	/* ── Celebration ── */
-	.celebration {
-		text-align: center;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 1rem;
-	}
-	.celebration h2 { font-size: 1.5rem; font-weight: 700; }
-	.mascot-img {
-		width: 140px;
-		height: auto;
-		filter: drop-shadow(0 4px 12px rgba(79, 70, 229, 0.15));
 	}
 
 	/* ── Selection page ── */
@@ -716,6 +716,37 @@
 		border-radius: 0.5rem;
 		padding: 0.75rem 0.5rem 0.5rem;
 	}
+	.task-card-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.5rem;
+	}
+	.explanation-toggle {
+		flex-shrink: 0;
+		width: 1.6rem;
+		height: 1.6rem;
+		border-radius: 50%;
+		border: 2px solid var(--c-gray-400);
+		background: #fff;
+		color: var(--c-gray-600);
+		font-size: 0.8rem;
+		font-weight: 700;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: border-color 0.15s, background 0.15s, color 0.15s;
+	}
+	.explanation-toggle:hover {
+		border-color: var(--c-primary);
+		color: var(--c-primary);
+	}
+	.explanation-toggle.active {
+		border-color: var(--c-primary);
+		background: var(--c-primary-light);
+		color: var(--c-primary);
+	}
 	.atom-label-tag {
 		font-size: 0.75rem;
 		font-weight: 600;
@@ -781,6 +812,22 @@
 	.choice-btn-symbol {
 		min-width: 70px;
 		font-size: 1.5rem;
+	}
+	.choice-btn-nein {
+		border-color: var(--c-error);
+		color: var(--c-error);
+	}
+	.choice-btn-nein:hover:not(:disabled) {
+		background: var(--c-error-light);
+		border-color: var(--c-error);
+	}
+	.choice-btn-ja {
+		border-color: var(--c-success);
+		color: var(--c-success);
+	}
+	.choice-btn-ja:hover:not(:disabled) {
+		background: var(--c-success-light);
+		border-color: var(--c-success);
 	}
 
 	/* ── Feedback card ── */
@@ -849,4 +896,41 @@
 		text-align: left;
 	}
 	.continue-btn { margin-top: 0.5rem; }
+
+	/* ── Answer comparison (wrong feedback) ── */
+	.answer-comparison {
+		width: 100%;
+		display: flex;
+		flex-direction: column;
+		gap: 0.4rem;
+		border-radius: var(--radius);
+		overflow: hidden;
+		font-size: 1rem;
+	}
+	.answer-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.75rem;
+		padding: 0.5rem 0.75rem;
+	}
+	.answer-row-wrong {
+		background: color-mix(in srgb, var(--c-error) 8%, transparent);
+	}
+	.answer-row-correct {
+		background: color-mix(in srgb, var(--c-success) 8%, transparent);
+	}
+	.answer-label {
+		font-size: 0.8rem;
+		font-weight: 600;
+		color: var(--c-gray-600);
+		white-space: nowrap;
+	}
+	.answer-value {
+		font-size: 1rem;
+		font-weight: 700;
+		font-variant-numeric: tabular-nums;
+	}
+	.answer-row-wrong .answer-value { color: var(--c-error); }
+	.answer-row-correct .answer-value { color: var(--c-success); }
 </style>

@@ -14,8 +14,11 @@
 		%sveltekit.head%
 		<script>
 			window.MathJax = {
-				tex: { inlineMath: [['\\(', '\\)']], displayMath: [] },
-				options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] },
+				tex: {
+					inlineMath: [['\\(', '\\)'], ['$', '$']],
+					displayMath: [['\\[', '\\]'], ['$$', '$$']]
+				},
+				options: { skipHtmlTags: ['script','noscript','style','textarea','pre','svg'] },
 				startup: { typeset: false }
 			};
 		</script>

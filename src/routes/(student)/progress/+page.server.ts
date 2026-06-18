@@ -125,8 +125,12 @@ export const load: PageServerLoad = async ({ locals, depends }) => {
 	const domains = groupAtoms(activeAtoms);
 	const masteredDomains = groupAtoms(masteredAtomsList);
 
-	// Summary stats
-	const totalAtoms = allAtoms.filter((a) => a.level === 'atom').length;
+	// Summary stats — count only unlocked atoms (frontier + mastered)
+	const unlockedAtomIds = new Set([
+		...activeAtoms.filter((a) => a.level === 'atom').map((a) => a.id),
+		...masteredAtomsList.map((a) => a.id)
+	]);
+	const totalAtoms = unlockedAtomIds.size;
 	const masteredAtoms = statuses.filter((s) => s.isMastered).length;
 
 	return {

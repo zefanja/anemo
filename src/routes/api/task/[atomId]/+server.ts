@@ -1,6 +1,8 @@
 import { json, error } from '@sveltejs/kit';
 import { getTaskForAtom } from '$lib/server/tasks/index.js';
 import { db } from '$lib/server/db/index.js';
+import { studentAtomStatus } from '$lib/server/db/schema.js';
+import { and, eq } from 'drizzle-orm';
 import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async ({ params, locals, url }) => {
@@ -16,8 +18,17 @@ export const GET: RequestHandler = async ({ params, locals, url }) => {
 	if (!atom) throw error(404, 'Atom nicht gefunden');
 	if (atom.level === 'cluster') throw error(400, 'Cluster werden nicht direkt geübt');
 
+	const statusRow = await db.query.studentAtomStatus.findFirst({
+		where: and(
+			eq(studentAtomStatus.studentId, locals.session.studentId),
+			eq(studentAtomStatus.atomId, params.atomId)
+		),
+		columns: { mastery: true }
+	});
+	const mastery = statusRow?.mastery ?? 0;
+
 	const excludePrompts = url.searchParams.getAll('ex');
-	const task = await getTaskForAtom(params.atomId, excludePrompts);
+	const task = await getTaskForAtom(params.atomId, excludePrompts, mastery);
 	if (!task) throw error(404, 'Keine Aufgabe verfügbar');
 
 	const baseInputData = task.inputData ?? null;

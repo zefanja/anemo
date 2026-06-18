@@ -15,7 +15,7 @@ export type TaskWithId = GeneratedTask & { id: string };
  *
  * excludePrompts: prompts recently shown to the student — avoided when possible.
  */
-export async function getTaskForAtom(atomId: string, excludePrompts: string[] = []): Promise<TaskWithId | null> {
+export async function getTaskForAtom(atomId: string, excludePrompts: string[] = [], mastery?: number): Promise<TaskWithId | null> {
 	// Try to pick an imported task not recently seen
 	let imported = excludePrompts.length > 0
 		? await db.query.tasks.findFirst({
@@ -54,7 +54,7 @@ export async function getTaskForAtom(atomId: string, excludePrompts: string[] = 
 		const excludeSet = new Set(excludePrompts);
 		let generated: GeneratedTask | null = null;
 		for (let attempt = 0; attempt < 5; attempt++) {
-			const candidate = generateTask(atomId);
+			const candidate = generateTask(atomId, mastery);
 			if (!candidate) break;
 			if (!excludeSet.has(candidate.prompt)) { generated = candidate; break; }
 			if (!generated) generated = candidate; // keep as last-resort fallback
