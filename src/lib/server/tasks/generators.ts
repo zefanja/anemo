@@ -188,8 +188,9 @@ function reg(atomId: string, gen: Gen): void {
 
 reg('arithmetik__zaehlen_zahlwortreihe', () => {
 	const step = pick([1, 2, 5, 10]);
-	const start = rand(1, 20) * step;
-	const terms = [start, start + step, start + 2 * step, start + 3 * step];
+	const dir = rand(0, 1) === 0 ? 1 : -1;
+	const start = dir === 1 ? rand(1, 10) * step : rand(5, 25) * step;
+	const terms = [0, 1, 2, 3].map(i => start + dir * i * step);
 	const missing = rand(0, 3);
 	const display = terms.map((v, i) => (i === missing ? '___' : String(v))).join(', ');
 	return {
@@ -197,7 +198,7 @@ reg('arithmetik__zaehlen_zahlwortreihe', () => {
 		prompt: `Welche Zahl fehlt? ${display}`,
 		answerType: 'integer',
 		correctAnswer: String(terms[missing]),
-		hint: `Die Zahlenfolge zählt in ${step}er-Schritten.`,
+		hint: `Die Folge ${dir === 1 ? 'zählt vorwärts' : 'zählt rückwärts'} in ${step}er-Schritten.`,
 		difficulty: step === 1 ? 0.1 : step === 2 ? 0.2 : 0.3
 	};
 });
@@ -284,11 +285,21 @@ reg('arithmetik__roemische_zahlen', () => {
 });
 
 reg('arithmetik__ueberschlagsrechnung', () => {
-	const a = rand(2, 9) * 10 + rand(3, 7);
-	const b = rand(2, 9) * 10 + rand(3, 7);
-	const ra = Math.round(a / 10) * 10;
-	const rb = Math.round(b / 10) * 10;
-	return { atomId: 'arithmetik__ueberschlagsrechnung', prompt: `Schätze: ${a} + ${b} ≈ ___  (runde zuerst auf Zehner)`, answerType: 'integer', correctAnswer: String(ra + rb), hint: `${a} ≈ ${ra}, ${b} ≈ ${rb}`, difficulty: 0.35 };
+	const atomId = 'arithmetik__ueberschlagsrechnung';
+	const op = pick(['+', '−', '·']);
+	if (op === '+') {
+		const a = rand(2, 9) * 10 + rand(3, 7), b = rand(2, 9) * 10 + rand(3, 7);
+		const ra = Math.round(a / 10) * 10, rb = Math.round(b / 10) * 10;
+		return { atomId, prompt: `Schätze: ${a} + ${b} ≈ ___  (runde auf Zehner)`, answerType: 'integer', correctAnswer: String(ra + rb), hint: `${a} ≈ ${ra}, ${b} ≈ ${rb}`, difficulty: 0.3 };
+	}
+	if (op === '−') {
+		const a = rand(3, 9) * 10 + rand(3, 7), b = rand(1, 5) * 10 + rand(3, 7);
+		const ra = Math.round(a / 10) * 10, rb = Math.round(b / 10) * 10;
+		return { atomId, prompt: `Schätze: ${a} − ${b} ≈ ___  (runde auf Zehner)`, answerType: 'integer', correctAnswer: String(ra - rb), hint: `${a} ≈ ${ra}, ${b} ≈ ${rb}`, difficulty: 0.35 };
+	}
+	const x = rand(2, 6), y = rand(2, 7) * 10 + rand(3, 7);
+	const ry = Math.round(y / 10) * 10;
+	return { atomId, prompt: `Schätze: ${x} · ${y} ≈ ___  (runde auf Zehner)`, answerType: 'integer', correctAnswer: String(x * ry), hint: `${y} ≈ ${ry}, dann ${x} · ${ry}`, difficulty: 0.4 };
 });
 
 // ── 2. Grundrechenarten (kleine Zahlen) ───────────────────────────────────────
@@ -312,8 +323,18 @@ reg('arithmetik__add_sub_bis_20_ohne_uebergang', () => {
 });
 
 reg('arithmetik__zehnerueberschreitung_bis_20', () => {
-	const a = rand(7, 9), b = rand(10 - a + 1, 9);
-	return { atomId: 'arithmetik__zehnerueberschreitung_bis_20', prompt: `${a} + ${b} = ?`, answerType: 'integer', correctAnswer: String(a + b), hint: `Nutze den Zehner als Zwischenschritt: ${a} + ${10 - a} = 10, dann noch ${b - (10 - a)}.`, difficulty: 0.25 };
+	const atomId = 'arithmetik__zehnerueberschreitung_bis_20';
+	const op = rand(0, 1);
+	if (op === 0) {
+		const a = rand(7, 9), b = rand(10 - a + 1, 9);
+		return { atomId, prompt: `${a} + ${b} = ?`, answerType: 'integer', correctAnswer: String(a + b), hint: `Nutze den Zehner: ${a} + ${10 - a} = 10, dann noch ${b - (10 - a)}.`, difficulty: 0.25 };
+	}
+	// Subtraction crossing ten: minuend ∈ [11,18], result ∈ [1,9]
+	const minuend = rand(11, 18);
+	const result = rand(1, 9);
+	if (result >= minuend) return registry.get(atomId)!();
+	const sub = minuend - result;
+	return { atomId, prompt: `${minuend} − ${sub} = ?`, answerType: 'integer', correctAnswer: String(result), hint: `Zerlege ${sub}: ${minuend} − ${minuend - 10} = 10, dann − ${sub - (minuend - 10)}.`, difficulty: 0.3 };
 });
 
 reg('arithmetik__verdoppeln_halbieren', () => {
@@ -414,16 +435,30 @@ reg('arithmetik__multiplikationsverstaendnis', () => {
 });
 
 reg('arithmetik__einmaleins_kernaufgaben', () => {
-	const rows = [1, 2, 5, 10];
-	const a = pick(rows), b = rand(1, 10);
-	return { atomId: 'arithmetik__einmaleins_kernaufgaben', prompt: `${a} · ${b} = ?`, answerType: 'integer', correctAnswer: String(a * b), difficulty: 0.25 };
+	const atomId = 'arithmetik__einmaleins_kernaufgaben';
+	if (rand(0, 1) === 0) {
+		const rows = [1, 2, 5, 10];
+		const a = pick(rows), b = rand(1, 10);
+		return { atomId, prompt: `${a} · ${b} = ?`, answerType: 'integer', correctAnswer: String(a * b), difficulty: 0.2 };
+	}
+	const n = rand(3, 10);
+	return { atomId, prompt: `${n} · ${n} = ?`, answerType: 'integer', correctAnswer: String(n * n), hint: `${n}² = ${n} · ${n}`, difficulty: 0.3 };
 });
 
 reg('arithmetik__einmaleins_ableiten', () => {
+	const atomId = 'arithmetik__einmaleins_ableiten';
+	type Strategy = { base: number; derived: number; hintFn: (b: number) => string };
+	const strategies: Strategy[] = [
+		{ base: 2, derived: 3, hintFn: b => `addiere einmal ${b}` },
+		{ base: 5, derived: 6, hintFn: b => `addiere einmal ${b}` },
+		{ base: 2, derived: 4, hintFn: b => `verdopple ${2 * b}` },
+		{ base: 5, derived: 7, hintFn: b => `addiere ${2 * b}` },
+		{ base: 4, derived: 8, hintFn: b => `verdopple ${4 * b}` },
+		{ base: 10, derived: 9, hintFn: b => `ziehe einmal ${b} ab` },
+	];
+	const { base, derived, hintFn } = pick(strategies);
 	const b = rand(3, 9);
-	const baseRow = pick([2, 5]);
-	const a = baseRow + 1;
-	return { atomId: 'arithmetik__einmaleins_ableiten', prompt: `Wenn ${baseRow} · ${b} = ${baseRow * b}, was ist dann ${a} · ${b}?`, answerType: 'integer', correctAnswer: String(a * b), hint: `Addiere einmal ${b} zum bekannten Ergebnis.`, difficulty: 0.3 };
+	return { atomId, prompt: `Wenn ${base} · ${b} = ${base * b}, was ist dann ${derived} · ${b}?`, answerType: 'integer', correctAnswer: String(derived * b), hint: `${base} · ${b} = ${base * b} → ${hintFn(b)}.`, difficulty: 0.3 };
 });
 
 reg('arithmetik__einmaleins_automatisierung', () => {
