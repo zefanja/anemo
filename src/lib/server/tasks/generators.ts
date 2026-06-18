@@ -275,12 +275,13 @@ reg('arithmetik__runden_natuerliche_zahlen', () => {
 
 reg('arithmetik__roemische_zahlen', () => {
 	const map: [number, string][] = [[1000,'M'],[900,'CM'],[500,'D'],[400,'CD'],[100,'C'],[90,'XC'],[50,'L'],[40,'XL'],[10,'X'],[9,'IX'],[5,'V'],[4,'IV'],[1,'I']];
-	const n = rand(1, 39);
+	const n = rand(1, 399);
 	let num = n, roman = '';
 	for (const [val, sym] of map) { while (num >= val) { roman += sym; num -= val; } }
+	const hint = 'M=1000, D=500, C=100, L=50, X=10, V=5, I=1. Subtraktionsregel: IV=4, IX=9, XL=40, XC=90, CD=400.';
 	const q = rand(0, 1);
-	if (q === 0) return { atomId: 'arithmetik__roemische_zahlen', prompt: `${roman} als arabische Zahl?`, answerType: 'integer', correctAnswer: String(n), difficulty: 0.35 };
-	return { atomId: 'arithmetik__roemische_zahlen', prompt: `${n} als römische Zahl? (Tippe die Buchstaben: z.B. XIV → 14)`, answerType: 'text', correctAnswer: roman, hint: `${roman}`, difficulty: 0.35 };
+	if (q === 0) return { atomId: 'arithmetik__roemische_zahlen', prompt: `${roman} als arabische Zahl?`, answerType: 'integer', correctAnswer: String(n), hint, difficulty: 0.35 };
+	return { atomId: 'arithmetik__roemische_zahlen', prompt: `${n} als römische Zahl?`, answerType: 'text', correctAnswer: roman, hint, difficulty: 0.4 };
 });
 
 reg('arithmetik__ueberschlagsrechnung', () => {
@@ -332,23 +333,45 @@ reg('arithmetik__add_sub_zehnerzahlen', () => {
 });
 
 reg('arithmetik__add_sub_bis_100_ohne_uebergang', () => {
-	const a = rand(10, 89);
-	const maxB = Math.min(99 - a, 9 - (a % 10) > 0 ? 99 - a : 99 - a);
-	const b = rand(1, Math.max(1, 9 - (a % 10)));
-	const fullB = rand(0, 9) * 10 + b;
+	const atomId = 'arithmetik__add_sub_bis_100_ohne_uebergang';
 	const op = rand(0, 1);
-	if (op === 0) { const sum = a + fullB; if (sum > 99) return { atomId: 'arithmetik__add_sub_bis_100_ohne_uebergang', prompt: `${a} + ${b} = ?`, answerType: 'integer', correctAnswer: String(a + b), difficulty: 0.25 }; return { atomId: 'arithmetik__add_sub_bis_100_ohne_uebergang', prompt: `${a} + ${fullB} = ?`, answerType: 'integer', correctAnswer: String(a + fullB), difficulty: 0.25 }; }
-	const big = rand(20, 99), small = rand(1, big % 10 || 9);
-	return { atomId: 'arithmetik__add_sub_bis_100_ohne_uebergang', prompt: `${big} − ${small} = ?`, answerType: 'integer', correctAnswer: String(big - small), difficulty: 0.25 };
+	if (op === 0) {
+		// Addition without carry: ones digits must not cross ten
+		const aTens = rand(1, 8), aOnes = rand(0, 9);
+		const a = aTens * 10 + aOnes;
+		const bOnes = rand(0, 9 - aOnes); // guaranteed no carry in ones
+		const maxBTens = Math.floor((99 - a) / 10);
+		const bTens = rand(0, Math.max(0, maxBTens));
+		const b = bTens * 10 + bOnes;
+		if (b === 0) return registry.get(atomId)!();
+		return { atomId, prompt: `${a} + ${b} = ?`, answerType: 'integer', correctAnswer: String(a + b), difficulty: 0.25 };
+	}
+	// Subtraction without borrowing: ones of minuend >= ones of subtrahend
+	const bigTens = rand(2, 9), bigOnes = rand(0, 9);
+	const big = bigTens * 10 + bigOnes;
+	const smallOnes = rand(0, bigOnes); // no borrowing needed
+	const smallTens = rand(0, bigTens - 1);
+	const small = smallTens * 10 + smallOnes;
+	if (small === 0) return registry.get(atomId)!();
+	return { atomId, prompt: `${big} − ${small} = ?`, answerType: 'integer', correctAnswer: String(big - small), difficulty: 0.25 };
 });
 
 reg('arithmetik__add_sub_bis_100_mit_uebergang', () => {
-	const a = rand(15, 85);
-	const b = rand(10 - (a % 10) + 1, Math.min(30, 99 - a));
+	const atomId = 'arithmetik__add_sub_bis_100_mit_uebergang';
 	const op = rand(0, 1);
-	if (op === 0) return { atomId: 'arithmetik__add_sub_bis_100_mit_uebergang', prompt: `${a} + ${b} = ?`, answerType: 'integer', correctAnswer: String(a + b), difficulty: 0.35 };
-	const big = rand(21, 99), diff = rand(2, big - 10);
-	return { atomId: 'arithmetik__add_sub_bis_100_mit_uebergang', prompt: `${big} − ${diff} = ?`, answerType: 'integer', correctAnswer: String(big - diff), difficulty: 0.35 };
+	if (op === 0) {
+		// Addition with carry: ones digits must cross ten
+		const a = rand(15, 85);
+		const b = rand(10 - (a % 10) + 1, Math.min(30, 99 - a));
+		return { atomId, prompt: `${a} + ${b} = ?`, answerType: 'integer', correctAnswer: String(a + b), difficulty: 0.35 };
+	}
+	// Subtraction with borrowing: ones of minuend < ones of subtrahend
+	const bigTens = rand(2, 9), bigOnes = rand(0, 8);
+	const big = bigTens * 10 + bigOnes;
+	const smallOnes = rand(bigOnes + 1, 9); // forces borrowing
+	const smallTens = rand(1, bigTens - 1);  // result stays >= 10
+	const small = smallTens * 10 + smallOnes;
+	return { atomId, prompt: `${big} − ${small} = ?`, answerType: 'integer', correctAnswer: String(big - small), difficulty: 0.35 };
 });
 
 // ── 3. Schriftliche Verfahren ─────────────────────────────────────────────────
@@ -821,7 +844,7 @@ reg('arithmetik__subtraktion_als_addition_gegenzahl', () => {
 
 reg('arithmetik__vorzeichenregeln_mult_div', () => {
 	const a = rand(1, 9), b = rand(1, 9);
-	const signs = pick([[1, -1], [-1, 1], [-1, -1]]);
+	const signs = pick([[1, -1], [-1, 1], [-1, -1], [1, 1]]);
 	const [sa, sb] = signs;
 	const op = rand(0, 1);
 	if (op === 0) return { atomId: 'arithmetik__vorzeichenregeln_mult_div', prompt: `(${sa * a}) · (${sb * b}) = ?`, answerType: 'integer', correctAnswer: String(sa * a * sb * b), hint: '(−) · (−) = (+), (−) · (+) = (−)', difficulty: 0.45 };
