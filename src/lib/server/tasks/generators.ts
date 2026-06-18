@@ -391,16 +391,20 @@ reg('arithmetik__halbschriftliches_rechnen', () => {
 });
 
 reg('arithmetik__rechengesetze_rechenvorteile', () => {
-	const type = rand(0, 2);
+	const atomId = 'arithmetik__rechengesetze_rechenvorteile';
+	const type = rand(0, 3);
 	if (type === 0) {
 		const a = rand(1, 9), b = rand(1, 9);
-		return { atomId: 'arithmetik__rechengesetze_rechenvorteile', prompt: `${a} + ${b} = ${b} + ___  (Kommutativgesetz)`, answerType: 'integer', correctAnswer: String(a), difficulty: 0.2 };
+		return { atomId, prompt: `${a} + ${b} = ${b} + ___  (Kommutativgesetz)`, answerType: 'integer', correctAnswer: String(a), difficulty: 0.2 };
 	} else if (type === 1) {
-		const a = rand(10, 50), b = rand(1, 9) * 10, c = rand(1, 9) * 10;
-		return { atomId: 'arithmetik__rechengesetze_rechenvorteile', prompt: `${a} + ${b} + ${100 - b} = ?  (suche den Rechenweg)`, answerType: 'integer', correctAnswer: String(a + 100), difficulty: 0.35 };
-	} else {
+		const a = rand(10, 50), b = rand(1, 9) * 10;
+		return { atomId, prompt: `${a} + ${b} + ${100 - b} = ?  (suche den Rechenweg)`, answerType: 'integer', correctAnswer: String(a + 100), difficulty: 0.35 };
+	} else if (type === 2) {
 		const a = rand(2, 9), b = rand(2, 9), c = rand(2, 9);
-		return { atomId: 'arithmetik__rechengesetze_rechenvorteile', prompt: `(${a} · ${b}) · ${c} = ${a} · (${b} · ___)`, answerType: 'integer', correctAnswer: String(c), difficulty: 0.25 };
+		return { atomId, prompt: `(${a} · ${b}) · ${c} = ${a} · (${b} · ___)`, answerType: 'integer', correctAnswer: String(c), hint: 'Assoziativgesetz: Reihenfolge der Klammern ist egal.', difficulty: 0.25 };
+	} else {
+		const a = rand(2, 6), b = rand(2, 8), c = rand(2, 8);
+		return { atomId, prompt: `${a} · (${b} + ${c}) = ${a} · ${b} + ${a} · ___`, answerType: 'integer', correctAnswer: String(c), hint: `Distributivgesetz: a·(b+c) = a·b + a·c`, difficulty: 0.4 };
 	}
 });
 
@@ -432,11 +436,14 @@ reg('arithmetik__einmaleins_automatisierung', () => {
 });
 
 reg('arithmetik__division_grundverstaendnis', () => {
+	const atomId = 'arithmetik__division_grundverstaendnis';
 	const b = rand(2, 9), q = rand(2, 10);
 	const a = b * q;
-	const type = rand(0, 1);
-	if (type === 0) return { atomId: 'arithmetik__division_grundverstaendnis', prompt: `${a} : ${b} = ?`, answerType: 'integer', correctAnswer: String(q), difficulty: 0.3 };
-	return { atomId: 'arithmetik__division_grundverstaendnis', prompt: `${a} Äpfel gleichmäßig auf ${b} Körbe — wie viele pro Korb?`, answerType: 'integer', correctAnswer: String(q), difficulty: 0.3 };
+	const type = rand(0, 2);
+	if (type === 0) return { atomId, prompt: `${a} : ${b} = ?`, answerType: 'integer', correctAnswer: String(q), difficulty: 0.3 };
+	if (type === 1) return { atomId, prompt: `${a} Äpfel gleichmäßig auf ${b} Körbe — wie viele Äpfel pro Korb? (Aufteilen)`, answerType: 'integer', correctAnswer: String(q), difficulty: 0.3 };
+	// Quotitive: how many groups of b fit in a?
+	return { atomId, prompt: `${a} Äpfel. In jeden Korb passen genau ${b} Äpfel. Wie viele Körbe braucht man? (Verteilen)`, answerType: 'integer', correctAnswer: String(q), hint: `${a} : ${b} = ?`, difficulty: 0.35 };
 });
 
 reg('arithmetik__division_mit_rest', () => {
@@ -466,21 +473,31 @@ reg('arithmetik__vorrangregeln', () => {
 // ── 7. Muster & Zahlenfolgen ─────────────────────────────────────────────────
 
 reg('arithmetik__muster_zahlenfolgen_grundschule', () => {
-	const type = rand(0, 2);
+	const atomId = 'arithmetik__muster_zahlenfolgen_grundschule';
+	const type = rand(0, 3);
 	if (type === 0) {
 		const start = rand(1, 10), step = rand(2, 5);
 		const seq = [0, 1, 2, 3, 4].map(i => start + i * step);
 		const missing = rand(1, 3);
 		const display = seq.slice(0, 5).map((v, i) => i === missing ? '___' : String(v)).join(', ');
-		return { atomId: 'arithmetik__muster_zahlenfolgen_grundschule', prompt: `Welche Zahl fehlt? ${display}`, answerType: 'integer', correctAnswer: String(seq[missing]), hint: `Die Folge wächst in ${step}er-Schritten.`, difficulty: 0.3 };
+		return { atomId, prompt: `Welche Zahl fehlt? ${display}`, answerType: 'integer', correctAnswer: String(seq[missing]), hint: `Die Folge wächst in ${step}er-Schritten.`, difficulty: 0.3 };
 	} else if (type === 1) {
 		const start = rand(5, 20), step = rand(2, 4);
 		const seq = [0, 1, 2, 3, 4].map(i => start - i * step);
-		return { atomId: 'arithmetik__muster_zahlenfolgen_grundschule', prompt: `Wie geht die Folge weiter? ${seq.slice(0, 4).join(', ')}, ___`, answerType: 'integer', correctAnswer: String(seq[4]), difficulty: 0.3 };
-	} else {
+		return { atomId, prompt: `Wie geht die Folge weiter? ${seq.slice(0, 4).join(', ')}, ___`, answerType: 'integer', correctAnswer: String(seq[4]), hint: `Die Folge nimmt um ${step} ab.`, difficulty: 0.3 };
+	} else if (type === 2) {
 		const base = rand(1, 5);
 		const seq = [base, base * 2, base * 4, base * 8];
-		return { atomId: 'arithmetik__muster_zahlenfolgen_grundschule', prompt: `${seq[0]}, ${seq[1]}, ${seq[2]}, ___`, answerType: 'integer', correctAnswer: String(seq[3]), hint: 'Jede Zahl wird verdoppelt.', difficulty: 0.35 };
+		return { atomId, prompt: `${seq[0]}, ${seq[1]}, ${seq[2]}, ___`, answerType: 'integer', correctAnswer: String(seq[3]), hint: 'Jede Zahl wird verdoppelt.', difficulty: 0.35 };
+	} else {
+		// Zahlenmauer: jede Zahl = Summe der zwei darunter
+		// Untere Reihe: a, b, c  →  Mitte: a+b, b+c  →  Oben: a+b+b+c
+		const a = rand(1, 8), b = rand(1, 8), c = rand(1, 8);
+		const ab = a + b, bc = b + c, top = ab + bc;
+		const which = pick([0, 1, 2] as const);
+		const bottom = [a, b, c].map((v, i) => i === which ? '___' : String(v));
+		const missing = which === 0 ? a : which === 1 ? b : c;
+		return { atomId, prompt: `Zahlenmauer (jede Zahl = Summe der zwei darunter): Oben: ${top} | Mitte: ${ab}, ${bc} | Unten: ${bottom.join(', ')}. Welche Zahl fehlt unten?`, answerType: 'integer', correctAnswer: String(missing), hint: 'Nutze die Mitte: Mitte − bekannte Nachbarzahl = fehlende Zahl.', difficulty: 0.4 };
 	}
 });
 
@@ -500,15 +517,24 @@ reg('arithmetik__sachaufgaben_grundschule', () => {
 // ── 9. Teilbarkeit ────────────────────────────────────────────────────────────
 
 reg('arithmetik__teiler_vielfache', () => {
+	const atomId = 'arithmetik__teiler_vielfache';
 	const n = pick([6, 8, 10, 12, 15, 18, 20, 24, 30, 36]);
 	const divisors = Array.from({ length: n }, (_, i) => i + 1).filter(d => n % d === 0);
-	const q = rand(0, 1);
-	if (q === 0) {
+	const type = rand(0, 3);
+	if (type === 0) {
 		const d = pick(divisors.slice(1, -1));
-		return { atomId: 'arithmetik__teiler_vielfache', prompt: `Ist ${d} ein Teiler von ${n}?`, answerType: 'boolean', correctAnswer: 'ja', difficulty: 0.3 };
+		return { atomId, prompt: `Ist ${d} ein Teiler von ${n}?`, answerType: 'boolean', correctAnswer: 'ja', difficulty: 0.3 };
+	} else if (type === 1) {
+		const notDiv = pick(Array.from({ length: n - 1 }, (_, i) => i + 2).filter(d => n % d !== 0));
+		return { atomId, prompt: `Ist ${notDiv} ein Teiler von ${n}?`, answerType: 'boolean', correctAnswer: 'nein', difficulty: 0.3 };
+	} else if (type === 2) {
+		// How many divisors does n have?
+		return { atomId, prompt: `Wie viele Teiler hat ${n}?`, answerType: 'integer', correctAnswer: String(divisors.length), hint: `Schreibe alle Teiler auf: ${divisors.join(', ')}`, difficulty: 0.4 };
+	} else {
+		// Name a multiple of n
+		const k = rand(2, 10);
+		return { atomId, prompt: `Nenne das ${k}. Vielfache von ${n}.`, answerType: 'integer', correctAnswer: String(n * k), hint: `${k} · ${n} = ?`, difficulty: 0.35 };
 	}
-	const notDiv = pick([...Array.from({ length: n - 1 }, (_, i) => i + 2).filter(d => n % d !== 0)]);
-	return { atomId: 'arithmetik__teiler_vielfache', prompt: `Ist ${notDiv} ein Teiler von ${n}?`, answerType: 'boolean', correctAnswer: 'nein', difficulty: 0.3 };
 });
 
 reg('arithmetik__teilbarkeitsregeln', () => {
@@ -526,19 +552,28 @@ reg('arithmetik__teilbarkeitsregeln', () => {
 });
 
 reg('arithmetik__primzahlen_primfaktorzerlegung', () => {
+	const atomId = 'arithmetik__primzahlen_primfaktorzerlegung';
 	const primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37];
 	const composites = [4, 6, 8, 9, 10, 12, 14, 15, 16, 18, 20, 21, 22, 24, 25, 26, 27, 28];
-	const q = rand(0, 2);
+	const q = rand(0, 3);
 	if (q === 0) {
 		const n = pick([...primes, ...composites.slice(0, 6)]);
-		return { atomId: 'arithmetik__primzahlen_primfaktorzerlegung', prompt: `Ist ${n} eine Primzahl?`, answerType: 'boolean', correctAnswer: primes.includes(n) ? 'ja' : 'nein', difficulty: 0.4 };
+		return { atomId, prompt: `Ist ${n} eine Primzahl?`, answerType: 'boolean', correctAnswer: primes.includes(n) ? 'ja' : 'nein', difficulty: 0.4 };
 	} else if (q === 1) {
 		const p1 = pick([2, 3, 5, 7]), p2 = pick([2, 3, 5, 7]);
-		return { atomId: 'arithmetik__primzahlen_primfaktorzerlegung', prompt: `Was ist der kleinste Primfaktor von ${p1 * p2}?`, answerType: 'integer', correctAnswer: String(Math.min(p1, p2)), difficulty: 0.45 };
+		return { atomId, prompt: `Was ist der kleinste Primfaktor von ${p1 * p2}?`, answerType: 'integer', correctAnswer: String(Math.min(p1, p2)), difficulty: 0.45 };
+	} else if (q === 2) {
+		// Full prime factorisation: ask for exponent of a specific prime
+		const p1 = pick([2, 3]), p2 = pick([2, 3, 5, 7].filter(x => x !== p1));
+		const e1 = rand(1, 3), e2 = rand(1, 2);
+		const n = p1 ** e1 * p2 ** e2;
+		return { atomId, prompt: `${n} = ${pow(p1, '?')} · ${pow(p2, e2)} — welcher Exponent gehört zu ${p1}?`, answerType: 'integer', correctAnswer: String(e1), hint: `Zerlege ${n} in Primfaktoren: durch ${p1} teilen.`, difficulty: 0.5 };
 	} else {
-		let p: number, e: number;
-		do { p = pick(primes.slice(0, 8)); e = rand(2, 4); } while (p ** e > 100);
-		return { atomId: 'arithmetik__primzahlen_primfaktorzerlegung', prompt: `${pow(p, e)} = ?`, answerType: 'integer', correctAnswer: String(p ** e), difficulty: 0.45 };
+		// Count prime factors (with multiplicity)
+		const p = pick([2, 3, 5]);
+		const e = rand(2, 4);
+		const n = p ** e;
+		return { atomId, prompt: `${n} = ${pow(p, '?')} — welcher Exponent?`, answerType: 'integer', correctAnswer: String(e), hint: `Wie oft ist ${p} als Primfaktor enthalten?`, difficulty: 0.45 };
 	}
 });
 
