@@ -25,7 +25,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 	const studentIds = classes.flatMap((c) => c.students.map((s) => s.id));
 
-	const [masteredStatuses, totalAtomCount, gamiStates] = await Promise.all([
+	const [masteredStatuses, totalAtomCount, gamiStates, atomStatuses] = await Promise.all([
 		studentIds.length > 0
 			? db.query.studentAtomStatus.findMany({
 					where: (s, { and, inArray, eq }) =>
@@ -40,6 +40,13 @@ export const load: PageServerLoad = async ({ locals }) => {
 		studentIds.length > 0
 			? db.query.gamificationState.findMany({
 					where: (g, { inArray }) => inArray(g.studentId, studentIds)
+				})
+			: Promise.resolve([]),
+		studentIds.length > 0
+			? db.query.studentAtomStatus.findMany({
+					where: (s, { inArray }) => inArray(s.studentId, studentIds),
+					columns: { atomId: true, mastery: true, isMastered: true, totalAttempts: true },
+					with: { atom: { columns: { label: true, domain: true } } }
 				})
 			: Promise.resolve([])
 	]);
@@ -67,6 +74,40 @@ export const load: PageServerLoad = async ({ locals }) => {
 		.sort((a, b) => b.xp - a.xp)
 		.slice(0, 10);
 
+	// Atom stats: group by atom, only include atoms practiced by at least 1 student
+	const atomStatsMap = new Map<
+		string,
+		{ label: string; domain: string; studentCount: number; masteredCount: number; masterySum: number }
+	>();
+	for (const s of atomStatuses) {
+		if (s.totalAttempts === 0) continue;
+		if (!atomStatsMap.has(s.atomId)) {
+			atomStatsMap.set(s.atomId, {
+				label: s.atom?.label ?? s.atomId,
+				domain: s.atom?.domain ?? '',
+				studentCount: 0,
+				masteredCount: 0,
+				masterySum: 0
+			});
+		}
+		const entry = atomStatsMap.get(s.atomId)!;
+		entry.studentCount++;
+		if (s.isMastered) entry.masteredCount++;
+		entry.masterySum += s.mastery;
+	}
+
+	const atomStats = Array.from(atomStatsMap.entries())
+		.map(([atomId, v]) => ({
+			atomId,
+			label: v.label,
+			domain: v.domain,
+			studentCount: v.studentCount,
+			masteredCount: v.masteredCount,
+			masteryRate: v.studentCount > 0 ? v.masteredCount / v.studentCount : 0,
+			avgMastery: v.studentCount > 0 ? v.masterySum / v.studentCount : 0
+		}))
+		.sort((a, b) => b.masteryRate - a.masteryRate);
+
 	return {
 		stats: {
 			classCount: classes.length,
@@ -82,6 +123,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 			isCorrect: a.isCorrect,
 			answeredAt: a.answeredAt
 		})),
-		leaderboard
+		leaderboard,
+		atomStats
 	};
 };

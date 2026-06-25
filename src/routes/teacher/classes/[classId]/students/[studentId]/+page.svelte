@@ -3,9 +3,6 @@
 
 	let { data }: { data: PageData } = $props();
 
-	let searchQuery = $state('');
-	let filterStatus = $state<'all' | 'mastered' | 'started' | 'not_started'>('all');
-
 	function relativeDate(d: Date | string | null): string {
 		if (!d) return '–';
 		const diff = Math.floor((Date.now() - new Date(d).getTime()) / 86400000);
@@ -13,6 +10,11 @@
 		if (diff === 1) return 'gestern';
 		if (diff < 30) return `vor ${diff} Tagen`;
 		return new Date(d).toLocaleDateString('de-DE');
+	}
+
+	function formatDateTime(d: Date | string): string {
+		const date = new Date(d);
+		return date.toLocaleDateString('de-DE') + ' ' + date.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
 	}
 
 	function masteryColor(pct: number, mastered: boolean): string {
@@ -32,6 +34,9 @@
 		data.totalAtoms > 0 ? Math.round((data.masteredCount / data.totalAtoms) * 100) : 0
 	);
 
+	let searchQuery = $state('');
+	let filterStatus = $state<'all' | 'mastered' | 'started' | 'not_started'>('all');
+
 	let filteredDomains = $derived(
 		data.atomsByDomain
 			.map((d) => ({
@@ -49,6 +54,42 @@
 			}))
 			.filter((d) => d.atoms.length > 0)
 	);
+
+	// ── Atom attempt history ───────────────────────────────────────────────────
+	type AttemptEntry = {
+		id: string;
+		isCorrect: boolean;
+		answeredAt: string;
+		taskPrompt: string | null;
+		correctAnswer: string | null;
+	};
+
+	let expandedAtomId = $state<string | null>(null);
+	let loadingAtomId = $state<string | null>(null);
+	let attemptCache = $state(new Map<string, AttemptEntry[]>());
+
+	async function toggleAtom(atomId: string, hasAttempts: boolean) {
+		if (!hasAttempts) return;
+		if (expandedAtomId === atomId) {
+			expandedAtomId = null;
+			return;
+		}
+		expandedAtomId = atomId;
+		if (attemptCache.has(atomId)) return;
+
+		loadingAtomId = atomId;
+		try {
+			const res = await fetch(
+				`/api/teacher/atom-attempts?studentId=${data.student.id}&atomId=${atomId}`
+			);
+			if (res.ok) {
+				const body = await res.json();
+				attemptCache = new Map(attemptCache).set(atomId, body.attempts);
+			}
+		} finally {
+			loadingAtomId = null;
+		}
+	}
 </script>
 
 <svelte:head>
@@ -151,6 +192,7 @@
 					<table class="atom-table">
 						<thead>
 							<tr>
+								<th class="col-chevron"></th>
 								<th>Atom</th>
 								<th>Status</th>
 								<th>Beherrschung</th>
@@ -163,7 +205,23 @@
 						<tbody>
 							{#each domainGroup.atoms as atom}
 								{@const status = atomStatus(atom)}
-								<tr class="atom-row-{status}">
+								{@const isExpanded = expandedAtomId === atom.id}
+								{@const isLoading = loadingAtomId === atom.id}
+								{@const hasAttempts = atom.totalAttempts > 0}
+								{@const cachedAttempts = attemptCache.get(atom.id)}
+
+								<tr
+									class="atom-row-{status}"
+									class:clickable={hasAttempts}
+									class:expanded={isExpanded}
+									onclick={() => toggleAtom(atom.id, hasAttempts)}
+									title={hasAttempts ? 'Klicken für Aufgaben-Verlauf' : ''}
+								>
+									<td class="col-chevron">
+										{#if hasAttempts}
+											<span class="chevron" class:open={isExpanded}>▶</span>
+										{/if}
+									</td>
 									<td class="atom-label">
 										{atom.label}
 										{#if atom.subdomain}
@@ -210,6 +268,59 @@
 									<td class="center muted">{relativeDate(atom.lastPracticedAt)}</td>
 									<td class="center muted">{relativeDate(atom.masteredAt)}</td>
 								</tr>
+
+								{#if isExpanded}
+									<tr class="detail-row">
+										<td colspan="8" class="detail-cell">
+											{#if isLoading}
+												<div class="detail-loading">Lädt…</div>
+											{:else if cachedAttempts}
+												{#if cachedAttempts.length === 0}
+													<div class="detail-empty">Keine Versuche gefunden.</div>
+												{:else}
+													<div class="detail-header">
+														<span class="detail-title">Aufgaben-Verlauf für „{atom.label}"</span>
+														<span class="detail-count">{cachedAttempts.length} Versuch{cachedAttempts.length !== 1 ? 'e' : ''}</span>
+													</div>
+													<table class="attempts-table">
+														<thead>
+															<tr>
+																<th>Zeitpunkt</th>
+																<th>Ergebnis</th>
+																<th>Aufgabe</th>
+																<th>Lösung</th>
+															</tr>
+														</thead>
+														<tbody>
+															{#each cachedAttempts as attempt}
+																<tr class:attempt-correct={attempt.isCorrect} class:attempt-wrong={!attempt.isCorrect}>
+																	<td class="attempt-time">{formatDateTime(attempt.answeredAt)}</td>
+																	<td class="attempt-result">
+																		{#if attempt.isCorrect}
+																			<span class="result-badge result-correct">✓ Richtig</span>
+																		{:else}
+																			<span class="result-badge result-wrong">✗ Falsch</span>
+																		{/if}
+																	</td>
+																	<td class="attempt-prompt">
+																		{#if attempt.taskPrompt}
+																			{attempt.taskPrompt}
+																		{:else}
+																			<span class="muted">Prozedurale Aufgabe</span>
+																		{/if}
+																	</td>
+																	<td class="attempt-answer muted">
+																		{attempt.correctAnswer ?? '–'}
+																	</td>
+																</tr>
+															{/each}
+														</tbody>
+													</table>
+												{/if}
+											{/if}
+										</td>
+									</tr>
+								{/if}
 							{/each}
 						</tbody>
 					</table>
@@ -315,10 +426,23 @@
 	.atom-table td { padding: 0.55rem 0.875rem; border-bottom: 1px solid #f9fafb; }
 	.atom-table tr:last-child td { border-bottom: none; }
 	.atom-row-mastered td { background: #f0fdf4; }
-	.atom-row-mastered:hover td { background: #dcfce7; }
-	.atom-row-started:hover td { background: #fffbeb; }
+	.atom-row-mastered.clickable:hover td { background: #dcfce7; cursor: pointer; }
+	.atom-row-started.clickable:hover td { background: #fffbeb; cursor: pointer; }
 	.atom-row-not_started { opacity: 0.6; }
 	.atom-row-not_started:hover { opacity: 1; }
+	.clickable { cursor: pointer; }
+	.expanded td { border-bottom: none; }
+
+	.col-chevron { width: 1.5rem; padding-right: 0; }
+	.chevron {
+		display: inline-block;
+		font-size: 0.6rem;
+		color: #9ca3af;
+		transition: transform 0.2s;
+		transform: rotate(0deg);
+	}
+	.chevron.open { transform: rotate(90deg); color: #16a34a; }
+
 	.atom-label { font-weight: 600; }
 	.subdomain { font-size: 0.7rem; color: #9ca3af; font-weight: 400; margin-left: 0.35rem; }
 	.atom-status { white-space: nowrap; }
@@ -340,6 +464,53 @@
 	.mastery-pct { font-size: 0.75rem; font-weight: 700; white-space: nowrap; min-width: 35px; text-align: right; }
 	.center { text-align: center; }
 	.muted { color: #9ca3af; }
+
+	/* Expanded detail row */
+	.detail-row td { border-bottom: 1px solid #e5e7eb; padding: 0; }
+	.detail-cell {
+		background: #f8fafc;
+		padding: 0.75rem 1rem 1rem 2.5rem;
+		border-left: 3px solid #16a34a;
+	}
+	.detail-loading { color: #9ca3af; font-size: 0.8rem; padding: 0.5rem 0; }
+	.detail-empty { color: #9ca3af; font-size: 0.8rem; padding: 0.5rem 0; }
+	.detail-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 0.6rem;
+	}
+	.detail-title { font-size: 0.8rem; font-weight: 700; color: #374151; }
+	.detail-count { font-size: 0.75rem; color: #9ca3af; }
+
+	/* Attempts table */
+	.attempts-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+	.attempts-table th {
+		padding: 0.3rem 0.6rem;
+		text-align: left;
+		font-size: 0.68rem;
+		color: #9ca3af;
+		font-weight: 600;
+		border-bottom: 1px solid #e5e7eb;
+		white-space: nowrap;
+	}
+	.attempts-table td { padding: 0.4rem 0.6rem; border-bottom: 1px solid #f3f4f6; vertical-align: top; }
+	.attempts-table tr:last-child td { border-bottom: none; }
+	.attempt-correct td { }
+	.attempt-wrong td { opacity: 0.85; }
+	.attempt-time { white-space: nowrap; color: #6b7280; font-size: 0.75rem; }
+	.attempt-result { white-space: nowrap; }
+	.result-badge {
+		display: inline-block;
+		padding: 0.1rem 0.4rem;
+		border-radius: 0.25rem;
+		font-size: 0.7rem;
+		font-weight: 700;
+	}
+	.result-correct { background: #dcfce7; color: #16a34a; }
+	.result-wrong { background: #fee2e2; color: #dc2626; }
+	.attempt-prompt { color: #374151; max-width: 360px; }
+	.attempt-answer { font-size: 0.75rem; white-space: nowrap; }
 
 	.empty-state { text-align: center; padding: 2rem; color: #9ca3af; }
 </style>

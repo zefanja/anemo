@@ -35,7 +35,10 @@ export async function updateMastery(
 	const newCorrect = prevCorrect + (isCorrect ? 1 : 0);
 	const mastery = computeMastery(existing?.mastery ?? 0, isCorrect, newTotal);
 	const wasMastered = existing?.isMastered ?? false;
-	const isMastered = mastery >= masteryRequired;
+	// Cap at 0.95 — the EWMA formula is asymptotic and can never reach 1.0,
+	// so mastery_required: 1.0 in atom data would make an atom permanently unmasterable.
+	const effectiveRequired = Math.min(masteryRequired, 0.95);
+	const isMastered = mastery >= effectiveRequired;
 	const justMastered = !wasMastered && isMastered;
 
 	const now = new Date();

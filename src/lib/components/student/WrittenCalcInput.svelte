@@ -74,28 +74,32 @@
 
 	// ── Multiplication partial products state (×) ─────────────────────────────
 
-	const onesB = $derived(b % 10);
-	const tensB = $derived(Math.floor(b / 10));
-	const mmSingle = $derived(tensB === 0);   // true → 1-stelliger Multiplikator
-	const mmP1 = $derived(a * (mmSingle ? b : onesB));
-	const mmP2 = $derived(mmSingle ? 0 : a * tensB);
-	const mmR  = $derived(a * b);
-	const mmP1Len = $derived(String(mmP1).length);
-	const mmP2Len = $derived(mmSingle ? 0 : String(mmP2).length);
-	const mmRLen  = $derived(String(mmR).length);
-	// 2-stellig: brauchen Platz für p2 + Verschiebung + p1 + Ergebnis
-	const mmTotalCols = $derived(mmSingle ? mmP1Len : Math.max(mmP1Len, mmP2Len + 1, mmRLen));
-	const mmP1LeftPad = $derived(mmTotalCols - mmP1Len);
-	const mmP2LeftPad = $derived(mmSingle ? 0 : mmTotalCols - mmP2Len - 1);
-	const mmRLeftPad  = $derived(mmTotalCols - mmRLen);
+	// bRowDigits: Ziffern von b in Anzeigereihenfolge (höchste zuerst = oberste Zeile)
+	const bRowDigits = $derived(op === '×' ? String(b).split('').map(Number) : []);
+	const mmNumRows = $derived(bRowDigits.length);
+	const mmSingle = $derived(mmNumRows === 1);
+	// Verschiebung je Zeile: oberste Zeile = höchster Shift
+	const mmShifts = $derived(bRowDigits.map((_, i) => mmNumRows - 1 - i));
+	const mmPartialVals = $derived(bRowDigits.map(d => a * d));
+	const mmPartialLens = $derived(mmPartialVals.map(v => Math.max(1, String(v).length)));
+	const mmR = $derived(a * b);
+	const mmRLen = $derived(String(mmR).length);
+	const mmTotalCols = $derived(
+		mmSingle
+			? mmPartialLens[0]
+			: Math.max(mmRLen, ...mmPartialLens.map((len, i) => len + mmShifts[i]))
+	);
+	const mmPartialLeftPads = $derived(
+		bRowDigits.map((_, i) => mmTotalCols - mmPartialLens[i] - mmShifts[i])
+	);
+	const mmRLeftPad = $derived(mmTotalCols - mmRLen);
 
-	let mmP1Cells = $state<string[]>([]);
-	let mmP1Active = $state(0);
-	let mmP2Cells = $state<string[]>([]);
-	let mmP2Active = $state(0);
-	let mmRCells  = $state<string[]>([]);
-	let mmRActive  = $state(0);
-	let mmSection = $state<'p1' | 'p2' | 'result'>('p1');
+	let mmCells = $state<string[][]>([]);
+	let mmActives = $state<number[]>([]);
+	let mmRCells = $state<string[]>([]);
+	let mmRActive = $state(0);
+	let mmRowIdx = $state(0);
+	let mmSection = $state<'partial' | 'result'>('partial');
 
 	// ── Division step-by-step state (:) ──────────────────────────────────────
 
@@ -118,20 +122,16 @@
 			simpleCells = Array(rLen).fill('');
 			simpleActive = rLen - 1;
 		} else if (_op === '×') {
-			const tens = Math.floor(_b / 10);
-			const single = tens === 0;
-			const p1 = single ? _a * _b : _a * (_b % 10);
-			const r  = _a * _b;
-			const p1Len = String(p1).length, rLen = String(r).length;
-			mmP1Cells = Array(p1Len).fill(''); mmP1Active = p1Len - 1;
-			if (!single) {
-				const p2Len = String(_a * tens).length;
-				mmP2Cells = Array(p2Len).fill(''); mmP2Active = p2Len - 1;
-				mmRCells  = Array(rLen).fill('');  mmRActive  = rLen - 1;
-			} else {
-				mmP2Cells = []; mmRCells = [];
-			}
-			mmSection = 'p1';
+			const digits = String(_b).split('').map(Number);
+			const single = digits.length === 1;
+			const rLen = String(_a * _b).length;
+			const cells = digits.map(d => Array(Math.max(1, String(_a * d).length)).fill(''));
+			mmCells = cells;
+			mmActives = cells.map(row => row.length - 1);
+			mmRCells = single ? [] : Array(rLen).fill('');
+			mmRActive = rLen - 1;
+			mmRowIdx = 0;
+			mmSection = 'partial';
 		} else if (_op === ':') {
 			const steps = computeDivSteps(_a, _b);
 			wdQuotCells = Array(steps.length).fill('');
@@ -145,9 +145,8 @@
 	const allFilled = $derived(
 		op === '×'
 			? mmSingle
-				? (mmP1Cells.length > 0 && mmP1Cells.every(c => c !== ''))
-				: (mmP1Cells.length > 0 && mmP1Cells.every(c => c !== '') &&
-				   mmP2Cells.every(c => c !== '') && mmRCells.every(c => c !== ''))
+				? (mmCells.length > 0 && mmCells[0].every(c => c !== ''))
+				: (mmCells.every(row => row.every(c => c !== '')) && mmRCells.every(c => c !== ''))
 			: op === ':'
 			? (wdQuotCells.length > 0 && wdQuotCells.every(c => c !== '') &&
 			   wdProdCells.every(row => row.every(c => c !== '')))
@@ -159,7 +158,7 @@
 	$effect(() => {
 		if (!allFilled) { value = ''; return; }
 		if (op === '+' || op === '-') value = simpleCells.join('');
-		else if (op === '×') value = mmSingle ? mmP1Cells.join('') : mmRCells.join('');
+		else if (op === '×') value = mmSingle ? (mmCells[0]?.join('') ?? '') : mmRCells.join('');
 		else if (op === ':') value = wdQuotCells.join('');
 	});
 
@@ -171,17 +170,18 @@
 			simpleCells[simpleActive] = digit; simpleCells = [...simpleCells];
 			if (simpleActive > 0) simpleActive--;
 		} else if (op === '×') {
-			if (mmSingle) {
-				mmP1Cells[mmP1Active] = digit; mmP1Cells = [...mmP1Cells];
-				if (mmP1Active > 0) mmP1Active--;
-			} else if (mmSection === 'p1') {
-				mmP1Cells[mmP1Active] = digit; mmP1Cells = [...mmP1Cells];
-				if (mmP1Active > 0) mmP1Active--;
-				else { mmSection = 'p2'; mmP2Active = mmP2Cells.length - 1; }
-			} else if (mmSection === 'p2') {
-				mmP2Cells[mmP2Active] = digit; mmP2Cells = [...mmP2Cells];
-				if (mmP2Active > 0) mmP2Active--;
-				else { mmSection = 'result'; mmRActive = mmRCells.length - 1; }
+			if (mmSection === 'partial') {
+				const cells = mmCells[mmRowIdx];
+				cells[mmActives[mmRowIdx]] = digit; mmCells = mmCells.map(r => [...r]);
+				if (mmActives[mmRowIdx] > 0) {
+					mmActives[mmRowIdx]--; mmActives = [...mmActives];
+				} else if (mmRowIdx < mmCells.length - 1) {
+					mmRowIdx++;
+					mmActives[mmRowIdx] = mmCells[mmRowIdx].length - 1;
+					mmActives = [...mmActives];
+				} else if (!mmSingle) {
+					mmSection = 'result'; mmRActive = mmRCells.length - 1;
+				}
 			} else {
 				mmRCells[mmRActive] = digit; mmRCells = [...mmRCells];
 				if (mmRActive > 0) mmRActive--;
@@ -211,20 +211,16 @@
 				simpleActive++; simpleCells[simpleActive] = ''; simpleCells = [...simpleCells];
 			}
 		} else if (op === '×') {
-			if (mmSingle) {
-				if (mmP1Cells[mmP1Active] !== '') { mmP1Cells[mmP1Active] = ''; mmP1Cells = [...mmP1Cells]; }
-				else if (mmP1Active < mmP1Cells.length - 1) { mmP1Active++; mmP1Cells[mmP1Active] = ''; mmP1Cells = [...mmP1Cells]; }
-			} else if (mmSection === 'result') {
+			if (mmSection === 'result') {
 				if (mmRCells[mmRActive] !== '') { mmRCells[mmRActive] = ''; mmRCells = [...mmRCells]; }
 				else if (mmRActive < mmRCells.length - 1) { mmRActive++; mmRCells[mmRActive] = ''; mmRCells = [...mmRCells]; }
-				else { mmSection = 'p2'; mmP2Active = 0; }
-			} else if (mmSection === 'p2') {
-				if (mmP2Cells[mmP2Active] !== '') { mmP2Cells[mmP2Active] = ''; mmP2Cells = [...mmP2Cells]; }
-				else if (mmP2Active < mmP2Cells.length - 1) { mmP2Active++; mmP2Cells[mmP2Active] = ''; mmP2Cells = [...mmP2Cells]; }
-				else { mmSection = 'p1'; mmP1Active = 0; }
+				else { mmSection = 'partial'; mmRowIdx = mmCells.length - 1; mmActives[mmRowIdx] = 0; mmActives = [...mmActives]; }
 			} else {
-				if (mmP1Cells[mmP1Active] !== '') { mmP1Cells[mmP1Active] = ''; mmP1Cells = [...mmP1Cells]; }
-				else if (mmP1Active < mmP1Cells.length - 1) { mmP1Active++; mmP1Cells[mmP1Active] = ''; mmP1Cells = [...mmP1Cells]; }
+				const cells = mmCells[mmRowIdx];
+				const active = mmActives[mmRowIdx];
+				if (cells[active] !== '') { cells[active] = ''; mmCells = mmCells.map(r => [...r]); }
+				else if (active < cells.length - 1) { mmActives[mmRowIdx]++; mmActives = [...mmActives]; mmCells[mmRowIdx][mmActives[mmRowIdx]] = ''; mmCells = mmCells.map(r => [...r]); }
+				else if (mmRowIdx > 0) { mmRowIdx--; mmActives[mmRowIdx] = 0; mmActives = [...mmActives]; }
 			}
 		} else if (op === ':') {
 			if (wdPhase === 'prod') {
@@ -304,52 +300,40 @@
 			<div class="mm-problem">{a} · {b}</div>
 			<div class="col-divider" style="width: calc({1 + mmTotalCols} * var(--cell-size))"></div>
 
-			{#if !mmSingle}
-				<!-- Zweites Teilprodukt: a × Zehnerstelle, um 1 nach links versetzt -->
+			{#each bRowDigits as _digit, rowIdx}
+				{@const shift = mmShifts[rowIdx]}
+				{@const leftPad = mmPartialLeftPads[rowIdx]}
+				{@const hasPlusSign = !mmSingle && shift === 0}
+				{@const cells = mmCells[rowIdx] ?? []}
+				{@const activeIdx = mmActives[rowIdx] ?? 0}
 				<div class="col-row">
-					<span class="op-cell op-symbol">+</span>
-					{#each Array(mmP2LeftPad) as _}<span class="digit-cell"></span>{/each}
-					{#each mmP2Cells as cell, i}
+					<span class="op-cell" class:op-symbol={hasPlusSign}>{hasPlusSign ? '+' : ''}</span>
+					{#each Array(leftPad) as _}<span class="digit-cell"></span>{/each}
+					{#each cells as cell, i}
 						<button
 							class="answer-cell"
-							class:active={i === mmP2Active && mmSection === 'p2'}
+							class:active={mmSection === 'partial' && mmRowIdx === rowIdx && i === activeIdx}
 							class:filled={cell !== ''}
 							{disabled}
-							onclick={() => { mmSection = 'p2'; mmP2Active = i; }}
-							aria-label={`Teilprodukt 2, Stelle ${mmP2Cells.length - i}`}
+							onclick={() => { mmSection = 'partial'; mmRowIdx = rowIdx; mmActives[rowIdx] = i; mmActives = [...mmActives]; }}
+							aria-label={`Teilprodukt Zeile ${rowIdx + 1}, Stelle ${cells.length - i}`}
 						>{cell}</button>
 					{/each}
-					<span class="digit-cell"></span><!-- Verschiebung ×10 -->
+					{#each Array(shift) as _}<span class="digit-cell"></span>{/each}
 				</div>
-			{/if}
-
-			<!-- Erstes Teilprodukt: a × Einerstelle (bei einstellig = Ergebnis) -->
-			<div class="col-row">
-				<span class="op-cell"></span>
-				{#each Array(mmP1LeftPad) as _}<span class="digit-cell"></span>{/each}
-				{#each mmP1Cells as cell, i}
-					<button
-						class="answer-cell"
-						class:active={i === mmP1Active && (mmSingle || mmSection === 'p1')}
-						class:filled={cell !== ''}
-						{disabled}
-						onclick={() => { mmSection = 'p1'; mmP1Active = i; }}
-						aria-label={`Teilprodukt 1, Stelle ${mmP1Cells.length - i}`}
-					>{cell}</button>
-				{/each}
-			</div>
+			{/each}
 
 			{#if !mmSingle}
 				<div class="col-divider" style="width: calc({1 + mmTotalCols} * var(--cell-size))"></div>
 
-				<!-- Ergebnis (nur bei 2-stellig) -->
+				<!-- Ergebnis -->
 				<div class="col-row">
 					<span class="op-cell"></span>
 					{#each Array(mmRLeftPad) as _}<span class="digit-cell"></span>{/each}
 					{#each mmRCells as cell, i}
 						<button
 							class="answer-cell"
-							class:active={i === mmRActive && mmSection === 'result'}
+							class:active={mmSection === 'result' && i === mmRActive}
 							class:filled={cell !== ''}
 							{disabled}
 							onclick={() => { mmSection = 'result'; mmRActive = i; }}

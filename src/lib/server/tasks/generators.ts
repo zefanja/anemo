@@ -577,10 +577,9 @@ reg('arithmetik__muster_zahlenfolgen_grundschule', () => {
 		// Untere Reihe: a, b, c  →  Mitte: a+b, b+c  →  Oben: a+b+b+c
 		const a = rand(1, 8), b = rand(1, 8), c = rand(1, 8);
 		const ab = a + b, bc = b + c, top = ab + bc;
-		const which = pick([0, 1, 2] as const);
-		const bottom = [a, b, c].map((v, i) => i === which ? '___' : String(v));
-		const missing = which === 0 ? a : which === 1 ? b : c;
-		return { atomId, prompt: `Zahlenmauer (jede Zahl = Summe der zwei darunter): Oben: ${top} | Mitte: ${ab}, ${bc} | Unten: ${bottom.join(', ')}. Welche Zahl fehlt unten?`, answerType: 'integer', correctAnswer: String(missing), hint: 'Nutze die Mitte: Mitte − bekannte Nachbarzahl = fehlende Zahl.', difficulty: 0.4 };
+		const which = pick(['a', 'b', 'c'] as const);
+		const missing = which === 'a' ? a : which === 'b' ? b : c;
+		return { atomId, prompt: 'Welche Zahl fehlt in der Zahlenmauer?', answerType: 'integer', correctAnswer: String(missing), inputData: { type: 'zahlenmauer', top, ab, bc, a, b, c, missing: which }, hint: 'Jede Zahl ist die Summe der zwei Zahlen darunter.', difficulty: 0.4 };
 	}
 });
 
@@ -769,34 +768,49 @@ reg('arithmetik__erweitern', () => {
 	const n = rand(1, 5), d = rand(2, 6), factor = rand(2, 5);
 	const hint = `Zähler und Nenner mit ${factor} multiplizieren.`;
 	if (rand(0, 1) === 0) {
-		return { atomId, prompt: `Erweitere ${fmtFrac(n, d)} mit ${factor} — neuer Zähler?`, answerType: 'integer', correctAnswer: String(n * factor), hint, difficulty: 0.35 };
+		return { atomId, prompt: `Erweitere ${fmtFrac(n, d)} mit ${factor}:`, answerType: 'integer' as const, correctAnswer: String(n * factor), hint, difficulty: 0.35,
+			inputData: { type: 'fraction_part', missing: 'numerator', knownDen: d * factor } };
 	}
-	return { atomId, prompt: `Erweitere ${fmtFrac(n, d)} mit ${factor} — neuer Nenner?`, answerType: 'integer', correctAnswer: String(d * factor), hint, difficulty: 0.35 };
+	return { atomId, prompt: `Erweitere ${fmtFrac(n, d)} mit ${factor}:`, answerType: 'integer' as const, correctAnswer: String(d * factor), hint, difficulty: 0.35,
+		inputData: { type: 'fraction_part', missing: 'denominator', knownNum: n * factor } };
 });
 
 reg('arithmetik__kuerzen', () => {
 	const atomId = 'arithmetik__kuerzen';
-	const n = rand(1, 5), d = rand(n + 1, 8);
+	// Ensure n/d is already fully reduced (coprime), so the result fraction is unambiguous
+	let n = rand(1, 5), d = rand(n + 1, 8);
+	while (gcd(n, d) !== 1) { n = rand(1, 5); d = rand(n + 1, 8); }
 	const factor = rand(2, 4);
 	const g = gcd(n * factor, d * factor);
 	const hint = `Teile Zähler und Nenner durch ${g}.`;
 	if (rand(0, 1) === 0) {
-		return { atomId, prompt: `Kürze ${fmtFrac(n * factor, d * factor)} vollständig — neuer Zähler?`, answerType: 'integer', correctAnswer: String(n), hint, difficulty: 0.4 };
+		return { atomId, prompt: `Kürze ${fmtFrac(n * factor, d * factor)} vollständig:`, answerType: 'integer' as const, correctAnswer: String(n), hint, difficulty: 0.4,
+			inputData: { type: 'fraction_part', missing: 'numerator', knownDen: d } };
 	}
-	return { atomId, prompt: `Kürze ${fmtFrac(n * factor, d * factor)} vollständig — neuer Nenner?`, answerType: 'integer', correctAnswer: String(d), hint, difficulty: 0.4 };
+	return { atomId, prompt: `Kürze ${fmtFrac(n * factor, d * factor)} vollständig:`, answerType: 'integer' as const, correctAnswer: String(d), hint, difficulty: 0.4,
+		inputData: { type: 'fraction_part', missing: 'denominator', knownNum: n } };
 });
 
 reg('arithmetik__gemischte_zahlen_unechte_brueche', () => {
 	const atomId = 'arithmetik__gemischte_zahlen_unechte_brueche';
-	const whole = rand(1, 5), n = rand(1, 5), d = rand(n + 1, 6);
+	// Ensure n/d is coprime so the fraction part is unambiguous in the visual
+	const whole = rand(1, 5);
+	let n = rand(1, 5), d = rand(n + 1, 6);
+	while (gcd(n, d) !== 1) { n = rand(1, 5); d = rand(n + 1, 6); }
 	const num = whole * d + n;
 	const type = rand(0, 2);
 	if (type === 0) {
-		return { atomId, prompt: `${fmtMixed(whole, n, d)} als unechter Bruch?`, answerType: 'fraction', correctAnswer: frac(num, d), hint: `${whole} · ${d} + ${n} = ${num}`, difficulty: 0.45 };
+		// Mixed → improper: denominator stays d, only numerator is unknown
+		return { atomId, prompt: `${fmtMixed(whole, n, d)} als unechter Bruch:`, answerType: 'fraction' as const, correctAnswer: frac(num, d), hint: `${whole} · ${d} + ${n} = ${num}`, difficulty: 0.45,
+			inputData: { type: 'fraction_part', missing: 'numerator', knownDen: d } };
 	} else if (type === 1) {
-		return { atomId, prompt: `${fmtFrac(num, d)} als gemischte Zahl — ganzer Anteil?`, answerType: 'integer', correctAnswer: String(whole), difficulty: 0.4 };
+		// Improper → whole part: show [?] n/d
+		return { atomId, prompt: `${fmtFrac(num, d)} als gemischte Zahl:`, answerType: 'integer' as const, correctAnswer: String(whole), difficulty: 0.4,
+			inputData: { type: 'mixed_part', missing: 'whole', numerator: n, denominator: d } };
 	} else {
-		return { atomId, prompt: `${fmtFrac(num, d)} als gemischte Zahl — Bruchanteil?`, answerType: 'fraction', correctAnswer: frac(n, d), hint: `${num} : ${d} = ${whole} Rest ${n}`, difficulty: 0.5 };
+		// Improper → fraction part: show whole [?]/d
+		return { atomId, prompt: `${fmtFrac(num, d)} als gemischte Zahl:`, answerType: 'fraction' as const, correctAnswer: frac(n, d), hint: `${num} : ${d} = ${whole} Rest ${n}`, difficulty: 0.5,
+			inputData: { type: 'mixed_part', missing: 'numerator', whole, denominator: d } };
 	}
 });
 
@@ -943,7 +957,8 @@ reg('arithmetik__dezimalzahl_zu_bruch', () => {
 	if (rand(0, 1) === 0) {
 		return { atomId, prompt: `${dec(val)} als vollständig gekürzten Bruch?`, answerType: 'fraction', correctAnswer: frac(n, d), hint: 'Schreibe als Bruch mit Nenner 10 oder 100, dann kürzen.', difficulty: 0.5 };
 	}
-	return { atomId, prompt: `${dec(val)} als vollständig gekürzten Bruch — Nenner?`, answerType: 'integer', correctAnswer: String(d), hint: `${dec(val)} = ${fmtFrac(n, d)}`, difficulty: 0.4 };
+	return { atomId, prompt: `${dec(val)} als vollständig gekürzten Bruch:`, answerType: 'integer' as const, correctAnswer: String(d), hint: `${dec(val)} = ${fmtFrac(n, d)}`, difficulty: 0.4,
+		inputData: { type: 'fraction_part', missing: 'denominator', knownNum: n } };
 });
 
 reg('arithmetik__periodische_dezimalzahlen', () => {

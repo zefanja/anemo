@@ -2,8 +2,11 @@
 	import { invalidate } from '$app/navigation';
 	import type { PageData } from './$types';
 	import FractionInput from '$lib/components/student/FractionInput.svelte';
+	import FractionPartInput from '$lib/components/student/FractionPartInput.svelte';
+	import MixedNumberPartInput from '$lib/components/student/MixedNumberPartInput.svelte';
 	import WrittenCalcInput from '$lib/components/student/WrittenCalcInput.svelte';
 	import NumberLineInput from '$lib/components/student/NumberLineInput.svelte';
+	import ZahlenmauernInput from '$lib/components/student/ZahlenmauernInput.svelte';
 	import MathText from '$lib/components/student/MathText.svelte';
 	import AtomExplanation from '$lib/components/student/AtomExplanation.svelte';
 	import WrittenCalcFeedback from '$lib/components/student/WrittenCalcFeedback.svelte';
@@ -65,8 +68,11 @@
 	// ── Input refs for auto-focus ──
 	let answerInput = $state<HTMLInputElement | null>(null);
 	let fractionInput = $state<{ focus: () => void } | null>(null);
+	let fractionPartInput = $state<{ focus: () => void } | null>(null);
+	let mixedPartInput = $state<{ focus: () => void } | null>(null);
 	let writtenCalcInput = $state<{ focus: () => void } | null>(null);
 	let numberLineInput = $state<{ focus: () => void } | null>(null);
+	let zahlenmauernInput = $state<{ focus: () => void } | null>(null);
 
 	const WRITTEN_ARITH_ATOMS = new Set([
 		'arithmetik__schriftliche_addition',
@@ -95,14 +101,25 @@
 		!!currentTask?.inputData?.totalSections
 	);
 
+	const isZahlenmauer = $derived(currentTask?.inputData?.type === 'zahlenmauer');
+
+	const isFractionPart = $derived(currentTask?.inputData?.type === 'fraction_part');
+	const isMixedPart = $derived(currentTask?.inputData?.type === 'mixed_part');
+
 	$effect(() => {
 		if (currentTask && !showFeedback) {
-			if (currentTask.answerType === 'fraction') {
+			if (isFractionPart) {
+				fractionPartInput?.focus();
+			} else if (isMixedPart) {
+				mixedPartInput?.focus();
+			} else if (currentTask.answerType === 'fraction') {
 				fractionInput?.focus();
 			} else if (writtenArith) {
 				writtenCalcInput?.focus();
 			} else if (isNumberLine) {
 				numberLineInput?.focus();
+			} else if (isZahlenmauer) {
+				zahlenmauernInput?.focus();
 			} else if (!currentTask.choices && currentTask.answerType !== 'boolean' && currentTask.answerType !== 'comparison') {
 				answerInput?.focus();
 			}
@@ -442,11 +459,52 @@
 									<button class="choice-btn" onclick={() => selectAnswer(choice)} disabled={isSubmitting}><MathText text={choice} /></button>
 								{/each}
 							</div>
+						{:else if isFractionPart}
+							{@const d = currentTask.inputData as { type: string; missing: 'numerator' | 'denominator'; knownNum?: number; knownDen?: number }}
+							<FractionPartInput
+								bind:this={fractionPartInput}
+								bind:value={answer}
+								missingPart={d.missing}
+								knownNumerator={d.knownNum}
+								knownDenominator={d.knownDen}
+								emitFullFraction={currentTask.answerType === 'fraction'}
+								disabled={isSubmitting}
+								onsubmit={submitAnswer}
+							/>
+						{:else if isMixedPart}
+							{@const d = currentTask.inputData as { type: string; missing: 'whole' | 'numerator'; whole?: number; numerator?: number; denominator: number }}
+							<MixedNumberPartInput
+								bind:this={mixedPartInput}
+								bind:value={answer}
+								missingPart={d.missing}
+								whole={d.whole}
+								numerator={d.numerator}
+								denominator={d.denominator}
+								emitFullFraction={currentTask.answerType === 'fraction'}
+								disabled={isSubmitting}
+								onsubmit={submitAnswer}
+							/>
 						{:else if currentTask.answerType === 'fraction'}
 							<FractionInput bind:this={fractionInput} bind:value={answer} disabled={isSubmitting} numDigits={currentTask.inputData?.numDigits as number | undefined} onsubmit={submitAnswer} />
 						{:else if writtenArith}
 							{#key currentTask.taskId}
 								<WrittenCalcInput bind:this={writtenCalcInput} a={writtenArith.a} b={writtenArith.b} op={writtenArith.op} bind:value={answer} disabled={isSubmitting} onsubmit={submitAnswer} />
+							{/key}
+						{:else if isZahlenmauer}
+							{#key currentTask.taskId}
+								<ZahlenmauernInput
+									bind:this={zahlenmauernInput}
+									top={currentTask.inputData!.top as number}
+									ab={currentTask.inputData!.ab as number}
+									bc={currentTask.inputData!.bc as number}
+									a={currentTask.inputData!.a as number}
+									b={currentTask.inputData!.b as number}
+									c={currentTask.inputData!.c as number}
+									missing={currentTask.inputData!.missing as 'a' | 'b' | 'c'}
+									bind:value={answer}
+									disabled={isSubmitting}
+									onsubmit={submitAnswer}
+								/>
 							{/key}
 						{:else if isNumberLine}
 							<NumberLineInput bind:this={numberLineInput} totalSections={currentTask.inputData!.totalSections as number} bind:value={answer} disabled={isSubmitting} onsubmit={submitAnswer} />
@@ -497,7 +555,7 @@
 						{/if}
 					</div>
 
-					{#if !currentTask.choices && currentTask.answerType !== 'boolean' && currentTask.answerType !== 'comparison' && !writtenArith}
+					{#if !currentTask.choices && currentTask.answerType !== 'boolean' && currentTask.answerType !== 'comparison' && !writtenArith && !isZahlenmauer && !isNumberLine}
 						<button
 							class="btn btn-primary btn-full btn-lg submit-btn"
 							onclick={submitAnswer}
