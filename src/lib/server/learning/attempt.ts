@@ -33,8 +33,12 @@ export async function processAttempt(
 	// 1. Update mastery (for non-cluster atoms)
 	const atom = await db.query.atoms.findFirst({
 		where: (a, { eq }) => eq(a.id, atomId),
-		columns: { masteryRequired: true, level: true }
+		columns: { masteryRequired: true, level: true, jahrgangsstufen: true }
 	});
+
+	const atomGrade = atom?.jahrgangsstufen?.length
+		? Math.min(...atom.jahrgangsstufen)
+		: null;
 
 	let mastery = 0;
 	let justMastered = false;
@@ -59,12 +63,15 @@ export async function processAttempt(
 		studentId,
 		atomId,
 		isCorrect: correct,
+		givenAnswer: submittedAnswer,
+		taskPrompt: task.prompt,
+		correctAnswer: task.correctAnswer,
 		fsrsRating: isReview ? (correct ? 3 : 1) : null,
 		answeredAt: new Date()
 	});
 
 	// 4. Gamification
-	const gami = await recordGamification(studentId, correct, isReview, justMastered, atomId);
+	const gami = await recordGamification(studentId, correct, isReview, justMastered, atomId, atomGrade);
 
 	return {
 		correct,

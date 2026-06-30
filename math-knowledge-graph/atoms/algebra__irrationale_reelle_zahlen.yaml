@@ -1,0 +1,38 @@
+id: algebra__irrationale_reelle_zahlen
+label: Irrationale Zahlen und der Bereich der reellen Zahlen
+description: Erkennen, dass Wurzeln wie √2 keine rationalen Zahlen sind; den Zahlbereich der reellen Zahlen
+  als Erweiterung verstehen.
+domain: algebra
+subdomain: Potenzen und Wurzeln
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 9
+weight:
+  mastery_required: 0.85
+  curriculum_centrality: 0.85
+  transfer_value: 0.85
+  cognitive_load: 0.55
+prerequisites:
+- id: algebra__quadratwurzel_begriff
+  type: required
+  mastery_level_needed: 0.85
+- id: logik__mengen_zahlbereiche
+  type: required
+  mastery_level_needed: 0.7
+related:
+- id: algebra__wurzeln_reelle_zahlen
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms algebra__wurzeln_reelle_zahlen
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 9, LB 1
+tags:
+- irrationale_zahlen
+- reelle_zahlen
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

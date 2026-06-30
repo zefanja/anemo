@@ -1,0 +1,35 @@
+id: algebra__wurzelterme_umformen
+label: Wurzelterme umformen (teilweise Wurzelziehen, Wurzelgesetze)
+description: Wurzeln teilweise ziehen und Wurzelgesetze (Produkt/Quotient) zum Vereinfachen von Wurzeltermen
+  nutzen.
+domain: algebra
+subdomain: Potenzen und Wurzeln
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 9
+weight:
+  mastery_required: 0.85
+  curriculum_centrality: 0.8
+  transfer_value: 0.85
+  cognitive_load: 0.65
+prerequisites:
+- id: algebra__irrationale_reelle_zahlen
+  type: required
+  mastery_level_needed: 0.8
+related:
+- id: algebra__wurzeln_reelle_zahlen
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms algebra__wurzeln_reelle_zahlen
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 9, LB 1
+tags:
+- wurzeln
+- wurzelterme
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

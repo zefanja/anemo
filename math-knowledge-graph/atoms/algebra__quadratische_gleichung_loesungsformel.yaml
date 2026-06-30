@@ -1,0 +1,38 @@
+id: algebra__quadratische_gleichung_loesungsformel
+label: Lösungsformel (pq-/Mitternachtsformel)
+description: Beliebige quadratische Gleichungen mit der Lösungsformel (pq- bzw. abc-/Mitternachtsformel)
+  lösen.
+domain: algebra
+subdomain: Gleichungen
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 9
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 1.0
+  transfer_value: 0.95
+  cognitive_load: 0.65
+prerequisites:
+- id: algebra__quadratische_gleichung_faktorisiert
+  type: required
+  mastery_level_needed: 0.8
+- id: algebra__wurzelterme_umformen
+  type: helpful
+  mastery_level_needed: 0.6
+related:
+- id: algebra__quadratische_gleichungen
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms algebra__quadratische_gleichungen
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 9, LB 1
+tags:
+- quadratische_gleichungen
+- lösungsformel
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

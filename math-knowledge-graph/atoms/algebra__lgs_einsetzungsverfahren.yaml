@@ -1,0 +1,38 @@
+id: algebra__lgs_einsetzungsverfahren
+label: Einsetzungsverfahren
+description: Eine Gleichung nach einer Variablen auflösen und in die andere einsetzen; algebraisch exakt
+  lösen.
+domain: algebra
+subdomain: Gleichungen
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 8
+weight:
+  mastery_required: 0.9
+  curriculum_centrality: 0.9
+  transfer_value: 0.9
+  cognitive_load: 0.6
+prerequisites:
+- id: algebra__lgs_grafisch
+  type: required
+  mastery_level_needed: 0.75
+- id: algebra__lineare_gleichung_variablen_beidseitig
+  type: required
+  mastery_level_needed: 0.85
+related:
+- id: algebra__lineare_gleichungssysteme
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms algebra__lineare_gleichungssysteme
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 8, LB 3
+tags:
+- lgs
+- einsetzungsverfahren
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

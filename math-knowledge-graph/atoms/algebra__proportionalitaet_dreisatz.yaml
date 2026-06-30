@@ -4,7 +4,7 @@ description: Quotienten- bzw. Produktgleichheit untersuchen; Je-desto-Aussagen; 
   in Sachaufgaben; grafische Darstellung.
 domain: algebra
 subdomain: Zuordnungen
-level: atom
+level: cluster
 granularity: 4
 schulformen:
 - GY
@@ -25,6 +25,16 @@ prerequisites:
 - id: arithmetik__verhaeltnisse
   type: helpful
   mastery_level_needed: 0.7
+- id: algebra__proportionale_zuordnung
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: algebra__antiproportionale_zuordnung
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
 lehrplan_ref:
 - schulform: GY
   dokument: lp_gy_mathematik_2021.pdf
@@ -34,4 +44,4 @@ tags:
 - dreisatz
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 2
+version: 3

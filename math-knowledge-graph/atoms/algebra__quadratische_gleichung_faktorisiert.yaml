@@ -1,0 +1,41 @@
+id: algebra__quadratische_gleichung_faktorisiert
+label: Lösen durch Faktorisieren (Satz vom Nullprodukt)
+description: Quadratische Gleichungen über Ausklammern oder binomische Formeln faktorisieren und mit dem
+  Satz vom Nullprodukt lösen.
+domain: algebra
+subdomain: Gleichungen
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 9
+weight:
+  mastery_required: 0.9
+  curriculum_centrality: 0.9
+  transfer_value: 0.9
+  cognitive_load: 0.6
+prerequisites:
+- id: algebra__quadratische_gleichung_reinquadratisch
+  type: required
+  mastery_level_needed: 0.8
+- id: algebra__binomische_formeln_rueckwaerts
+  type: required
+  mastery_level_needed: 0.8
+- id: algebra__ausklammern_faktorisieren
+  type: required
+  mastery_level_needed: 0.8
+related:
+- id: algebra__quadratische_gleichungen
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms algebra__quadratische_gleichungen
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 9, LB 1
+tags:
+- quadratische_gleichungen
+- nullprodukt
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

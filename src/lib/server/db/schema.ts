@@ -150,7 +150,10 @@ export const students = pgTable(
 		createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 		lastActiveAt: timestamp('last_active_at', { withTimezone: true }),
 		placementDone: boolean('placement_done').notNull().default(false),
-		hideLeaderboard: boolean('hide_leaderboard').notNull().default(false)
+		hideLeaderboard: boolean('hide_leaderboard').notNull().default(false),
+		// extra domains unlocked for this student beyond the class-level enabledDomains
+		// null = no extras; only relevant when class.enabledDomains is not null
+		extraDomains: jsonb('extra_domains').$type<string[] | null>()
 	},
 	(t) => [index('students_class_idx').on(t.classId), uniqueIndex('students_code_hash_idx').on(t.codeHash)]
 );
@@ -259,6 +262,9 @@ export const attempts = pgTable(
 			.references(() => atoms.id, { onDelete: 'cascade' }),
 		taskId: text('task_id').references(() => tasks.id),
 		isCorrect: boolean('is_correct').notNull(),
+		givenAnswer: text('given_answer'),
+		taskPrompt: text('task_prompt'),
+		correctAnswer: text('correct_answer'),
 		// FSRS rating used (1=Again, 2=Hard, 3=Good, 4=Easy) — null for non-mastered
 		fsrsRating: integer('fsrs_rating'),
 		answeredAt: timestamp('answered_at', { withTimezone: true }).notNull().defaultNow()

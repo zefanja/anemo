@@ -48,7 +48,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 
 	const studentIds = studentList.map((s) => s.id);
 
-	const [gamiStates, masteredStatuses, allAtoms] = await Promise.all([
+	const [gamiStates, masteredStatuses, allAtoms, allAtomStatuses, rawAttempts] = await Promise.all([
 		studentIds.length > 0
 			? db.query.gamificationState.findMany({
 					where: (g, { inArray }) => inArray(g.studentId, studentIds)
@@ -65,23 +65,102 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 			where: (a, { eq }) => eq(a.level, 'atom'),
 			columns: { id: true, domain: true },
 			orderBy: (a, { asc }) => [asc(a.domain)]
-		})
+		}),
+		studentIds.length > 0
+			? db.query.studentAtomStatus.findMany({
+					where: (s, { inArray }) => inArray(s.studentId, studentIds),
+					columns: { atomId: true, studentId: true, mastery: true, isMastered: true, totalAttempts: true },
+					with: { atom: { columns: { label: true, domain: true } } }
+				})
+			: Promise.resolve([]),
+		studentIds.length > 0
+			? db.query.attempts.findMany({
+					where: (a, { inArray }) => inArray(a.studentId, studentIds),
+					orderBy: (a, { desc }) => [desc(a.answeredAt)],
+					limit: 500,
+					with: {
+						student: { columns: { id: true, displayName: true } },
+						atom: { columns: { label: true } }
+					}
+				})
+			: Promise.resolve([])
 	]);
+
+	const enabledAtoms = cls.enabledDomains
+		? allAtoms.filter((a) => cls.enabledDomains!.includes(a.domain))
+		: allAtoms;
+	const enabledAtomIds = new Set(enabledAtoms.map((a) => a.id));
 
 	const gamiMap = new Map(gamiStates.map((g) => [g.studentId, g]));
 
 	const masteredByStudent = new Map<string, Set<string>>();
 	for (const m of masteredStatuses) {
+		if (!enabledAtomIds.has(m.atomId)) continue;
 		if (!masteredByStudent.has(m.studentId)) masteredByStudent.set(m.studentId, new Set());
 		masteredByStudent.get(m.studentId)!.add(m.atomId);
 	}
 
-	const domains = [...new Set(allAtoms.map((a) => a.domain))];
+	const domains = [...new Set(enabledAtoms.map((a) => a.domain))];
+	const allDomains = [...new Set(allAtoms.map((a) => a.domain))].sort();
 	const atomsByDomain = new Map<string, string[]>();
-	for (const a of allAtoms) {
+	for (const a of enabledAtoms) {
 		if (!atomsByDomain.has(a.domain)) atomsByDomain.set(a.domain, []);
 		atomsByDomain.get(a.domain)!.push(a.id);
 	}
+
+	// Atom stats with per-student detail
+	const studentNameMap = new Map(studentList.map((s) => [s.id, s.displayName]));
+
+	type AtomStudentDetail = { studentId: string; displayName: string; mastery: number; isMastered: boolean };
+	type AtomEntry = { label: string; domain: string; studentCount: number; masteredCount: number; masterySum: number; students: AtomStudentDetail[] };
+	const atomStatsMap = new Map<string, AtomEntry>();
+
+	for (const s of allAtomStatuses) {
+		if (s.totalAttempts === 0) continue;
+		const displayName = studentNameMap.get(s.studentId);
+		if (!displayName) continue;
+		if (!atomStatsMap.has(s.atomId)) {
+			atomStatsMap.set(s.atomId, { label: s.atom?.label ?? s.atomId, domain: s.atom?.domain ?? '', studentCount: 0, masteredCount: 0, masterySum: 0, students: [] });
+		}
+		const entry = atomStatsMap.get(s.atomId)!;
+		entry.studentCount++;
+		if (s.isMastered) entry.masteredCount++;
+		entry.masterySum += s.mastery;
+		entry.students.push({ studentId: s.studentId, displayName, mastery: s.mastery, isMastered: s.isMastered });
+	}
+
+	const atomStats = Array.from(atomStatsMap.entries())
+		.map(([atomId, v]) => ({
+			atomId,
+			label: v.label,
+			domain: v.domain,
+			studentCount: v.studentCount,
+			masteredCount: v.masteredCount,
+			masteryRate: v.studentCount > 0 ? v.masteredCount / v.studentCount : 0,
+			avgMastery: v.studentCount > 0 ? v.masterySum / v.studentCount : 0,
+			students: v.students.sort((a, b) => a.mastery - b.mastery)
+		}))
+		.sort((a, b) => b.masteryRate - a.masteryRate);
+
+	// Recent activity per student
+	const activityMap = new Map<string, { studentId: string; displayName: string; total: number; correct: number; lastAtomLabel: string; lastAnsweredAt: Date | string }>();
+	for (const a of rawAttempts) {
+		const sid = a.studentId;
+		if (!activityMap.has(sid)) {
+			activityMap.set(sid, {
+				studentId: sid,
+				displayName: a.student?.displayName ?? studentNameMap.get(sid) ?? '?',
+				total: 0,
+				correct: 0,
+				lastAtomLabel: a.atom?.label ?? a.atomId,
+				lastAnsweredAt: a.answeredAt
+			});
+		}
+		const entry = activityMap.get(sid)!;
+		entry.total++;
+		if (a.isCorrect) entry.correct++;
+	}
+	const recentActivity = Array.from(activityMap.values()).slice(0, 15);
 
 	return {
 		class: {
@@ -90,8 +169,11 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 			enabledDomains: cls.enabledDomains ?? null,
 			showLeaderboard: cls.showLeaderboard
 		},
-		totalAtoms: allAtoms.length,
+		totalAtoms: enabledAtoms.length,
 		domains,
+		allDomains,
+		atomStats,
+		recentActivity,
 		students: studentList.map((s) => {
 			const mastered = masteredByStudent.get(s.id) ?? new Set();
 			const gami = gamiMap.get(s.id);

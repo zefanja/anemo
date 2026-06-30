@@ -2,6 +2,8 @@
 	import { goto } from '$app/navigation';
 	import { enhance } from '$app/forms';
 	import FractionInput from '$lib/components/student/FractionInput.svelte';
+	import FractionPartInput from '$lib/components/student/FractionPartInput.svelte';
+	import MixedNumberPartInput from '$lib/components/student/MixedNumberPartInput.svelte';
 	import WrittenCalcInput from '$lib/components/student/WrittenCalcInput.svelte';
 	import NumberLineInput from '$lib/components/student/NumberLineInput.svelte';
 	import MathText from '$lib/components/student/MathText.svelte';
@@ -33,6 +35,8 @@
 
 	let answerInput = $state<HTMLInputElement | null>(null);
 	let fractionInput = $state<{ focus: () => void } | null>(null);
+	let fractionPartInput = $state<{ focus: () => void } | null>(null);
+	let mixedPartInput = $state<{ focus: () => void } | null>(null);
 	let writtenCalcInput = $state<{ focus: () => void } | null>(null);
 	let numberLineInput = $state<{ focus: () => void } | null>(null);
 
@@ -62,10 +66,16 @@
 		current?.atomId === 'arithmetik__brueche_am_zahlenstrahl' &&
 		!!current?.inputData?.totalSections
 	);
+	const isFractionPart = $derived(current?.inputData?.type === 'fraction_part');
+	const isMixedPart = $derived(current?.inputData?.type === 'mixed_part');
 
 	$effect(() => {
 		if (phase === 'question' && current) {
-			if (current.answerType === 'fraction') {
+			if (isFractionPart) {
+				fractionPartInput?.focus();
+			} else if (isMixedPart) {
+				mixedPartInput?.focus();
+			} else if (current.answerType === 'fraction') {
 				fractionInput?.focus();
 			} else if (writtenArith) {
 				writtenCalcInput?.focus();
@@ -156,7 +166,7 @@
 				};
 				answer = '';
 				phase = 'question';
-			}, 1200);
+			}, 1000);
 		} finally {
 			isSubmitting = false;
 		}
@@ -265,11 +275,35 @@
 				<MathText text={current.prompt} class="task-prompt" />
 				<div class="answer-area">
 					{#if current.choices}
-						<div class="choice-buttons">
+						<div class="choice-buttons choice-buttons-multi">
 							{#each current.choices as choice}
 								<button class="choice-btn" onclick={() => selectAnswer(choice)} disabled={isSubmitting}><MathText text={choice} /></button>
 							{/each}
 						</div>
+					{:else if isFractionPart}
+						{@const d = current.inputData as { type: string; missing: 'numerator' | 'denominator'; knownNum?: number; knownDen?: number }}
+						<FractionPartInput
+							bind:this={fractionPartInput}
+							bind:value={answer}
+							missingPart={d.missing}
+							knownNumerator={d.knownNum}
+							knownDenominator={d.knownDen}
+							emitFullFraction={current.answerType === 'fraction'}
+							disabled={isSubmitting}
+							onsubmit={submitAnswer}
+						/>
+					{:else if isMixedPart}
+						{@const d = current.inputData as { type: string; missing: 'whole' | 'numerator'; whole?: number; numerator?: number; denominator: number }}
+						<MixedNumberPartInput
+							bind:this={mixedPartInput}
+							bind:value={answer}
+							missingPart={d.missing}
+							whole={d.whole}
+							numerator={d.numerator}
+							denominator={d.denominator}
+							disabled={isSubmitting}
+							onsubmit={submitAnswer}
+						/>
 					{:else if current.answerType === 'fraction'}
 						<FractionInput bind:this={fractionInput} bind:value={answer} disabled={isSubmitting} numDigits={current.inputData?.numDigits as number | undefined} onsubmit={submitAnswer} />
 					{:else if writtenArith}
@@ -546,10 +580,19 @@
 		gap: 0.75rem;
 		justify-content: center;
 	}
+	.choice-buttons-multi {
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+	}
+	@media (min-width: 520px) {
+		.choice-buttons-multi {
+			grid-template-columns: repeat(4, 1fr);
+		}
+	}
 	.choice-btn {
-		min-width: 90px;
-		padding: 0.85rem 1.5rem;
-		font-size: 1.1rem;
+		min-width: 0;
+		padding: 0.75rem 0.75rem;
+		font-size: 1rem;
 		font-weight: 700;
 		border: 2px solid var(--c-gray-200);
 		border-radius: var(--radius);
@@ -557,6 +600,9 @@
 		color: var(--c-gray-900);
 		cursor: pointer;
 		transition: border-color .15s, background .15s, box-shadow .15s;
+		white-space: normal;
+		word-break: break-word;
+		line-height: 1.4;
 	}
 	.choice-btn:hover:not(:disabled) {
 		border-color: var(--c-primary);

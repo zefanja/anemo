@@ -1,0 +1,35 @@
+id: algebra__binomische_formeln_vorwaerts
+label: Binomische Formeln anwenden (ausmultiplizieren)
+description: Die drei binomischen Formeln zum schnellen Ausmultiplizieren von (a+b)², (a−b)², (a+b)(a−b)
+  anwenden.
+domain: algebra
+subdomain: Terme
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 8
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.95
+  transfer_value: 0.95
+  cognitive_load: 0.5
+prerequisites:
+- id: algebra__ausmultiplizieren_distributiv
+  type: required
+  mastery_level_needed: 0.9
+related:
+- id: algebra__binomische_formeln
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms algebra__binomische_formeln
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 8, LB 1
+tags:
+- binomische_formeln
+- ausmultiplizieren
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

@@ -4,7 +4,7 @@ description: Nullstellen quadratischer Funktionen grafisch und rechnerisch ermit
   vollständiger Fallunterscheidung der Lösungsanzahl; Lösen durch Faktorisieren bei überschaubarem Zahlenmaterial.
 domain: algebra
 subdomain: Gleichungen
-level: atom
+level: cluster
 granularity: 4
 schulformen:
 - GY
@@ -16,9 +16,6 @@ weight:
   transfer_value: 0.95
   cognitive_load: 0.7
 prerequisites:
-- id: algebra__quadratische_funktionen
-  type: required
-  mastery_level_needed: 0.8
 - id: algebra__binomische_formeln
   type: required
   mastery_level_needed: 0.8
@@ -28,6 +25,26 @@ prerequisites:
 - id: algebra__lineare_gleichungen
   type: required
   mastery_level_needed: 0.85
+- id: algebra__quadratische_gleichung_reinquadratisch
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: algebra__quadratische_gleichung_faktorisiert
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: algebra__quadratische_gleichung_loesungsformel
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: algebra__quadratische_gleichung_diskriminante
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
 lehrplan_ref:
 - schulform: GY
   dokument: lp_gy_mathematik_2021.pdf
@@ -38,4 +55,4 @@ tags:
 - nullstellen
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

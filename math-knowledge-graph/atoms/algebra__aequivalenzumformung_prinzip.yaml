@@ -1,0 +1,41 @@
+id: algebra__aequivalenzumformung_prinzip
+label: Äquivalenzumformungen verstehen (Waagemodell)
+description: Das Prinzip der Äquivalenzumformung (auf beiden Seiten dasselbe) am Waagemodell verstehen
+  und auf einfache einschrittige Gleichungen anwenden.
+domain: algebra
+subdomain: Gleichungen
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 8
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 1.0
+  transfer_value: 1.0
+  cognitive_load: 0.5
+prerequisites:
+- id: algebra__terme_umformen
+  type: required
+  mastery_level_needed: 0.8
+- id: algebra__gleichungen_inhaltlich_loesen
+  type: required
+  mastery_level_needed: 0.75
+- id: arithmetik__rationale_zahlen_addieren_subtrahieren
+  type: required
+  mastery_level_needed: 0.85
+related:
+- id: algebra__lineare_gleichungen
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms algebra__lineare_gleichungen
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 8, LB 1
+tags:
+- äquivalenzumformung
+- waagemodell
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

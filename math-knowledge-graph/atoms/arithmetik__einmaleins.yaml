@@ -12,7 +12,7 @@ jahrgangsstufen:
 - 2
 - 3
 weight:
-  mastery_required: 0.95
+  mastery_required: 1.0
   curriculum_centrality: 1.0
   transfer_value: 1.0
   cognitive_load: 0.5
@@ -49,4 +49,4 @@ tags:
 - multiplikation
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 3
+version: 2

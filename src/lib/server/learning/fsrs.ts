@@ -36,6 +36,15 @@ function stateFromCard(card: Card): FsrsState {
 
 const scheduler = fsrs();
 
+// R = (1 + elapsed_days / (9 * stability))^(-1); returns 0 for new/unreviewed cards
+export function computeRetrievability(state: FsrsState): number {
+	if (!state.last_review || state.stability <= 0) return 0;
+	const elapsedMs = Date.now() - new Date(state.last_review).getTime();
+	const elapsedDays = elapsedMs / 86_400_000;
+	const card = cardFromState(state);
+	return scheduler.get_retrievability(card, new Date(), false) as number;
+}
+
 // Initialize FSRS for a newly mastered atom
 export async function initFsrsForAtom(studentId: string, atomId: string): Promise<void> {
 	const card = createEmptyCard();

@@ -27,7 +27,7 @@ export const load: PageServerLoad = async ({ locals, depends }) => {
 		}),
 		db.query.students.findFirst({
 			where: (s, { eq }) => eq(s.id, studentId),
-			columns: { hideLeaderboard: true }
+			columns: { hideLeaderboard: true, extraDomains: true }
 		}),
 		db
 			.select({
@@ -82,7 +82,16 @@ export const load: PageServerLoad = async ({ locals, depends }) => {
 			.sort((a, b) => b.xp - a.xp);
 	}
 
-	const frontier = await computeFrontier(studentId, classRecord?.enabledDomains ?? null);
+	const classDomains = classRecord?.enabledDomains ?? null;
+	const extraDomains = studentRecord?.extraDomains ?? null;
+	const effectiveDomains =
+		classDomains === null
+			? null
+			: extraDomains && extraDomains.length > 0
+				? [...new Set([...classDomains, ...extraDomains])]
+				: classDomains;
+
+	const frontier = await computeFrontier(studentId, effectiveDomains);
 	const activeIds = new Set(frontier.map((f) => f.id));
 
 	const statusMap = new Map(statuses.map((s) => [s.atomId, s]));
@@ -133,6 +142,22 @@ export const load: PageServerLoad = async ({ locals, depends }) => {
 	const totalAtoms = unlockedAtomIds.size;
 	const masteredAtoms = statuses.filter((s) => s.isMastered).length;
 
+	const starMapAtoms = allAtoms.filter(
+		(a) => !effectiveDomains || effectiveDomains.includes(a.domain)
+	).map((a) => {
+		const st = statusMap.get(a.id);
+		return {
+			id: a.id,
+			label: a.label,
+			domain: a.domain,
+			subdomain: a.subdomain ?? null,
+			level: a.level as 'atom' | 'cluster',
+			mastery: st?.mastery ?? 0,
+			isMastered: st?.isMastered ?? false,
+			isActive: activeIds.has(a.id)
+		};
+	});
+
 	return {
 		domains,
 		masteredDomains,
@@ -143,7 +168,8 @@ export const load: PageServerLoad = async ({ locals, depends }) => {
 		leaderboard,
 		showLeaderboard: classRecord?.showLeaderboard ?? false,
 		studentHidesLeaderboard: studentRecord?.hideLeaderboard ?? false,
-		studentId
+		studentId,
+		starMapAtoms
 	};
 };
 

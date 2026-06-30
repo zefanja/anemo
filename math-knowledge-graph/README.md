@@ -8,9 +8,38 @@ auf Basis der sächsischen Lehrpläne im Projekt:
 
 ## Umfang
 
-- **179 Atome**, **408 gewichtete prerequisites-Kanten** (azyklisch, geprüft)
-- Domänenverteilung: arithmetik 95, geometrie 27, algebra 25, stochastik 11,
+- **219 Atome**, **514 gewichtete prerequisites-Kanten** (azyklisch, geprüft)
+- Domänenverteilung: arithmetik 95, algebra 65, geometrie 27, stochastik 11,
   analysis 10, analytische_geometrie 8, logik_und_mengen 2, lineare_algebra 1
+
+### Feinatomisierung Algebra (v2)
+
+12 zentrale Algebra-Atome wurden in 40 Mikrofertigkeiten (Granularität 5)
+zerlegt; dieselbe Cluster-Mechanik wie bei der Arithmetik (Eltern bleiben
+als `level: cluster`, Teilfertigkeiten als `required`-prerequisites + per
+`special_case_of` rückverlinkt; externe Referenzen aus Geometrie und
+Analysis bleiben gültig). Schwerpunkte:
+
+- **Terme:** Variablenbegriff, Termwert, gleichartige Glieder zusammenfassen;
+  Ausmultiplizieren/Ausklammern; binomische Formeln vorwärts (ausmultiplizieren)
+  und rückwärts (faktorisieren) getrennt.
+- **Gleichungen:** Äquivalenzumformung (Waagemodell) → zweischrittig →
+  Variablen beidseitig → Klammern/Brüche → Sonderfälle; LGS in vier Verfahren
+  (grafisch, Einsetzung, Gleichsetzung, Addition); quadratische Gleichungen
+  (reinquadratisch, Faktorisieren/Nullprodukt, Lösungsformel, Diskriminante).
+- **Potenzen/Wurzeln:** Potenzgesetze (gleiche Basis, Potenz einer Potenz,
+  negative, rationale Exponenten); Wurzelbegriff, irrationale/reelle Zahlen,
+  Wurzelterme.
+- **Funktionen:** Funktionsbegriff (Eindeutigkeit, Darstellungsformen,
+  Def-/Wertebereich); lineare Funktionen (Steigung/Achsenabschnitt, Graph,
+  Gleichung aufstellen, Nullstelle); quadratische Funktionen (Normalparabel,
+  Scheitelpunktform, Formumwandlung, Nullstellen).
+- **Zuordnungen:** proportional und antiproportional mit Dreisatz.
+
+Dabei wurde eine didaktisch fragwürdige Altkante korrigiert: das Lösen
+quadratischer Gleichungen hängt nicht mehr von den quadratischen Funktionen
+ab (umgekehrt brauchen deren Nullstellen das Gleichungslösen) — das löst
+zugleich einen sonst entstehenden Zyklus.
 
 ### Lückenschluss Arithmetik nach Curriculum-Abgleich (v3)
 
@@ -100,7 +129,7 @@ In der Erstellungsumgebung waren `jsonschema`/`networkx` nicht installierbar
 (Schema-Kernregeln, Referenz-Integrität, Zyklenfreiheit per eigener DFS):
 
 ```
-✅ Alle Prüfungen bestanden (179 Atome).
+✅ Alle Prüfungen bestanden (219 Atome).
 ```
 
 **Bitte zusätzlich auf deinem Rechner mit dem Original-Setup validieren**

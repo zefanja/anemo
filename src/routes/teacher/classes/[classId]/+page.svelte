@@ -8,15 +8,15 @@
 	let showBulkForm = $state(false);
 	let confirmDelete = $state<string | null>(null);
 	let confirmResetAll = $state(false);
-	let activeTab = $state<'students' | 'heatmap' | 'leaderboard' | 'settings'>('students');
+	let activeTab = $state<'students' | 'heatmap' | 'stats' | 'leaderboard' | 'settings'>('students');
 	let editingId = $state<string | null>(null);
 	let editingName = $state('');
 
 	// Domain filter state: null = all enabled
 	let enabledDomains = $state<Set<string>>(
-		data.class.enabledDomains ? new Set(data.class.enabledDomains) : new Set(data.domains)
+		data.class.enabledDomains ? new Set(data.class.enabledDomains) : new Set(data.allDomains)
 	);
-	let allDomainsEnabled = $derived(enabledDomains.size === data.domains.length);
+	let allDomainsEnabled = $derived(enabledDomains.size === data.allDomains.length);
 
 	function toggleDomain(domain: string) {
 		const next = new Set(enabledDomains);
@@ -29,7 +29,7 @@
 		if (allDomainsEnabled) {
 			enabledDomains = new Set();
 		} else {
-			enabledDomains = new Set(data.domains);
+			enabledDomains = new Set(data.allDomains);
 		}
 	}
 
@@ -55,15 +55,87 @@
 
 	let showLeaderboard = $state(data.class.showLeaderboard);
 
-	let leaderboard = $derived(
-		[...data.students].sort((a, b) => b.xp - a.xp)
+	// Sorting for students tab
+	type StudentSortKey = 'displayName' | 'level' | 'xp' | 'streakDays' | 'masteredCount' | 'lastActiveAt';
+	let studentSortKey = $state<StudentSortKey>('displayName');
+	let studentSortDir = $state<'asc' | 'desc'>('asc');
+
+	let sortedStudents = $derived(
+		[...data.students].sort((a, b) => {
+			const av = a[studentSortKey], bv = b[studentSortKey];
+			if (studentSortKey === 'lastActiveAt') {
+				const at = av ? new Date(av as string).getTime() : 0;
+				const bt = bv ? new Date(bv as string).getTime() : 0;
+				return studentSortDir === 'asc' ? at - bt : bt - at;
+			}
+			if (typeof av === 'string' && typeof bv === 'string') {
+				return studentSortDir === 'asc' ? av.localeCompare(bv, 'de') : bv.localeCompare(av, 'de');
+			}
+			return studentSortDir === 'asc' ? (av as number) - (bv as number) : (bv as number) - (av as number);
+		})
 	);
+
+	function toggleStudentSort(key: StudentSortKey) {
+		if (studentSortKey === key) { studentSortDir = studentSortDir === 'asc' ? 'desc' : 'asc'; }
+		else { studentSortKey = key; studentSortDir = key === 'displayName' ? 'asc' : 'desc'; }
+	}
+	function studentSortIcon(key: StudentSortKey): string {
+		if (studentSortKey !== key) return '⇅';
+		return studentSortDir === 'asc' ? '▲' : '▼';
+	}
+
+	// Sorting for leaderboard tab
+	type LbSortKey = 'displayName' | 'level' | 'xp' | 'masteredCount' | 'streakDays';
+	let lbSortKey = $state<LbSortKey>('xp');
+	let lbSortDir = $state<'asc' | 'desc'>('desc');
+
+	let leaderboard = $derived(
+		[...data.students].sort((a, b) => {
+			const av = a[lbSortKey], bv = b[lbSortKey];
+			if (typeof av === 'string' && typeof bv === 'string') {
+				return lbSortDir === 'asc' ? av.localeCompare(bv, 'de') : bv.localeCompare(av, 'de');
+			}
+			return lbSortDir === 'asc' ? (av as number) - (bv as number) : (bv as number) - (av as number);
+		})
+	);
+
+	function toggleLbSort(key: LbSortKey) {
+		if (lbSortKey === key) { lbSortDir = lbSortDir === 'asc' ? 'desc' : 'asc'; }
+		else { lbSortKey = key; lbSortDir = key === 'displayName' ? 'asc' : 'desc'; }
+	}
+	function lbSortIcon(key: LbSortKey): string {
+		if (lbSortKey !== key) return '⇅';
+		return lbSortDir === 'asc' ? '▲' : '▼';
+	}
 
 	function rankIcon(i: number): string {
 		if (i === 0) return '🥇';
 		if (i === 1) return '🥈';
 		if (i === 2) return '🥉';
 		return `${i + 1}.`;
+	}
+
+	function pct(v: number): string {
+		return `${Math.round(v * 100)}%`;
+	}
+
+	function timeAgo(date: Date | string): string {
+		const d = new Date(date);
+		const diff = Math.floor((Date.now() - d.getTime()) / 1000);
+		if (diff < 60) return 'gerade eben';
+		if (diff < 3600) return `vor ${Math.floor(diff / 60)} Min.`;
+		if (diff < 86400) return `vor ${Math.floor(diff / 3600)} Std.`;
+		return `vor ${Math.floor(diff / 86400)} Tagen`;
+	}
+
+	// Atom stats
+	const TOP_N = 5;
+	let expandedAtomId = $state<string | null>(null);
+	let bestAtoms = $derived(data.atomStats.slice(0, TOP_N));
+	let worstAtoms = $derived([...data.atomStats].reverse().slice(0, TOP_N));
+
+	function toggleAtom(key: string) {
+		expandedAtomId = expandedAtomId === key ? null : key;
 	}
 
 	function pctColor(pct: number): string {
@@ -154,7 +226,7 @@ ${cards.map((c) => `<div class="card">
 		<div>
 			<a href="/teacher/classes" class="breadcrumb">← Klassen</a>
 			<h1 class="page-title">{data.class.name}</h1>
-			<p class="meta">{data.students.length} Schüler · {data.totalAtoms} Atome gesamt</p>
+			<p class="meta">{data.students.length} Schüler · {data.totalAtoms} Atome{data.class.enabledDomains ? ' (aktiviert)' : ' gesamt'}</p>
 		</div>
 	</div>
 
@@ -226,6 +298,9 @@ ${cards.map((c) => `<div class="card">
 		</button>
 		<button class="tab" class:active={activeTab === 'heatmap'} onclick={() => (activeTab = 'heatmap')}>
 			Fortschritt
+		</button>
+		<button class="tab" class:active={activeTab === 'stats'} onclick={() => (activeTab = 'stats')}>
+			Statistik
 		</button>
 		<button class="tab" class:active={activeTab === 'leaderboard'} onclick={() => (activeTab = 'leaderboard')}>
 			Leaderboard
@@ -303,17 +378,17 @@ ${cards.map((c) => `<div class="card">
 					<table class="t">
 						<thead>
 							<tr>
-								<th>Name</th>
-								<th>Level</th>
-								<th>XP</th>
-								<th>Streak</th>
-								<th>Gemeistert</th>
-								<th>Zuletzt aktiv</th>
+								<th class="sort-th"><button class="sort-btn" class:sorted={studentSortKey==='displayName'} onclick={() => toggleStudentSort('displayName')}>Name <span class="sort-icon" class:active={studentSortKey==='displayName'}>{studentSortIcon('displayName')}</span></button></th>
+								<th class="sort-th"><button class="sort-btn" class:sorted={studentSortKey==='level'} onclick={() => toggleStudentSort('level')}>Level <span class="sort-icon" class:active={studentSortKey==='level'}>{studentSortIcon('level')}</span></button></th>
+								<th class="sort-th"><button class="sort-btn" class:sorted={studentSortKey==='xp'} onclick={() => toggleStudentSort('xp')}>XP <span class="sort-icon" class:active={studentSortKey==='xp'}>{studentSortIcon('xp')}</span></button></th>
+								<th class="sort-th"><button class="sort-btn" class:sorted={studentSortKey==='streakDays'} onclick={() => toggleStudentSort('streakDays')}>Streak <span class="sort-icon" class:active={studentSortKey==='streakDays'}>{studentSortIcon('streakDays')}</span></button></th>
+								<th class="sort-th"><button class="sort-btn" class:sorted={studentSortKey==='masteredCount'} onclick={() => toggleStudentSort('masteredCount')}>Gemeistert <span class="sort-icon" class:active={studentSortKey==='masteredCount'}>{studentSortIcon('masteredCount')}</span></button></th>
+								<th class="sort-th"><button class="sort-btn" class:sorted={studentSortKey==='lastActiveAt'} onclick={() => toggleStudentSort('lastActiveAt')}>Zuletzt aktiv <span class="sort-icon" class:active={studentSortKey==='lastActiveAt'}>{studentSortIcon('lastActiveAt')}</span></button></th>
 								<th>Aktionen</th>
 							</tr>
 						</thead>
 						<tbody>
-							{#each data.students as s}
+							{#each sortedStudents as s}
 								<tr>
 									<td class="name-cell">
 										{#if editingId === s.id}
@@ -436,6 +511,139 @@ ${cards.map((c) => `<div class="card">
 			{/if}
 		</div>
 
+	<!-- ── Statistik tab ── -->
+	{:else if activeTab === 'stats'}
+		<div class="tab-content">
+			{#if data.atomStats.length === 0}
+				<p class="muted">Noch keine Übungsversuche vorhanden.</p>
+			{:else}
+				<div class="two-col">
+					<section class="card stat-card-inner">
+						<div class="card-header">
+							<h3 class="card-title">Gut gemeistert</h3>
+							<span class="badge badge-green">Top {bestAtoms.length}</span>
+						</div>
+						<ul class="atom-list">
+							{#each bestAtoms as a}
+								{@const key = a.atomId + '-best'}
+								{@const isExpanded = expandedAtomId === key}
+								<li class="atom-row">
+									<button class="atom-btn" onclick={() => toggleAtom(key)}>
+										<div class="atom-meta">
+											<span class="atom-label">{a.label}</span>
+											<span class="atom-domain">{a.domain}</span>
+										</div>
+										<div class="atom-bar-wrap">
+											<div class="atom-bar">
+												<div class="atom-bar-fill fill-green" style="width:{pct(a.masteryRate)}"></div>
+											</div>
+											<span class="atom-pct">{pct(a.masteryRate)}</span>
+											<span class="atom-frac">({a.masteredCount}/{a.studentCount})</span>
+											<span class="atom-chevron" class:open={isExpanded}>›</span>
+										</div>
+									</button>
+									{#if isExpanded}
+										<ul class="student-detail-list">
+											{#each a.students as s}
+												<li class="student-detail-row">
+													<a href="/teacher/classes/{data.class.id}/students/{s.studentId}" class="student-detail-name">
+														{s.displayName}
+													</a>
+													<div class="student-detail-bar-wrap">
+														<div class="student-detail-bar">
+															<div class="student-detail-fill fill-green" style="width:{pct(s.mastery)}"></div>
+														</div>
+														<span class="student-detail-pct">{pct(s.mastery)}</span>
+													</div>
+													{#if s.isMastered}<span class="mastered-badge">✓</span>{/if}
+												</li>
+											{/each}
+										</ul>
+									{/if}
+								</li>
+							{/each}
+						</ul>
+					</section>
+
+					<section class="card stat-card-inner">
+						<div class="card-header">
+							<h3 class="card-title">Schwierige Atome</h3>
+							<span class="badge badge-red">Flop {worstAtoms.length}</span>
+						</div>
+						<ul class="atom-list">
+							{#each worstAtoms as a}
+								{@const key = a.atomId + '-worst'}
+								{@const isExpanded = expandedAtomId === key}
+								<li class="atom-row">
+									<button class="atom-btn" onclick={() => toggleAtom(key)}>
+										<div class="atom-meta">
+											<span class="atom-label">{a.label}</span>
+											<span class="atom-domain">{a.domain}</span>
+										</div>
+										<div class="atom-bar-wrap">
+											<div class="atom-bar">
+												<div class="atom-bar-fill fill-red" style="width:{pct(a.masteryRate)}"></div>
+											</div>
+											<span class="atom-pct">{pct(a.masteryRate)}</span>
+											<span class="atom-frac">({a.masteredCount}/{a.studentCount})</span>
+											<span class="atom-chevron" class:open={isExpanded}>›</span>
+										</div>
+									</button>
+									{#if isExpanded}
+										<ul class="student-detail-list">
+											{#each a.students as s}
+												<li class="student-detail-row">
+													<a href="/teacher/classes/{data.class.id}/students/{s.studentId}" class="student-detail-name">
+														{s.displayName}
+													</a>
+													<div class="student-detail-bar-wrap">
+														<div class="student-detail-bar">
+															<div class="student-detail-fill fill-red" style="width:{pct(s.mastery)}"></div>
+														</div>
+														<span class="student-detail-pct">{pct(s.mastery)}</span>
+													</div>
+													{#if s.isMastered}<span class="mastered-badge">✓</span>{/if}
+												</li>
+											{/each}
+										</ul>
+									{/if}
+								</li>
+							{/each}
+						</ul>
+					</section>
+				</div>
+
+				<section class="card stat-card-inner">
+					<div class="card-header">
+						<h3 class="card-title">Letzte Aktivitäten</h3>
+					</div>
+					{#if data.recentActivity.length === 0}
+						<p class="muted">Noch keine Versuche vorhanden.</p>
+					{:else}
+						<ul class="activity-list">
+							{#each data.recentActivity as a}
+								<li class="activity-item">
+									<div class="activity-score-wrap">
+										<span class="activity-score">{a.correct}/{a.total}</span>
+										<div class="activity-bar-mini">
+											<div class="activity-bar-fill" style="width:{a.total > 0 ? Math.round(a.correct/a.total*100) : 0}%"></div>
+										</div>
+									</div>
+									<span class="activity-body">
+										<a href="/teacher/classes/{data.class.id}/students/{a.studentId}" class="activity-link">
+											<strong>{a.displayName}</strong>
+										</a>
+										<span class="activity-atom">zuletzt: {a.lastAtomLabel}</span>
+									</span>
+									<span class="activity-time">{timeAgo(a.lastAnsweredAt)}</span>
+								</li>
+							{/each}
+						</ul>
+					{/if}
+				</section>
+			{/if}
+		</div>
+
 	<!-- ── Leaderboard tab ── -->
 	{:else if activeTab === 'leaderboard'}
 		<div class="tab-content">
@@ -452,11 +660,11 @@ ${cards.map((c) => `<div class="card">
 						<thead>
 							<tr>
 								<th class="lb-rank-col">#</th>
-								<th>Name</th>
-								<th class="center">Level</th>
-								<th class="center">XP</th>
-								<th class="center">Gemeistert</th>
-								<th class="center">Streak</th>
+								<th class="sort-th"><button class="sort-btn" class:sorted={lbSortKey==='displayName'} onclick={() => toggleLbSort('displayName')}>Name <span class="sort-icon" class:active={lbSortKey==='displayName'}>{lbSortIcon('displayName')}</span></button></th>
+								<th class="sort-th"><button class="sort-btn" class:sorted={lbSortKey==='level'} onclick={() => toggleLbSort('level')}>Level <span class="sort-icon" class:active={lbSortKey==='level'}>{lbSortIcon('level')}</span></button></th>
+								<th class="sort-th"><button class="sort-btn" class:sorted={lbSortKey==='xp'} onclick={() => toggleLbSort('xp')}>XP <span class="sort-icon" class:active={lbSortKey==='xp'}>{lbSortIcon('xp')}</span></button></th>
+								<th class="sort-th"><button class="sort-btn" class:sorted={lbSortKey==='masteredCount'} onclick={() => toggleLbSort('masteredCount')}>Gemeistert <span class="sort-icon" class:active={lbSortKey==='masteredCount'}>{lbSortIcon('masteredCount')}</span></button></th>
+								<th class="sort-th"><button class="sort-btn" class:sorted={lbSortKey==='streakDays'} onclick={() => toggleLbSort('streakDays')}>Streak <span class="sort-icon" class:active={lbSortKey==='streakDays'}>{lbSortIcon('streakDays')}</span></button></th>
 							</tr>
 						</thead>
 						<tbody>
@@ -551,7 +759,7 @@ ${cards.map((c) => `<div class="card">
 						</label>
 					</div>
 					<div class="domain-list">
-						{#each data.domains as domain}
+						{#each data.allDomains as domain}
 							<label class="domain-check" class:disabled={!enabledDomains.has(domain)}>
 								<input
 									type="checkbox"
@@ -858,4 +1066,80 @@ ${cards.map((c) => `<div class="card">
 	.domain-check.disabled { opacity: 0.5; }
 	.domain-check-label { flex: 1; line-height: 1.2; word-break: break-word; }
 	.warn-hint { font-size: 0.8rem; color: #dc2626; margin: 0.25rem 0 0; }
+
+	/* Statistik tab */
+	.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+	@media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+
+	.stat-card-inner { padding: 1rem; }
+	.card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+	.card-title { font-size: 0.9rem; font-weight: 700; margin: 0; }
+
+	.badge { font-size: 0.7rem; font-weight: 700; padding: 0.2rem 0.5rem; border-radius: 9999px; }
+	.badge-green { background: #dcfce7; color: #16a34a; }
+	.badge-red { background: #fee2e2; color: #dc2626; }
+
+	.atom-list { list-style: none; display: flex; flex-direction: column; gap: 0.4rem; }
+	.atom-row { display: flex; flex-direction: column; }
+	.atom-btn {
+		display: flex; flex-direction: column; gap: 0.2rem;
+		background: none; border: none; cursor: pointer; text-align: left;
+		padding: 0.4rem 0.5rem; border-radius: 0.4rem; transition: background 0.12s; width: 100%;
+	}
+	.atom-btn:hover { background: #f9fafb; }
+	.atom-meta { display: flex; justify-content: space-between; align-items: baseline; }
+	.atom-label { font-size: 0.85rem; font-weight: 600; color: #111827; }
+	.atom-domain { font-size: 0.7rem; color: #9ca3af; }
+	.atom-bar-wrap { display: flex; align-items: center; gap: 0.4rem; }
+	.atom-bar { flex: 1; height: 6px; background: #f3f4f6; border-radius: 9999px; overflow: hidden; }
+	.atom-bar-fill { height: 100%; border-radius: 9999px; transition: width 0.3s ease; }
+	.fill-green { background: #16a34a; }
+	.fill-red { background: #dc2626; }
+	.atom-pct { font-size: 0.75rem; font-weight: 700; color: #374151; white-space: nowrap; min-width: 2.5rem; text-align: right; }
+	.atom-frac { font-size: 0.7rem; color: #9ca3af; white-space: nowrap; }
+	.atom-chevron { font-size: 1rem; color: #9ca3af; display: inline-block; transition: transform 0.2s; line-height: 1; }
+	.atom-chevron.open { transform: rotate(90deg); }
+
+	.student-detail-list {
+		list-style: none; display: flex; flex-direction: column; gap: 0.25rem;
+		background: #f9fafb; border-radius: 0.4rem; padding: 0.5rem 0.6rem; margin: 0 0.1rem 0.2rem;
+	}
+	.student-detail-row { display: flex; align-items: center; gap: 0.5rem; font-size: 0.78rem; }
+	.student-detail-name {
+		min-width: 7rem; font-weight: 600; color: #111827; text-decoration: none;
+		white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+	}
+	.student-detail-name:hover { color: #16a34a; text-decoration: underline; }
+	.student-detail-bar-wrap { flex: 1; display: flex; align-items: center; gap: 0.3rem; min-width: 0; }
+	.student-detail-bar { flex: 1; height: 4px; background: #e5e7eb; border-radius: 9999px; overflow: hidden; }
+	.student-detail-fill { height: 100%; border-radius: 9999px; }
+	.student-detail-pct { font-size: 0.7rem; color: #6b7280; white-space: nowrap; min-width: 2rem; text-align: right; }
+	.mastered-badge { font-size: 0.7rem; color: #16a34a; font-weight: 700; }
+
+	.activity-list { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
+	.activity-item { display: flex; align-items: center; gap: 0.6rem; font-size: 0.85rem; }
+	.activity-score-wrap { display: flex; flex-direction: column; align-items: center; gap: 0.15rem; flex-shrink: 0; width: 3rem; }
+	.activity-score { font-size: 0.7rem; font-weight: 700; color: #374151; white-space: nowrap; }
+	.activity-bar-mini { width: 100%; height: 4px; background: #f3f4f6; border-radius: 9999px; overflow: hidden; }
+	.activity-bar-fill { height: 100%; background: #16a34a; border-radius: 9999px; }
+	.activity-body { flex: 1; color: #374151; display: flex; flex-direction: column; gap: 0.1rem; min-width: 0; }
+	.activity-link { color: inherit; text-decoration: none; }
+	.activity-link:hover { color: #16a34a; text-decoration: underline; }
+	.activity-atom { font-size: 0.72rem; color: #9ca3af; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+	.activity-time { font-size: 0.75rem; color: #9ca3af; white-space: nowrap; }
+
+	/* Sortable column headers */
+	.sort-th { padding: 0 !important; }
+	.sort-btn {
+		background: none; border: none; cursor: pointer;
+		font-size: 0.75rem; color: #6b7280; font-weight: 600;
+		padding: 0.5rem 0.875rem;
+		display: flex; align-items: center; gap: 0.35rem;
+		white-space: nowrap; width: 100%;
+		transition: background 0.1s, color 0.1s;
+	}
+	.sort-btn:hover { background: #f0fdf4; color: #15803d; }
+	.sort-btn.sorted { color: #15803d; background: #f0fdf4; }
+	.sort-icon { font-size: 0.7rem; opacity: 0.35; flex-shrink: 0; }
+	.sort-icon.active { opacity: 1; color: #16a34a; }
 </style>

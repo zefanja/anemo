@@ -102,9 +102,33 @@
 	);
 
 	const isZahlenmauer = $derived(currentTask?.inputData?.type === 'zahlenmauer');
-
 	const isFractionPart = $derived(currentTask?.inputData?.type === 'fraction_part');
 	const isMixedPart = $derived(currentTask?.inputData?.type === 'mixed_part');
+	const isPqSteps = $derived(currentTask?.inputData?.type === 'pq_steps');
+
+	// pq multi-step state
+	let pqStepIndex = $state(0);
+	let pqStepHintVisible = $state(false);
+
+	type PqSubStep = { subPrompt: string; choices: string[]; correctAnswer: string; hint: string; context?: string; isFinal?: boolean };
+	const pqCurrentStep = $derived(
+		isPqSteps ? ((currentTask!.inputData!.subSteps as PqSubStep[])[pqStepIndex] ?? null) : null
+	);
+
+	function selectPqStep(value: string) {
+		if (!pqCurrentStep) return;
+		if (value === pqCurrentStep.correctAnswer) {
+			if (pqCurrentStep.isFinal) {
+				answer = value;
+				submitAnswer();
+			} else {
+				pqStepIndex++;
+				pqStepHintVisible = false;
+			}
+		} else {
+			pqStepHintVisible = true;
+		}
+	}
 
 	$effect(() => {
 		if (currentTask && !showFeedback) {
@@ -120,7 +144,7 @@
 				numberLineInput?.focus();
 			} else if (isZahlenmauer) {
 				zahlenmauernInput?.focus();
-			} else if (!currentTask.choices && currentTask.answerType !== 'boolean' && currentTask.answerType !== 'comparison') {
+			} else if (!currentTask.choices && currentTask.answerType !== 'boolean' && currentTask.answerType !== 'comparison' && !isPqSteps) {
 				answerInput?.focus();
 			}
 		}
@@ -150,6 +174,8 @@
 		lastResult = null;
 		showExplanationManual = false;
 		hadWrongAttempt = false;
+		pqStepIndex = 0;
+		pqStepHintVisible = false;
 		try {
 			const params = new URLSearchParams();
 			recentPrompts.slice(-5).forEach(p => params.append('ex', p));
@@ -189,7 +215,7 @@
 				autoAdvanceTimer = setTimeout(() => {
 					autoAdvanceTimer = null;
 					handleContinue();
-				}, 1500);
+				}, 1000);
 			}
 		} catch {
 			// show generic error?
@@ -413,6 +439,16 @@
 
 					{#if !lastResult.correct && currentTask?.explanation}
 						<AtomExplanation text={currentTask.explanation} illustrationConfig={currentTask.illustrationConfig} />
+					{:else if !lastResult.correct && Array.isArray(currentTask?.inputData?.steps)}
+						<div class="steps-box">
+							<div class="steps-title">Lösungsweg:</div>
+							{#each currentTask!.inputData!.steps as step, i}
+								<div class="step-row">
+									<span class="step-num">{i + 1}.</span>
+									<span class="step-text"><MathText text={String(step)} /></span>
+								</div>
+							{/each}
+						</div>
 					{:else if !lastResult.correct && lastResult.hint}
 						<div class="hint-box">💡 <MathText text={lastResult.hint} /></div>
 					{/if}
@@ -451,10 +487,29 @@
 						<div class="task-svg">{@html currentTask.svg}</div>
 					{/if}
 					<MathText text={currentTask.prompt} class="task-prompt" />
+					{#if currentTask.inputData?.sublabel}
+						<div class="task-sublabel">{currentTask.inputData.sublabel as string}</div>
+					{/if}
 
 					<div class="answer-area">
-						{#if currentTask.choices}
-							<div class="choice-buttons">
+						{#if isPqSteps && pqCurrentStep}
+							<div class="pq-steps">
+								<div class="pq-progress">Schritt {pqStepIndex + 1} / {(currentTask.inputData!.subSteps as PqSubStep[]).length}</div>
+								{#if pqCurrentStep.context}
+									<div class="pq-context"><MathText text={pqCurrentStep.context} /></div>
+								{/if}
+								<div class="pq-subprompt"><MathText text={pqCurrentStep.subPrompt} /></div>
+								<div class="choice-buttons choice-buttons-multi">
+									{#each pqCurrentStep.choices as choice}
+										<button class="choice-btn" onclick={() => selectPqStep(choice)} disabled={isSubmitting}><MathText text={choice} /></button>
+									{/each}
+								</div>
+								{#if pqStepHintVisible}
+									<div class="hint-box">💡 <MathText text={pqCurrentStep.hint} /></div>
+								{/if}
+							</div>
+						{:else if currentTask.choices}
+							<div class="choice-buttons choice-buttons-multi">
 								{#each currentTask.choices as choice}
 									<button class="choice-btn" onclick={() => selectAnswer(choice)} disabled={isSubmitting}><MathText text={choice} /></button>
 								{/each}
@@ -555,7 +610,7 @@
 						{/if}
 					</div>
 
-					{#if !currentTask.choices && currentTask.answerType !== 'boolean' && currentTask.answerType !== 'comparison' && !writtenArith && !isZahlenmauer && !isNumberLine}
+					{#if !currentTask.choices && currentTask.answerType !== 'boolean' && currentTask.answerType !== 'comparison' && !writtenArith && !isZahlenmauer && !isPqSteps}
 						<button
 							class="btn btn-primary btn-full btn-lg submit-btn"
 							onclick={submitAnswer}
@@ -665,6 +720,12 @@
 		flex-direction: column;
 		align-items: center;
 		gap: 1rem;
+		max-width: 280px;
+	}
+	.mascot-img {
+		width: 100px;
+		max-width: 35vw;
+		height: auto;
 	}
 	.mascot-inline {
 		width: 48px;
@@ -813,6 +874,16 @@
 		letter-spacing: .05em;
 	}
 	/* .task-prompt lives in app.css (rendered via MathText component) */
+	.task-sublabel {
+		font-size: 0.85rem;
+		font-weight: 700;
+		color: var(--c-primary);
+		background: var(--c-primary-light);
+		border-radius: 0.4rem;
+		padding: 0.3rem 0.75rem;
+		text-align: center;
+		align-self: center;
+	}
 	.answer-area {
 		display: flex;
 		justify-content: center;
@@ -849,10 +920,19 @@
 		gap: 0.75rem;
 		justify-content: center;
 	}
+	.choice-buttons-multi {
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+	}
+	@media (min-width: 520px) {
+		.choice-buttons-multi {
+			grid-template-columns: repeat(4, 1fr);
+		}
+	}
 	.choice-btn {
-		min-width: 90px;
-		padding: 0.85rem 1.5rem;
-		font-size: 1.1rem;
+		min-width: 0;
+		padding: 0.75rem 0.75rem;
+		font-size: 1rem;
 		font-weight: 700;
 		border: 2px solid var(--c-gray-200);
 		border-radius: var(--radius);
@@ -860,6 +940,9 @@
 		color: var(--c-gray-900);
 		cursor: pointer;
 		transition: border-color .15s, background .15s, box-shadow .15s;
+		white-space: normal;
+		word-break: break-word;
+		line-height: 1.4;
 	}
 	.choice-btn:hover:not(:disabled) {
 		border-color: var(--c-primary);
@@ -952,6 +1035,61 @@
 		font-size: 0.9rem;
 		width: 100%;
 		text-align: left;
+	}
+	.pq-steps {
+		width: 100%;
+		display: flex;
+		flex-direction: column;
+		gap: 0.6rem;
+	}
+	.pq-progress {
+		font-size: 0.8rem;
+		font-weight: 600;
+		color: var(--c-primary);
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+	}
+	.pq-context {
+		background: var(--c-gray-50);
+		border: 1px solid var(--c-gray-200);
+		border-radius: var(--radius);
+		padding: 0.5rem 0.75rem;
+		font-size: 0.95rem;
+		color: var(--c-gray-700);
+	}
+	.pq-subprompt {
+		font-size: 1rem;
+		font-weight: 600;
+		color: var(--c-gray-900);
+	}
+	.steps-box {
+		background: var(--c-gray-50);
+		border: 1px solid var(--c-gray-200);
+		border-radius: var(--radius);
+		padding: 0.75rem;
+		font-size: 0.9rem;
+		width: 100%;
+		text-align: left;
+	}
+	.steps-title {
+		font-weight: 700;
+		color: var(--c-gray-700);
+		margin-bottom: 0.4rem;
+	}
+	.step-row {
+		display: flex;
+		gap: 0.5rem;
+		padding: 0.15rem 0;
+		align-items: baseline;
+	}
+	.step-num {
+		font-weight: 700;
+		color: var(--c-primary);
+		flex-shrink: 0;
+		min-width: 1.2rem;
+	}
+	.step-text {
+		color: var(--c-gray-800);
 	}
 	.continue-btn { margin-top: 0.5rem; }
 

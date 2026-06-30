@@ -4,7 +4,7 @@ description: Äquivalenzumformungen auf beiden Seiten; Gleichungen mit Klammern 
   Seiten; Probe; Sonderfälle (keine/unendlich viele Lösungen).
 domain: algebra
 subdomain: Gleichungen
-level: atom
+level: cluster
 granularity: 4
 schulformen:
 - GY
@@ -25,6 +25,31 @@ prerequisites:
 - id: arithmetik__rationale_zahlen_addieren_subtrahieren
   type: required
   mastery_level_needed: 0.85
+- id: algebra__aequivalenzumformung_prinzip
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: algebra__lineare_gleichung_zweischritt
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: algebra__lineare_gleichung_variablen_beidseitig
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: algebra__lineare_gleichung_klammern_brueche
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: algebra__lineare_gleichung_sonderfaelle
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
 lehrplan_ref:
 - schulform: GY
   dokument: lp_gy_mathematik_2021.pdf
@@ -34,4 +59,4 @@ tags:
 - äquivalenzumformung
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

@@ -1,0 +1,38 @@
+id: algebra__proportionale_zuordnung
+label: Proportionale Zuordnungen und Dreisatz
+description: Proportionale Zuordnungen erkennen (Quotientengleichheit, Ursprungsgerade) und mit dem Dreisatz
+  rechnen.
+domain: algebra
+subdomain: Zuordnungen
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 6
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.95
+  transfer_value: 0.95
+  cognitive_load: 0.5
+prerequisites:
+- id: algebra__zuordnungen
+  type: required
+  mastery_level_needed: 0.8
+- id: arithmetik__brueche_multiplizieren_dividieren
+  type: required
+  mastery_level_needed: 0.8
+related:
+- id: algebra__proportionalitaet_dreisatz
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms algebra__proportionalitaet_dreisatz
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 6, LB 2
+tags:
+- proportional
+- dreisatz
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

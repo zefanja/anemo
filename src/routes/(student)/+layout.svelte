@@ -4,7 +4,10 @@
 
 	let { data, children }: { data: LayoutData; children: import('svelte').Snippet } = $props();
 
-	const LEVEL_THRESHOLDS = [0, 100, 250, 500, 900, 1400, 2000, 3000, 4500, 6500, 9000];
+	const LEVEL_THRESHOLDS = [
+		0, 100, 250, 500, 900, 1400, 2000, 3000, 4500, 6500, 9000,
+		12500, 17000, 22500, 29000, 37000, 46500, 57500, 70000, 85000
+	];
 
 	function xpProgress(xp: number, level: number): number {
 		const lo = LEVEL_THRESHOLDS[level - 1] ?? 0;
@@ -157,16 +160,31 @@
 		color: var(--c-gray-400);
 		font-size: 0.7rem;
 		font-weight: 500;
-		transition: color .15s;
+		transition: color .15s, background .15s;
 		min-height: 56px;
+		border-top: 2px solid transparent;
+		margin-top: -1px;
+	}
+	@media (hover: hover) {
+		.nav-item:hover {
+			color: var(--c-primary);
+			background: color-mix(in srgb, var(--c-primary) 8%, transparent);
+		}
+		.nav-logout:hover {
+			color: var(--c-error);
+			background: color-mix(in srgb, var(--c-error) 8%, transparent);
+		}
 	}
 	.nav-item.active {
 		color: var(--c-primary);
+		font-weight: 700;
+		border-top-color: var(--c-primary);
+		background: color-mix(in srgb, var(--c-primary) 6%, transparent);
+	}
+	.nav-item.active svg {
+		stroke-width: 2.5;
 	}
 	.nav-logout {
 		color: var(--c-gray-400);
-	}
-	.nav-logout:hover {
-		color: var(--c-error);
 	}
 </style>

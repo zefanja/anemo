@@ -53,10 +53,30 @@
 		return sortDir === 'asc' ? '▲' : '▼';
 	}
 
-	// ── Atom stats ─────────────────────────────────────────────────────────────
+	// ── Atom stats with class filter ───────────────────────────────────────────
 	const TOP_N = 5;
-	let bestAtoms = $derived(data.atomStats.slice(0, TOP_N));
-	let worstAtoms = $derived([...data.atomStats].reverse().slice(0, TOP_N));
+	let selectedClassId = $state<string | null>(null);
+	let expandedAtomId = $state<string | null>(null);
+
+	let currentAtomStats = $derived(
+		selectedClassId === null
+			? data.atomStats
+			: (data.classAtomStats.find((c) => c.classId === selectedClassId)?.atomStats ?? [])
+	);
+
+	let bestAtoms = $derived(currentAtomStats.slice(0, TOP_N));
+	let worstAtoms = $derived([...currentAtomStats].reverse().slice(0, TOP_N));
+
+	function toggleClass(classId: string | null) {
+		selectedClassId = classId;
+		expandedAtomId = null;
+	}
+
+	function toggleAtom(atomId: string) {
+		expandedAtomId = expandedAtomId === atomId ? null : atomId;
+	}
+
+	const showClassColumn = $derived(selectedClassId === null && data.classAtomStats.length > 1);
 </script>
 
 <svelte:head><title>Anemo – Dashboard</title></svelte:head>
@@ -84,78 +104,87 @@
 		</div>
 	</div>
 
-	<div class="two-col">
-		<!-- Classes quick-links -->
-		<section class="card">
-			<div class="card-header">
-				<h2>Klassen</h2>
-				<a href="/teacher/classes" class="link-more">Alle anzeigen →</a>
-			</div>
-			{#if data.classes.length === 0}
-				<p class="empty-note">Noch keine Klassen angelegt.</p>
-				<a href="/teacher/classes" class="btn btn-primary">Erste Klasse anlegen</a>
-			{:else}
-				<ul class="class-list">
-					{#each data.classes as c}
-						<li>
-							<a href="/teacher/classes/{c.id}" class="class-item">
-								<span class="class-name">{c.name}</span>
-								<span class="class-count">{c.studentCount} Schüler</span>
-							</a>
-						</li>
-					{/each}
-				</ul>
-			{/if}
-		</section>
-
-		<!-- Recent activity -->
-		<section class="card">
-			<div class="card-header">
-				<h2>Letzte Aktivitäten</h2>
-			</div>
-			{#if data.recentAttempts.length === 0}
-				<p class="empty-note">Noch keine Versuche vorhanden.</p>
-			{:else}
-				<ul class="activity-list">
-					{#each data.recentAttempts as a}
-						<li class="activity-item">
-							<span class="activity-dot" class:correct={a.isCorrect} class:wrong={!a.isCorrect}></span>
-							<span class="activity-body">
-								<strong>{a.studentName}</strong> – {a.atomLabel}
-							</span>
-							<span class="activity-time">{timeAgo(a.answeredAt)}</span>
-						</li>
-					{/each}
-				</ul>
-			{/if}
-		</section>
-	</div>
-
 	<!-- Atom stats -->
 	{#if data.atomStats.length > 0}
+		<!-- Class filter tabs -->
+		{#if data.classAtomStats.length > 1}
+			<div class="class-tabs">
+				<button
+					class="class-tab"
+					class:active={selectedClassId === null}
+					onclick={() => toggleClass(null)}
+				>
+					Alle Klassen
+				</button>
+				{#each data.classAtomStats as cls}
+					<button
+						class="class-tab"
+						class:active={selectedClassId === cls.classId}
+						onclick={() => toggleClass(cls.classId)}
+					>
+						{cls.className}
+					</button>
+				{/each}
+			</div>
+		{/if}
+
 		<div class="two-col">
 			<section class="card">
 				<div class="card-header">
 					<h2>Gut gemeistert</h2>
 					<span class="badge badge-green">Top {bestAtoms.length}</span>
 				</div>
-				<ul class="atom-list">
-					{#each bestAtoms as a}
-						<li class="atom-row">
-							<div class="atom-meta">
-								<span class="atom-label">{a.label}</span>
-								<span class="atom-domain">{a.domain}</span>
-							</div>
-							<div class="atom-bar-wrap">
-								<div class="atom-bar">
-									<div class="atom-bar-fill fill-green" style="width:{pct(a.masteryRate)}"></div>
-								</div>
-								<span class="atom-pct">{pct(a.masteryRate)}</span>
-								<span class="atom-frac">({a.masteredCount}/{a.studentCount})</span>
-							</div>
-						</li>
-					{/each}
-				</ul>
+				{#if bestAtoms.length === 0}
+					<p class="empty-note">Keine Daten für diese Klasse.</p>
+				{:else}
+					<ul class="atom-list">
+						{#each bestAtoms as a}
+							{@const isExpanded = expandedAtomId === a.atomId + '-best'}
+							<li class="atom-row">
+								<button class="atom-btn" onclick={() => toggleAtom(a.atomId + '-best')}>
+									<div class="atom-meta">
+										<span class="atom-label">{a.label}</span>
+										<span class="atom-domain">{a.domain}</span>
+									</div>
+									<div class="atom-bar-wrap">
+										<div class="atom-bar">
+											<div class="atom-bar-fill fill-green" style="width:{pct(a.masteryRate)}"></div>
+										</div>
+										<span class="atom-pct">{pct(a.masteryRate)}</span>
+										<span class="atom-frac">({a.masteredCount}/{a.studentCount})</span>
+										<span class="atom-chevron" class:open={isExpanded}>›</span>
+									</div>
+								</button>
+								{#if isExpanded}
+									<ul class="student-detail-list">
+										{#each a.students as s}
+											<li class="student-detail-row">
+												<a
+													href="/teacher/classes/{s.classId}/students/{s.studentId}"
+													class="student-detail-name"
+												>
+													{s.displayName}
+												</a>
+												{#if showClassColumn}
+													<span class="student-detail-class">{s.className}</span>
+												{/if}
+												<div class="student-detail-bar-wrap">
+													<div class="student-detail-bar">
+														<div class="student-detail-fill fill-green" style="width:{pct(s.mastery)}"></div>
+													</div>
+													<span class="student-detail-pct">{pct(s.mastery)}</span>
+												</div>
+												{#if s.isMastered}
+													<span class="mastered-badge">✓</span>
+												{/if}
+											</li>
+										{/each}
+									</ul>
+								{/if}
+							</li>
+						{/each}
+					</ul>
+				{/if}
 			</section>
 
 			<section class="card">
@@ -163,23 +192,57 @@
 					<h2>Schwierige Atome</h2>
 					<span class="badge badge-red">Flop {worstAtoms.length}</span>
 				</div>
-				<ul class="atom-list">
-					{#each worstAtoms as a}
-						<li class="atom-row">
-							<div class="atom-meta">
-								<span class="atom-label">{a.label}</span>
-								<span class="atom-domain">{a.domain}</span>
-							</div>
-							<div class="atom-bar-wrap">
-								<div class="atom-bar">
-									<div class="atom-bar-fill fill-red" style="width:{pct(a.masteryRate)}"></div>
-								</div>
-								<span class="atom-pct">{pct(a.masteryRate)}</span>
-								<span class="atom-frac">({a.masteredCount}/{a.studentCount})</span>
-							</div>
-						</li>
-					{/each}
-				</ul>
+				{#if worstAtoms.length === 0}
+					<p class="empty-note">Keine Daten für diese Klasse.</p>
+				{:else}
+					<ul class="atom-list">
+						{#each worstAtoms as a}
+							{@const isExpanded = expandedAtomId === a.atomId + '-worst'}
+							<li class="atom-row">
+								<button class="atom-btn" onclick={() => toggleAtom(a.atomId + '-worst')}>
+									<div class="atom-meta">
+										<span class="atom-label">{a.label}</span>
+										<span class="atom-domain">{a.domain}</span>
+									</div>
+									<div class="atom-bar-wrap">
+										<div class="atom-bar">
+											<div class="atom-bar-fill fill-red" style="width:{pct(a.masteryRate)}"></div>
+										</div>
+										<span class="atom-pct">{pct(a.masteryRate)}</span>
+										<span class="atom-frac">({a.masteredCount}/{a.studentCount})</span>
+										<span class="atom-chevron" class:open={isExpanded}>›</span>
+									</div>
+								</button>
+								{#if isExpanded}
+									<ul class="student-detail-list">
+										{#each a.students as s}
+											<li class="student-detail-row">
+												<a
+													href="/teacher/classes/{s.classId}/students/{s.studentId}"
+													class="student-detail-name"
+												>
+													{s.displayName}
+												</a>
+												{#if showClassColumn}
+													<span class="student-detail-class">{s.className}</span>
+												{/if}
+												<div class="student-detail-bar-wrap">
+													<div class="student-detail-bar">
+														<div class="student-detail-fill fill-red" style="width:{pct(s.mastery)}"></div>
+													</div>
+													<span class="student-detail-pct">{pct(s.mastery)}</span>
+												</div>
+												{#if s.isMastered}
+													<span class="mastered-badge">✓</span>
+												{/if}
+											</li>
+										{/each}
+									</ul>
+								{/if}
+							</li>
+						{/each}
+					</ul>
+				{/if}
 			</section>
 		</div>
 	{/if}
@@ -253,6 +316,63 @@
 			</div>
 		</section>
 	{/if}
+
+	<div class="two-col">
+		<!-- Classes quick-links -->
+		<section class="card">
+			<div class="card-header">
+				<h2>Klassen</h2>
+				<a href="/teacher/classes" class="link-more">Alle anzeigen →</a>
+			</div>
+			{#if data.classes.length === 0}
+				<p class="empty-note">Noch keine Klassen angelegt.</p>
+				<a href="/teacher/classes" class="btn btn-primary">Erste Klasse anlegen</a>
+			{:else}
+				<ul class="class-list">
+					{#each data.classes as c}
+						<li>
+							<a href="/teacher/classes/{c.id}" class="class-item">
+								<span class="class-name">{c.name}</span>
+								<span class="class-count">{c.studentCount} Schüler</span>
+							</a>
+						</li>
+					{/each}
+				</ul>
+			{/if}
+		</section>
+
+		<!-- Recent activity -->
+		<section class="card">
+			<div class="card-header">
+				<h2>Letzte Aktivitäten</h2>
+			</div>
+			{#if data.recentActivity.length === 0}
+				<p class="empty-note">Noch keine Versuche vorhanden.</p>
+			{:else}
+				<ul class="activity-list">
+					{#each data.recentActivity as a}
+						<li class="activity-item">
+							<div class="activity-score-wrap">
+								<span class="activity-score" title="{a.correct}/{a.total} richtig">
+									{a.correct}/{a.total}
+								</span>
+								<div class="activity-bar">
+									<div class="activity-bar-fill" style="width:{a.total > 0 ? Math.round(a.correct/a.total*100) : 0}%"></div>
+								</div>
+							</div>
+							<span class="activity-body">
+								<a href="/teacher/classes/{a.classId}/students/{a.studentId}" class="activity-link">
+									<strong>{a.studentName}</strong>
+								</a>
+								<span class="activity-atom">zuletzt: {a.lastAtomLabel}</span>
+							</span>
+							<span class="activity-time">{timeAgo(a.lastAnsweredAt)}</span>
+						</li>
+					{/each}
+				</ul>
+			{/if}
+		</section>
+	</div>
 </div>
 
 <style>
@@ -306,6 +426,26 @@
 	.badge-green { background: #dcfce7; color: #16a34a; }
 	.badge-red { background: #fee2e2; color: #dc2626; }
 
+	/* Class filter tabs */
+	.class-tabs {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.4rem;
+	}
+	.class-tab {
+		padding: 0.35rem 0.85rem;
+		border-radius: 9999px;
+		border: 1.5px solid #e5e7eb;
+		background: #f9fafb;
+		color: #374151;
+		font-size: 0.8rem;
+		font-weight: 600;
+		cursor: pointer;
+		transition: all 0.15s;
+	}
+	.class-tab:hover { border-color: #16a34a; color: #16a34a; background: #f0fdf4; }
+	.class-tab.active { background: #16a34a; color: #fff; border-color: #16a34a; }
+
 	.class-list { list-style: none; display: flex; flex-direction: column; gap: 0.35rem; }
 	.class-item {
 		display: flex;
@@ -322,26 +462,77 @@
 	.class-name { font-weight: 600; font-size: 0.9rem; }
 	.class-count { font-size: 0.75rem; color: #6b7280; }
 
-	.activity-list { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
+	.activity-list { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
 	.activity-item {
 		display: flex;
 		align-items: center;
 		gap: 0.6rem;
 		font-size: 0.85rem;
 	}
-	.activity-dot {
-		width: 8px; height: 8px;
-		border-radius: 50%;
+	.activity-score-wrap {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.15rem;
 		flex-shrink: 0;
+		width: 3rem;
 	}
-	.activity-dot.correct { background: #16a34a; }
-	.activity-dot.wrong { background: #dc2626; }
-	.activity-body { flex: 1; color: #374151; }
+	.activity-score {
+		font-size: 0.7rem;
+		font-weight: 700;
+		color: #374151;
+		white-space: nowrap;
+	}
+	.activity-bar {
+		width: 100%;
+		height: 4px;
+		background: #f3f4f6;
+		border-radius: 9999px;
+		overflow: hidden;
+	}
+	.activity-bar-fill {
+		height: 100%;
+		background: #16a34a;
+		border-radius: 9999px;
+	}
+	.activity-body {
+		flex: 1;
+		color: #374151;
+		display: flex;
+		flex-direction: column;
+		gap: 0.1rem;
+		min-width: 0;
+	}
+	.activity-link { color: inherit; text-decoration: none; }
+	.activity-link:hover { color: #16a34a; text-decoration: underline; }
+	.activity-atom {
+		font-size: 0.72rem;
+		color: #9ca3af;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
 	.activity-time { font-size: 0.75rem; color: #9ca3af; white-space: nowrap; }
 
 	/* Atom stats */
-	.atom-list { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
-	.atom-row { display: flex; flex-direction: column; gap: 0.2rem; }
+	.atom-list { list-style: none; display: flex; flex-direction: column; gap: 0.4rem; }
+	.atom-row { display: flex; flex-direction: column; }
+
+	.atom-btn {
+		display: flex;
+		flex-direction: column;
+		gap: 0.2rem;
+		background: none;
+		border: none;
+		cursor: pointer;
+		text-align: left;
+		padding: 0.4rem 0.5rem;
+		border-radius: 0.4rem;
+		transition: background 0.12s;
+		width: 100%;
+	}
+	.atom-btn:hover { background: #f9fafb; }
+
 	.atom-meta { display: flex; justify-content: space-between; align-items: baseline; }
 	.atom-label { font-size: 0.85rem; font-weight: 600; color: #111827; }
 	.atom-domain { font-size: 0.7rem; color: #9ca3af; }
@@ -366,6 +557,78 @@
 	.fill-red { background: #dc2626; }
 	.atom-pct { font-size: 0.75rem; font-weight: 700; color: #374151; white-space: nowrap; min-width: 2.5rem; text-align: right; }
 	.atom-frac { font-size: 0.7rem; color: #9ca3af; white-space: nowrap; }
+	.atom-chevron {
+		font-size: 1rem;
+		color: #9ca3af;
+		display: inline-block;
+		transition: transform 0.2s;
+		line-height: 1;
+	}
+	.atom-chevron.open { transform: rotate(90deg); }
+
+	/* Student detail list */
+	.student-detail-list {
+		list-style: none;
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+		background: #f9fafb;
+		border-radius: 0.4rem;
+		padding: 0.5rem 0.6rem;
+		margin: 0 0.1rem 0.2rem;
+	}
+	.student-detail-row {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		font-size: 0.78rem;
+	}
+	.student-detail-name {
+		min-width: 7rem;
+		font-weight: 600;
+		color: #111827;
+		text-decoration: none;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	.student-detail-name:hover { color: #16a34a; text-decoration: underline; }
+	.student-detail-class {
+		font-size: 0.7rem;
+		color: #9ca3af;
+		white-space: nowrap;
+		min-width: 4rem;
+	}
+	.student-detail-bar-wrap {
+		flex: 1;
+		display: flex;
+		align-items: center;
+		gap: 0.3rem;
+		min-width: 0;
+	}
+	.student-detail-bar {
+		flex: 1;
+		height: 4px;
+		background: #e5e7eb;
+		border-radius: 9999px;
+		overflow: hidden;
+	}
+	.student-detail-fill {
+		height: 100%;
+		border-radius: 9999px;
+	}
+	.student-detail-pct {
+		font-size: 0.7rem;
+		color: #6b7280;
+		white-space: nowrap;
+		min-width: 2rem;
+		text-align: right;
+	}
+	.mastered-badge {
+		font-size: 0.7rem;
+		color: #16a34a;
+		font-weight: 700;
+	}
 
 	/* Leaderboard */
 	.lb-table-wrap { overflow-x: auto; }

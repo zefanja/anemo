@@ -1,0 +1,37 @@
+id: algebra__funktion_eindeutige_zuordnung
+label: Funktion als eindeutige Zuordnung
+description: Eine Funktion als eindeutige Zuordnung verstehen und von mehrdeutigen Zuordnungen unterscheiden.
+domain: algebra
+subdomain: Funktionen
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 8
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.95
+  transfer_value: 0.95
+  cognitive_load: 0.5
+prerequisites:
+- id: algebra__zuordnungen
+  type: required
+  mastery_level_needed: 0.8
+- id: geometrie__koordinatensystem
+  type: required
+  mastery_level_needed: 0.8
+related:
+- id: algebra__funktionsbegriff
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms algebra__funktionsbegriff
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 8, LB 3
+tags:
+- funktionsbegriff
+- eindeutigkeit
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

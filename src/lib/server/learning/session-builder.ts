@@ -30,12 +30,24 @@ export async function buildSession(
 	studentId: string,
 	classId: string
 ): Promise<PracticeSession> {
-	const classData = await db.query.classes.findFirst({
-		where: (c, { eq }) => eq(c.id, classId)
-	});
+	const [classData, studentData] = await Promise.all([
+		db.query.classes.findFirst({ where: (c, { eq }) => eq(c.id, classId) }),
+		db.query.students.findFirst({
+			where: (s, { eq }) => eq(s.id, studentId),
+			columns: { extraDomains: true }
+		})
+	]);
 
 	const maxReview = classData?.sessionMaxReview ?? parseInt(env.SESSION_MAX_REVIEW ?? '10');
-	const enabledDomains = classData?.enabledDomains ?? null;
+	const classDomains = classData?.enabledDomains ?? null;
+	const extraDomains = studentData?.extraDomains ?? null;
+	// Merge: if class has restricted domains, add student's extras on top
+	const enabledDomains =
+		classDomains === null
+			? null
+			: extraDomains && extraDomains.length > 0
+				? [...new Set([...classDomains, ...extraDomains])]
+				: classDomains;
 
 	// FSRS reviews – mandatory, capped at maxReview
 	const dueReviews = await getDueReviews(studentId);

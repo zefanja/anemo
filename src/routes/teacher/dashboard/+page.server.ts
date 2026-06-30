@@ -8,16 +8,16 @@ export const load: PageServerLoad = async ({ locals }) => {
 	}
 	const { teacherId } = locals.session;
 
-	const [classes, recentAttempts] = await Promise.all([
+	const [classes, rawAttempts] = await Promise.all([
 		db.query.classes.findMany({
 			where: (c, { eq }) => eq(c.teacherId, teacherId),
 			with: { students: { columns: { id: true, displayName: true } } }
 		}),
 		db.query.attempts.findMany({
 			orderBy: (a, { desc }) => [desc(a.answeredAt)],
-			limit: 15,
+			limit: 1000,
 			with: {
-				student: { columns: { displayName: true, classId: true } },
+				student: { columns: { id: true, displayName: true, classId: true } },
 				atom: { columns: { label: true } }
 			}
 		})
@@ -45,7 +45,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 		studentIds.length > 0
 			? db.query.studentAtomStatus.findMany({
 					where: (s, { inArray }) => inArray(s.studentId, studentIds),
-					columns: { atomId: true, mastery: true, isMastered: true, totalAttempts: true },
+					columns: { atomId: true, studentId: true, mastery: true, isMastered: true, totalAttempts: true },
 					with: { atom: { columns: { label: true, domain: true } } }
 				})
 			: Promise.resolve([])
@@ -74,39 +74,136 @@ export const load: PageServerLoad = async ({ locals }) => {
 		.sort((a, b) => b.xp - a.xp)
 		.slice(0, 10);
 
-	// Atom stats: group by atom, only include atoms practiced by at least 1 student
-	const atomStatsMap = new Map<
-		string,
-		{ label: string; domain: string; studentCount: number; masteredCount: number; masterySum: number }
-	>();
+	// Build student info lookup
+	const studentInfoMap = new Map<string, { displayName: string; classId: string; className: string }>();
+	for (const c of classes) {
+		for (const s of c.students) {
+			studentInfoMap.set(s.id, { displayName: s.displayName, classId: c.id, className: c.name });
+		}
+	}
+
+	type AtomStudentDetail = {
+		studentId: string;
+		displayName: string;
+		classId: string;
+		className: string;
+		mastery: number;
+		isMastered: boolean;
+	};
+	type AtomEntry = {
+		label: string;
+		domain: string;
+		studentCount: number;
+		masteredCount: number;
+		masterySum: number;
+		students: AtomStudentDetail[];
+	};
+
+	const allAtomStatsMap = new Map<string, AtomEntry>();
+	const classAtomStatsMap = new Map<string, Map<string, AtomEntry>>();
+
 	for (const s of atomStatuses) {
 		if (s.totalAttempts === 0) continue;
-		if (!atomStatsMap.has(s.atomId)) {
-			atomStatsMap.set(s.atomId, {
+		const info = studentInfoMap.get(s.studentId);
+		if (!info) continue;
+
+		const detail: AtomStudentDetail = {
+			studentId: s.studentId,
+			displayName: info.displayName,
+			classId: info.classId,
+			className: info.className,
+			mastery: s.mastery,
+			isMastered: s.isMastered
+		};
+
+		if (!allAtomStatsMap.has(s.atomId)) {
+			allAtomStatsMap.set(s.atomId, {
 				label: s.atom?.label ?? s.atomId,
 				domain: s.atom?.domain ?? '',
 				studentCount: 0,
 				masteredCount: 0,
-				masterySum: 0
+				masterySum: 0,
+				students: []
 			});
 		}
-		const entry = atomStatsMap.get(s.atomId)!;
-		entry.studentCount++;
-		if (s.isMastered) entry.masteredCount++;
-		entry.masterySum += s.mastery;
+		const allEntry = allAtomStatsMap.get(s.atomId)!;
+		allEntry.studentCount++;
+		if (s.isMastered) allEntry.masteredCount++;
+		allEntry.masterySum += s.mastery;
+		allEntry.students.push(detail);
+
+		if (!classAtomStatsMap.has(info.classId)) classAtomStatsMap.set(info.classId, new Map());
+		const classMap = classAtomStatsMap.get(info.classId)!;
+		if (!classMap.has(s.atomId)) {
+			classMap.set(s.atomId, {
+				label: s.atom?.label ?? s.atomId,
+				domain: s.atom?.domain ?? '',
+				studentCount: 0,
+				masteredCount: 0,
+				masterySum: 0,
+				students: []
+			});
+		}
+		const classEntry = classMap.get(s.atomId)!;
+		classEntry.studentCount++;
+		if (s.isMastered) classEntry.masteredCount++;
+		classEntry.masterySum += s.mastery;
+		classEntry.students.push(detail);
 	}
 
-	const atomStats = Array.from(atomStatsMap.entries())
-		.map(([atomId, v]) => ({
-			atomId,
-			label: v.label,
-			domain: v.domain,
-			studentCount: v.studentCount,
-			masteredCount: v.masteredCount,
-			masteryRate: v.studentCount > 0 ? v.masteredCount / v.studentCount : 0,
-			avgMastery: v.studentCount > 0 ? v.masterySum / v.studentCount : 0
-		}))
-		.sort((a, b) => b.masteryRate - a.masteryRate);
+	function buildAtomStats(map: Map<string, AtomEntry>) {
+		return Array.from(map.entries())
+			.map(([atomId, v]) => ({
+				atomId,
+				label: v.label,
+				domain: v.domain,
+				studentCount: v.studentCount,
+				masteredCount: v.masteredCount,
+				masteryRate: v.studentCount > 0 ? v.masteredCount / v.studentCount : 0,
+				avgMastery: v.studentCount > 0 ? v.masterySum / v.studentCount : 0,
+				students: v.students.sort((a, b) => a.mastery - b.mastery)
+			}))
+			.sort((a, b) => b.masteryRate - a.masteryRate);
+	}
+
+	const atomStats = buildAtomStats(allAtomStatsMap);
+	const classAtomStats = classes.map((c) => ({
+		classId: c.id,
+		className: c.name,
+		atomStats: buildAtomStats(classAtomStatsMap.get(c.id) ?? new Map())
+	}));
+
+	// Group recent attempts by student, keeping order by last activity
+	const activityMap = new Map<
+		string,
+		{
+			studentId: string;
+			studentName: string;
+			classId: string;
+			total: number;
+			correct: number;
+			lastAtomLabel: string;
+			lastAnsweredAt: Date | string;
+		}
+	>();
+	for (const a of rawAttempts) {
+		const sid = a.student?.id ?? a.studentId;
+		if (!activityMap.has(sid)) {
+			activityMap.set(sid, {
+				studentId: sid,
+				studentName: a.student?.displayName ?? '?',
+				classId: a.student?.classId ?? '',
+				total: 0,
+				correct: 0,
+				lastAtomLabel: a.atom?.label ?? a.atomId,
+				lastAnsweredAt: a.answeredAt
+			});
+		}
+		const entry = activityMap.get(sid)!;
+		entry.total++;
+		if (a.isCorrect) entry.correct++;
+	}
+	const recentActivity = Array.from(activityMap.values()).slice(0, 15);
 
 	return {
 		stats: {
@@ -116,14 +213,9 @@ export const load: PageServerLoad = async ({ locals }) => {
 			totalAtoms: totalAtomCount.length
 		},
 		classes: classes.map((c) => ({ id: c.id, name: c.name, studentCount: c.students.length })),
-		recentAttempts: recentAttempts.map((a) => ({
-			id: a.id,
-			studentName: a.student?.displayName ?? '?',
-			atomLabel: a.atom?.label ?? a.atomId,
-			isCorrect: a.isCorrect,
-			answeredAt: a.answeredAt
-		})),
+		recentActivity,
 		leaderboard,
-		atomStats
+		atomStats,
+		classAtomStats
 	};
 };

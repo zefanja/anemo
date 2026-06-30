@@ -25,9 +25,7 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 		where: (a, { and, eq }) => and(eq(a.studentId, studentId), eq(a.atomId, atomId)),
 		orderBy: (a, { desc }) => [desc(a.answeredAt)],
 		limit: 100,
-		with: {
-			task: { columns: { prompt: true, correctAnswer: true } }
-		}
+		columns: { id: true, isCorrect: true, answeredAt: true, givenAnswer: true, taskPrompt: true, correctAnswer: true }
 	});
 
 	return json({
@@ -35,8 +33,9 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 			id: a.id,
 			isCorrect: a.isCorrect,
 			answeredAt: a.answeredAt,
-			taskPrompt: a.task?.prompt ?? null,
-			correctAnswer: a.task?.correctAnswer ?? null
+			givenAnswer: a.givenAnswer ?? null,
+			taskPrompt: a.taskPrompt ?? null,
+			correctAnswer: a.correctAnswer ?? null
 		}))
 	});
 };

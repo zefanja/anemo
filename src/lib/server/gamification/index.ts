@@ -2,13 +2,26 @@ import { db } from '../db/index.js';
 import { gamificationState, badges, studentAtomStatus } from '../db/schema.js';
 import { eq } from 'drizzle-orm';
 
-// XP rewards
-const XP_CORRECT = 10;
-const XP_ATOM_MASTERED = 50;
-const XP_REVIEW_CORRECT = 5;
+// XP rewards by atom grade level (minimum Jahrgangsstufe of the atom)
+const XP_TABLE: Array<{ maxGrade: number; correct: number; review: number; mastered: number }> = [
+	{ maxGrade: 2, correct: 5, review: 3, mastered: 25 },
+	{ maxGrade: 4, correct: 8, review: 4, mastered: 40 },
+	{ maxGrade: 6, correct: 10, review: 5, mastered: 50 },
+	{ maxGrade: 8, correct: 15, review: 8, mastered: 75 },
+	{ maxGrade: 10, correct: 20, review: 10, mastered: 100 },
+	{ maxGrade: Infinity, correct: 25, review: 13, mastered: 125 }
+];
+
+function xpForGrade(grade: number | null): { correct: number; review: number; mastered: number } {
+	const g = grade ?? 5;
+	return XP_TABLE.find((row) => g <= row.maxGrade)!;
+}
 
 // Level thresholds: level N requires this many total XP
-const LEVEL_THRESHOLDS = [0, 100, 250, 500, 900, 1400, 2000, 3000, 4500, 6500, 9000];
+const LEVEL_THRESHOLDS = [
+	0, 100, 250, 500, 900, 1400, 2000, 3000, 4500, 6500, 9000,
+	12500, 17000, 22500, 29000, 37000, 46500, 57500, 70000, 85000
+];
 
 function xpToLevel(xp: number): number {
 	for (let i = LEVEL_THRESHOLDS.length - 1; i >= 0; i--) {
@@ -31,7 +44,8 @@ export async function recordAttempt(
 	isCorrect: boolean,
 	isReview: boolean,
 	justMastered: boolean,
-	atomId: string
+	atomId: string,
+	atomGrade: number | null = null
 ): Promise<GamificationResult> {
 	const now = new Date();
 	const todayStr = now.toISOString().slice(0, 10);
@@ -52,10 +66,11 @@ export async function recordAttempt(
 	}
 
 	// XP
+	const xp = xpForGrade(atomGrade);
 	let xpGained = 0;
 	if (isCorrect) {
-		xpGained += isReview ? XP_REVIEW_CORRECT : XP_CORRECT;
-		if (justMastered) xpGained += XP_ATOM_MASTERED;
+		xpGained += isReview ? xp.review : xp.correct;
+		if (justMastered) xpGained += xp.mastered;
 	}
 
 	// Streak
@@ -117,8 +132,8 @@ export async function recordPlacementCompletion(
 		state = { studentId, xp: 0, level: 1, streakDays: 0, streakLastDate: null, updatedAt: now };
 	}
 
-	// Award XP for each atom correctly answered during placement
-	const xpGained = testedPassed * XP_ATOM_MASTERED;
+	// Award XP for each atom correctly answered during placement (use grade 5 as neutral default)
+	const xpGained = testedPassed * xpForGrade(5).mastered;
 
 	// Count total mastered atoms (includes placement_propagated) for badge checks
 	const masteredRows = await db.query.studentAtomStatus.findMany({

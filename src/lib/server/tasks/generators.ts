@@ -191,6 +191,51 @@ function svgIntegerLine(lo: number, hi: number, highlights: number[]): string {
 	return s;
 }
 
+// Coordinate system SVG with two lines for LGS visualisation.
+// lines: up to 2 entries with slope m and y-intercept b.
+function svgCoordSystem(
+	lines: { m: number; b: number; color: string; label: string }[],
+	range = 4
+): string {
+	const W = 260, H = 260, pad = 28;
+	const plotW = W - 2 * pad, plotH = H - 2 * pad;
+	const sx = plotW / (range * 2), sy = plotH / (range * 2);
+	const ox = pad + plotW / 2, oy = pad + plotH / 2;
+	const tx = (x: number) => +(ox + x * sx).toFixed(1);
+	const ty = (y: number) => +(oy - y * sy).toFixed(1);
+	const gc = '#e5e7eb', ac = '#6b7280';
+	let s = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" `
+		+ `style="max-width:100%;display:block;margin:0 auto;border-radius:8px;background:#f9fafb">`;
+	for (let i = -range; i <= range; i++) {
+		s += `<line x1="${tx(i)}" y1="${pad}" x2="${tx(i)}" y2="${H - pad}" stroke="${gc}" stroke-width="1"/>`;
+		s += `<line x1="${pad}" y1="${ty(i)}" x2="${W - pad}" y2="${ty(i)}" stroke="${gc}" stroke-width="1"/>`;
+	}
+	s += `<line x1="${pad}" y1="${oy}" x2="${W - pad}" y2="${oy}" stroke="${ac}" stroke-width="2"/>`;
+	s += `<line x1="${ox}" y1="${pad}" x2="${ox}" y2="${H - pad}" stroke="${ac}" stroke-width="2"/>`;
+	s += `<polygon points="${W - pad},${oy - 4} ${W - pad + 8},${oy} ${W - pad},${oy + 4}" fill="${ac}"/>`;
+	s += `<polygon points="${ox - 4},${pad} ${ox},${pad - 8} ${ox + 4},${pad}" fill="${ac}"/>`;
+	for (let i = -range; i <= range; i++) {
+		if (i === 0) continue;
+		if (i % 2 === 0) {
+			s += `<text x="${tx(i)}" y="${oy + 16}" text-anchor="middle" font-size="9" fill="${ac}" font-family="system-ui,sans-serif">${i}</text>`;
+			s += `<text x="${ox - 14}" y="${ty(i) + 4}" text-anchor="middle" font-size="9" fill="${ac}" font-family="system-ui,sans-serif">${i}</text>`;
+		}
+	}
+	s += `<text x="${W - pad + 4}" y="${oy + 4}" font-size="11" fill="${ac}" font-family="system-ui,sans-serif">x</text>`;
+	s += `<text x="${ox + 4}" y="${pad - 4}" font-size="11" fill="${ac}" font-family="system-ui,sans-serif">y</text>`;
+	const colors = ['#4f46e5', '#dc2626'];
+	for (let li = 0; li < lines.length; li++) {
+		const { m, b, color, label } = lines[li];
+		const c = color || colors[li];
+		s += `<line x1="${tx(-range)}" y1="${ty(m * -range + b)}" x2="${tx(range)}" y2="${ty(m * range + b)}" stroke="${c}" stroke-width="2.5" stroke-linecap="round"/>`;
+		const lx = tx(range - 0.8), ly = ty(m * (range - 0.8) + b) - 8;
+		if (ly > pad && ly < H - pad)
+			s += `<text x="${lx}" y="${ly}" font-size="11" font-weight="bold" fill="${c}" font-family="system-ui,sans-serif">${label}</text>`;
+	}
+	s += '</svg>';
+	return s;
+}
+
 // ── Generator registry ────────────────────────────────────────────────────────
 
 const registry = new Map<string, Gen>();
@@ -533,8 +578,8 @@ reg('arithmetik__division_mit_rest', () => {
 	const b = rand(2, 9), q = rand(2, 10), r = rand(1, b - 1);
 	const a = b * q + r;
 	const which = rand(0, 1);
-	if (which === 0) return { atomId: 'arithmetik__division_mit_rest', prompt: `${a} : ${b} = ? Rest ___ — gib den Quotienten an`, answerType: 'integer', correctAnswer: String(q), hint: `${a} = ${b} · ${q} + ${r}`, difficulty: 0.4 };
-	return { atomId: 'arithmetik__division_mit_rest', prompt: `${a} : ${b} = ${q} Rest ___`, answerType: 'integer', correctAnswer: String(r), hint: `${a} − ${b} · ${q} = ?`, difficulty: 0.4 };
+	if (which === 0) return { atomId: 'arithmetik__division_mit_rest', prompt: `${a} : ${b} = ? Rest ${r}`, answerType: 'integer', correctAnswer: String(q), hint: `${a} = ${b} · ${q} + ${r}`, difficulty: 0.4, inputData: { sublabel: 'Gesucht: Quotient' } };
+	return { atomId: 'arithmetik__division_mit_rest', prompt: `${a} : ${b} = ${q} Rest ?`, answerType: 'integer', correctAnswer: String(r), hint: `${a} − ${b} · ${q} = ?`, difficulty: 0.4, inputData: { sublabel: 'Gesucht: Rest' } };
 });
 
 // ── 6. Vorrangregeln / Rechengesetze ─────────────────────────────────────────
@@ -713,9 +758,10 @@ reg('arithmetik__brueche_am_zahlenstrahl', () => {
 	// Arrow shows position → student names the fraction's numerator (denominator = d)
 	return {
 		atomId: 'arithmetik__brueche_am_zahlenstrahl',
-		prompt: `Der Pfeil zeigt auf einen Punkt. Welcher Bruch mit Nenner ${d} liegt dort? Gib den Zähler an.`,
+		prompt: `Der Pfeil zeigt auf einen Punkt. Welcher Bruch mit Nenner ${d} liegt dort?`,
 		answerType: 'integer', correctAnswer: String(n),
 		svg: svgFractionLine(d, n),
+		inputData: { type: 'fraction_part', missing: 'numerator', knownDen: d },
 		hint: `Zähle die Abschnitte vom Nullpunkt bis zum Pfeil.`, difficulty: 0.45
 	};
 });
@@ -890,9 +936,14 @@ reg('arithmetik__dezimalzahlen_stellenwert', () => {
 reg('arithmetik__dezimalzahlen_vergleichen_ordnen_runden', () => {
 	const type = rand(0, 1);
 	if (type === 0) {
-		const n = parseFloat((rand(10, 99) + Math.random()).toFixed(2));
 		const place = rand(0, 1);
-		if (place === 0) return { atomId: 'arithmetik__dezimalzahlen_vergleichen_ordnen_runden', prompt: `Runde ${dec(n)} auf eine Nachkommastelle: ___`, answerType: 'number', correctAnswer: dec(Math.round(n * 10) / 10), difficulty: 0.4 };
+		if (place === 0) {
+			// Second decimal must be 1–9 so the task is non-trivial
+			const n = rand(10, 99) + rand(0, 9) / 10 + rand(1, 9) / 100;
+			return { atomId: 'arithmetik__dezimalzahlen_vergleichen_ordnen_runden', prompt: `Runde ${dec(n)} auf eine Nachkommastelle: ___`, answerType: 'number', correctAnswer: dec(Math.round(n * 10) / 10), difficulty: 0.4 };
+		}
+		// First decimal must be 1–9 so the task is non-trivial
+		const n = rand(10, 99) + rand(1, 9) / 10;
 		return { atomId: 'arithmetik__dezimalzahlen_vergleichen_ordnen_runden', prompt: `Runde ${dec(n)} auf ganze Zahlen: ___`, answerType: 'integer', correctAnswer: String(Math.round(n)), difficulty: 0.35 };
 	}
 	const a = parseFloat((Math.random() * 9 + 1).toFixed(2));
@@ -919,9 +970,13 @@ reg('arithmetik__kommaverschiebung', () => {
 });
 
 reg('arithmetik__dezimal_division_natuerliche_zahl', () => {
-	const d = rand(2, 8), q = rand(1, 9), r = rand(1, 9);
-	const dividend = d * q + r / 10;
-	return { atomId: 'arithmetik__dezimal_division_natuerliche_zahl', prompt: `${dec(dividend)} : ${d} = ?`, answerType: 'number', correctAnswer: dec(dividend / d), difficulty: 0.5 };
+	// Build dividend from d × answer so the result is always a clean 1-decimal number.
+	// Skip combinations where d·r is divisible by 10 (dividend would have no decimal part).
+	let d: number, q: number, r: number;
+	do { d = rand(2, 8); q = rand(1, 9); r = rand(1, 9); } while ((d * r) % 10 === 0);
+	const dividend = d * q + (d * r) / 10;
+	const answer = q + r / 10;
+	return { atomId: 'arithmetik__dezimal_division_natuerliche_zahl', prompt: `${dec(dividend)} : ${d} = ?`, answerType: 'number', correctAnswer: dec(answer), hint: `Schriftlich: ${dec(dividend)} : ${d}`, difficulty: 0.5 };
 });
 
 reg('arithmetik__dezimal_mal_dezimal', () => {
@@ -988,17 +1043,17 @@ reg('arithmetik__negative_zahlen_zahlengerade', () => {
 		const a = -rand(1, 10), b = -rand(1, 10);
 		if (a === b) return registry.get(atomId)!();
 		const bigger = Math.max(a, b);
-		return { atomId, prompt: `Welche Zahl liegt weiter rechts auf dem Zahlenstrahl: ${a} oder ${b}?`, answerType: 'integer', correctAnswer: String(bigger), svg: svgIntegerLine(Math.min(a, b) - 1, 1, [a, b]), hint: 'Weiter rechts = größer.', difficulty: 0.4 };
+		return { atomId, prompt: `Welche Zahl liegt weiter rechts auf dem Zahlenstrahl: ${a} oder ${b}?`, answerType: 'integer', correctAnswer: String(bigger), choices: [String(a), String(b)], svg: svgIntegerLine(Math.min(a, b) - 1, 1, [a, b]), hint: 'Weiter rechts = größer.', difficulty: 0.4 };
 	} else if (type === 1) {
 		// Positive vs negative
 		const pos = rand(1, 8), neg = -rand(1, 8);
-		return { atomId, prompt: `Welche Zahl liegt weiter rechts auf dem Zahlenstrahl: ${neg} oder ${pos}?`, answerType: 'integer', correctAnswer: String(pos), svg: svgIntegerLine(neg - 1, pos + 1, [neg, pos]), hint: 'Positive Zahlen liegen rechts von Null, negative links.', difficulty: 0.3 };
+		return { atomId, prompt: `Welche Zahl liegt weiter rechts auf dem Zahlenstrahl: ${neg} oder ${pos}?`, answerType: 'integer', correctAnswer: String(pos), choices: [String(neg), String(pos)], svg: svgIntegerLine(neg - 1, pos + 1, [neg, pos]), hint: 'Positive Zahlen liegen rechts von Null, negative links.', difficulty: 0.3 };
 	} else {
 		// Everyday context: temperature
 		const t1 = rand(-15, 20), t2 = rand(-15, 20);
 		if (t1 === t2) return registry.get(atomId)!();
 		const warmer = Math.max(t1, t2);
-		return { atomId, prompt: `Welche Temperatur ist wärmer: ${t1} °C oder ${t2} °C?`, answerType: 'integer', correctAnswer: String(warmer), hint: 'Höhere Temperatur = größere Zahl auf dem Thermometer.', difficulty: 0.35 };
+		return { atomId, prompt: `Welche Temperatur ist wärmer: ${t1} °C oder ${t2} °C?`, answerType: 'integer', correctAnswer: String(warmer), choices: [`${t1} °C`, `${t2} °C`], hint: 'Höhere Temperatur = größere Zahl auf dem Thermometer.', difficulty: 0.35 };
 	}
 });
 
@@ -1030,12 +1085,11 @@ reg('arithmetik__subtraktion_als_addition_gegenzahl', () => {
 
 reg('arithmetik__vorzeichenregeln_mult_div', () => {
 	const a = rand(1, 9), b = rand(1, 9);
-	const signs = pick([[1, -1], [-1, 1], [-1, -1], [1, 1]]);
-	const [sa, sb] = signs;
+	const sa = pick([-1, 1]), sb = pick([-1, 1]);
 	const op = rand(0, 1);
-	if (op === 0) return { atomId: 'arithmetik__vorzeichenregeln_mult_div', prompt: `(${sa * a}) · (${sb * b}) = ?`, answerType: 'integer', correctAnswer: String(sa * a * sb * b), hint: '(−) · (−) = (+), (−) · (+) = (−)', difficulty: 0.45 };
-	const product = a * b;
-	return { atomId: 'arithmetik__vorzeichenregeln_mult_div', prompt: `(${sa * product}) : (${sa * a}) = ?`, answerType: 'integer', correctAnswer: String(b), hint: 'Gleiches Vorzeichen → positiv, verschiedene → negativ.', difficulty: 0.45 };
+	if (op === 0) return { atomId: 'arithmetik__vorzeichenregeln_mult_div', prompt: `(${sa * a}) · (${sb * b}) = ?`, answerType: 'integer', correctAnswer: String(sa * sb * a * b), hint: '(−) · (−) = (+), (−) · (+) = (−)', difficulty: 0.45 };
+	// Division: (sa*a*b) : (sb*a) = sa*sb*b — independent signs so result can be negative
+	return { atomId: 'arithmetik__vorzeichenregeln_mult_div', prompt: `(${sa * a * b}) : (${sb * a}) = ?`, answerType: 'integer', correctAnswer: String(sa * sb * b), hint: 'Gleiches Vorzeichen → positiv, verschiedene → negativ.', difficulty: 0.45 };
 });
 
 reg('arithmetik__vorzeichen_klammerregeln', () => {
@@ -1229,6 +1283,971 @@ reg('arithmetik__arithmetisches_mittel', () => {
 	const mean = sum / count;
 	if (!Number.isInteger(mean)) return registry.get('arithmetik__arithmetisches_mittel')!();
 	return { atomId: 'arithmetik__arithmetisches_mittel', prompt: `Arithmetisches Mittel von {${nums.join(', ')}} = ?`, answerType: 'integer', correctAnswer: String(mean), hint: `Summe = ${sum}, Anzahl = ${count}`, difficulty: 0.45 };
+});
+
+// ── 18. Algebra: Terme ────────────────────────────────────────────────────────
+
+reg('algebra__variablenbegriff', () => {
+	const type = rand(0, 4);
+	let q: string, a: string, w: string[];
+	if (type === 0) {
+		// n Stück zum Preis v
+		const n = rand(2, 9);
+		const v = pick(['a', 'b', 'h', 'k', 'p']);
+		const items = ['Hefte', 'Äpfel', 'Bücher', 'Stifte', 'Kekse', 'Orangen'];
+		const item = pick(items);
+		q = `Ein ${item.slice(0, -1)} kostet \\(${v}\\) Euro. Wie viel kosten ${n} ${item}?`;
+		a = `\\(${n}${v}\\)`; w = [`\\(${v}+${n}\\)`, `\\(${n}+${v}\\)`, `\\(${v}−${n}\\)`];
+	} else if (type === 1) {
+		// Anzahl × pro Person
+		const n = rand(2, 8);
+		const v = pick(['n', 'k', 's', 'm', 'a']);
+		const people = pick(['Schüler', 'Kinder', 'Spieler', 'Gäste']);
+		const things = pick(['Stifte', 'Punkte', 'Karten', 'Bonbons', 'Aufgaben']);
+		q = `${n} ${people} erhalten je \\(${v}\\) ${things}. Wie viele ${things} insgesamt?`;
+		a = `\\(${n}${v}\\)`; w = [`\\(${v}+${n}\\)`, `\\(${v} \\cdot ${v}\\)`, `\\(${n}−${v}\\)`];
+	} else if (type === 2) {
+		// Differenz (jünger / kürzer)
+		const d = rand(1, 6);
+		const v = pick(['x', 'a', 'n', 'j']);
+		const [[p1, rel], obj] = [pick([['Lena', 'ihr'], ['Max', 'sein'], ['Tim', 'sein']]), pick(['Bruder', 'Freund', 'Cousin'])];
+		q = `${p1} ist \\(${v}\\) Jahre alt. ${rel.charAt(0).toUpperCase() + rel.slice(1)} ${obj} ist ${d} Jahre jünger. Wie alt ist er?`;
+		a = `\\(${v}−${d}\\)`; w = [`\\(${v}+${d}\\)`, `\\(${d}−${v}\\)`, `\\(${d}${v}\\)`];
+	} else if (type === 3) {
+		// Geschwindigkeit × Zeit
+		const t = rand(2, 6);
+		const v = pick(['v', 'g', 'w']);
+		const vehicle = pick(['Zug', 'Auto', 'Fahrrad', 'Bus']);
+		q = `Ein ${vehicle} fährt \\(${v}\\) km/h. Wie weit kommt es in ${t} Stunden?`;
+		a = `\\(${t}${v}\\)`; w = [`\\(${v}+${t}\\)`, `\\(${v}:${t}\\)`, `\\(${t}+${v}\\)`];
+	} else {
+		// Geometrisch: Umfang
+		const n = rand(3, 8);
+		const v = pick(['s', 'a', 'l', 'b']);
+		const shapes = [
+			{ name: 'gleichseitigen Dreieck', sides: 3 },
+			{ name: 'Quadrat', sides: 4 },
+			{ name: 'regelmäßigen Fünfeck', sides: 5 },
+			{ name: `regelmäßigen ${n}-Eck`, sides: n },
+		];
+		const shape = pick(shapes);
+		q = `Ein ${shape.name} hat die Seite \\(${v}\\). Wie lautet der Umfang?`;
+		a = `\\(${shape.sides}${v}\\)`; w = [`\\(${v}+${shape.sides}\\)`, `\\(${v}^2\\)`, `\\(${shape.sides}+${v}\\)`];
+	}
+	const choices = [a, ...w].sort(() => Math.random() - 0.5);
+	return { atomId: 'algebra__variablenbegriff', prompt: q, answerType: 'text', correctAnswer: a, choices, difficulty: 0.3 };
+});
+
+reg('algebra__termwert_berechnen', () => {
+	const x = rand(-4, 6);
+	const type = rand(0, 3);
+	if (type === 0) {
+		const a = rand(2, 5), b = rand(-5, 5);
+		const val = a * x + b;
+		return { atomId: 'algebra__termwert_berechnen', prompt: `Berechne \\(${a}x ${b >= 0 ? '+' : ''}${b}\\) für \\(x = ${x}\\).`, answerType: 'integer', correctAnswer: String(val), hint: `Einsetzen: ${a}·(${x}) + (${b}) = ${val}`, difficulty: 0.4 };
+	} else if (type === 1) {
+		const a = rand(1, 3);
+		const val = a * x * x;
+		return { atomId: 'algebra__termwert_berechnen', prompt: `Berechne \\(${a > 1 ? a : ''}x^2\\) für \\(x = ${x}\\).`, answerType: 'integer', correctAnswer: String(val), hint: `Einsetzen: ${a}·(${x})² = ${a}·${x * x} = ${val}`, difficulty: 0.45 };
+	} else if (type === 2) {
+		const a = rand(1, 3), b = rand(1, 4);
+		const val = a * x * x + b * x;
+		return { atomId: 'algebra__termwert_berechnen', prompt: `Berechne \\(${a > 1 ? a : ''}x^2 ${b >= 0 ? '+' : ''}${b}x\\) für \\(x = ${x}\\).`, answerType: 'integer', correctAnswer: String(val), hint: `Einsetzen: ${a}·${x * x} + ${b}·${x} = ${val}`, difficulty: 0.5 };
+	} else {
+		const a = rand(2, 6), b = rand(1, 5);
+		const val = a * x - b;
+		return { atomId: 'algebra__termwert_berechnen', prompt: `Berechne \\(${a}x − ${b}\\) für \\(x = ${x}\\).`, answerType: 'integer', correctAnswer: String(val), hint: `Einsetzen: ${a}·(${x}) − ${b} = ${val}`, difficulty: 0.35 };
+	}
+});
+
+reg('algebra__terme_zusammenfassen', () => {
+	const type = rand(0, 2);
+	if (type === 0) {
+		const a = rand(2, 8), b = rand(2, 8);
+		return { atomId: 'algebra__terme_zusammenfassen', prompt: `Vereinfache: \\(${a}x + ${b}x = \\_ \\_ x\\)`, answerType: 'integer', correctAnswer: String(a + b), hint: `Gleichartige Terme: \\((${a}+${b})x = ${a + b}x\\)`, difficulty: 0.35 };
+	} else if (type === 1) {
+		const a = rand(3, 9), b = rand(1, a - 1);
+		return { atomId: 'algebra__terme_zusammenfassen', prompt: `Vereinfache: \\(${a}a − ${b}a = \\_ \\_ a\\)`, answerType: 'integer', correctAnswer: String(a - b), hint: `Gleichartige Terme: \\((${a}−${b})a = ${a - b}a\\)`, difficulty: 0.35 };
+	} else {
+		const ca = rand(2, 5), cb = rand(2, 5), da = rand(1, ca - 1);
+		const resA = ca - da;
+		const choices = [`\\(${resA}a + ${cb + 1}b\\)`, `\\(${resA}a + ${cb}b\\)`, `\\(${ca}a + ${cb}b\\)`, `\\(${resA + 1}a + ${cb}b\\)`];
+		const correct = `\\(${resA}a + ${cb}b\\)`;
+		return { atomId: 'algebra__terme_zusammenfassen', prompt: `Vereinfache: \\(${ca}a + ${cb}b − ${da}a\\)`, answerType: 'text', correctAnswer: correct, choices: choices.sort(() => Math.random() - 0.5), hint: `Nur gleichartige Terme zusammenfassen: \\((${ca}−${da})a + ${cb}b\\)`, difficulty: 0.45 };
+	}
+});
+
+reg('algebra__ausmultiplizieren_distributiv', () => {
+	const type = rand(0, 2);
+	if (type === 0) {
+		const a = rand(2, 6), b = rand(1, 8);
+		return { atomId: 'algebra__ausmultiplizieren_distributiv', prompt: `Multipliziere aus: \\(${a}(x + ${b}) = ${a}x + \\_\\_\\)`, answerType: 'integer', correctAnswer: String(a * b), hint: `\\(${a} \\cdot x + ${a} \\cdot ${b} = ${a}x + ${a * b}\\)`, difficulty: 0.4 };
+	} else if (type === 1) {
+		const a = rand(2, 5), b = rand(1, 6);
+		return { atomId: 'algebra__ausmultiplizieren_distributiv', prompt: `Multipliziere aus: \\(${a}(x − ${b}) = ${a}x − \\_\\_\\)`, answerType: 'integer', correctAnswer: String(a * b), hint: `\\(${a} \\cdot x − ${a} \\cdot ${b} = ${a}x − ${a * b}\\)`, difficulty: 0.4 };
+	} else {
+		const p = rand(1, 5), q = rand(1, 5);
+		const mid = p + q, last = p * q;
+		const choices = [`\\(x^2 + ${mid}x + ${last}\\)`, `\\(x^2 + ${p}x + ${q}\\)`, `\\(x^2 + ${mid}x + ${p * q + 1}\\)`, `\\(x^2 − ${mid}x + ${last}\\)`];
+		return { atomId: 'algebra__ausmultiplizieren_distributiv', prompt: `Multipliziere aus: \\((x + ${p})(x + ${q})\\)`, answerType: 'text', correctAnswer: choices[0], choices: choices.sort(() => Math.random() - 0.5), hint: `\\(x^2+(${p}+${q})x+${p} \\cdot ${q} = x^2+${mid}x+${last}\\)`, difficulty: 0.55 };
+	}
+});
+
+reg('algebra__ausklammern_faktorisieren', () => {
+	const type = rand(0, 1);
+	if (type === 0) {
+		const k = rand(2, 6), a = rand(2, 5), b = rand(1, 5);
+		return { atomId: 'algebra__ausklammern_faktorisieren', prompt: `Klammere aus: \\(${k * a}x + ${k * b} = ${k}\\cdot(\\_\\_)\\)`, answerType: 'text', correctAnswer: `\\(${a}x + ${b}\\)`, choices: [`\\(${a}x + ${b}\\)`, `\\(${a}x + ${k * b}\\)`, `\\(${k * a}x + ${b}\\)`, `\\(${a}x − ${b}\\)`].sort(() => Math.random() - 0.5), hint: `Teile jeden Term durch \\(${k}\\): \\(${k}(${a}x + ${b})\\)`, difficulty: 0.5 };
+	} else {
+		// a must be odd so that gcd(k*a, k*2) = k (not a larger multiple of k)
+		const k = rand(2, 5), a = rand(0, 1) * 2 + 3; // 3 or 5
+		const coeff1 = k * a, coeff2 = k * 2;
+		const wrongChoices = Array.from(new Set([coeff1, coeff2, k + 1].map(String).filter(c => c !== String(k)))).slice(0, 3);
+		return { atomId: 'algebra__ausklammern_faktorisieren', prompt: `Welcher Faktor kann ausgeklammert werden? \\(${coeff1}x − ${coeff2}\\)`, answerType: 'integer', correctAnswer: String(k), choices: [String(k), ...wrongChoices].sort(() => Math.random() - 0.5), hint: `ggT(${coeff1}, ${coeff2}) = ${k}`, difficulty: 0.45 };
+	}
+});
+
+reg('algebra__binomische_formeln_vorwaerts', () => {
+	const type = rand(0, 2);
+	if (type === 0) {
+		const a = rand(2, 6);
+		return { atomId: 'algebra__binomische_formeln_vorwaerts', prompt: `\\((x + ${a})^2 = x^2 + \\_\\_x + ${a * a}\\)`, answerType: 'integer', correctAnswer: String(2 * a), hint: `1. Formel: \\((x+a)^2 = x^2+2ax+a^2\\) → \\(2 \\cdot ${a} \\cdot x\\)`, difficulty: 0.5 };
+	} else if (type === 1) {
+		const a = rand(2, 5);
+		return { atomId: 'algebra__binomische_formeln_vorwaerts', prompt: `\\((x − ${a})^2 = x^2 − \\_\\_x + ${a * a}\\)`, answerType: 'integer', correctAnswer: String(2 * a), hint: `2. Formel: \\((x−a)^2 = x^2−2ax+a^2\\) → \\(2 \\cdot ${a} \\cdot x\\)`, difficulty: 0.5 };
+	} else {
+		const a = rand(2, 7);
+		return { atomId: 'algebra__binomische_formeln_vorwaerts', prompt: `\\((x + ${a})(x − ${a}) = x^2 − \\_\\_\\)`, answerType: 'integer', correctAnswer: String(a * a), hint: `3. Formel: \\((x+a)(x−a) = x^2−a^2\\) → \\(a^2 = ${a * a}\\)`, difficulty: 0.45 };
+	}
+});
+
+reg('algebra__binomische_formeln_rueckwaerts', () => {
+	const type = rand(0, 1);
+	if (type === 0) {
+		const a = rand(2, 7);
+		const choices = [String(a), String(a + 1), String(a - 1), String(a * 2)].sort(() => Math.random() - 0.5);
+		return { atomId: 'algebra__binomische_formeln_rueckwaerts', prompt: `\\(x^2 − ${a * a}\\) lässt sich schreiben als \\((x + \\_\\_)(x − \\_\\_ )\\). Welche Zahl fehlt?`, answerType: 'integer', correctAnswer: String(a), choices, hint: `3. binomische Formel rückwärts: \\(x^2−${a * a} = (x+${a})(x−${a})\\)`, difficulty: 0.55 };
+	} else {
+		const a = rand(2, 6);
+		const choices = [String(a), String(a + 1), String(a - 1), String(a * 2)].sort(() => Math.random() - 0.5);
+		return { atomId: 'algebra__binomische_formeln_rueckwaerts', prompt: `\\(x^2 + ${2 * a}x + ${a * a} = (x + \\_\\_)^2\\). Welche Zahl fehlt?`, answerType: 'integer', correctAnswer: String(a), choices, hint: `1. binomische Formel rückwärts: \\(x^2+${2 * a}x+${a * a} = (x+${a})^2\\)`, difficulty: 0.55 };
+	}
+});
+
+reg('algebra__gleichungen_inhaltlich_loesen', () => {
+	const type = rand(0, 2);
+	if (type === 0) {
+		const x = rand(2, 15), b = rand(3, 12);
+		return { atomId: 'algebra__gleichungen_inhaltlich_loesen', prompt: `\\(x + ${b} = ${x + b}\\)  →  \\(x = ?\\)`, answerType: 'integer', correctAnswer: String(x), hint: `Umkehroperation: ${x + b} − ${b} = ${x}`, difficulty: 0.25 };
+	} else if (type === 1) {
+		const x = rand(2, 12), a = rand(2, 8);
+		return { atomId: 'algebra__gleichungen_inhaltlich_loesen', prompt: `\\(${a} \\cdot x = ${a * x}\\)  →  \\(x = ?\\)`, answerType: 'integer', correctAnswer: String(x), hint: `Umkehroperation: ${a * x} ÷ ${a} = ${x}`, difficulty: 0.25 };
+	} else {
+		const x = rand(2, 10), b = rand(2, 8);
+		return { atomId: 'algebra__gleichungen_inhaltlich_loesen', prompt: `\\(x − ${b} = ${x - b}\\)  →  \\(x = ?\\)`, answerType: 'integer', correctAnswer: String(x), hint: `Umkehroperation: ${x - b} + ${b} = ${x}`, difficulty: 0.25 };
+	}
+});
+
+// ── 19. Algebra: Gleichungen ──────────────────────────────────────────────────
+
+reg('algebra__aequivalenzumformung_prinzip', () => {
+	const type = rand(0, 1);
+	if (type === 0) {
+		const b = rand(2, 9), rhs = rand(b + 1, 15);
+		const choices = [`−${b}`, `+${b}`, `·${b}`, `:${b}`];
+		return { atomId: 'algebra__aequivalenzumformung_prinzip', prompt: `Von \\(x + ${b} = ${rhs}\\) zu \\(x = ${rhs - b}\\): Welche Umformung wurde auf beiden Seiten durchgeführt?`, answerType: 'text', correctAnswer: `−${b}`, choices: choices.sort(() => Math.random() - 0.5), difficulty: 0.35 };
+	} else {
+		const a = rand(2, 7), rhs = rand(1, 6) * a;
+		const choices = [`:${a}`, `·${a}`, `+${a}`, `−${a}`];
+		return { atomId: 'algebra__aequivalenzumformung_prinzip', prompt: `Von \\(${a}x = ${rhs}\\) zu \\(x = ${rhs / a}\\): Welche Umformung?`, answerType: 'text', correctAnswer: `:${a}`, choices: choices.sort(() => Math.random() - 0.5), difficulty: 0.35 };
+	}
+});
+
+reg('algebra__lineare_gleichung_zweischritt', () => {
+	let a = rand(2, 5), b = rand(-6, 6), x = rand(-4, 8);
+	while (b === 0) b = rand(-6, 6);
+	const c = a * x + b;
+	const sign = (n: number) => n >= 0 ? `+${n}` : `${n}`;
+	return {
+		atomId: 'algebra__lineare_gleichung_zweischritt',
+		prompt: `Löse: \\(${a}x ${sign(b)} = ${c}\\)`,
+		answerType: 'integer',
+		correctAnswer: String(x),
+		inputData: {
+			steps: [
+				`Gleichung: \\(${a}x ${sign(b)} = ${c}\\)`,
+				`Schritt 1 – \\(${b > 0 ? '−' : '+'}${Math.abs(b)}\\) auf beiden Seiten: \\(${a}x = ${c - b}\\)`,
+				`Schritt 2 – \\(:${a}\\) auf beiden Seiten: \\(x = ${x}\\)`,
+				`Probe: \\(${a}·${x} ${sign(b)} = ${c}\\) ✓`
+			]
+		},
+		difficulty: 0.45
+	};
+});
+
+reg('algebra__lineare_gleichung_variablen_beidseitig', () => {
+	// Generate x first → uniform distribution instead of bias toward 1/2
+	const x = rand(1, 9);
+	const diff = rand(1, 4);  // a - c
+	const a = rand(diff + 2, Math.min(diff + 5, 9));
+	const c = a - diff;
+	const b = rand(1, 8);
+	const d = x * diff + b;
+	const sign = (n: number) => n >= 0 ? `+${n}` : `${n}`;
+	return {
+		atomId: 'algebra__lineare_gleichung_variablen_beidseitig',
+		prompt: `Löse: \\(${a}x ${sign(b)} = ${c}x ${sign(d)}\\)`,
+		answerType: 'integer',
+		correctAnswer: String(x),
+		inputData: {
+			steps: [
+				`\\(${a}x ${sign(b)} = ${c}x ${sign(d)}\\)`,
+				`\\(−${c}x\\) auf beiden Seiten: \\(${diff}x ${sign(b)} = ${d}\\)`,
+				`\\(−${b}\\) auf beiden Seiten: \\(${diff}x = ${d - b}\\)`,
+				diff === 1 ? `\\(x = ${x}\\)` : `\\(:${diff}\\): \\(x = ${x}\\)`
+			]
+		},
+		difficulty: 0.55
+	};
+});
+
+reg('algebra__lineare_gleichung_klammern_brueche', () => {
+	const a = rand(2, 4), b = rand(1, 6), x = rand(1, 8);
+	const rhs = a * (x + b);
+	const sign = (n: number) => n >= 0 ? `+${n}` : `${n}`;
+	return {
+		atomId: 'algebra__lineare_gleichung_klammern_brueche',
+		prompt: `Löse: \\(${a}(x ${sign(b)}) = ${rhs}\\)`,
+		answerType: 'integer',
+		correctAnswer: String(x),
+		inputData: {
+			steps: [
+				`\\(${a}(x ${sign(b)}) = ${rhs}\\)`,
+				`Ausmultiplizieren: \\(${a}x ${sign(a * b)} = ${rhs}\\)`,
+				`\\(${a * b > 0 ? '−' : '+'}${Math.abs(a * b)}\\): \\(${a}x = ${rhs - a * b}\\)`,
+				`\\(:${a}\\): \\(x = ${x}\\)`
+			]
+		},
+		difficulty: 0.55
+	};
+});
+
+reg('algebra__lineare_gleichung_sonderfaelle', () => {
+	// type=2 added so "genau eine Lösung" is sometimes correct (previously never, reducing effective choices to 2)
+	const type = rand(0, 2);
+	const a = rand(2, 5), b = rand(1, 6);
+	const choices = ['keine Lösung', 'genau eine Lösung', 'unendlich viele Lösungen'];
+	if (type === 0) {
+		return { atomId: 'algebra__lineare_gleichung_sonderfaelle', prompt: `Wie viele Lösungen hat \\(${a}x + ${b} = ${a}x + ${b + 1}\\)?`, answerType: 'text', correctAnswer: 'keine lösung', choices, hint: `Nach Umformen: ${b} = ${b + 1} — unmöglich!`, difficulty: 0.5 };
+	} else if (type === 1) {
+		return { atomId: 'algebra__lineare_gleichung_sonderfaelle', prompt: `Wie viele Lösungen hat \\(${a}(x + ${b}) = ${a}x + ${a * b}\\)?`, answerType: 'text', correctAnswer: 'unendlich viele lösungen', choices, hint: `Nach Ausmultiplizieren: \\(${a}x+${a * b} = ${a}x+${a * b}\\) — immer wahr!`, difficulty: 0.5 };
+	} else {
+		const c = rand(2, 5), x = rand(1, 7);
+		return { atomId: 'algebra__lineare_gleichung_sonderfaelle', prompt: `Wie viele Lösungen hat \\(${c}x + ${b} = ${c * x + b}\\)?`, answerType: 'text', correctAnswer: 'genau eine lösung', choices, hint: `Umformen: \\(${c}x = ${c * x}\\) → \\(x = ${x}\\).`, difficulty: 0.5 };
+	}
+});
+
+reg('algebra__lineare_ungleichungen', () => {
+	const a = rand(2, 5), b = rand(1, 8), x = rand(2, 8);
+	const rhs = a * x + b;
+	const ops = ['>', '<', '≥', '≤'];
+	const op = pick(ops);
+	const revOp = op === '>' ? '<' : op === '<' ? '>' : op === '≥' ? '≤' : '≥';
+	const isGreater = op === '>' || op === '≥';
+	const choices = [`\\(x ${op} ${x}\\)`, `\\(x ${revOp} ${x}\\)`, `\\(x ${op} ${x + 1}\\)`, `\\(x ${revOp} ${x - 1}\\)`];
+	return { atomId: 'algebra__lineare_ungleichungen', prompt: `Löse: \\(${a}x + ${b} ${op} ${rhs}\\)`, answerType: 'text', correctAnswer: `\\(x ${op} ${x}\\)`, choices: choices.sort(() => Math.random() - 0.5), hint: `Wie Gleichung lösen: \\(−${b}\\), dann \\(:${a}\\). Vorzeichen bleibt gleich.`, difficulty: 0.5 };
+});
+
+reg('algebra__wurzelgleichungen', () => {
+	const type = rand(0, 1);
+	if (type === 0) {
+		const a = rand(2, 8);
+		return {
+			atomId: 'algebra__wurzelgleichungen',
+			prompt: `Löse: \\(\\sqrt{x} = ${a}\\)`,
+			answerType: 'integer',
+			correctAnswer: String(a * a),
+			inputData: {
+				steps: [
+					`\\(\\sqrt{x} = ${a}\\)`,
+					`Beide Seiten quadrieren: \\(x = ${a}^2 = ${a * a}\\)`,
+					`Probe: \\(\\sqrt{${a * a}} = ${a}\\) ✓`
+				]
+			},
+			difficulty: 0.55
+		};
+	} else {
+		const a = rand(2, 6), c = rand(1, 6);
+		return {
+			atomId: 'algebra__wurzelgleichungen',
+			prompt: `Löse: \\(\\sqrt{x + ${c}} = ${a}\\)`,
+			answerType: 'integer',
+			correctAnswer: String(a * a - c),
+			inputData: {
+				steps: [
+					`\\(\\sqrt{x + ${c}} = ${a}\\)`,
+					`Quadrieren: \\(x + ${c} = ${a * a}\\)`,
+					`\\(−${c}\\): \\(x = ${a * a - c}\\)`,
+					`Probe: \\(\\sqrt{${a * a - c} + ${c}} = \\sqrt{${a * a}} = ${a}\\) ✓`
+				]
+			},
+			difficulty: 0.6
+		};
+	}
+});
+
+// ── 20. Algebra: LGS ─────────────────────────────────────────────────────────
+
+reg('algebra__lgs_einsetzungsverfahren', () => {
+	const x = rand(1, 5), y = rand(1, 5);
+	const m = rand(1, 3);
+	const b = y - m * x;
+	const a2 = rand(2, 4), c2 = a2 * x + y;
+	const bSign = (n: number) => n >= 0 ? `+${n}` : `${n}`;
+	return {
+		atomId: 'algebra__lgs_einsetzungsverfahren',
+		prompt: `Löse mit dem Einsetzungsverfahren:\n\\(y = ${m}x ${bSign(b)}\\)\n\\(${a2}x + y = ${c2}\\)\nGesucht: \\(x = ?\\)`,
+		answerType: 'integer',
+		correctAnswer: String(x),
+		inputData: {
+			steps: [
+				`Gleichung I einsetzen in II: \\(${a2}x + (${m}x ${bSign(b)}) = ${c2}\\)`,
+				`\\(${a2 + m}x ${bSign(b)} = ${c2}\\)`,
+				`\\(${a2 + m}x = ${c2 - b}\\)  →  \\(x = ${x}\\)`,
+				`Einsetzen: \\(y = ${m}·${x} ${bSign(b)} = ${y}\\)`,
+				`Lösung: \\(x = ${x},\\; y = ${y}\\)`
+			]
+		},
+		difficulty: 0.65
+	};
+});
+
+reg('algebra__lgs_additionsverfahren', () => {
+	const x = rand(1, 5), y = rand(1, 5);
+	const a1 = rand(1, 3), b1 = rand(1, 3);
+	const a2 = rand(1, 3), b2 = b1; // same y-coefficient so subtraction eliminates y
+	const c1 = a1 * x + b1 * y, c2 = a2 * x + b2 * y;
+	if (a1 === a2) return registry.get('algebra__lgs_additionsverfahren')!();
+	return {
+		atomId: 'algebra__lgs_additionsverfahren',
+		prompt: `Löse mit dem Additionsverfahren:\n\\(${a1}x + ${b1}y = ${c1}\\)\n\\(${a2}x + ${b2}y = ${c2}\\)\nGesucht: \\(x = ?\\)`,
+		answerType: 'integer',
+		correctAnswer: String(x),
+		inputData: {
+			steps: [
+				`Gleichung I − II (y-Terme heben sich auf):`,
+				`\\((${a1}−${a2})x = ${c1}−${c2}\\)  →  \\(${a1 - a2}x = ${c1 - c2}\\)`,
+				`\\(x = ${x}\\)`,
+				`Einsetzen in I: \\(${a1}·${x} + ${b1}y = ${c1}\\)  →  \\(y = ${y}\\)`,
+				`Lösung: \\(x = ${x},\\; y = ${y}\\)`
+			]
+		},
+		difficulty: 0.65
+	};
+});
+
+reg('algebra__lgs_gleichsetzungsverfahren', () => {
+	const x = rand(1, 5), y = rand(1, 5);
+	const m1 = rand(1, 3), b1 = y - m1 * x;
+	const m2 = rand(1, 3);
+	if (m2 === m1) return registry.get('algebra__lgs_gleichsetzungsverfahren')!();
+	const b2 = y - m2 * x;
+	const bStr = (n: number) => n >= 0 ? `+${n}` : `${n}`;
+	return {
+		atomId: 'algebra__lgs_gleichsetzungsverfahren',
+		prompt: `Löse mit dem Gleichsetzungsverfahren:\n\\(y = ${m1}x ${bStr(b1)}\\)\n\\(y = ${m2}x ${bStr(b2)}\\)\nGesucht: \\(x = ?\\)`,
+		answerType: 'integer',
+		correctAnswer: String(x),
+		inputData: {
+			steps: [
+				`Beide y-Terme gleichsetzen:`,
+				`\\(${m1}x ${bStr(b1)} = ${m2}x ${bStr(b2)}\\)`,
+				`\\(${m1 - m2}x = ${b2 - b1}\\)  →  \\(x = ${x}\\)`,
+				`Einsetzen: \\(y = ${m1}·${x} ${bStr(b1)} = ${y}\\)`,
+				`Lösung: \\(x = ${x},\\; y = ${y}\\)`
+			]
+		},
+		difficulty: 0.65
+	};
+});
+
+reg('algebra__lgs_grafisch', () => {
+	const slopes = [-2, -1, 1, 2];
+	const px = rand(-2, 2), py = rand(-2, 2);
+	const m1 = pick(slopes);
+	const m2 = pick(slopes.filter(s => s !== m1));
+	const b1 = py - m1 * px, b2 = py - m2 * px;
+	const bStr = (n: number) => n >= 0 ? (n === 0 ? '' : `+${n}`) : `${n}`;
+	const wrongPts: string[] = [];
+	const offsets = [[-1, 0], [1, 0], [0, 1], [0, -1], [1, 1], [-1, -1]];
+	for (const [dx, dy] of offsets.sort(() => Math.random() - 0.5)) {
+		const wx = px + dx, wy = py + dy;
+		const key = `(${wx} | ${wy})`;
+		if (!wrongPts.includes(key)) wrongPts.push(key);
+		if (wrongPts.length === 3) break;
+	}
+	const correct = `(${px} | ${py})`;
+	const choices = [correct, ...wrongPts].sort(() => Math.random() - 0.5);
+	return {
+		atomId: 'algebra__lgs_grafisch',
+		prompt: `An welchem Punkt schneiden sich die Geraden\ng₁: \\(y = ${m1}x${bStr(b1)}\\) und g₂: \\(y = ${m2}x${bStr(b2)}\\)?`,
+		answerType: 'text',
+		correctAnswer: correct,
+		choices,
+		svg: svgCoordSystem(
+			[{ m: m1, b: b1, color: '#4f46e5', label: 'g₁' }, { m: m2, b: b2, color: '#dc2626', label: 'g₂' }]
+		),
+		hint: `Am Schnittpunkt gilt: \\(${m1}x${bStr(b1)} = ${m2}x${bStr(b2)}\\)`,
+		difficulty: 0.55
+	};
+});
+
+// ── 21. Algebra: Zuordnungen / Proportionalität ───────────────────────────────
+
+reg('algebra__proportionale_zuordnung', () => {
+	const unit = pick(['€', 'km', 'kg', 'l']);
+	const rate = rand(2, 8);
+	const n1 = rand(2, 6), n2 = rand(n1 + 1, 10);
+	const c1 = rate * n1;
+	return {
+		atomId: 'algebra__proportionale_zuordnung',
+		prompt: `${n1} Stück kosten ${c1} ${unit}. Wie viel kosten ${n2} Stück?`,
+		answerType: 'integer',
+		correctAnswer: String(rate * n2),
+		inputData: {
+			steps: [
+				`Preis pro Stück: ${c1} ${unit} ÷ ${n1} = ${rate} ${unit}`,
+				`Für ${n2} Stück: ${n2} · ${rate} = ${rate * n2} ${unit}`
+			]
+		},
+		difficulty: 0.4
+	};
+});
+
+reg('algebra__antiproportionale_zuordnung', () => {
+	const x = rand(2, 6), y = rand(2, 5);
+	const k = x * y;
+	const newX = pick([k / (y + 1), k / (y - 1)].filter(v => Number.isInteger(v) && v > 0));
+	if (!newX) return registry.get('algebra__antiproportionale_zuordnung')!();
+	const newY = k / newX;
+	const context = pick([
+		{ t: 'Arbeiter', u: 'Tage', inv: true },
+		{ t: 'Maschinen', u: 'Stunden', inv: true }
+	]);
+	return {
+		atomId: 'algebra__antiproportionale_zuordnung',
+		prompt: `${x} ${context.t} brauchen ${y} ${context.u}. Wie lange brauchen ${newX} ${context.t}?`,
+		answerType: 'integer',
+		correctAnswer: String(newY),
+		inputData: {
+			steps: [
+				`Gesamtarbeit: ${x} · ${y} = ${k} (konstantes Produkt)`,
+				`Für ${newX} ${context.t}: ${k} ÷ ${newX} = ${newY} ${context.u}`
+			]
+		},
+		difficulty: 0.5
+	};
+});
+
+reg('algebra__zuordnungen', () => {
+	const type = rand(0, 1);
+	if (type === 0) {
+		const pairs = [[1, rand(2, 5)], [2, rand(2, 5)], [3, rand(2, 5)]];
+		const dupX = rand(0, 1) === 1;
+		if (dupX) pairs[2][0] = pairs[0][0];
+		const isFunc = !dupX;
+		return { atomId: 'algebra__zuordnungen', prompt: `Ist die Zuordnung {(${pairs.map(p => p.join('→')).join(', ')})} eine Funktion?`, answerType: 'text', correctAnswer: isFunc ? 'ja' : 'nein', choices: ['ja', 'nein'], hint: 'Eine Funktion ordnet jedem \\(x\\)-Wert genau einen \\(y\\)-Wert zu.', difficulty: 0.4 };
+	} else {
+		const tables = [
+			{ t: 'x | 1 | 2 | 3\ny | 4 | 5 | 6', isF: true },
+			{ t: 'x | 1 | 1 | 2\ny | 3 | 4 | 5', isF: false },
+			{ t: 'x | 2 | 3 | 4\ny | 5 | 5 | 6', isF: true },
+		];
+		const tbl = pick(tables);
+		return { atomId: 'algebra__zuordnungen', prompt: `Ist diese Tabelle eine Funktion?\n${tbl.t}`, answerType: 'text', correctAnswer: tbl.isF ? 'ja' : 'nein', choices: ['ja', 'nein'], hint: 'Prüfe: Gibt es einen \\(x\\)-Wert, der zweimal auftaucht?', difficulty: 0.4 };
+	}
+});
+
+reg('algebra__funktion_eindeutige_zuordnung', () => {
+	const type = rand(0, 1);
+	const choices = ['ja', 'nein'];
+	if (type === 0) {
+		const a = rand(2, 4), b = rand(1, 5);
+		const x = rand(2, 5);
+		const isFunc = rand(0, 1) === 1;
+		const secondY = isFunc ? a * x + b : a * (x + 1) + b;
+		const q = isFunc
+			? `f(${x}) = ${a * x + b}`
+			: `{(${x}, ${a * x + b}), (${x}, ${secondY})} – ist das eine Funktion?`;
+		return { atomId: 'algebra__funktion_eindeutige_zuordnung', prompt: `\\(f(x) = ${a}x + ${b}\\). Gibt es für \\(x = ${x}\\) genau einen \\(y\\)-Wert?`, answerType: 'text', correctAnswer: 'ja', choices, hint: 'Funktionen haben für jedes \\(x\\) genau einen \\(y\\)-Wert.', difficulty: 0.35 };
+	} else {
+		return { atomId: 'algebra__funktion_eindeutige_zuordnung', prompt: `Ist {(1,2), (2,3), (1,4)} eine Funktion? (\\(x=1\\) taucht zweimal auf)`, answerType: 'text', correctAnswer: 'nein', choices, hint: '\\(x=1\\) hat zwei verschiedene \\(y\\)-Werte → keine Funktion.', difficulty: 0.4 };
+	}
+});
+
+reg('algebra__funktion_darstellungsformen', () => {
+	const a = rand(1, 4), b = rand(-4, 4);
+	const x = rand(1, 5);
+	const y = a * x + b;
+	const bSign = (n: number) => n > 0 ? `+${n}` : n < 0 ? `${n}` : '';
+	return { atomId: 'algebra__funktion_darstellungsformen', prompt: `\\(f(x) = ${a}x${bSign(b)}\\). Berechne \\(f(${x})\\).`, answerType: 'integer', correctAnswer: String(y), hint: `Einsetzen: ${a}·${x}${bSign(b)} = ${y}`, difficulty: 0.35 };
+});
+
+reg('algebra__definitions_wertebereich', () => {
+	const templates = [
+		{ f: '\\sqrt{x}', D: 'x ≥ 0', w: ['x > 0', 'alle reellen Zahlen', 'x ≠ 0'] },
+		{ f: '\\frac{1}{x}', D: 'x ≠ 0', w: ['x > 0', 'x ≥ 0', 'alle reellen Zahlen'] },
+		{ f: 'x^2', D: 'alle reellen Zahlen', w: ['x ≥ 0', 'x > 0', 'x ≠ 0'] },
+		{ f: '\\sqrt{x-2}', D: 'x ≥ 2', w: ['x > 2', 'x ≥ 0', 'alle reellen Zahlen'] },
+	];
+	const t = pick(templates);
+	const choices = [t.D, ...t.w].sort(() => Math.random() - 0.5);
+	return { atomId: 'algebra__definitions_wertebereich', prompt: `Was ist der Definitionsbereich von \\(f(x) = ${t.f}\\)?`, answerType: 'text', correctAnswer: t.D.toLowerCase(), choices, hint: `Beachte: Unter der Wurzel darf keine negative Zahl stehen, und durch 0 darf nicht geteilt werden.`, difficulty: 0.5 };
+});
+
+reg('algebra__zahlenfolgen', () => {
+	const type = rand(0, 2);
+	if (type === 0) {
+		const d = rand(2, 7), a1 = rand(1, 5);
+		const terms = [a1, a1 + d, a1 + 2 * d, a1 + 3 * d];
+		return { atomId: 'algebra__zahlenfolgen', prompt: `Welche Zahl kommt als nächstes? ${terms.join(', ')}, ___`, answerType: 'integer', correctAnswer: String(a1 + 4 * d), hint: `Arithmetische Folge mit Differenz \\(d = ${d}\\)`, difficulty: 0.4 };
+	} else if (type === 1) {
+		const q = pick([2, 3]), a1 = rand(1, 3);
+		const terms = [a1, a1 * q, a1 * q * q, a1 * q * q * q];
+		return { atomId: 'algebra__zahlenfolgen', prompt: `Welche Zahl kommt als nächstes? ${terms.join(', ')}, ___`, answerType: 'integer', correctAnswer: String(a1 * q ** 4), hint: `Geometrische Folge mit Faktor \\(q = ${q}\\)`, difficulty: 0.45 };
+	} else {
+		const a1 = rand(1, 3), d = rand(2, 5), n = rand(4, 7);
+		const an = a1 + (n - 1) * d;
+		return { atomId: 'algebra__zahlenfolgen', prompt: `Bildungsvorschrift: \\(a_n = ${a1} + (n-1)\\cdot${d}\\). Berechne \\(a_${n}\\).`, answerType: 'integer', correctAnswer: String(an), hint: `Einsetzen: ${a1} + (${n}−1)·${d} = ${a1} + ${(n - 1) * d} = ${an}`, difficulty: 0.5 };
+	}
+});
+
+// ── 22. Algebra: Potenzen und Wurzeln ────────────────────────────────────────
+
+reg('algebra__potenzgesetz_gleiche_basis', () => {
+	const type = rand(0, 1);
+	const m = rand(2, 6), n = rand(2, 6);
+	if (type === 0) {
+		return { atomId: 'algebra__potenzgesetz_gleiche_basis', prompt: `\\(a^${m} \\cdot a^${n} = a^{?\\ }\\)`, answerType: 'integer', correctAnswer: String(m + n), hint: `Gleiche Basis: Exponenten addieren → ${m}+${n}=${m + n}`, difficulty: 0.4 };
+	} else {
+		if (m <= n) return registry.get('algebra__potenzgesetz_gleiche_basis')!();
+		return { atomId: 'algebra__potenzgesetz_gleiche_basis', prompt: `\\(a^${m} : a^${n} = a^{?\\ }\\)`, answerType: 'integer', correctAnswer: String(m - n), hint: `Gleiche Basis: Exponenten subtrahieren → ${m}−${n}=${m - n}`, difficulty: 0.4 };
+	}
+});
+
+reg('algebra__potenzgesetz_potenz_einer_potenz', () => {
+	const m = rand(2, 4), n = rand(2, 4);
+	const base = pick(['a', 'x', 'b', '2x', '3y', 'ab']);
+	return { atomId: 'algebra__potenzgesetz_potenz_einer_potenz', prompt: `\\((${base}^${m})^${n} = ${base}^{?\\ }\\)`, answerType: 'integer', correctAnswer: String(m * n), hint: `Potenz einer Potenz: Exponenten multiplizieren → ${m}·${n}=${m * n}`, difficulty: 0.45 };
+});
+
+reg('algebra__potenzen_negative_exponenten', () => {
+	const base = pick([2, 3, 5, 10]);
+	const exp = rand(1, 3);
+	const val = base ** exp;
+	const type = rand(0, 1);
+	if (type === 0) {
+		return { atomId: 'algebra__potenzen_negative_exponenten', prompt: `\\(${base}^{-${exp}} = \\frac{1}{\\_\\_}\\)`, answerType: 'integer', correctAnswer: String(val), hint: `\\(a^{-n} = \\frac{1}{a^n}\\) → \\(\\frac{1}{${base}^{${exp}}} = \\frac{1}{${val}}\\)`, difficulty: 0.45 };
+	} else {
+		const choices = [`\\(\\frac{1}{${val}}\\)`, `\\(-${val}\\)`, `\\(${val}\\)`, `\\(\\frac{1}{${val + 1}}\\)`];
+		return { atomId: 'algebra__potenzen_negative_exponenten', prompt: `Was ist \\(${base}^{-${exp}}\\)?`, answerType: 'text', correctAnswer: `\\(\\frac{1}{${val}}\\)`, choices: choices.sort(() => Math.random() - 0.5), hint: `\\(a^{-n} = \\frac{1}{a^n}\\) → \\(\\frac{1}{${val}}\\)`, difficulty: 0.45 };
+	}
+});
+
+reg('algebra__potenzen_rationale_exponenten', () => {
+	const cases: { base: number; exp: string; val: number; hint: string }[] = [
+		{ base: 4, exp: '1/2', val: 2, hint: '\\(4^{1/2} = \\sqrt{4} = 2\\)' },
+		{ base: 8, exp: '1/3', val: 2, hint: '\\(8^{1/3} = \\sqrt[3]{8} = 2\\)' },
+		{ base: 27, exp: '1/3', val: 3, hint: '\\(27^{1/3} = \\sqrt[3]{27} = 3\\)' },
+		{ base: 9, exp: '1/2', val: 3, hint: '\\(9^{1/2} = \\sqrt{9} = 3\\)' },
+		{ base: 4, exp: '3/2', val: 8, hint: '\\(4^{3/2} = (\\sqrt{4})^3 = 2^3 = 8\\)' },
+		{ base: 8, exp: '2/3', val: 4, hint: '\\(8^{2/3} = (\\sqrt[3]{8})^2 = 2^2 = 4\\)' },
+		{ base: 27, exp: '2/3', val: 9, hint: '\\(27^{2/3} = (\\sqrt[3]{27})^2 = 3^2 = 9\\)' },
+		{ base: 16, exp: '1/2', val: 4, hint: '\\(16^{1/2} = \\sqrt{16} = 4\\)' },
+	];
+	const c = pick(cases);
+	return { atomId: 'algebra__potenzen_rationale_exponenten', prompt: `\\(${c.base}^{${c.exp}} = ?\\)`, answerType: 'integer', correctAnswer: String(c.val), hint: c.hint, difficulty: 0.55 };
+});
+
+reg('algebra__quadratwurzel_begriff', () => {
+	const squares = [1, 4, 9, 16, 25, 36, 49, 64, 81, 100, 121, 144];
+	const n = pick(squares);
+	const root = Math.sqrt(n);
+	const type = rand(0, 1);
+	if (type === 0) {
+		return { atomId: 'algebra__quadratwurzel_begriff', prompt: `\\(\\sqrt{${n}} = ?\\)`, answerType: 'integer', correctAnswer: String(root), hint: `\\(${root}^2 = ${n}\\)`, difficulty: 0.35 };
+	} else {
+		return { atomId: 'algebra__quadratwurzel_begriff', prompt: `\\(x^2 = ${n}\\)  →  \\(x = ?\\) (positive Lösung)`, answerType: 'integer', correctAnswer: String(root), hint: `Die positive Lösung: \\(x = \\sqrt{${n}} = ${root}\\)`, difficulty: 0.35 };
+	}
+});
+
+reg('algebra__irrationale_reelle_zahlen', () => {
+	const irrationals = ['√2', '√3', '√5', '√7', 'π'];
+	const rationals = ['√4', '√9', '√16', '√25', '0,333…'];
+	const irr = pick(irrationals);
+	const rats = [pick(rationals), pick(rationals)].filter((v, i, a) => a.indexOf(v) === i);
+	while (rats.length < 2) rats.push(pick(rationals));
+	const choices = [irr, ...rats.slice(0, 2), pick(rationals.filter(r => !rats.includes(r)))].sort(() => Math.random() - 0.5);
+	return { atomId: 'algebra__irrationale_reelle_zahlen', prompt: `Welche der folgenden Zahlen ist irrational?`, answerType: 'text', correctAnswer: irr.toLowerCase(), choices, hint: 'Irrationale Zahlen können nicht als Bruch dargestellt werden.', difficulty: 0.45 };
+});
+
+reg('algebra__wurzelterme_umformen', () => {
+	const cases: { expr: string; factor: number; rest: number }[] = [
+		{ expr: '\\sqrt{8}', factor: 2, rest: 2 },
+		{ expr: '\\sqrt{12}', factor: 2, rest: 3 },
+		{ expr: '\\sqrt{18}', factor: 3, rest: 2 },
+		{ expr: '\\sqrt{20}', factor: 2, rest: 5 },
+		{ expr: '\\sqrt{27}', factor: 3, rest: 3 },
+		{ expr: '\\sqrt{50}', factor: 5, rest: 2 },
+		{ expr: '\\sqrt{45}', factor: 3, rest: 5 },
+		{ expr: '\\sqrt{75}', factor: 5, rest: 3 },
+	];
+	const c = pick(cases);
+	return { atomId: 'algebra__wurzelterme_umformen', prompt: `\\(${c.expr} = \\_\\_ \\cdot \\sqrt{${c.rest}}\\)`, answerType: 'integer', correctAnswer: String(c.factor), hint: `\\(${c.expr} = \\sqrt{${c.factor ** 2} \\cdot ${c.rest}} = ${c.factor}\\sqrt{${c.rest}}\\)`, difficulty: 0.5 };
+});
+
+// ── 23. Algebra: Lineare Funktionen ──────────────────────────────────────────
+
+reg('algebra__lineare_funktion_steigung_achsenabschnitt', () => {
+	const m = rand(-4, 4), n = rand(-5, 5);
+	while (m === 0) return registry.get('algebra__lineare_funktion_steigung_achsenabschnitt')!();
+	const nSign = (v: number) => v >= 0 ? `+${v}` : `${v}`;
+	const type = rand(0, 1);
+	if (type === 0) {
+		return { atomId: 'algebra__lineare_funktion_steigung_achsenabschnitt', prompt: `\\(f(x) = ${m}x ${nSign(n)}\\). Wie groß ist die Steigung \\(m\\)?`, answerType: 'integer', correctAnswer: String(m), hint: `In \\(y=mx+n\\) ist \\(m\\) der Koeffizient vor \\(x\\).`, difficulty: 0.35 };
+	} else {
+		return { atomId: 'algebra__lineare_funktion_steigung_achsenabschnitt', prompt: `\\(f(x) = ${m}x ${nSign(n)}\\). Wie groß ist der y-Achsenabschnitt \\(n\\)?`, answerType: 'integer', correctAnswer: String(n), hint: `In \\(y=mx+n\\) ist \\(n\\) der y-Achsenabschnitt (konstantes Glied).`, difficulty: 0.35 };
+	}
+});
+
+reg('algebra__lineare_funktion_nullstelle', () => {
+	// Generate x0 first for uniform distribution (retry-loop on n%m===0 heavily biases toward x0=±1)
+	const x0 = rand(-5, 5);
+	if (x0 === 0) return registry.get('algebra__lineare_funktion_nullstelle')!();
+	const m = rand(1, 5);
+	const n = -x0 * m;
+	const nSign = (v: number) => v >= 0 ? `+${v}` : `${v}`;
+	return {
+		atomId: 'algebra__lineare_funktion_nullstelle',
+		prompt: `Bestimme die Nullstelle von \\(f(x) = ${m}x ${nSign(n)}\\).`,
+		answerType: 'integer',
+		correctAnswer: String(x0),
+		inputData: {
+			steps: [
+				`\\(${m}x ${nSign(n)} = 0\\)`,
+				`\\(${m}x = ${-n}\\)`,
+				`\\(x_0 = ${x0}\\)`
+			]
+		},
+		difficulty: 0.45
+	};
+});
+
+reg('algebra__lineare_funktion_gleichung_aufstellen', () => {
+	const m = rand(-3, 4), n = rand(-5, 5);
+	while (m === 0) return registry.get('algebra__lineare_funktion_gleichung_aufstellen')!();
+	const nSign = (v: number) => v >= 0 ? `+${v}` : `${v}`;
+	const type = rand(0, 1);
+	if (type === 0) {
+		const choices = [`\\(y = ${m}x ${nSign(n)}\\)`, `\\(y = ${m}x ${nSign(n + 1)}\\)`, `\\(y = ${m + 1}x ${nSign(n)}\\)`, `\\(y = ${-m}x ${nSign(n)}\\)`].sort(() => Math.random() - 0.5);
+		return { atomId: 'algebra__lineare_funktion_gleichung_aufstellen', prompt: `Steigung \\(m = ${m}\\), y-Achsenabschnitt \\(n = ${n}\\). Wie lautet die Funktionsgleichung?`, answerType: 'text', correctAnswer: `\\(y = ${m}x ${nSign(n)}\\)`, choices, difficulty: 0.4 };
+	} else {
+		const x1 = rand(-2, 2), y1 = m * x1 + n;
+		const x2 = x1 + rand(1, 3), y2 = m * x2 + n;
+		const choices = [`\\(y = ${m}x ${nSign(n)}\\)`, `\\(y = ${m}x ${nSign(n - 1)}\\)`, `\\(y = ${m + 1}x ${nSign(n)}\\)`, `\\(y = ${m}x ${nSign(n + 2)}\\)`].sort(() => Math.random() - 0.5);
+		return {
+			atomId: 'algebra__lineare_funktion_gleichung_aufstellen',
+			prompt: `Die Gerade geht durch \\((${x1}|${y1})\\) und \\((${x2}|${y2})\\). Wie lautet die Gleichung?`,
+			answerType: 'text',
+			correctAnswer: `\\(y = ${m}x ${nSign(n)}\\)`,
+			choices,
+			hint: `Steigung: \\(m = \\frac{${y2}−${y1}}{${x2}−${x1}} = ${m}\\); dann \\(n\\) bestimmen.`,
+			difficulty: 0.55
+		};
+	}
+});
+
+reg('algebra__lineare_funktion_graph_zeichnen', () => {
+	const m = rand(-3, 3), n = rand(-4, 4);
+	while (m === 0) return registry.get('algebra__lineare_funktion_graph_zeichnen')!();
+	const testX = rand(1, 3);
+	const correctY = m * testX + n;
+	const choices = [
+		`(${testX} | ${correctY})`,
+		`(${testX} | ${correctY + 1})`,
+		`(${testX} | ${correctY - 1})`,
+		`(${testX + 1} | ${correctY})`
+	].sort(() => Math.random() - 0.5);
+	const nSign = (v: number) => v >= 0 ? `+${v}` : `${v}`;
+	return { atomId: 'algebra__lineare_funktion_graph_zeichnen', prompt: `Welcher Punkt liegt auf dem Graphen von \\(f(x) = ${m}x ${nSign(n)}\\)?`, answerType: 'text', correctAnswer: `(${testX} | ${correctY})`, choices, hint: `Einsetzen: \\(f(${testX}) = ${m} \\cdot ${testX}${nSign(n)} = ${correctY}\\)`, difficulty: 0.4 };
+});
+
+// ── 24. Algebra: Quadratische Funktionen und Gleichungen ─────────────────────
+
+reg('algebra__normalparabel_streckung', () => {
+	const type = rand(0, 2);
+	if (type === 0) {
+		const a = pick([2, 3, 0.5, 0.25]);
+		const desc = a > 1 ? 'schmaler als die Normalparabel' : 'breiter als die Normalparabel';
+		const choices = ['schmaler als die Normalparabel', 'breiter als die Normalparabel', 'nach oben verschoben', 'nach links verschoben'];
+		return { atomId: 'algebra__normalparabel_streckung', prompt: `Was beschreibt \\(f(x) = ${a}x^2\\) im Vergleich zur Normalparabel \\(y = x^2\\)?`, answerType: 'text', correctAnswer: desc, choices: choices.sort(() => Math.random() - 0.5), hint: '\\(a > 1\\): schmaler (gestreckt), \\(0 < a < 1\\): breiter (gestaucht)', difficulty: 0.45 };
+	} else if (type === 1) {
+		const c = rand(1, 5);
+		const choices = [`um ${c} nach oben`, `um ${c} nach unten`, `um ${c} nach rechts`, `um ${c} nach links`];
+		return { atomId: 'algebra__normalparabel_streckung', prompt: `Was bewirkt das \\(+${c}\\) in \\(f(x) = x^2 + ${c}\\)?`, answerType: 'text', correctAnswer: `um ${c} nach oben`, choices: choices.sort(() => Math.random() - 0.5), hint: `\\(+c\\) verschiebt den Graphen um \\(c\\) nach oben.`, difficulty: 0.4 };
+	} else {
+		const c = rand(1, 4);
+		const choices = [`um ${c} nach rechts`, `um ${c} nach links`, `um ${c} nach oben`, `um ${c} nach unten`];
+		return { atomId: 'algebra__normalparabel_streckung', prompt: `Was bewirkt \\(f(x) = (x − ${c})^2\\) gegenüber \\(y = x^2\\)?`, answerType: 'text', correctAnswer: `um ${c} nach rechts`, choices: choices.sort(() => Math.random() - 0.5), hint: `\\((x−c)^2\\): Verschiebung um \\(c\\) nach rechts.`, difficulty: 0.45 };
+	}
+});
+
+reg('algebra__scheitelpunktform', () => {
+	const d = rand(-4, 4), e = rand(-4, 4), a = pick([1, -1, 2]);
+	// d=0 or e=0 causes duplicate choices: (0|e)==(-0|e) and (d|0)==(d|-0)
+	if (d === 0 || e === 0) return registry.get('algebra__scheitelpunktform')!();
+	const dSign = d >= 0 ? `${d}` : `(${d})`;
+	const eSign = (v: number) => v >= 0 ? `+${v}` : `${v}`;
+	const choices = [`(${d} | ${e})`, `(${-d} | ${e})`, `(${d} | ${-e})`, `(${-d} | ${-e})`];
+	return { atomId: 'algebra__scheitelpunktform', prompt: `Lies den Scheitelpunkt ab: \\(f(x) = ${a === 1 ? '' : a}(x − ${dSign})^2 ${eSign(e)}\\)`, answerType: 'text', correctAnswer: `(${d} | ${e})`, choices: choices.sort(() => Math.random() - 0.5), hint: `Scheitelpunktform \\(y=a(x−d)^2+e\\) → Scheitel \\(S(d \\mid e)\\)`, difficulty: 0.5 };
+});
+
+reg('algebra__scheitelform_umwandeln', () => {
+	const d = rand(-4, 4), e = rand(-4, 4);
+	// d=0 causes "x² x +q" in LaTeX (literal "x" without coefficient)
+	if (d === 0) return registry.get('algebra__scheitelform_umwandeln')!();
+	// (x-d)² + e = x² - 2dx + d² + e
+	const p = -2 * d, q = d * d + e;
+	const pSign = (v: number) => v > 0 ? `+${v}` : v < 0 ? `${v}` : '';
+	const correct = `\\(x^2 ${pSign(p)}x ${pSign(q)}\\)`;
+	const choices = [correct, `\\(x^2 ${pSign(p + 2)}x ${pSign(q)}\\)`, `\\(x^2 ${pSign(p)}x ${pSign(q + 1)}\\)`, `\\(x^2 ${pSign(p - 1)}x ${pSign(q)}\\)`].sort(() => Math.random() - 0.5);
+	const dStr = d >= 0 ? `${d}` : `(${d})`;
+	return {
+		atomId: 'algebra__scheitelform_umwandeln',
+		prompt: `Schreibe in allgemeiner Form: \\(f(x) = (x − ${dStr})^2 ${pSign(e)}\\)`,
+		answerType: 'text',
+		correctAnswer: correct,
+		choices,
+		inputData: {
+			steps: [
+				`\\((x−${dStr})^2 = x^2 ${pSign(-2 * d)}x + ${d * d}\\)`,
+				`\\(+ (${e})\\): \\(x^2 ${pSign(p)}x + ${d * d} + (${e})\\)`,
+				`\\(= x^2 ${pSign(p)}x ${pSign(q)}\\)`
+			]
+		},
+		difficulty: 0.6
+	};
+});
+
+reg('algebra__parabel_nullstellen', () => {
+	const x1 = rand(-4, 4), x2 = rand(-4, 4);
+	// x1+x2===0: distractor "x₁=-s; x₂=-l" would equal correct "x₁=s; x₂=l" (symmetric roots)
+	while (x1 === x2 || x1 + x2 === 0) return registry.get('algebra__parabel_nullstellen')!();
+	const [s, l] = x1 < x2 ? [x1, x2] : [x2, x1];
+	const type = rand(0, 1);
+	if (type === 0) {
+		const correct = `x₁=${s}; x₂=${l}`;
+		const choices = [correct, `x₁=${-s}; x₂=${-l}`, `x₁=${s+1}; x₂=${l}`, `x₁=${s}; x₂=${l+1}`].sort(() => Math.random() - 0.5);
+		return { atomId: 'algebra__parabel_nullstellen', prompt: `Bestimme die Nullstellen von \\(f(x) = (x ${x1 >= 0 ? '−' : '+'} ${Math.abs(x1)})(x ${x2 >= 0 ? '−' : '+'} ${Math.abs(x2)})\\)`, answerType: 'text', correctAnswer: correct, choices, hint: `Satz vom Nullprodukt: Jeder Faktor = 0 setzen.`, difficulty: 0.5 };
+	} else {
+		const a2 = -(x1 + x2), a0 = x1 * x2;
+		const correct = `x₁=${s}; x₂=${l}`;
+		const choices = [correct, `x₁=${-s}; x₂=${-l}`, `x₁=${s}; x₂=${l-1}`, `x₁=${s+1}; x₂=${l}`].sort(() => Math.random() - 0.5);
+		const pSign = (v: number) => v >= 0 ? `+${v}` : `${v}`;
+		return {
+			atomId: 'algebra__parabel_nullstellen',
+			prompt: `Bestimme die Nullstellen: \\(f(x) = x^2 ${pSign(a2)}x ${pSign(a0)}\\)`,
+			answerType: 'text',
+			correctAnswer: correct,
+			choices,
+			inputData: {
+				steps: [
+					`\\(x^2 ${pSign(a2)}x ${pSign(a0)} = 0\\)`,
+					`\\(p = ${a2},\\; q = ${a0}\\)`,
+					`\\(x = -\\frac{${a2}}{2} \\pm \\sqrt{(\\frac{${a2}}{2})^2 - ${a0}}\\)`,
+					`\\(x_1 = ${s},\\quad x_2 = ${l}\\)`
+				]
+			},
+			difficulty: 0.6
+		};
+	}
+});
+
+reg('algebra__parametereinfluss_graphen', () => {
+	const templates = [
+		{ q: 'Was bewirkt \\(a > 1\\) in \\(f(x) = a \\cdot x^2\\)?', a: 'Graph wird schmaler', w: ['Graph wird breiter', 'Graph verschiebt sich nach oben', 'Graph spiegelt sich'] },
+		{ q: 'Was bewirkt \\(c > 0\\) in \\(f(x) = x^2 + c\\)?', a: 'Verschiebung nach oben um \\(c\\)', w: ['Verschiebung nach unten um \\(c\\)', 'Verschiebung nach rechts', 'Streckung um \\(c\\)'] },
+		{ q: 'Was bewirkt ein negatives \\(a\\) in \\(f(x) = a \\cdot x^2\\)?', a: 'Parabel öffnet nach unten', w: ['Parabel öffnet nach oben', 'Verschiebung nach links', 'Stauchung'] },
+		{ q: 'Was bewirkt \\(c > 0\\) in \\(f(x) = (x - c)^2\\)?', a: 'Verschiebung um \\(c\\) nach rechts', w: ['Verschiebung um \\(c\\) nach links', 'Verschiebung um \\(c\\) nach oben', 'Verschiebung um \\(c\\) nach unten'] },
+	];
+	const t = pick(templates);
+	const choices = [t.a, ...t.w].sort(() => Math.random() - 0.5);
+	return { atomId: 'algebra__parametereinfluss_graphen', prompt: t.q, answerType: 'text', correctAnswer: t.a.toLowerCase(), choices, difficulty: 0.45 };
+});
+
+reg('algebra__quadratische_gleichung_reinquadratisch', () => {
+	// ~20% chance: keine Lösung (negative RHS)
+	if (rand(0, 4) === 0) {
+		const x = rand(2, 9);
+		const c = x * x;
+		const correct = 'keine Lösung';
+		const choices = [correct, `\\(x = ${x}\\) oder \\(x = −${x}\\)`, `\\(x = ${x}\\)`, `\\(x = −${x}\\)`].sort(() => Math.random() - 0.5);
+		return {
+			atomId: 'algebra__quadratische_gleichung_reinquadratisch',
+			prompt: `Löse: \\(x^2 = −${c}\\)`,
+			answerType: 'text',
+			correctAnswer: correct,
+			choices,
+			hint: `\\(x^2\\) ist immer ≥ 0 – die Gleichung hat keine reelle Lösung.`,
+			difficulty: 0.45
+		};
+	}
+
+	const x = rand(2, 9);
+	const c = x * x;
+	const correct = `\\(x = ${x}\\) oder \\(x = −${x}\\)`;
+
+	// Two "oder"-form distractors with adjacent values so students can't just pick "the ± one"
+	const d1 = x < 9 ? x + 1 : x - 2;
+	const d2 = x > 2 ? x - 1 : x + 2;
+	const pool = [
+		`\\(x = ${d1}\\) oder \\(x = −${d1}\\)`,
+		`\\(x = ${d2}\\) oder \\(x = −${d2}\\)`,
+		`\\(x = ${x}\\)`,
+		`\\(x = −${x}\\)`,
+		'keine Lösung'
+	];
+	const distractors = pool.sort(() => Math.random() - 0.5).slice(0, 3);
+	const choices = [correct, ...distractors].sort(() => Math.random() - 0.5);
+
+	const type = rand(0, 1);
+	if (type === 0) {
+		return {
+			atomId: 'algebra__quadratische_gleichung_reinquadratisch',
+			prompt: `Löse: \\(x^2 = ${c}\\)`,
+			answerType: 'text',
+			correctAnswer: correct,
+			choices,
+			hint: `\\(x^2 = ${c}\\) → \\(x = \\pm\\sqrt{${c}} = \\pm${x}\\)`,
+			difficulty: 0.4
+		};
+	} else {
+		const a = rand(2, 4);
+		return {
+			atomId: 'algebra__quadratische_gleichung_reinquadratisch',
+			prompt: `Löse: \\(${a}x^2 = ${a * c}\\)`,
+			answerType: 'text',
+			correctAnswer: correct,
+			choices,
+			inputData: {
+				steps: [`\\(:${a}\\): \\(x^2 = ${c}\\)`, `\\(x = \\pm\\sqrt{${c}} = \\pm${x}\\)`]
+			},
+			difficulty: 0.45
+		};
+	}
+});
+
+reg('algebra__quadratische_gleichung_faktorisiert', () => {
+	const x1 = rand(-5, 5), x2 = rand(-5, 5);
+	// x1+x2===0 guard: distractor "-x1 oder -x2" would equal correct in reversed order
+	while (x1 === x2 || x1 === 0 || x1 + x2 === 0) return registry.get('algebra__quadratische_gleichung_faktorisiert')!();
+	const t1 = x1 >= 0 ? `x − ${x1}` : `x + ${-x1}`;
+	const t2 = x2 >= 0 ? `x − ${x2}` : `x + ${-x2}`;
+	const correct = `\\(x = ${x1}\\) oder \\(x = ${x2}\\)`;
+	const choices = [correct, `\\(x = ${-x1}\\) oder \\(x = ${-x2}\\)`, `\\(x = ${x1}\\)`, `\\(x = ${x1 + 1}\\) oder \\(x = ${x2 + 1}\\)`].sort(() => Math.random() - 0.5);
+	return { atomId: 'algebra__quadratische_gleichung_faktorisiert', prompt: `Löse: \\((${t1})(${t2}) = 0\\)`, answerType: 'text', correctAnswer: correct, choices, hint: `Satz vom Nullprodukt: \\(${t1} = 0\\) oder \\(${t2} = 0\\)`, difficulty: 0.45 };
+});
+
+reg('algebra__quadratische_gleichung_loesungsformel', () => {
+	const x1 = rand(-4, 4), x2 = rand(-4, 4);
+	const p = -(x1 + x2), q = x1 * x2;
+	// p=0: step-1 choices degenerate; q=0: step-1 choices collapse to 2 options
+	if (x1 === x2 || p % 2 !== 0 || x1 + x2 === 0 || q === 0) return registry.get('algebra__quadratische_gleichung_loesungsformel')!();
+	const [s, l] = x1 < x2 ? [x1, x2] : [x2, x1];
+	const pStr = (v: number) => v >= 0 ? `+${v}` : `${v}`;
+	const half = -p / 2;
+	const disc = half * half - q;
+	const sqrtDisc = Math.sqrt(disc);
+	if (!Number.isInteger(sqrtDisc) || sqrtDisc === 0) return registry.get('algebra__quadratische_gleichung_loesungsformel')!();
+
+	const correct = `x₁=${s}; x₂=${l}`;
+	const shuf = <T>(a: T[]) => a.sort(() => Math.random() - 0.5);
+
+	// Step 1: identify p and q
+	const s1Choices = shuf([`p=${p}, q=${q}`, `p=${-p}, q=${q}`, `p=${p}, q=${-q}`, `p=${-p}, q=${-q}`]);
+
+	// Step 2: compute -p/2
+	const s2Raw = [half, -half, half + 1, half - 1];
+	const s2Choices = shuf([...new Set(s2Raw)].map(String));
+
+	// Step 3: compute discriminant (p/2)²−q
+	const s3Raw = [disc, half * half, disc + 1, disc - 1];
+	const s3Choices = shuf([...new Set(s3Raw)].map(String));
+
+	// Step 4: final solutions
+	const s4Choices = shuf([correct, `x₁=${-s}; x₂=${-l}`, `x₁=${s}; x₂=${l + 1}`, `x₁=${s - 1}; x₂=${l}`]);
+
+	return {
+		atomId: 'algebra__quadratische_gleichung_loesungsformel',
+		prompt: `Löse mit der pq-Formel: \\(x^2 ${pStr(p)}x ${pStr(q)} = 0\\)`,
+		answerType: 'text',
+		correctAnswer: correct,
+		inputData: {
+			type: 'pq_steps',
+			subSteps: [
+				{
+					subPrompt: 'Welche Werte haben p und q?',
+					choices: s1Choices,
+					correctAnswer: `p=${p}, q=${q}`,
+					hint: `In \\(x^2 + px + q = 0\\) ist der Koeffizient vor \\(x\\) der Wert p.`
+				},
+				{
+					context: `\\(p = ${p},\\quad q = ${q}\\)`,
+					subPrompt: `Berechne \\(-\\dfrac{p}{2} = -\\dfrac{${p}}{2}\\)`,
+					choices: s2Choices,
+					correctAnswer: String(half),
+					hint: `\\(-\\dfrac{${p}}{2} = ${half}\\)`
+				},
+				{
+					context: `\\(-\\dfrac{p}{2} = ${half}\\)`,
+					subPrompt: `Berechne \\(\\left(\\dfrac{p}{2}\\right)^2 - q = ${half}^2 - (${q})\\)`,
+					choices: s3Choices,
+					correctAnswer: String(disc),
+					hint: `\\(${half}^2 - (${q}) = ${half * half} - (${q}) = ${disc}\\)`
+				},
+				{
+					context: `\\(x = ${half} \\pm \\sqrt{${disc}} = ${half} \\pm ${sqrtDisc}\\)`,
+					subPrompt: `Berechne x₁ und x₂`,
+					choices: s4Choices,
+					correctAnswer: correct,
+					hint: `\\(x_1 = ${half} - ${sqrtDisc} = ${s},\\quad x_2 = ${half} + ${sqrtDisc} = ${l}\\)`,
+					isFinal: true
+				}
+			]
+		},
+		difficulty: 0.65
+	};
+});
+
+reg('algebra__quadratische_gleichung_diskriminante', () => {
+	const type = rand(0, 2);
+	const choices = ['keine Lösung', 'genau eine Lösung', 'zwei Lösungen'];
+	if (type === 0) {
+		const p = rand(1, 4), q = p * p + rand(1, 3);
+		const D = (p / 2) ** 2 - q;
+		return { atomId: 'algebra__quadratische_gleichung_diskriminante', prompt: `\\(x^2 + ${p}x + ${q} = 0\\): Wie viele Lösungen? \\(D = (\\frac{${p}}{2})^2 - ${q} = ${+(D.toFixed(2))}\\)`, answerType: 'text', correctAnswer: 'keine lösung', choices: choices.sort(() => Math.random() - 0.5), hint: 'D < 0 → keine reellen Lösungen', difficulty: 0.5 };
+	} else if (type === 1) {
+		const r = rand(2, 5);
+		const p = 2 * r, q = r * r;
+		return { atomId: 'algebra__quadratische_gleichung_diskriminante', prompt: `\\(x^2 + ${p}x + ${q} = 0\\): Wie viele Lösungen? \\(D = ${r}^2 - ${q} = 0\\)`, answerType: 'text', correctAnswer: 'genau eine lösung', choices: choices.sort(() => Math.random() - 0.5), hint: 'D = 0 → genau eine (doppelte) Lösung', difficulty: 0.5 };
+	} else {
+		const x1 = rand(-3, 3), x2 = rand(-3, 3);
+		while (x1 === x2) return registry.get('algebra__quadratische_gleichung_diskriminante')!();
+		const p = -(x1 + x2), q = x1 * x2;
+		const D = (p / 2) ** 2 - q;
+		const pSign = (v: number) => v >= 0 ? `+${v}` : `${v}`;
+		return { atomId: 'algebra__quadratische_gleichung_diskriminante', prompt: `\\(x^2 ${pSign(p)}x ${pSign(q)} = 0\\): Wie viele Lösungen? (\\(D = ${D}\\))`, answerType: 'text', correctAnswer: 'zwei lösungen', choices: choices.sort(() => Math.random() - 0.5), hint: 'D > 0 → zwei verschiedene Lösungen', difficulty: 0.5 };
+	}
 });
 
 // ── Export ────────────────────────────────────────────────────────────────────

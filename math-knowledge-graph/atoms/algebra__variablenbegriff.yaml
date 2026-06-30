@@ -1,0 +1,39 @@
+id: algebra__variablenbegriff
+label: Variablenbegriff und Terme aufstellen
+description: Variablen als Platzhalter/Veränderliche deuten; zu Sachsituationen und Mustern passende Terme
+  aufstellen und Terme sprachlich beschreiben.
+domain: algebra
+subdomain: Terme
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 7
+- 8
+weight:
+  mastery_required: 0.9
+  curriculum_centrality: 0.9
+  transfer_value: 0.9
+  cognitive_load: 0.45
+prerequisites:
+- id: algebra__gleichungen_inhaltlich_loesen
+  type: required
+  mastery_level_needed: 0.75
+- id: arithmetik__rechengesetze_rechenvorteile
+  type: required
+  mastery_level_needed: 0.8
+related:
+- id: algebra__variablen_terme
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms algebra__variablen_terme
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 8, LB 1
+tags:
+- variablen
+- terme_aufstellen
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

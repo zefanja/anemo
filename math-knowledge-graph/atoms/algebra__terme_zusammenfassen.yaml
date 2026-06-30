@@ -1,0 +1,39 @@
+id: algebra__terme_zusammenfassen
+label: Gleichartige Glieder zusammenfassen
+description: Gleichartige Terme (gleiche Variablenpotenz) erkennen und zusammenfassen; typische Fehlvorstellung
+  'a + a = a²' bzw. '3a + 2 = 5a' gezielt adressieren.
+domain: algebra
+subdomain: Terme
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 7
+- 8
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.95
+  transfer_value: 0.95
+  cognitive_load: 0.5
+prerequisites:
+- id: algebra__termwert_berechnen
+  type: required
+  mastery_level_needed: 0.8
+- id: arithmetik__rationale_zahlen_addieren_subtrahieren
+  type: required
+  mastery_level_needed: 0.85
+related:
+- id: algebra__variablen_terme
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms algebra__variablen_terme
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 8, LB 1
+tags:
+- zusammenfassen
+- gleichartige_glieder
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

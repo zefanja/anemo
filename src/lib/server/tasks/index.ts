@@ -90,7 +90,16 @@ export function checkAnswer(
 	const c = correctAnswer.trim().toLowerCase().replace(',', '.');
 
 	if (answerType === 'text' || answerType === 'boolean' || answerType === 'comparison') {
-		return s === c;
+		if (s === c) return true;
+		// Order-independent check for "oder"/"und"-separated solutions (e.g. x=-1 oder x=-2 == x=-2 oder x=-1)
+		for (const sep of [' oder ', ' und ']) {
+			if (s.includes(sep) && c.includes(sep)) {
+				const sParts = s.split(sep).map(p => p.trim()).sort();
+				const cParts = c.split(sep).map(p => p.trim()).sort();
+				if (sParts.length === cParts.length && sParts.every((p, i) => p === cParts[i])) return true;
+			}
+		}
+		return false;
 	}
 
 	if (answerType === 'fraction') {

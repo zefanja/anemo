@@ -1,6 +1,9 @@
-import { redirect, error } from '@sveltejs/kit';
+import { redirect, error, fail } from '@sveltejs/kit';
 import { db } from '$lib/server/db/index.js';
-import type { PageServerLoad } from './$types';
+import { eq } from 'drizzle-orm';
+import { students } from '$lib/server/db/schema.js';
+import { computeRetrievability, type FsrsState } from '$lib/server/learning/fsrs.js';
+import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals, params }) => {
 	if (!locals.session || locals.session.type !== 'teacher') {
@@ -20,7 +23,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 
 	const [allAtoms, atomStatuses, gami, recentAttempts] = await Promise.all([
 		db.query.atoms.findMany({
-			where: (a, { eq }) => eq(a.level, 'atom'),
+			where: (a, { eq: eqFn }) => eqFn(a.level, 'atom'),
 			columns: { id: true, label: true, domain: true, subdomain: true },
 			orderBy: (a, { asc }) => [asc(a.domain), asc(a.label)]
 		}),
@@ -38,13 +41,27 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 		})
 	]);
 
+	const classDomains = cls.enabledDomains ?? null;
+	const studentExtraDomains = student.extraDomains ?? null;
+	const effectiveDomains =
+		classDomains === null
+			? null
+			: studentExtraDomains && studentExtraDomains.length > 0
+				? [...new Set([...classDomains, ...studentExtraDomains])]
+				: classDomains;
+
+	const enabledAtoms = effectiveDomains
+		? allAtoms.filter((a) => effectiveDomains.includes(a.domain))
+		: allAtoms;
+	const enabledAtomIds = new Set(enabledAtoms.map((a) => a.id));
+
 	const statusByAtom = new Map(atomStatuses.map((s) => [s.atomId, s]));
 
-	const domains = [...new Set(allAtoms.map((a) => a.domain))];
+	const domains = [...new Set(enabledAtoms.map((a) => a.domain))];
 
 	const atomsByDomain = domains.map((domain) => ({
 		domain,
-		atoms: allAtoms
+		atoms: enabledAtoms
 			.filter((a) => a.domain === domain)
 			.map((a) => {
 				const status = statusByAtom.get(a.id);
@@ -57,14 +74,18 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 					totalAttempts: status?.totalAttempts ?? 0,
 					correctAttempts: status?.correctAttempts ?? 0,
 					lastPracticedAt: status?.lastPracticedAt ?? null,
-					masteredAt: status?.masteredAt ?? null
+					masteredAt: status?.masteredAt ?? null,
+					retrievability: status?.isMastered && status.fsrsState
+						? computeRetrievability(status.fsrsState as FsrsState)
+						: null
 				};
 			})
 	}));
 
-	const totalAtoms = allAtoms.length;
-	const masteredCount = atomStatuses.filter((s) => s.isMastered).length;
-	const startedCount = atomStatuses.filter((s) => s.totalAttempts > 0).length;
+	const totalAtoms = enabledAtoms.length;
+	const masteredCount = atomStatuses.filter((s) => s.isMastered && enabledAtomIds.has(s.atomId)).length;
+	const inProgressCount = atomStatuses.filter((s) => !s.isMastered && s.totalAttempts > 0 && enabledAtomIds.has(s.atomId)).length;
+	const startedCount = masteredCount + inProgressCount;
 
 	// Recent activity: last 7 days per day
 	const activityByDay: Record<string, { correct: number; total: number }> = {};
@@ -75,14 +96,19 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 		if (a.isCorrect) activityByDay[day].correct++;
 	}
 
+	// All unique domains in the graph for the domain-unlock panel
+	const allDomains = [...new Set(allAtoms.map((a) => a.domain))].sort();
+
 	return {
-		class: { id: cls.id, name: cls.name },
+		class: { id: cls.id, name: cls.name, enabledDomains: classDomains },
 		student: {
 			id: student.id,
 			displayName: student.displayName,
 			lastActiveAt: student.lastActiveAt,
-			placementDone: student.placementDone
+			placementDone: student.placementDone,
+			extraDomains: studentExtraDomains
 		},
+		allDomains,
 		gami: {
 			xp: gami?.xp ?? 0,
 			level: gami?.level ?? 1,
@@ -90,8 +116,37 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 		},
 		totalAtoms,
 		masteredCount,
+		inProgressCount,
 		startedCount,
 		atomsByDomain,
 		activityByDay
 	};
+};
+
+export const actions: Actions = {
+	updateExtraDomains: async ({ locals, params, request }) => {
+		if (!locals.session || locals.session.type !== 'teacher') return fail(401);
+		const { teacherId } = locals.session;
+
+		const cls = await db.query.classes.findFirst({
+			where: (c, { and }) => and(eq(c.id, params.classId), eq(c.teacherId, teacherId))
+		});
+		if (!cls) return fail(403, { error: 'Keine Berechtigung' });
+
+		const student = await db.query.students.findFirst({
+			where: (s, { and }) => and(eq(s.id, params.studentId), eq(s.classId, params.classId))
+		});
+		if (!student) return fail(404, { error: 'Schüler nicht gefunden' });
+
+		const formData = await request.formData();
+		const selected = formData.getAll('domain') as string[];
+		const extra = selected.length > 0 ? selected : null;
+
+		await db
+			.update(students)
+			.set({ extraDomains: extra })
+			.where(eq(students.id, params.studentId));
+
+		return { success: true };
+	}
 };

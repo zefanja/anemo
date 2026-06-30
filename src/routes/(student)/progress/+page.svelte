@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto, invalidate } from '$app/navigation';
 	import { enhance } from '$app/forms';
+	import StarMap from '$lib/components/student/StarMap.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -165,6 +166,10 @@
 			<div class="overall-fill" style="width: {overallPct}%"></div>
 		</div>
 	</div>
+
+	<!-- ── Star map ── -->
+	<div class="section-title">Deine Galaxie</div>
+	<StarMap atoms={data.starMapAtoms} />
 
 	<!-- ── Activity heatmap ── -->
 	<div class="heatmap-card">

@@ -4,7 +4,7 @@ description: Potenzgesetze (Produkte, Quotienten, Potenzen von Potenzen); Erweit
   rationale Exponenten nach dem Permanenzprinzip; Wurzeln als Potenzen.
 domain: algebra
 subdomain: Potenzen und Wurzeln
-level: atom
+level: cluster
 granularity: 4
 schulformen:
 - GY
@@ -25,6 +25,26 @@ prerequisites:
 - id: algebra__wurzeln_reelle_zahlen
   type: required
   mastery_level_needed: 0.75
+- id: algebra__potenzgesetz_gleiche_basis
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: algebra__potenzgesetz_potenz_einer_potenz
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: algebra__potenzen_negative_exponenten
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: algebra__potenzen_rationale_exponenten
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
 lehrplan_ref:
 - schulform: GY
   dokument: lp_gy_mathematik_2021.pdf
@@ -34,4 +54,4 @@ tags:
 - rationale_exponenten
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

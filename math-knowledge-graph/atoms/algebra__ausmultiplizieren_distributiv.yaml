@@ -1,0 +1,38 @@
+id: algebra__ausmultiplizieren_distributiv
+label: Ausmultiplizieren (Distributivgesetz)
+description: Produkte aus Faktor und Summe sowie aus zwei Summen mit dem Distributivgesetz ausmultiplizieren;
+  Vorzeichen bei Minusklammern beachten.
+domain: algebra
+subdomain: Terme
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 8
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.95
+  transfer_value: 0.95
+  cognitive_load: 0.5
+prerequisites:
+- id: algebra__terme_zusammenfassen
+  type: required
+  mastery_level_needed: 0.85
+- id: arithmetik__rationale_zahlen_multiplizieren_dividieren
+  type: required
+  mastery_level_needed: 0.85
+related:
+- id: algebra__terme_umformen
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms algebra__terme_umformen
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 8, LB 1
+tags:
+- ausmultiplizieren
+- distributivgesetz
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

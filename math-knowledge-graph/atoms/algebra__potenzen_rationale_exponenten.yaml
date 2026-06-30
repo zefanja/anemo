@@ -1,0 +1,38 @@
+id: algebra__potenzen_rationale_exponenten
+label: Potenzen mit rationalen Exponenten (Wurzelschreibweise)
+description: Rationale Exponenten als Wurzeln deuten (a^(1/n)=ⁿ√a) und Potenzgesetze darauf anwenden.
+domain: algebra
+subdomain: Potenzen und Wurzeln
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 9
+- 10
+weight:
+  mastery_required: 0.85
+  curriculum_centrality: 0.8
+  transfer_value: 0.9
+  cognitive_load: 0.65
+prerequisites:
+- id: algebra__potenzen_negative_exponenten
+  type: required
+  mastery_level_needed: 0.85
+- id: algebra__wurzeln_reelle_zahlen
+  type: required
+  mastery_level_needed: 0.8
+related:
+- id: algebra__potenzgesetze
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms algebra__potenzgesetze
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 9, LB 1
+tags:
+- potenzgesetze
+- rationale_exponenten
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

@@ -35,7 +35,9 @@
 			let pd = remainder * 10 + parseInt(divStr[colIdx]);
 			let rightCol = colIdx;
 			colIdx++;
-			while (pd < divisor && colIdx < divStr.length) {
+			// Only merge digits before the first quotient step (leading digits < divisor).
+			// After that, each position gets its own step, even if the quotient digit is 0.
+			while (steps.length === 0 && pd < divisor && colIdx < divStr.length) {
 				pd = pd * 10 + parseInt(divStr[colIdx]);
 				rightCol = colIdx;
 				colIdx++;
@@ -447,11 +449,8 @@
 </div>
 
 <style>
-	:root {
-		--cell-size: 2.75rem;
-	}
-
 	.written-wrap {
+		--cell-size: min(2.75rem, calc((100vw - 5.5rem) / 10));
 		display: flex;
 		flex-direction: column;
 		align-items: center;
@@ -476,7 +475,7 @@
 		flex-shrink: 0;
 		width: var(--cell-size);
 		height: var(--cell-size);
-		font-size: 1.4rem;
+		font-size: calc(var(--cell-size) * 0.51);
 		font-weight: 700;
 		color: var(--c-gray-700);
 	}
@@ -492,7 +491,7 @@
 		flex-shrink: 0;
 		width: var(--cell-size);
 		height: var(--cell-size);
-		font-size: 1.4rem;
+		font-size: calc(var(--cell-size) * 0.51);
 		font-weight: 700;
 		font-variant-numeric: tabular-nums;
 		font-family: ui-monospace, 'Courier New', monospace;
@@ -514,7 +513,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		font-size: 1.4rem;
+		font-size: calc(var(--cell-size) * 0.51);
 		font-weight: 700;
 		font-variant-numeric: tabular-nums;
 		font-family: ui-monospace, 'Courier New', monospace;
@@ -558,7 +557,7 @@
 		text-align: right;
 		padding-left: var(--cell-size); /* reserviert Platz für Op-Spalte */
 		padding-bottom: 0.1rem;
-		font-size: 1.4rem;
+		font-size: calc(var(--cell-size) * 0.51);
 		font-weight: 700;
 		font-family: ui-monospace, 'Courier New', monospace;
 		color: var(--c-gray-900);
@@ -570,9 +569,8 @@
 		flex-direction: column;
 		align-items: flex-start;
 		font-family: ui-monospace, 'Courier New', monospace;
-		font-size: 1.4rem;
+		font-size: calc(var(--cell-size) * 0.51);
 		font-weight: 700;
-		overflow-x: auto;
 		max-width: 100%;
 	}
 
@@ -589,7 +587,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		font-size: 1.4rem;
+		font-size: calc(var(--cell-size) * 0.51);
 		font-weight: 700;
 		color: var(--c-gray-700);
 		padding: 0 0.2rem;

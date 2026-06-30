@@ -1,0 +1,35 @@
+id: algebra__lineare_gleichung_sonderfaelle
+label: Sonderfälle (keine / unendlich viele Lösungen)
+description: Gleichungen erkennen und deuten, die keine oder unendlich viele Lösungen haben (z. B. 2x+1=2x+3
+  bzw. 0=0).
+domain: algebra
+subdomain: Gleichungen
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 8
+weight:
+  mastery_required: 0.85
+  curriculum_centrality: 0.85
+  transfer_value: 0.85
+  cognitive_load: 0.6
+prerequisites:
+- id: algebra__lineare_gleichung_klammern_brueche
+  type: required
+  mastery_level_needed: 0.8
+related:
+- id: algebra__lineare_gleichungen
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms algebra__lineare_gleichungen
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 8, LB 1
+tags:
+- lineare_gleichungen
+- sonderfälle
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

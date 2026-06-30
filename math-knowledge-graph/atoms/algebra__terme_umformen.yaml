@@ -4,7 +4,7 @@ description: Gleichartige Terme zusammenfassen; Klammern ausmultiplizieren; Ausk
   Anwendung des Distributivgesetzes auf Variablenterme.
 domain: algebra
 subdomain: Terme
-level: atom
+level: cluster
 granularity: 4
 schulformen:
 - GY
@@ -23,6 +23,16 @@ prerequisites:
   type: required
   mastery_level_needed: 0.85
   note: Vorzeichenfehler sind die Hauptfehlerquelle beim Termumformen.
+- id: algebra__ausmultiplizieren_distributiv
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: algebra__ausklammern_faktorisieren
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
 lehrplan_ref:
 - schulform: GY
   dokument: lp_gy_mathematik_2021.pdf
@@ -33,4 +43,4 @@ tags:
 - ausklammern
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

@@ -1,0 +1,38 @@
+id: algebra__lgs_grafisch
+label: LGS grafisch lösen
+description: Ein lineares Gleichungssystem als Schnittpunkt zweier Geraden deuten und grafisch lösen;
+  Bezug zu Lage der Geraden (Sonderfälle).
+domain: algebra
+subdomain: Gleichungen
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 8
+weight:
+  mastery_required: 0.85
+  curriculum_centrality: 0.85
+  transfer_value: 0.85
+  cognitive_load: 0.55
+prerequisites:
+- id: algebra__lineare_funktionen
+  type: required
+  mastery_level_needed: 0.8
+- id: algebra__lineare_gleichungen
+  type: required
+  mastery_level_needed: 0.85
+related:
+- id: algebra__lineare_gleichungssysteme
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms algebra__lineare_gleichungssysteme
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 8, LB 3
+tags:
+- lgs
+- grafisch
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

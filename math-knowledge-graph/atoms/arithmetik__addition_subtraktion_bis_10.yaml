@@ -11,7 +11,7 @@ schulformen:
 jahrgangsstufen:
 - 1
 weight:
-  mastery_required: 0.95
+  mastery_required: 0.98
   curriculum_centrality: 1.0
   transfer_value: 0.95
   cognitive_load: 0.35
@@ -33,4 +33,4 @@ tags:
 - zahlenraum_10
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 2
+version: 1

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
+	import MathText from '$lib/components/student/MathText.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -15,6 +16,12 @@
 	function formatDateTime(d: Date | string): string {
 		const date = new Date(d);
 		return date.toLocaleDateString('de-DE') + ' ' + date.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+	}
+
+	function retrievabilityColor(r: number): string {
+		if (r >= 0.8) return '#16a34a';
+		if (r >= 0.6) return '#d97706';
+		return '#dc2626';
 	}
 
 	function masteryColor(pct: number, mastered: boolean): string {
@@ -33,6 +40,29 @@
 	let overallPct = $derived(
 		data.totalAtoms > 0 ? Math.round((data.masteredCount / data.totalAtoms) * 100) : 0
 	);
+
+	// Domain-unlock panel: only relevant when the class has restricted domains
+	let lockedDomains = $derived(
+		data.class.enabledDomains
+			? data.allDomains.filter((d) => !data.class.enabledDomains!.includes(d))
+			: []
+	);
+	let selectedExtras = $state<Set<string>>(new Set(data.student.extraDomains ?? []));
+	let savingDomains = $state(false);
+	let domainSaveMsg = $state<string | null>(null);
+
+	async function saveExtraDomains() {
+		savingDomains = true;
+		domainSaveMsg = null;
+		const fd = new FormData();
+		for (const d of selectedExtras) fd.append('domain', d);
+		try {
+			const res = await fetch('?/updateExtraDomains', { method: 'POST', body: fd });
+			domainSaveMsg = res.ok ? 'Gespeichert.' : 'Fehler beim Speichern.';
+		} finally {
+			savingDomains = false;
+		}
+	}
 
 	let searchQuery = $state('');
 	let filterStatus = $state<'all' | 'mastered' | 'started' | 'not_started'>('all');
@@ -60,6 +90,7 @@
 		id: string;
 		isCorrect: boolean;
 		answeredAt: string;
+		givenAnswer: string | null;
 		taskPrompt: string | null;
 		correctAnswer: string | null;
 	};
@@ -131,14 +162,50 @@
 			</div>
 		</div>
 		<div class="stat-card">
-			<div class="stat-value">{data.startedCount - data.masteredCount}</div>
+			<div class="stat-value">{data.inProgressCount}</div>
 			<div class="stat-label">In Arbeit</div>
 		</div>
 		<div class="stat-card">
-			<div class="stat-value">{data.totalAtoms - data.startedCount}</div>
+			<div class="stat-value">{data.totalAtoms - data.masteredCount - data.inProgressCount}</div>
 			<div class="stat-label">Noch nicht begonnen</div>
 		</div>
 	</div>
+
+	<!-- Domain-unlock panel (only shown when class has restricted domains) -->
+	{#if lockedDomains.length > 0}
+		<div class="domain-unlock-panel">
+			<div class="panel-header">
+				<span class="panel-title">Zusätzliche Bereiche freischalten</span>
+				<span class="panel-sub">Die Klasse hat eingeschränkte Bereiche. Hier kannst du für diesen Schüler weitere freischalten.</span>
+			</div>
+			<div class="domain-checkboxes">
+				{#each lockedDomains as domain}
+					<label class="domain-check-label" class:checked={selectedExtras.has(domain)}>
+						<input
+							type="checkbox"
+							checked={selectedExtras.has(domain)}
+							onchange={() => {
+								const next = new Set(selectedExtras);
+								if (next.has(domain)) next.delete(domain);
+								else next.add(domain);
+								selectedExtras = next;
+								domainSaveMsg = null;
+							}}
+						/>
+						{domain}
+					</label>
+				{/each}
+			</div>
+			<div class="panel-actions">
+				<button class="btn-save" disabled={savingDomains} onclick={saveExtraDomains}>
+					{savingDomains ? 'Speichert…' : 'Speichern'}
+				</button>
+				{#if domainSaveMsg}
+					<span class="save-msg">{domainSaveMsg}</span>
+				{/if}
+			</div>
+		</div>
+	{/if}
 
 	<!-- Filters -->
 	<div class="filters">
@@ -156,10 +223,10 @@
 				✅ Gemeistert ({data.masteredCount})
 			</button>
 			<button class="filter-btn started" class:active={filterStatus === 'started'} onclick={() => (filterStatus = 'started')}>
-				🟡 In Arbeit ({data.startedCount - data.masteredCount})
+				🟡 In Arbeit ({data.inProgressCount})
 			</button>
 			<button class="filter-btn not-started" class:active={filterStatus === 'not_started'} onclick={() => (filterStatus = 'not_started')}>
-				⬜ Nicht begonnen ({data.totalAtoms - data.startedCount})
+				⬜ Nicht begonnen ({data.totalAtoms - data.masteredCount - data.inProgressCount})
 			</button>
 		</div>
 	</div>
@@ -200,6 +267,7 @@
 								<th>Richtig</th>
 								<th>Zuletzt</th>
 								<th>Gemeistert am</th>
+									<th>Abrufbarkeit</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -267,6 +335,15 @@
 									</td>
 									<td class="center muted">{relativeDate(atom.lastPracticedAt)}</td>
 									<td class="center muted">{relativeDate(atom.masteredAt)}</td>
+									<td class="center">
+										{#if atom.retrievability !== null}
+											<span class="retrievability-badge" style="color: {retrievabilityColor(atom.retrievability)}; border-color: {retrievabilityColor(atom.retrievability)}">
+												{Math.round(atom.retrievability * 100)}%
+											</span>
+										{:else}
+											<span class="muted">–</span>
+										{/if}
+									</td>
 								</tr>
 
 								{#if isExpanded}
@@ -288,7 +365,8 @@
 																<th>Zeitpunkt</th>
 																<th>Ergebnis</th>
 																<th>Aufgabe</th>
-																<th>Lösung</th>
+																<th>Schülerantwort</th>
+																<th>Richtige Lösung</th>
 															</tr>
 														</thead>
 														<tbody>
@@ -304,13 +382,24 @@
 																	</td>
 																	<td class="attempt-prompt">
 																		{#if attempt.taskPrompt}
-																			{attempt.taskPrompt}
+																			<MathText text={attempt.taskPrompt} />
 																		{:else}
 																			<span class="muted">Prozedurale Aufgabe</span>
 																		{/if}
 																	</td>
-																	<td class="attempt-answer muted">
-																		{attempt.correctAnswer ?? '–'}
+																	<td class="attempt-given" class:given-wrong={!attempt.isCorrect}>
+																		{#if attempt.givenAnswer !== null}
+																			<MathText text={attempt.givenAnswer} />
+																		{:else}
+																			<span class="muted">–</span>
+																		{/if}
+																	</td>
+																	<td class="attempt-answer" class:answer-hidden={attempt.isCorrect}>
+																		{#if attempt.isCorrect}
+																			<span class="muted">–</span>
+																		{:else}
+																			<MathText text={attempt.correctAnswer ?? '–'} />
+																		{/if}
 																	</td>
 																</tr>
 															{/each}
@@ -509,8 +598,71 @@
 	}
 	.result-correct { background: #dcfce7; color: #16a34a; }
 	.result-wrong { background: #fee2e2; color: #dc2626; }
-	.attempt-prompt { color: #374151; max-width: 360px; }
-	.attempt-answer { font-size: 0.75rem; white-space: nowrap; }
+	.attempt-prompt { color: #374151; max-width: 300px; }
+	.attempt-given { font-size: 0.85rem; font-weight: 600; white-space: nowrap; }
+	.attempt-given.given-wrong { color: #dc2626; }
+	.attempt-answer { font-size: 0.8rem; white-space: nowrap; color: #16a34a; font-weight: 600; }
+
+	.retrievability-badge {
+		display: inline-block;
+		padding: 0.1rem 0.45rem;
+		border-radius: 0.375rem;
+		border: 1.5px solid;
+		font-size: 0.72rem;
+		font-weight: 700;
+	}
 
 	.empty-state { text-align: center; padding: 2rem; color: #9ca3af; }
+
+	/* Domain-unlock panel */
+	.domain-unlock-panel {
+		background: #fff;
+		border: 1.5px solid #d1fae5;
+		border-radius: 0.75rem;
+		padding: 1rem 1.25rem;
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+		box-shadow: 0 1px 4px rgba(0,0,0,.05);
+	}
+	.panel-header { display: flex; flex-direction: column; gap: 0.2rem; }
+	.panel-title { font-weight: 700; font-size: 0.9rem; color: #111827; }
+	.panel-sub { font-size: 0.78rem; color: #6b7280; }
+	.domain-checkboxes {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+	}
+	.domain-check-label {
+		display: flex;
+		align-items: center;
+		gap: 0.4rem;
+		padding: 0.35rem 0.7rem;
+		border: 1.5px solid #e5e7eb;
+		border-radius: 0.5rem;
+		font-size: 0.82rem;
+		font-weight: 600;
+		color: #374151;
+		cursor: pointer;
+		transition: all .15s;
+		background: #f9fafb;
+	}
+	.domain-check-label:hover { border-color: #6ee7b7; background: #f0fdf4; }
+	.domain-check-label.checked { border-color: #16a34a; background: #f0fdf4; color: #15803d; }
+	.domain-check-label input { accent-color: #16a34a; width: 15px; height: 15px; }
+	.panel-actions { display: flex; align-items: center; gap: 0.75rem; }
+	.btn-save {
+		padding: 0.4rem 1rem;
+		background: #16a34a;
+		color: #fff;
+		border: none;
+		border-radius: 0.5rem;
+		font-size: 0.85rem;
+		font-weight: 600;
+		cursor: pointer;
+		transition: background .15s;
+	}
+	.btn-save:hover:not(:disabled) { background: #15803d; }
+	.btn-save:disabled { opacity: 0.6; cursor: not-allowed; }
+	.save-msg { font-size: 0.8rem; color: #16a34a; font-weight: 600; }
 </style>

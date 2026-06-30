@@ -11,7 +11,7 @@ schulformen:
 jahrgangsstufen:
 - 1
 weight:
-  mastery_required: 0.95
+  mastery_required: 1.0
   curriculum_centrality: 1.0
   transfer_value: 1.0
   cognitive_load: 0.3
@@ -25,7 +25,7 @@ tags:
 - klasse1
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 3
+version: 2
 prerequisites:
 - id: arithmetik__zaehlen_zahlwortreihe
   type: required
