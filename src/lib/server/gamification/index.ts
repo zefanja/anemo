@@ -1,6 +1,15 @@
 import { db } from '../db/index.js';
 import { gamificationState, badges, studentAtomStatus } from '../db/schema.js';
-import { eq } from 'drizzle-orm';
+import { eq, desc } from 'drizzle-orm';
+import { env } from '$env/dynamic/private';
+import { attempts } from '../db/schema.js';
+import { xpToLevel, comboBonus, DEFAULT_DAILY_XP_GOAL, LEVEL_THRESHOLDS } from '$lib/gamification.js';
+import { advanceStreak, displayedStreak, countCombo, isoDate } from './streak.js';
+
+export function dailyXpGoal(): number {
+	const n = parseInt(env.DAILY_XP_GOAL ?? '');
+	return Number.isFinite(n) && n > 0 ? n : DEFAULT_DAILY_XP_GOAL;
+}
 
 // XP rewards by atom grade level (minimum Jahrgangsstufe of the atom)
 const XP_TABLE: Array<{ maxGrade: number; correct: number; review: number; mastered: number }> = [
@@ -17,19 +26,6 @@ function xpForGrade(grade: number | null): { correct: number; review: number; ma
 	return XP_TABLE.find((row) => g <= row.maxGrade)!;
 }
 
-// Level thresholds: level N requires this many total XP
-const LEVEL_THRESHOLDS = [
-	0, 100, 250, 500, 900, 1400, 2000, 3000, 4500, 6500, 9000,
-	12500, 17000, 22500, 29000, 37000, 46500, 57500, 70000, 85000
-];
-
-function xpToLevel(xp: number): number {
-	for (let i = LEVEL_THRESHOLDS.length - 1; i >= 0; i--) {
-		if (xp >= LEVEL_THRESHOLDS[i]) return i + 1;
-	}
-	return 1;
-}
-
 export interface GamificationResult {
 	xpGained: number;
 	newXp: number;
@@ -37,6 +33,14 @@ export interface GamificationResult {
 	levelUp: boolean;
 	newBadges: string[];
 	streakDays: number;
+	combo: number;
+	comboBonus: number;
+	dailyXp: number;
+	dailyGoal: number;
+	dailyGoalReached: boolean;
+	streakFreezes: number;
+	freezeUsed: boolean;
+	freezeEarned: boolean;
 }
 
 export async function recordAttempt(
@@ -48,44 +52,39 @@ export async function recordAttempt(
 	atomGrade: number | null = null
 ): Promise<GamificationResult> {
 	const now = new Date();
-	const todayStr = now.toISOString().slice(0, 10);
+	const todayStr = isoDate(now);
+	const state = await getOrCreateState(studentId);
 
-	let state = await db.query.gamificationState.findFirst({
-		where: (g, { eq }) => eq(g.studentId, studentId)
-	});
-
-	if (!state) {
-		await db.insert(gamificationState).values({
-			studentId,
-			xp: 0,
-			level: 1,
-			streakDays: 0,
-			streakLastDate: null
-		});
-		state = { studentId, xp: 0, level: 1, streakDays: 0, streakLastDate: null, updatedAt: now };
+	// Combo: consecutive correct answers (the current attempt is already stored)
+	let combo = 0;
+	if (isCorrect) {
+		const recent = await db
+			.select({ isCorrect: attempts.isCorrect, answeredAt: attempts.answeredAt })
+			.from(attempts)
+			.where(eq(attempts.studentId, studentId))
+			.orderBy(desc(attempts.answeredAt))
+			.limit(30);
+		combo = countCombo(recent);
 	}
 
 	// XP
 	const xp = xpForGrade(atomGrade);
 	let xpGained = 0;
+	let bonus = 0;
 	if (isCorrect) {
 		xpGained += isReview ? xp.review : xp.correct;
 		if (justMastered) xpGained += xp.mastered;
+		bonus = comboBonus(combo);
+		xpGained += bonus;
 	}
 
-	// Streak
-	let streakDays = state.streakDays;
-	const lastDate = state.streakLastDate;
-	if (lastDate !== todayStr) {
-		const yesterday = new Date(now);
-		yesterday.setDate(yesterday.getDate() - 1);
-		const yesterdayStr = yesterday.toISOString().slice(0, 10);
-		if (lastDate === yesterdayStr) {
-			streakDays += 1;
-		} else {
-			streakDays = 1;
-		}
-	}
+	// Streak (with streak freezes)
+	const streak = advanceStreak(state.streakLastDate, todayStr, state.streakDays, state.streakFreezes);
+
+	// Daily goal
+	const goal = dailyXpGoal();
+	const prevDaily = state.dailyXpDate === todayStr ? state.dailyXp : 0;
+	const dailyXp = prevDaily + xpGained;
 
 	const newXp = state.xp + xpGained;
 	const oldLevel = state.level;
@@ -94,17 +93,57 @@ export async function recordAttempt(
 
 	await db
 		.update(gamificationState)
-		.set({ xp: newXp, level: newLevel, streakDays, streakLastDate: todayStr, updatedAt: now })
+		.set({
+			xp: newXp,
+			level: newLevel,
+			streakDays: streak.streakDays,
+			streakLastDate: todayStr,
+			streakFreezes: streak.freezes,
+			dailyXp,
+			dailyXpDate: todayStr,
+			updatedAt: now
+		})
 		.where(eq(gamificationState.studentId, studentId));
 
 	const newBadges = await checkAndAwardBadges(studentId, {
 		justMastered,
 		atomId,
-		streakDays,
+		streakDays: streak.streakDays,
 		newXp
 	});
 
-	return { xpGained, newXp, newLevel, levelUp, newBadges, streakDays };
+	return {
+		xpGained,
+		newXp,
+		newLevel,
+		levelUp,
+		newBadges,
+		streakDays: streak.streakDays,
+		combo,
+		comboBonus: bonus,
+		dailyXp,
+		dailyGoal: goal,
+		dailyGoalReached: prevDaily < goal && dailyXp >= goal,
+		streakFreezes: streak.freezes,
+		freezeUsed: streak.freezesUsed > 0,
+		freezeEarned: streak.freezeEarned
+	};
+}
+
+async function getOrCreateState(studentId: string) {
+	const state = await db.query.gamificationState.findFirst({
+		where: (g, { eq }) => eq(g.studentId, studentId)
+	});
+	if (state) return state;
+	const [created] = await db
+		.insert(gamificationState)
+		.values({ studentId })
+		.onConflictDoNothing()
+		.returning();
+	return (
+		created ??
+		(await db.query.gamificationState.findFirst({ where: (g, { eq }) => eq(g.studentId, studentId) }))!
+	);
 }
 
 // Called once after the placement test completes to award XP and badges
@@ -115,22 +154,8 @@ export async function recordPlacementCompletion(
 	testedPassed: number
 ): Promise<{ xpGained: number; newBadges: string[] }> {
 	const now = new Date();
-	const todayStr = now.toISOString().slice(0, 10);
-
-	let state = await db.query.gamificationState.findFirst({
-		where: (g, { eq }) => eq(g.studentId, studentId)
-	});
-
-	if (!state) {
-		await db.insert(gamificationState).values({
-			studentId,
-			xp: 0,
-			level: 1,
-			streakDays: 0,
-			streakLastDate: null
-		});
-		state = { studentId, xp: 0, level: 1, streakDays: 0, streakLastDate: null, updatedAt: now };
-	}
+	const todayStr = isoDate(now);
+	const state = await getOrCreateState(studentId);
 
 	// Award XP for each atom correctly answered during placement (use grade 5 as neutral default)
 	const xpGained = testedPassed * xpForGrade(5).mastered;
@@ -212,22 +237,25 @@ async function checkAndAwardBadges(
 }
 
 export async function getGamificationState(studentId: string) {
-	const state = await db.query.gamificationState.findFirst({
-		where: (g, { eq }) => eq(g.studentId, studentId)
-	});
-	const earnedBadges = await db.query.badges.findMany({
-		where: (b, { eq }) => eq(b.studentId, studentId)
-	});
+	const [state, earnedBadges] = await Promise.all([
+		db.query.gamificationState.findFirst({ where: (g, { eq }) => eq(g.studentId, studentId) }),
+		db.query.badges.findMany({ where: (b, { eq }) => eq(b.studentId, studentId) })
+	]);
+	const todayStr = isoDate(new Date());
+	const xp = state?.xp ?? 0;
+	const freezes = state?.streakFreezes ?? 1;
+	const streak = displayedStreak(state?.streakLastDate ?? null, todayStr, state?.streakDays ?? 0, freezes);
+	const level = state?.level ?? 1;
 	return {
-		xp: state?.xp ?? 0,
-		level: state?.level ?? 1,
-		streakDays: state?.streakDays ?? 0,
-		xpToNextLevel: nextLevelXp(state?.xp ?? 0),
+		xp,
+		level,
+		streakDays: streak.streakDays,
+		streakAtRisk: streak.atRisk,
+		practicedToday: state?.streakLastDate === todayStr,
+		streakFreezes: freezes,
+		dailyXp: state?.dailyXpDate === todayStr ? state.dailyXp : 0,
+		dailyGoal: dailyXpGoal(),
+		xpToNextLevel: LEVEL_THRESHOLDS[level] ?? Infinity,
 		badges: earnedBadges.map((b) => ({ type: b.badgeType, awardedAt: b.awardedAt }))
 	};
-}
-
-function nextLevelXp(currentXp: number): number {
-	const level = xpToLevel(currentXp);
-	return LEVEL_THRESHOLDS[level] ?? Infinity;
 }

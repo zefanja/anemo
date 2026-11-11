@@ -1,64 +1,38 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import Icon from '$lib/components/student/Icon.svelte';
+	import { ui } from '$lib/stores/ui.svelte.js';
 	import type { LayoutData } from './$types';
 
 	let { data, children }: { data: LayoutData; children: import('svelte').Snippet } = $props();
 
-	const LEVEL_THRESHOLDS = [
-		0, 100, 250, 500, 900, 1400, 2000, 3000, 4500, 6500, 9000,
-		12500, 17000, 22500, 29000, 37000, 46500, 57500, 70000, 85000
-	];
-
-	function xpProgress(xp: number, level: number): number {
-		const lo = LEVEL_THRESHOLDS[level - 1] ?? 0;
-		const hi = LEVEL_THRESHOLDS[level] ?? lo + 1000;
-		if (hi <= lo) return 100;
-		return Math.min(100, Math.round(((xp - lo) / (hi - lo)) * 100));
-	}
-
-	let progress = $derived(xpProgress(data.xp, data.level));
 	let currentPath = $derived($page.url.pathname);
+	let hideNav = $derived(ui.focusMode || currentPath.startsWith('/placement'));
+
+	const NAV = [
+		{ href: '/practice', label: 'Üben', icon: 'pencil' },
+		{ href: '/progress', label: 'Sterne', icon: 'stars' },
+		{ href: '/badges', label: 'Abzeichen', icon: 'medal' },
+		{ href: '/me', label: 'Ich', icon: 'user' }
+	] as const;
 </script>
 
-<div class="layout">
-	<header class="gami-bar">
-		<div class="gami-left">
-			<span class="level-badge">Lv&nbsp;{data.level}</span>
-			<div class="xp-track" aria-label="XP Fortschritt {progress}%">
-				<div class="xp-fill" style="width: {progress}%"></div>
-			</div>
-			<span class="xp-label">{data.xp} XP</span>
-		</div>
-		<div class="gami-right">
-			<span class="streak" title="Tages-Streak">🔥&nbsp;{data.streakDays}</span>
-			<span class="student-name">{data.studentName}</span>
-		</div>
-	</header>
-
+<div class="layout" class:dark={currentPath.startsWith('/progress')}>
 	<main class="main">
 		{@render children()}
 	</main>
 
-	<nav class="bottom-nav" aria-label="Navigation">
-		<a href="/practice" class="nav-item" class:active={currentPath.startsWith('/practice')}>
-			<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-				<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>
-			</svg>
-			<span>Üben</span>
-		</a>
-		<a href="/progress" class="nav-item" class:active={currentPath.startsWith('/progress')}>
-			<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-				<path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/>
-			</svg>
-			<span>Fortschritt</span>
-		</a>
-		<a href="/logout" class="nav-item nav-logout">
-			<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-				<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
-			</svg>
-			<span>Abmelden</span>
-		</a>
-	</nav>
+	{#if !hideNav}
+		<nav class="bottom-nav" aria-label="Navigation">
+			{#each NAV as item}
+				{@const active = currentPath.startsWith(item.href)}
+				<a href={item.href} class="nav-item" class:active aria-current={active ? 'page' : undefined}>
+					<span class="nav-pill"><Icon name={item.icon} size={24} /></span>
+					<span>{item.label}</span>
+				</a>
+			{/each}
+		</nav>
+	{/if}
 </div>
 
 <style>
@@ -67,124 +41,63 @@
 		flex-direction: column;
 		height: 100svh;
 		overflow: hidden;
+		background: var(--c-ground);
+		color: var(--c-navy);
 	}
-
-	/* ── Gamification bar ── */
-	.gami-bar {
-		flex-shrink: 0;
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		padding: 0.5rem 1rem;
-		background: var(--c-primary);
+	.layout.dark {
+		background: #081f45;
 		color: #fff;
-		height: 52px;
-	}
-	.gami-left {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		flex: 1;
-		min-width: 0;
-	}
-	.level-badge {
-		font-weight: 700;
-		font-size: 0.85rem;
-		white-space: nowrap;
-		background: rgba(255,255,255,.2);
-		border-radius: 999px;
-		padding: 0.15rem 0.5rem;
-	}
-	.xp-track {
-		flex: 1;
-		height: 8px;
-		background: rgba(255,255,255,.25);
-		border-radius: 999px;
-		overflow: hidden;
-		min-width: 40px;
-	}
-	.xp-fill {
-		height: 100%;
-		background: #fbbf24;
-		border-radius: 999px;
-		transition: width .4s ease;
-	}
-	.xp-label {
-		font-size: 0.75rem;
-		white-space: nowrap;
-		opacity: .85;
-	}
-	.gami-right {
-		display: flex;
-		align-items: center;
-		gap: 0.6rem;
-		margin-left: 0.75rem;
-	}
-	.streak {
-		font-size: 0.9rem;
-		white-space: nowrap;
-	}
-	.student-name {
-		font-size: 0.8rem;
-		opacity: .85;
-		max-width: 80px;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
 	}
 
-	/* ── Main content ── */
 	.main {
 		flex: 1;
 		overflow-y: auto;
 		-webkit-overflow-scrolling: touch;
 	}
 
-	/* ── Bottom nav ── */
 	.bottom-nav {
 		flex-shrink: 0;
-		display: flex;
-		border-top: 1px solid var(--c-gray-200);
+		display: grid;
+		grid-template-columns: repeat(4, minmax(0, 1fr));
 		background: #fff;
-		padding-bottom: env(safe-area-inset-bottom, 0);
+		border-top: 1px solid var(--c-line);
+		padding: 0.4rem 0.5rem calc(0.5rem + env(safe-area-inset-bottom, 0px));
+	}
+	.dark .bottom-nav {
+		background: var(--c-navy);
+		border-top-color: var(--c-navy-3);
 	}
 	.nav-item {
-		flex: 1;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		justify-content: center;
 		gap: 2px;
-		padding: 0.5rem 0;
+		min-height: 52px;
+		justify-content: center;
 		text-decoration: none;
-		color: var(--c-gray-400);
-		font-size: 0.7rem;
-		font-weight: 500;
-		transition: color .15s, background .15s;
-		min-height: 56px;
-		border-top: 2px solid transparent;
-		margin-top: -1px;
+		color: var(--c-ink-2);
+		font-size: 0.75rem;
+		font-weight: 800;
 	}
-	@media (hover: hover) {
-		.nav-item:hover {
-			color: var(--c-primary);
-			background: color-mix(in srgb, var(--c-primary) 8%, transparent);
-		}
-		.nav-logout:hover {
-			color: var(--c-error);
-			background: color-mix(in srgb, var(--c-error) 8%, transparent);
-		}
+	.dark .nav-item { color: #bfdbfe; }
+	.nav-pill {
+		display: flex;
+		padding: 0.25rem 1.1rem;
+		border-radius: 999px;
+		transition: background .15s;
 	}
 	.nav-item.active {
 		color: var(--c-primary);
-		font-weight: 700;
-		border-top-color: var(--c-primary);
-		background: color-mix(in srgb, var(--c-primary) 6%, transparent);
+		font-weight: 900;
 	}
-	.nav-item.active svg {
-		stroke-width: 2.5;
+	.nav-item.active .nav-pill { background: var(--c-primary-light); }
+	.dark .nav-item.active { color: #fff; }
+	.dark .nav-item.active .nav-pill { background: var(--c-navy-3); }
+	@media (hover: hover) {
+		.nav-item:hover .nav-pill { background: var(--c-primary-light); }
+		.dark .nav-item:hover .nav-pill { background: var(--c-navy-3); }
 	}
-	.nav-logout {
-		color: var(--c-gray-400);
+	@media (min-width: 700px) {
+		.bottom-nav { justify-content: center; grid-template-columns: repeat(4, 120px); }
 	}
 </style>

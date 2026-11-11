@@ -292,6 +292,11 @@ export const gamificationState = pgTable('gamification_state', {
 	level: integer('level').notNull().default(1),
 	streakDays: integer('streak_days').notNull().default(0),
 	streakLastDate: text('streak_last_date'), // ISO date string YYYY-MM-DD
+	// "Streak-Schutz": each one bridges a single missed day. Earned every 7 streak days (max 2).
+	streakFreezes: integer('streak_freezes').notNull().default(1),
+	// XP earned on dailyXpDate — drives the daily goal ring
+	dailyXp: integer('daily_xp').notNull().default(0),
+	dailyXpDate: text('daily_xp_date'), // ISO date string YYYY-MM-DD
 	updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
 });
 

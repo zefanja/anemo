@@ -16,6 +16,14 @@ export interface AttemptResult {
 	levelUp: boolean;
 	newBadges: string[];
 	streakDays: number;
+	combo: number;
+	comboBonus: number;
+	dailyXp: number;
+	dailyGoal: number;
+	dailyGoalReached: boolean;
+	streakFreezes: number;
+	freezeUsed: boolean;
+	freezeEarned: boolean;
 	hint?: string;
 	correctAnswer?: string;
 	submittedAnswer?: string;
@@ -82,6 +90,14 @@ export async function processAttempt(
 		levelUp: gami.levelUp,
 		newBadges: gami.newBadges,
 		streakDays: gami.streakDays,
+		combo: gami.combo,
+		comboBonus: gami.comboBonus,
+		dailyXp: gami.dailyXp,
+		dailyGoal: gami.dailyGoal,
+		dailyGoalReached: gami.dailyGoalReached,
+		streakFreezes: gami.streakFreezes,
+		freezeUsed: gami.freezeUsed,
+		freezeEarned: gami.freezeEarned,
 		hint: !correct ? task.hint : undefined,
 		correctAnswer: !correct ? task.correctAnswer : undefined,
 		submittedAnswer: !correct ? submittedAnswer : undefined
