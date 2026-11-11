@@ -55,21 +55,35 @@ describe('generators ↔ knowledge graph', () => {
 });
 
 describe('every generator', () => {
+	const STAGES = 6;
+	const SAMPLES = 120;
+
 	it.each(registeredAtomIds)('%s yields well-formed tasks at every stage', (id) => {
-		for (let stage = 0; stage < 5; stage++) {
-			for (let i = 0; i < 40; i++) {
+		for (let stage = 0; stage < STAGES; stage++) {
+			const answers = new Set<string>();
+			let binary = true;
+			for (let i = 0; i < SAMPLES; i++) {
 				const task = generateTask(id, stage)!;
+				const text = [task.prompt, task.correctAnswer, task.hint ?? '', ...(task.choices ?? []), JSON.stringify(task.inputData ?? '')].join(' ');
 				expect(task.atomId).toBe(id);
-				expect(task.prompt).not.toMatch(/undefined|NaN|Infinity/);
-				expect(task.correctAnswer).not.toMatch(/undefined|NaN|Infinity/);
+				expect(text + (task.svg ?? '')).not.toMatch(/undefined|NaN|Infinity|\[object/);
+				// German decimal comma everywhere the student can see a number ("3. Vielfache" is fine)
+				expect(text.replace(/\d\. /g, '')).not.toMatch(/\d\.\d/);
+				if (task.answerType === 'integer') expect(task.correctAnswer).toMatch(/^-?\d+$/);
+				if (task.answerType === 'boolean') expect(['ja', 'nein']).toContain(task.correctAnswer);
 				if (task.choices) {
-					// one of the offered choices must be accepted as the correct answer
-					const accepted = task.choices.filter((c) =>
-						checkAnswer(c, task.correctAnswer, task.answerType)
-					);
-					expect(accepted.length).toBeGreaterThan(0);
+					// exactly one offered choice is accepted — answers are compared case-insensitively,
+					// so "b = A : a" and "b = a : A" would both count as correct
+					const accepted = task.choices.filter((c) => checkAnswer(c, task.correctAnswer, task.answerType));
+					expect(accepted, `${task.prompt} ${JSON.stringify(task.choices)}`).toHaveLength(1);
+					if (task.answerType === 'text') expect(task.choices).toContain(task.correctAnswer);
 				}
+				if (!(task.answerType === 'boolean' || task.answerType === 'comparison' || task.choices?.length === 2)) binary = false;
+				answers.add(task.correctAnswer);
 			}
+			// A stage whose tasks are all two-way decisions must not always have the same answer,
+			// otherwise it can be mastered by always pressing the same button.
+			if (binary) expect(answers.size, `stage ${stage} always answers "${[...answers][0]}"`).toBeGreaterThan(1);
 		}
 	});
 });
