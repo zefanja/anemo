@@ -16,9 +16,9 @@ weight:
   transfer_value: 0.95
   cognitive_load: 0.8
 prerequisites:
-- id: algebra__zahlenfolgen
+- id: algebra__folgen_grenzwert
   type: required
-  mastery_level_needed: 0.75
+  mastery_level_needed: 0.7
 - id: algebra__ganzrationale_funktionen
   type: required
   mastery_level_needed: 0.8
@@ -45,4 +45,4 @@ tags:
 - stetigkeit
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 2
+version: 3

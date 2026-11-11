@@ -19,6 +19,9 @@ prerequisites:
 - id: geometrie__sin_cos_tan_definition
   type: required
   mastery_level_needed: 0.85
+- id: algebra__formeln_umstellen
+  type: helpful
+  mastery_level_needed: 0.7
 related:
 - id: geometrie__trigonometrie_rechtwinkliges_dreieck
   relation: special_case_of
@@ -32,4 +35,4 @@ tags:
 - seiten
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

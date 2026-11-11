@@ -1,0 +1,32 @@
+id: stochastik__gegenereignis
+label: Gegenereignis und Gegenwahrscheinlichkeit
+description: Zu einem Ereignis das Gegenereignis angeben und P(nicht A) = 1 − P(A) nutzen („mindestens
+  einmal“).
+domain: stochastik
+subdomain: Wahrscheinlichkeit
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 8
+weight:
+  mastery_required: 0.9
+  curriculum_centrality: 0.85
+  transfer_value: 0.9
+  cognitive_load: 0.45
+prerequisites:
+- id: stochastik__laplace_formel
+  type: required
+  mastery_level_needed: 0.85
+related:
+- id: stochastik__laplace_wahrscheinlichkeit
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms stochastik__laplace_wahrscheinlichkeit
+tags:
+- gegenereignis
+notes: Beim Graph-Review (v4) als fehlende Teilfertigkeit ergänzt; Lehrplanbezug noch nicht gegen das
+  Lehrplan-PDF verifiziert.
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

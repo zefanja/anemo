@@ -16,9 +16,13 @@ weight:
   transfer_value: 0.9
   cognitive_load: 0.5
 prerequisites:
-- id: geometrie__winkelbeziehungen
+- id: geometrie__neben_scheitelwinkel
   type: required
   mastery_level_needed: 0.8
+- id: geometrie__stufen_wechselwinkel
+  type: helpful
+  mastery_level_needed: 0.7
+  note: Der Beweis nutzt Wechselwinkel an Parallelen.
 lehrplan_ref:
 - schulform: GY
   dokument: lp_gy_mathematik_2021.pdf
@@ -28,4 +32,4 @@ tags:
 - dreieck
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

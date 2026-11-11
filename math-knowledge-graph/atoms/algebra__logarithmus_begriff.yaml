@@ -1,0 +1,40 @@
+id: algebra__logarithmus_begriff
+label: Logarithmus als Umkehrung des Potenzierens
+description: Den Logarithmus als gesuchten Exponenten deuten und einfache Logarithmen ohne Hilfsmittel
+  bestimmen.
+domain: algebra
+subdomain: Funktionen
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 10
+weight:
+  mastery_required: 0.9
+  curriculum_centrality: 0.85
+  transfer_value: 0.9
+  cognitive_load: 0.65
+prerequisites:
+- id: algebra__exponentialfunktion_graph
+  type: required
+  mastery_level_needed: 0.8
+- id: algebra__potenzen_negative_exponenten
+  type: required
+  mastery_level_needed: 0.8
+- id: algebra__umkehrfunktion
+  type: helpful
+  mastery_level_needed: 0.7
+related:
+- id: algebra__logarithmus
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms algebra__logarithmus
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 10, LB 4
+tags:
+- logarithmus
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

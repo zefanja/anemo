@@ -22,6 +22,9 @@ prerequisites:
 - id: stochastik__daten_erheben_darstellen_grundschule
   type: required
   mastery_level_needed: 0.7
+- id: stochastik__diagramme_lesen_erstellen
+  type: helpful
+  mastery_level_needed: 0.7
 lehrplan_ref:
 - schulform: GY
   dokument: lp_gy_mathematik_2021.pdf
@@ -30,4 +33,4 @@ tags:
 - häufigkeit
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

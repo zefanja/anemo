@@ -16,13 +16,15 @@ weight:
   transfer_value: 0.85
   cognitive_load: 0.65
 prerequisites:
-- id: algebra__proportionalitaet_dreisatz
+- id: algebra__proportionale_zuordnung
   type: required
   mastery_level_needed: 0.8
-  note: Ähnlichkeit ist Proportionalität in der Geometrie.
 - id: geometrie__kongruenz_dreieckskonstruktion
   type: required
   mastery_level_needed: 0.7
+- id: arithmetik__massstab
+  type: helpful
+  mastery_level_needed: 0.6
 lehrplan_ref:
 - schulform: GY
   dokument: lp_gy_mathematik_2021.pdf
@@ -33,4 +35,4 @@ tags:
 - maßstab
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

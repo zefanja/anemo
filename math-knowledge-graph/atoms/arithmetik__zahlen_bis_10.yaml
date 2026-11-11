@@ -1,0 +1,29 @@
+id: arithmetik__zahlen_bis_10
+label: Zahlen bis 10 (Mengen, Ziffern, Vergleichen)
+description: Mengen bis 10 erfassen und Ziffern zuordnen; Vorgänger und Nachfolger bestimmen; Zahlen bis
+  10 vergleichen (<, >, =).
+domain: arithmetik
+subdomain: Zahlverständnis
+level: atom
+granularity: 5
+schulformen:
+- GS
+jahrgangsstufen:
+- 1
+weight:
+  mastery_required: 0.98
+  curriculum_centrality: 1.0
+  transfer_value: 0.95
+  cognitive_load: 0.25
+prerequisites:
+- id: arithmetik__zaehlen_zahlwortreihe
+  type: required
+  mastery_level_needed: 0.8
+tags:
+- zahlen_bis_10
+- vergleichen
+notes: Beim Graph-Review (v4) als fehlende Teilfertigkeit ergänzt; Lehrplanbezug noch nicht gegen das
+  Lehrplan-PDF verifiziert.
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

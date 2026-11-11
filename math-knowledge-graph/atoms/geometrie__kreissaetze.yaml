@@ -11,9 +11,9 @@ schulformen:
 jahrgangsstufen:
 - 7
 weight:
-  mastery_required: 0.6
+  mastery_required: 0.7
   curriculum_centrality: 0.6
-  transfer_value: 0.6
+  transfer_value: 0.5
   cognitive_load: 0.7
 prerequisites:
 - id: geometrie__innenwinkelsatz_dreieck
@@ -25,6 +25,9 @@ prerequisites:
 - id: logik__saetze_und_beweise
   type: required
   mastery_level_needed: 0.7
+- id: geometrie__kreis_grundbegriffe
+  type: required
+  mastery_level_needed: 0.7
 lehrplan_ref:
 - schulform: GY
   dokument: lp_gy_mathematik_2021.pdf
@@ -34,4 +37,4 @@ tags:
 - kreissätze
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

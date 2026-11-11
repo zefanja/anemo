@@ -16,7 +16,7 @@ jahrgangsstufen:
 weight:
   mastery_required: 0.7
   curriculum_centrality: 0.7
-  transfer_value: 0.75
+  transfer_value: 0.5
   cognitive_load: 0.4
 prerequisites:
 - id: geometrie__ebene_figuren_grundschule
@@ -32,4 +32,4 @@ tags:
 - parkettierung
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

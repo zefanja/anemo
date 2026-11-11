@@ -13,12 +13,19 @@ jahrgangsstufen:
 weight:
   mastery_required: 0.85
   curriculum_centrality: 0.85
-  transfer_value: 0.85
+  transfer_value: 0.8
   cognitive_load: 0.6
 prerequisites:
 - id: geometrie__trigonometrie_rechtwinkliges_dreieck
   type: required
   mastery_level_needed: 0.85
+- id: algebra__verhaeltnisgleichungen
+  type: required
+  mastery_level_needed: 0.75
+- id: algebra__einheitskreis
+  type: helpful
+  mastery_level_needed: 0.6
+  note: Stumpfe Winkel.
 related:
 - id: geometrie__sinussatz_kosinussatz
   relation: special_case_of
@@ -31,4 +38,4 @@ tags:
 - sinussatz
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

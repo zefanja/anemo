@@ -1,0 +1,36 @@
+id: algebra__gleichungen_aus_sachtexten
+label: Gleichungen aus Sachsituationen aufstellen und lösen
+description: Sachtexte in eine Gleichung mit einer Variablen übersetzen, lösen und das Ergebnis im Sachzusammenhang
+  deuten.
+domain: algebra
+subdomain: Gleichungen
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 8
+weight:
+  mastery_required: 0.85
+  curriculum_centrality: 0.85
+  transfer_value: 0.8
+  cognitive_load: 0.7
+prerequisites:
+- id: algebra__lineare_gleichung_variablen_beidseitig
+  type: required
+  mastery_level_needed: 0.8
+- id: algebra__variablenbegriff
+  type: required
+  mastery_level_needed: 0.85
+related:
+- id: algebra__lineare_gleichungen
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms algebra__lineare_gleichungen
+tags:
+- sachaufgaben
+- gleichung_aufstellen
+notes: Beim Graph-Review (v4) als fehlende Teilfertigkeit ergänzt; Lehrplanbezug noch nicht gegen das
+  Lehrplan-PDF verifiziert.
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

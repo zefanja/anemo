@@ -1,0 +1,33 @@
+id: algebra__summen_multiplizieren
+label: Summen multiplizieren ((a + b)(c + d))
+description: 'Zwei Summen miteinander multiplizieren: jedes Glied der ersten mit jedem Glied der zweiten
+  Klammer, anschließend zusammenfassen.'
+domain: algebra
+subdomain: Terme
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 8
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.9
+  transfer_value: 0.9
+  cognitive_load: 0.55
+prerequisites:
+- id: algebra__ausmultiplizieren_distributiv
+  type: required
+  mastery_level_needed: 0.9
+related:
+- id: algebra__terme_umformen
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms algebra__terme_umformen
+tags:
+- terme
+- ausmultiplizieren
+notes: Beim Graph-Review (v4) als fehlende Teilfertigkeit ergänzt; Lehrplanbezug noch nicht gegen das
+  Lehrplan-PDF verifiziert.
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

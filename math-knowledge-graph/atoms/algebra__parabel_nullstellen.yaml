@@ -17,11 +17,14 @@ weight:
   cognitive_load: 0.6
 prerequisites:
 - id: algebra__scheitelform_umwandeln
-  type: required
-  mastery_level_needed: 0.8
+  type: helpful
+  mastery_level_needed: 0.6
 - id: algebra__quadratische_gleichungen
   type: required
   mastery_level_needed: 0.85
+- id: algebra__scheitelpunktform
+  type: required
+  mastery_level_needed: 0.8
 related:
 - id: algebra__quadratische_funktionen
   relation: special_case_of
@@ -35,4 +38,4 @@ tags:
 - nullstellen
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

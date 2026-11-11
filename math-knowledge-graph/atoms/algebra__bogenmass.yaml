@@ -1,0 +1,37 @@
+id: algebra__bogenmass
+label: Bogenmaß und Gradmaß umrechnen
+description: Winkel im Bogenmaß als Bogenlänge am Einheitskreis verstehen und zwischen Grad- und Bogenmaß
+  umrechnen.
+domain: algebra
+subdomain: Funktionen
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 10
+weight:
+  mastery_required: 0.9
+  curriculum_centrality: 0.8
+  transfer_value: 0.85
+  cognitive_load: 0.5
+prerequisites:
+- id: geometrie__kreisbogen_kreissektor
+  type: required
+  mastery_level_needed: 0.75
+- id: algebra__einheitskreis
+  type: helpful
+  mastery_level_needed: 0.6
+related:
+- id: algebra__sinusfunktion
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms algebra__sinusfunktion
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 10, LB 1
+tags:
+- bogenmaß
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

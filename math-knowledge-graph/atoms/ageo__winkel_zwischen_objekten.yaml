@@ -13,15 +13,15 @@ jahrgangsstufen:
 weight:
   mastery_required: 0.85
   curriculum_centrality: 0.85
-  transfer_value: 0.85
+  transfer_value: 0.7
   cognitive_load: 0.6
 prerequisites:
 - id: ageo__skalarprodukt_winkel
   type: required
   mastery_level_needed: 0.85
-- id: ageo__lage_gerade_ebene_ebenen
+- id: ageo__ebene_normalen_koordinatenform
   type: required
-  mastery_level_needed: 0.75
+  mastery_level_needed: 0.8
 related:
 - id: ageo__abstaende_winkel
   relation: special_case_of
@@ -34,4 +34,4 @@ tags:
 - schnittwinkel
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

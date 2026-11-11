@@ -17,8 +17,8 @@ weight:
   cognitive_load: 0.7
 prerequisites:
 - id: geometrie__satz_des_pythagoras
-  type: required
-  mastery_level_needed: 0.8
+  type: helpful
+  mastery_level_needed: 0.6
 - id: geometrie__zentrische_streckung_aehnlichkeit
   type: required
   mastery_level_needed: 0.75
@@ -51,4 +51,4 @@ tags:
 - tangens
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 2
+version: 3

@@ -1,0 +1,35 @@
+id: geometrie__hoehen_erkennen
+label: Höhen in Dreieck und Parallelogramm erkennen
+description: Zu einer Grundseite die zugehörige Höhe erkennen und einzeichnen (auch außerhalb der Figur).
+domain: geometrie
+subdomain: Flächeninhalt
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 6
+weight:
+  mastery_required: 0.9
+  curriculum_centrality: 0.85
+  transfer_value: 0.9
+  cognitive_load: 0.5
+prerequisites:
+- id: geometrie__senkrecht_parallel
+  type: required
+  mastery_level_needed: 0.8
+- id: geometrie__dreiecksarten
+  type: required
+  mastery_level_needed: 0.7
+related:
+- id: geometrie__dreiecke_vierecke_flaecheninhalt
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms geometrie__dreiecke_vierecke_flaecheninhalt
+tags:
+- höhe
+- grundseite
+notes: Beim Graph-Review (v4) als fehlende Teilfertigkeit ergänzt; Lehrplanbezug noch nicht gegen das
+  Lehrplan-PDF verifiziert.
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

@@ -13,7 +13,7 @@ jahrgangsstufen:
 weight:
   mastery_required: 0.7
   curriculum_centrality: 0.6
-  transfer_value: 0.7
+  transfer_value: 0.5
   cognitive_load: 0.5
 prerequisites:
 - id: arithmetik__umwandeln_bruch_dezimal_prozent
@@ -30,4 +30,4 @@ tags:
 - periodische_dezimalzahlen
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

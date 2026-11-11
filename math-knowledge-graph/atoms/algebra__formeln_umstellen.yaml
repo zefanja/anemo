@@ -1,0 +1,33 @@
+id: algebra__formeln_umstellen
+label: Formeln nach einer Variablen umstellen
+description: Formeln und Gleichungen mit mehreren Variablen durch Äquivalenzumformungen nach einer gesuchten
+  Größe auflösen.
+domain: algebra
+subdomain: Gleichungen
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 8
+weight:
+  mastery_required: 0.9
+  curriculum_centrality: 0.85
+  transfer_value: 0.9
+  cognitive_load: 0.65
+prerequisites:
+- id: algebra__lineare_gleichung_zweischritt
+  type: required
+  mastery_level_needed: 0.85
+related:
+- id: algebra__lineare_gleichungen
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms algebra__lineare_gleichungen
+tags:
+- formeln
+- umstellen
+notes: Beim Graph-Review (v4) als fehlende Teilfertigkeit ergänzt; Lehrplanbezug noch nicht gegen das
+  Lehrplan-PDF verifiziert.
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

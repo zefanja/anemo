@@ -18,7 +18,7 @@ prerequisites:
 - id: arithmetik__brueche_add_sub_gleichnamig
   type: required
   mastery_level_needed: 0.9
-- id: arithmetik__erweitern
+- id: arithmetik__brueche_gleichnamig_machen
   type: required
   mastery_level_needed: 0.9
 - id: arithmetik__ggt_kgv
@@ -38,4 +38,4 @@ tags:
 - hauptnenner
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

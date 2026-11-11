@@ -4,7 +4,7 @@ description: Integrieren als Umkehrung des Differenzierens; Stammfunktionen ganz
   von Potenzfunktionen mit rationalen Exponenten, e^x, 1/x, sin x; lineare Substitution.
 domain: analysis
 subdomain: Integralrechnung
-level: atom
+level: cluster
 granularity: 4
 schulformen:
 - GY
@@ -17,11 +17,26 @@ weight:
   cognitive_load: 0.7
 prerequisites:
 - id: analysis__ableitungsregeln
-  type: required
-  mastery_level_needed: 0.85
+  type: helpful
+  mastery_level_needed: 0.7
 - id: analysis__produkt_kettenregel
   type: helpful
   mastery_level_needed: 0.7
+- id: analysis__stammfunktion_potenzregel
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: analysis__stammfunktion_weitere
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: analysis__stammfunktion_lineare_substitution
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
 lehrplan_ref:
 - schulform: GY
   dokument: lp_gy_mathematik_2021.pdf
@@ -31,4 +46,4 @@ tags:
 - integral
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

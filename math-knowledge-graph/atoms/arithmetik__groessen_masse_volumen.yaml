@@ -17,9 +17,9 @@ weight:
   transfer_value: 0.8
   cognitive_load: 0.5
 prerequisites:
-- id: arithmetik__groessen_geld_laenge_zeit
+- id: arithmetik__groessen_laengen
   type: required
-  mastery_level_needed: 0.8
+  mastery_level_needed: 0.75
 - id: arithmetik__stellenwert_bis_1000
   type: required
   mastery_level_needed: 0.8
@@ -36,4 +36,4 @@ tags:
 - kommaschreibweise
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

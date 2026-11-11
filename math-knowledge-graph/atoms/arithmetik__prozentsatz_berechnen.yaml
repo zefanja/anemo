@@ -16,10 +16,10 @@ weight:
   transfer_value: 0.85
   cognitive_load: 0.55
 prerequisites:
-- id: arithmetik__prozentschreibweise
+- id: arithmetik__prozent_grundbegriffe
   type: required
   mastery_level_needed: 0.85
-- id: algebra__proportionalitaet_dreisatz
+- id: algebra__proportionale_zuordnung
   type: required
   mastery_level_needed: 0.8
 - id: arithmetik__prozentwert_berechnen
@@ -37,4 +37,4 @@ tags:
 - prozentsatz
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

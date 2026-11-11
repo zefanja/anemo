@@ -20,7 +20,7 @@ prerequisites:
   mastery_level_needed: 0.85
 - id: algebra__verkettung_verknuepfung
   type: required
-  mastery_level_needed: 0.8
+  mastery_level_needed: 0.75
   note: Innere und äußere Funktion müssen vorab identifiziert werden können.
 - id: analysis__produktregel
   type: required
@@ -41,4 +41,4 @@ tags:
 - kettenregel
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 2
+version: 3

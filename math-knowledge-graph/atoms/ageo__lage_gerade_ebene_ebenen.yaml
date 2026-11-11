@@ -4,8 +4,8 @@ description: Lagebeziehungen zwischen Gerade und Ebene sowie zwischen Ebenen unt
   und Schnittgeraden berechnen.
 domain: analytische_geometrie
 subdomain: Geraden und Ebenen
-level: atom
-granularity: 5
+level: cluster
+granularity: 4
 schulformen:
 - GY
 jahrgangsstufen:
@@ -18,11 +18,21 @@ weight:
   cognitive_load: 0.65
 prerequisites:
 - id: ageo__lage_gerade_gerade
-  type: required
-  mastery_level_needed: 0.8
+  type: helpful
+  mastery_level_needed: 0.7
 - id: ageo__ebene_koordinaten_normalenform
   type: required
   mastery_level_needed: 0.8
+- id: ageo__lage_gerade_ebene
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: ageo__lage_ebene_ebene
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
 related:
 - id: ageo__lagebeziehungen
   relation: special_case_of
@@ -36,4 +46,4 @@ tags:
 - schnittgerade
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

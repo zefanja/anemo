@@ -21,7 +21,7 @@ prerequisites:
   type: required
   mastery_level_needed: 0.8
   note: Wird als Umkehrung der Prozentwert-Berechnung erarbeitet.
-- id: algebra__proportionalitaet_dreisatz
+- id: algebra__proportionale_zuordnung
   type: required
   mastery_level_needed: 0.8
 lehrplan_ref:
@@ -36,4 +36,4 @@ tags:
 - grundwert
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

@@ -23,6 +23,9 @@ prerequisites:
 - id: geometrie__dreiecke_vierecke_flaecheninhalt
   type: required
   mastery_level_needed: 0.8
+- id: geometrie__flaechen_volumeneinheiten_umrechnen
+  type: helpful
+  mastery_level_needed: 0.6
 lehrplan_ref:
 - schulform: GY
   dokument: lp_gy_mathematik_2021.pdf
@@ -32,4 +35,4 @@ tags:
 - volumen
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

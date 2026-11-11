@@ -20,6 +20,12 @@ prerequisites:
   type: required
   mastery_level_needed: 0.85
 - id: algebra__quadratische_funktionen
+  type: helpful
+  mastery_level_needed: 0.7
+- id: algebra__steigung_aus_zwei_punkten
+  type: required
+  mastery_level_needed: 0.85
+- id: algebra__normalparabel_streckung
   type: required
   mastery_level_needed: 0.75
 related:
@@ -35,4 +41,4 @@ tags:
 - differenzenquotient
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

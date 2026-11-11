@@ -1,0 +1,35 @@
+id: geometrie__kreisbogen_kreissektor
+label: Kreisbogen und Kreissektor
+description: Bogenlänge und Flächeninhalt eines Kreisausschnitts als Anteil am Vollkreis berechnen.
+domain: geometrie
+subdomain: Kreis
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 9
+weight:
+  mastery_required: 0.85
+  curriculum_centrality: 0.75
+  transfer_value: 0.75
+  cognitive_load: 0.55
+prerequisites:
+- id: geometrie__kreisflaeche
+  type: required
+  mastery_level_needed: 0.85
+- id: arithmetik__bruch_anteil_einer_menge
+  type: required
+  mastery_level_needed: 0.8
+related:
+- id: geometrie__kreis_umfang_flaecheninhalt
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms geometrie__kreis_umfang_flaecheninhalt
+tags:
+- kreisbogen
+- kreissektor
+notes: Beim Graph-Review (v4) als fehlende Teilfertigkeit ergänzt; Lehrplanbezug noch nicht gegen das
+  Lehrplan-PDF verifiziert.
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

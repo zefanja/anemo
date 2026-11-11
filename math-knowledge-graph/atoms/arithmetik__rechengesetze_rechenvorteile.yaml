@@ -1,5 +1,5 @@
 id: arithmetik__rechengesetze_rechenvorteile
-label: Rechengesetze, Rechenstrategien und Vorrangregeln
+label: Rechengesetze und Rechenvorteile (Kommutativ-, Assoziativ-, Distributivgesetz)
 description: Kommutativ-, Assoziativ- und Distributivgesetz; Rechenvorteile nutzen; Vorrangregeln (Punkt
   vor Strich, Klammern); Überschlag.
 domain: arithmetik
@@ -38,4 +38,4 @@ tags:
 - vorrang
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 2
+version: 3

@@ -19,6 +19,9 @@ prerequisites:
 - id: geometrie__pythagoras_hypotenuse
   type: required
   mastery_level_needed: 0.85
+- id: algebra__formeln_umstellen
+  type: helpful
+  mastery_level_needed: 0.7
 related:
 - id: geometrie__satz_des_pythagoras
   relation: special_case_of
@@ -32,4 +35,4 @@ tags:
 - kathete
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

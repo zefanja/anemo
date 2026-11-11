@@ -19,6 +19,9 @@ prerequisites:
 - id: geometrie__neben_scheitelwinkel
   type: required
   mastery_level_needed: 0.85
+- id: geometrie__senkrecht_parallel
+  type: helpful
+  mastery_level_needed: 0.7
 related:
 - id: geometrie__winkelbeziehungen
   relation: special_case_of
@@ -32,4 +35,4 @@ tags:
 - wechselwinkel
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

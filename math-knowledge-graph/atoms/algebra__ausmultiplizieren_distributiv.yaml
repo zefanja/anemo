@@ -22,6 +22,9 @@ prerequisites:
 - id: arithmetik__rationale_zahlen_multiplizieren_dividieren
   type: required
   mastery_level_needed: 0.85
+- id: algebra__produkte_von_termen
+  type: required
+  mastery_level_needed: 0.85
 related:
 - id: algebra__terme_umformen
   relation: special_case_of
@@ -35,4 +38,4 @@ tags:
 - distributivgesetz
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

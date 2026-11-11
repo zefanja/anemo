@@ -1,0 +1,37 @@
+id: stochastik__sigma_regeln
+label: Sigma-Regeln und Prognoseintervalle
+description: Mit Erwartungswert und Standardabweichung einer Binomialverteilung Prognoseintervalle angeben
+  (Sigma-Regeln).
+domain: stochastik
+subdomain: Statistik
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 12
+weight:
+  mastery_required: 0.8
+  curriculum_centrality: 0.75
+  transfer_value: 0.7
+  cognitive_load: 0.7
+prerequisites:
+- id: stochastik__binomial_erwartungswert_sigma
+  type: required
+  mastery_level_needed: 0.85
+- id: stochastik__kumulierte_binomialverteilung
+  type: required
+  mastery_level_needed: 0.8
+related:
+- id: stochastik__beurteilende_statistik
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms stochastik__beurteilende_statistik
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Jg. 11/12 GK, LB 6
+tags:
+- sigma_regeln
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

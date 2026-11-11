@@ -17,14 +17,18 @@ weight:
   cognitive_load: 0.6
 prerequisites:
 - id: geometrie__satz_des_pythagoras
-  type: required
-  mastery_level_needed: 0.8
+  type: helpful
+  mastery_level_needed: 0.6
 - id: geometrie__zentrische_streckung_aehnlichkeit
   type: required
   mastery_level_needed: 0.75
 - id: arithmetik__brueche_multiplizieren_dividieren
   type: required
   mastery_level_needed: 0.8
+- id: geometrie__pythagoras_hypotenuse
+  type: required
+  mastery_level_needed: 0.75
+  note: Bezeichnungen Hypotenuse/Kathete im rechtwinkligen Dreieck.
 related:
 - id: geometrie__trigonometrie_rechtwinkliges_dreieck
   relation: special_case_of
@@ -39,4 +43,4 @@ tags:
 - tangens
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

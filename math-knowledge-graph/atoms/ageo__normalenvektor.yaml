@@ -1,0 +1,44 @@
+id: ageo__normalenvektor
+label: Normalenvektor einer Ebene bestimmen
+description: Einen zu beiden Spannvektoren orthogonalen Vektor über das Skalarprodukt (LGS) oder das Vektorprodukt
+  bestimmen.
+domain: analytische_geometrie
+subdomain: Geraden und Ebenen
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 11
+- 12
+weight:
+  mastery_required: 0.9
+  curriculum_centrality: 0.9
+  transfer_value: 0.9
+  cognitive_load: 0.6
+prerequisites:
+- id: ageo__ebene_parameterform
+  type: required
+  mastery_level_needed: 0.8
+- id: ageo__skalarprodukt_winkel
+  type: required
+  mastery_level_needed: 0.85
+- id: algebra__lineare_gleichungssysteme
+  type: required
+  mastery_level_needed: 0.8
+- id: ageo__vektorprodukt
+  type: helpful
+  mastery_level_needed: 0.6
+related:
+- id: ageo__ebene_koordinaten_normalenform
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms ageo__ebene_koordinaten_normalenform
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Jg. 11/12 GK, LB 3
+tags:
+- normalenvektor
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

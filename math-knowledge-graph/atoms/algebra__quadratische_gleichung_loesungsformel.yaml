@@ -17,9 +17,15 @@ weight:
   cognitive_load: 0.65
 prerequisites:
 - id: algebra__quadratische_gleichung_faktorisiert
-  type: required
-  mastery_level_needed: 0.8
+  type: helpful
+  mastery_level_needed: 0.7
 - id: algebra__wurzelterme_umformen
+  type: helpful
+  mastery_level_needed: 0.6
+- id: algebra__quadratische_gleichung_reinquadratisch
+  type: required
+  mastery_level_needed: 0.85
+- id: algebra__quadratische_ergaenzung
   type: helpful
   mastery_level_needed: 0.6
 related:
@@ -35,4 +41,4 @@ tags:
 - lösungsformel
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

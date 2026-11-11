@@ -20,9 +20,10 @@ prerequisites:
 - id: stochastik__mehrstufige_zufallsversuche
   type: required
   mastery_level_needed: 0.85
-- id: stochastik__daten_auswerten_kenngroessen
+- id: arithmetik__arithmetisches_mittel
   type: required
   mastery_level_needed: 0.75
+  note: Erwartungswert als gewichtetes Mittel.
 - id: algebra__funktionsbegriff
   type: helpful
   mastery_level_needed: 0.7
@@ -50,4 +51,4 @@ tags:
 - erwartungswert
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 2
+version: 3

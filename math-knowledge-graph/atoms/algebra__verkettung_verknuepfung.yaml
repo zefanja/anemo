@@ -13,7 +13,7 @@ jahrgangsstufen:
 weight:
   mastery_required: 0.75
   curriculum_centrality: 0.65
-  transfer_value: 0.85
+  transfer_value: 0.8
   cognitive_load: 0.7
 prerequisites:
 - id: algebra__funktionsbegriff
@@ -28,4 +28,4 @@ tags:
 - verknüpfung
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

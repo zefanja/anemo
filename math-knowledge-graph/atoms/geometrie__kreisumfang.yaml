@@ -22,6 +22,9 @@ prerequisites:
 - id: algebra__variablen_terme
   type: required
   mastery_level_needed: 0.7
+- id: geometrie__kreis_grundbegriffe
+  type: required
+  mastery_level_needed: 0.8
 related:
 - id: geometrie__kreis_umfang_flaecheninhalt
   relation: special_case_of
@@ -36,4 +39,4 @@ tags:
 - pi
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

@@ -1,0 +1,39 @@
+id: arithmetik__brueche_gleichnamig_machen
+label: Brüche gleichnamig machen (Hauptnenner)
+description: Zu zwei Brüchen einen gemeinsamen Nenner finden (Vielfaches, kgV) und beide Brüche entsprechend
+  erweitern.
+domain: arithmetik
+subdomain: Bruchrechnung
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 6
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.9
+  transfer_value: 0.9
+  cognitive_load: 0.55
+prerequisites:
+- id: arithmetik__erweitern
+  type: required
+  mastery_level_needed: 0.9
+- id: arithmetik__teiler_vielfache
+  type: required
+  mastery_level_needed: 0.8
+- id: arithmetik__ggt_kgv
+  type: helpful
+  mastery_level_needed: 0.7
+related:
+- id: arithmetik__brueche_addieren_subtrahieren
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms arithmetik__brueche_addieren_subtrahieren
+tags:
+- hauptnenner
+- gleichnamig
+notes: Beim Graph-Review (v4) als fehlende Teilfertigkeit ergänzt; Lehrplanbezug noch nicht gegen das
+  Lehrplan-PDF verifiziert.
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

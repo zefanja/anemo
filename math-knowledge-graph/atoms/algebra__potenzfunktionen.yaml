@@ -4,12 +4,13 @@ description: 'Eigenschaften von Potenzfunktionen: Definitions-/Wertebereich, Nul
   Symmetrie; Begriff Polynom.'
 domain: algebra
 subdomain: Funktionen
-level: atom
+level: cluster
 granularity: 4
 schulformen:
 - GY
 jahrgangsstufen:
 - 9
+- 10
 weight:
   mastery_required: 0.8
   curriculum_centrality: 0.8
@@ -22,6 +23,21 @@ prerequisites:
 - id: algebra__funktionsbegriff
   type: required
   mastery_level_needed: 0.85
+- id: algebra__potenzfunktionen_natuerliche_exponenten
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: algebra__potenzfunktionen_negative_exponenten
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: algebra__wurzelfunktionen
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
 lehrplan_ref:
 - schulform: GY
   dokument: lp_gy_mathematik_2021.pdf
@@ -31,4 +47,4 @@ tags:
 - asymptoten
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

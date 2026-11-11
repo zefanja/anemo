@@ -23,17 +23,22 @@ prerequisites:
   type: required
   mastery_level_needed: 0.85
 - id: algebra__logarithmus
-  type: required
-  mastery_level_needed: 0.75
+  type: helpful
+  mastery_level_needed: 0.6
 - id: algebra__sinusfunktion
-  type: required
-  mastery_level_needed: 0.7
+  type: helpful
+  mastery_level_needed: 0.6
 - id: analysis__potenz_summen_faktorregel
   type: required
   mastery_level_needed: 0.8
   note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
     beherrscht sind.
 - id: analysis__ableitung_e_ln_sin
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: analysis__potenzregel_negative_rationale_exponenten
   type: required
   mastery_level_needed: 0.8
   note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
@@ -47,4 +52,4 @@ tags:
 - potenzregel
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 2
+version: 3

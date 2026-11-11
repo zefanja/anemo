@@ -15,9 +15,9 @@ weight:
   transfer_value: 0.9
   cognitive_load: 0.4
 prerequisites:
-- id: arithmetik__groessen_geld_laenge_zeit
+- id: arithmetik__groessen_laengen
   type: required
-  mastery_level_needed: 0.75
+  mastery_level_needed: 0.8
 - id: arithmetik__dezimalzahlen_stellenwert
   type: required
   mastery_level_needed: 0.75
@@ -34,4 +34,4 @@ tags:
 - umrechnen
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

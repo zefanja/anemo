@@ -1,0 +1,38 @@
+id: ageo__lage_ebene_ebene
+label: Lagebeziehung Ebene–Ebene (Schnittgerade)
+description: Untersuchen, ob zwei Ebenen sich schneiden, parallel oder identisch sind; Schnittgerade bestimmen.
+domain: analytische_geometrie
+subdomain: Geraden und Ebenen
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 11
+- 12
+weight:
+  mastery_required: 0.85
+  curriculum_centrality: 0.85
+  transfer_value: 0.7
+  cognitive_load: 0.7
+prerequisites:
+- id: ageo__lage_gerade_ebene
+  type: required
+  mastery_level_needed: 0.8
+- id: ageo__kollinearitaet
+  type: required
+  mastery_level_needed: 0.8
+related:
+- id: ageo__lage_gerade_ebene_ebenen
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms ageo__lage_gerade_ebene_ebenen
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Jg. 11/12 GK, LB 3
+tags:
+- lagebeziehung
+- schnittgerade
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

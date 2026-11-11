@@ -1,0 +1,36 @@
+id: arithmetik__bruch_als_quotient
+label: 'Bruch als Quotient (3 : 4 = 3/4)'
+description: Einen Bruch als Ergebnis einer Division deuten und Divisionsaufgaben als Bruch schreiben.
+domain: arithmetik
+subdomain: Bruchrechnung
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 5
+- 6
+weight:
+  mastery_required: 0.9
+  curriculum_centrality: 0.85
+  transfer_value: 0.9
+  cognitive_load: 0.5
+prerequisites:
+- id: arithmetik__bruch_anteil_eines_ganzen
+  type: required
+  mastery_level_needed: 0.85
+- id: arithmetik__division_grundverstaendnis
+  type: required
+  mastery_level_needed: 0.85
+related:
+- id: arithmetik__bruchbegriff
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms arithmetik__bruchbegriff
+tags:
+- bruch
+- quotient
+notes: Beim Graph-Review (v4) als fehlende Teilfertigkeit ergänzt; Lehrplanbezug noch nicht gegen das
+  Lehrplan-PDF verifiziert.
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

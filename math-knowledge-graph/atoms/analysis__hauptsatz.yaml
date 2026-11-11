@@ -12,13 +12,13 @@ jahrgangsstufen:
 weight:
   mastery_required: 0.95
   curriculum_centrality: 1.0
-  transfer_value: 0.95
+  transfer_value: 0.8
   cognitive_load: 0.6
 prerequisites:
 - id: analysis__integral_orientierte_flaeche
   type: required
   mastery_level_needed: 0.85
-- id: analysis__stammfunktion
+- id: analysis__stammfunktion_potenzregel
   type: required
   mastery_level_needed: 0.85
 related:
@@ -33,4 +33,4 @@ tags:
 - hauptsatz
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

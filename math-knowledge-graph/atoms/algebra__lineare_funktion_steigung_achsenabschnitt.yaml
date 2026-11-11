@@ -19,7 +19,7 @@ prerequisites:
 - id: algebra__funktion_darstellungsformen
   type: required
   mastery_level_needed: 0.85
-- id: algebra__proportionalitaet_dreisatz
+- id: algebra__proportionale_zuordnung
   type: required
   mastery_level_needed: 0.75
 related:
@@ -35,4 +35,4 @@ tags:
 - steigung
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

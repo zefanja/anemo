@@ -12,7 +12,7 @@ jahrgangsstufen:
 weight:
   mastery_required: 0.9
   curriculum_centrality: 0.85
-  transfer_value: 0.85
+  transfer_value: 0.8
   cognitive_load: 0.55
 prerequisites:
 - id: geometrie__kreisflaeche
@@ -21,6 +21,9 @@ prerequisites:
 - id: geometrie__prismen
   type: required
   mastery_level_needed: 0.75
+- id: geometrie__flaechen_volumeneinheiten_umrechnen
+  type: helpful
+  mastery_level_needed: 0.6
 related:
 - id: geometrie__zylinder_kugel
   relation: special_case_of
@@ -35,4 +38,4 @@ tags:
 - oberfläche
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

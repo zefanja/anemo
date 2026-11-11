@@ -4,7 +4,7 @@ description: Logarithmus als Umkehrung des Potenzierens; Logarithmusfunktionen a
   Exponentialfunktionen; Logarithmengesetze; Lösen von Gleichungen der Form a^x = b; e und ln.
 domain: algebra
 subdomain: Funktionen
-level: atom
+level: cluster
 granularity: 4
 schulformen:
 - GY
@@ -20,8 +20,23 @@ prerequisites:
   type: required
   mastery_level_needed: 0.85
 - id: algebra__umkehrfunktion
+  type: helpful
+  mastery_level_needed: 0.7
+- id: algebra__logarithmus_begriff
   type: required
-  mastery_level_needed: 0.75
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: algebra__logarithmengesetze
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: algebra__exponentialgleichungen
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
 lehrplan_ref:
 - schulform: GY
   dokument: lp_gy_mathematik_2021.pdf
@@ -31,4 +46,4 @@ tags:
 - exponentialgleichungen
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

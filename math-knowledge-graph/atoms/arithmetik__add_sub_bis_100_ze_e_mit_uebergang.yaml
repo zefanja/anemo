@@ -1,0 +1,38 @@
+id: arithmetik__add_sub_bis_100_ze_e_mit_uebergang
+label: Addition/Subtraktion ZE ± E mit Zehnerübergang (47 + 8, 63 − 7)
+description: Zu einer zweistelligen Zahl eine einstellige addieren bzw. von ihr subtrahieren, wenn dabei
+  ein Zehner überschritten wird (Teilschrittverfahren bis zum Zehner und darüber hinaus).
+domain: arithmetik
+subdomain: Rechenstrategien
+level: atom
+granularity: 5
+schulformen:
+- GS
+jahrgangsstufen:
+- 2
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.95
+  transfer_value: 0.9
+  cognitive_load: 0.5
+prerequisites:
+- id: arithmetik__add_sub_bis_100_ohne_uebergang
+  type: required
+  mastery_level_needed: 0.85
+- id: arithmetik__zehnerueberschreitung_bis_20
+  type: required
+  mastery_level_needed: 0.9
+related:
+- id: arithmetik__addition_subtraktion_bis_100
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms arithmetik__addition_subtraktion_bis_100
+lehrplan_ref:
+- schulform: GS
+  dokument: lp_gs_mathematik_2025_kommentiert.pdf
+  abschnitt: Kl. 1/2, LB 2 Zahl und Operation
+tags:
+- zehnerübergang
+- zahlenraum_100
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

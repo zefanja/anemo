@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildAncestorSet, buildDiscriminationSets } from './frontier.js';
+import { buildAncestorSet, buildDiscriminationSets, computeGraphDepths } from './frontier.js';
 
 // arithmetik graph example:
 // add_sub_bis_100_mit_uebergang → add_sub_bis_100_ohne_uebergang → stellenwert_bis_100 → zahlverstaendnis_bis_20
@@ -88,5 +88,32 @@ describe('buildDiscriminationSets', () => {
 		const mastered = new Set(['add_ohne_uebergang', 'add_mit_uebergang', 'addition_bis_20']);
 		const result = buildDiscriminationSets([cluster], requiredEdges, atomLevelIds, mastered);
 		expect(result[0].subAtomIds).not.toContain('addition_bis_20');
+	});
+});
+
+describe('computeGraphDepths', () => {
+	it('returns the longest required-prerequisite chain for each node', () => {
+		const depths = computeGraphDepths(edges);
+		expect(depths.get('zahlverstaendnis_bis_20')).toBeUndefined(); // root → depth 0
+		expect(depths.get('stellenwert_bis_100')).toBe(1);
+		expect(depths.get('add_sub_bis_100_ohne_uebergang')).toBe(2);
+		expect(depths.get('add_sub_bis_100_mit_uebergang')).toBe(3);
+	});
+
+	it('uses the longest path when a node has several prerequisites', () => {
+		const depths = computeGraphDepths([
+			{ sourceId: 'a', targetId: 'b' },
+			{ sourceId: 'b', targetId: 'c' },
+			{ sourceId: 'a', targetId: 'c' }
+		]);
+		expect(depths.get('c')).toBe(2);
+	});
+
+	it('terminates on cyclic input', () => {
+		const depths = computeGraphDepths([
+			{ sourceId: 'a', targetId: 'b' },
+			{ sourceId: 'b', targetId: 'a' }
+		]);
+		expect(depths.size).toBeGreaterThan(0);
 	});
 });

@@ -13,13 +13,16 @@ jahrgangsstufen:
 weight:
   mastery_required: 0.85
   curriculum_centrality: 0.85
-  transfer_value: 0.85
+  transfer_value: 0.8
   cognitive_load: 0.55
 prerequisites:
 - id: stochastik__binomialverteilung_formel
   type: required
   mastery_level_needed: 0.85
 - id: stochastik__erwartungswert
+  type: required
+  mastery_level_needed: 0.8
+- id: stochastik__varianz_standardabweichung
   type: required
   mastery_level_needed: 0.8
 related:
@@ -35,4 +38,4 @@ tags:
 - sigma
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

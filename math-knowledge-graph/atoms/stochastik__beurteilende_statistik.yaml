@@ -4,7 +4,7 @@ description: Von der Stichprobe auf die Gesamtheit schließen; Hypothesentests a
   Fehlerarten interpretieren.
 domain: stochastik
 subdomain: Statistik
-level: atom
+level: cluster
 granularity: 4
 schulformen:
 - GY
@@ -19,6 +19,21 @@ prerequisites:
 - id: stochastik__binomialverteilung
   type: required
   mastery_level_needed: 0.85
+- id: stochastik__sigma_regeln
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: stochastik__schaetzen_konfidenzintervall
+  type: required
+  mastery_level_needed: 0.75
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: stochastik__hypothesentest
+  type: required
+  mastery_level_needed: 0.75
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
 lehrplan_ref:
 - schulform: GY
   dokument: lp_gy_mathematik_2021.pdf
@@ -28,4 +43,4 @@ tags:
 - statistik
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

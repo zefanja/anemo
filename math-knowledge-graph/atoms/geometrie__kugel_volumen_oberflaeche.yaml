@@ -12,12 +12,22 @@ jahrgangsstufen:
 weight:
   mastery_required: 0.85
   curriculum_centrality: 0.8
-  transfer_value: 0.8
+  transfer_value: 0.7
   cognitive_load: 0.55
 prerequisites:
 - id: geometrie__zylinder_volumen_oberflaeche
+  type: helpful
+  mastery_level_needed: 0.6
+- id: geometrie__kreisflaeche
+  type: required
+  mastery_level_needed: 0.8
+- id: geometrie__quader_volumen_oberflaeche
   type: required
   mastery_level_needed: 0.75
+  note: Volumenbegriff.
+- id: arithmetik__potenzieren_natuerliche_zahlen
+  type: required
+  mastery_level_needed: 0.8
 related:
 - id: geometrie__zylinder_kugel
   relation: special_case_of
@@ -32,4 +42,4 @@ tags:
 - oberfläche
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

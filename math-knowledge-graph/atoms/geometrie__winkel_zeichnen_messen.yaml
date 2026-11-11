@@ -19,6 +19,9 @@ prerequisites:
 - id: geometrie__lagebeziehungen_lineare_figuren
   type: required
   mastery_level_needed: 0.8
+- id: geometrie__senkrecht_parallel
+  type: required
+  mastery_level_needed: 0.8
 lehrplan_ref:
 - schulform: GY
   dokument: lp_gy_mathematik_2021.pdf
@@ -28,4 +31,4 @@ tags:
 - geodreieck
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

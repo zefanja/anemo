@@ -14,15 +14,18 @@ jahrgangsstufen:
 - 7
 - 9
 weight:
-  mastery_required: 0.6
+  mastery_required: 0.7
   curriculum_centrality: 0.6
   transfer_value: 0.8
   cognitive_load: 0.75
 prerequisites:
 - id: geometrie__innenwinkelsatz_dreieck
+  type: required
+  mastery_level_needed: 0.7
+  note: Der Innenwinkelsatz ist das Einstiegsbeispiel für den direkten Beweis.
+- id: arithmetik__primzahlen_primfaktorzerlegung
   type: helpful
   mastery_level_needed: 0.6
-  note: Der Innenwinkelsatz ist das Einstiegsbeispiel für den direkten Beweis.
 lehrplan_ref:
 - schulform: GY
   dokument: lp_gy_mathematik_2021.pdf
@@ -32,4 +35,4 @@ tags:
 - argumentieren
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

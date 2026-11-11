@@ -16,9 +16,9 @@ weight:
   transfer_value: 0.95
   cognitive_load: 0.5
 prerequisites:
-- id: algebra__ausmultiplizieren_distributiv
+- id: algebra__summen_multiplizieren
   type: required
-  mastery_level_needed: 0.9
+  mastery_level_needed: 0.85
 related:
 - id: algebra__binomische_formeln
   relation: special_case_of
@@ -32,4 +32,4 @@ tags:
 - ausmultiplizieren
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

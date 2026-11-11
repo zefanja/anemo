@@ -1,5 +1,5 @@
 id: stochastik__bedingte_wahrscheinlichkeit_begriff
-label: Bedingte Wahrscheinlichkeit und Satz von Bayes
+label: Bedingte Wahrscheinlichkeit berechnen (Baumdiagramm, Vierfeldertafel)
 description: Bedingte Wahrscheinlichkeiten aus Vierfeldertafel und Baum bestimmen, Bäume umkehren (Satz
   von Bayes) und Ergebnisse im Kontext deuten.
 domain: stochastik
@@ -13,7 +13,7 @@ jahrgangsstufen:
 weight:
   mastery_required: 0.9
   curriculum_centrality: 0.9
-  transfer_value: 0.9
+  transfer_value: 0.7
   cognitive_load: 0.7
 prerequisites:
 - id: stochastik__vierfeldertafel
@@ -32,4 +32,4 @@ tags:
 - bayes
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

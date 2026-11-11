@@ -22,6 +22,9 @@ prerequisites:
 - id: geometrie__rechteck_flaeche_umfang
   type: required
   mastery_level_needed: 0.75
+- id: geometrie__quader_volumen_oberflaeche
+  type: required
+  mastery_level_needed: 0.75
 related:
 - id: geometrie__einheiten_umrechnen
   relation: special_case_of
@@ -35,4 +38,4 @@ tags:
 - volumeneinheiten
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

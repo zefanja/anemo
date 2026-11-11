@@ -19,9 +19,13 @@ prerequisites:
 - id: algebra__scheitelpunktform
   type: required
   mastery_level_needed: 0.85
-- id: algebra__binomische_formeln_rueckwaerts
+- id: algebra__quadratische_ergaenzung
+  type: required
+  mastery_level_needed: 0.85
+- id: algebra__binomische_formeln_vorwaerts
   type: required
   mastery_level_needed: 0.8
+  note: Von der Scheitelpunktform zur allgemeinen Form wird das Binom ausmultipliziert.
 related:
 - id: algebra__quadratische_funktionen
   relation: special_case_of
@@ -35,4 +39,4 @@ tags:
 - quadratische_ergänzung
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

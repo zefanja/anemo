@@ -1,5 +1,5 @@
 id: arithmetik__add_sub_bis_100_mit_uebergang
-label: Addition/Subtraktion bis 100 mit Zehnerübergang
+label: Addition/Subtraktion ZE ± ZE mit Zehnerübergang (47 + 38, 63 − 28)
 description: Aufgaben wie 47+38 oder 62−27 mit Zehnerübergang über tragfähige Strategien (schrittweise,
   Hilfsaufgabe) lösen.
 domain: arithmetik
@@ -19,10 +19,9 @@ prerequisites:
 - id: arithmetik__add_sub_bis_100_ohne_uebergang
   type: required
   mastery_level_needed: 0.85
-- id: arithmetik__zehnerueberschreitung_bis_20
+- id: arithmetik__add_sub_bis_100_ze_e_mit_uebergang
   type: required
   mastery_level_needed: 0.9
-  note: Der Übergang im Hunderterraum baut direkt auf dem Zehnerübergang bis 20 auf.
 lehrplan_ref:
 - schulform: GS
   dokument: lp_gs_mathematik_2025_kommentiert.pdf
@@ -36,4 +35,4 @@ tags:
 - zehnerübergang
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

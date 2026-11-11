@@ -38,6 +38,11 @@ prerequisites:
   mastery_level_needed: 0.8
   note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
     beherrscht sind.
+- id: arithmetik__add_sub_bis_100_ze_e_mit_uebergang
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
 lehrplan_ref:
 - schulform: GS
   dokument: lp_gs_mathematik_2025_kommentiert.pdf
@@ -47,4 +52,4 @@ tags:
 - kopfrechnen
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 2
+version: 3

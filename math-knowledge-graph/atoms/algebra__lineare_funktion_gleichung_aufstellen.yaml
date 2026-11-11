@@ -19,9 +19,12 @@ prerequisites:
 - id: algebra__lineare_funktion_graph_zeichnen
   type: required
   mastery_level_needed: 0.8
-- id: algebra__lineare_gleichungen
+- id: algebra__lineare_gleichung_zweischritt
   type: required
   mastery_level_needed: 0.8
+- id: algebra__steigung_aus_zwei_punkten
+  type: required
+  mastery_level_needed: 0.85
 related:
 - id: algebra__lineare_funktionen
   relation: special_case_of
@@ -35,4 +38,4 @@ tags:
 - gleichung_aufstellen
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

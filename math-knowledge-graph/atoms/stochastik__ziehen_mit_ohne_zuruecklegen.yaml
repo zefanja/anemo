@@ -20,6 +20,9 @@ prerequisites:
 - id: stochastik__pfadadditionsregel
   type: required
   mastery_level_needed: 0.85
+- id: stochastik__gegenereignis
+  type: helpful
+  mastery_level_needed: 0.6
 related:
 - id: stochastik__mehrstufige_zufallsversuche
   relation: special_case_of
@@ -33,4 +36,4 @@ tags:
 - zurücklegen
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

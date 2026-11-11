@@ -1,0 +1,41 @@
+id: algebra__potenzfunktionen_negative_exponenten
+label: Potenzfunktionen mit negativen Exponenten (Hyperbeln)
+description: 'Graphen und Eigenschaften von y = x⁻ⁿ: Definitionslücke, Asymptoten, Symmetrie.'
+domain: algebra
+subdomain: Funktionen
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 9
+- 10
+weight:
+  mastery_required: 0.8
+  curriculum_centrality: 0.8
+  transfer_value: 0.8
+  cognitive_load: 0.65
+prerequisites:
+- id: algebra__potenzfunktionen_natuerliche_exponenten
+  type: required
+  mastery_level_needed: 0.8
+- id: algebra__potenzen_negative_exponenten
+  type: required
+  mastery_level_needed: 0.85
+- id: algebra__antiproportionale_zuordnung
+  type: helpful
+  mastery_level_needed: 0.6
+related:
+- id: algebra__potenzfunktionen
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms algebra__potenzfunktionen
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 9, LB 1
+tags:
+- potenzfunktion
+- hyperbel
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

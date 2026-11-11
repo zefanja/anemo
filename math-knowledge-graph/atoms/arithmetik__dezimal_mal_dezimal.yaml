@@ -17,7 +17,7 @@ weight:
   transfer_value: 0.9
   cognitive_load: 0.55
 prerequisites:
-- id: arithmetik__schriftliche_multiplikation
+- id: arithmetik__dezimal_mal_natuerliche_zahl
   type: required
   mastery_level_needed: 0.85
 - id: arithmetik__kommaverschiebung
@@ -36,4 +36,4 @@ tags:
 - multiplikation
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

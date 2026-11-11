@@ -4,8 +4,8 @@ description: Größenvorstellungen und Stützpunktwissen aufbauen; messen; Einhe
   Einheiten umrechnen; in Sachsituationen rechnen (Preistafeln, Fahrpläne).
 domain: arithmetik
 subdomain: Größen und Messen
-level: atom
-granularity: 3
+level: cluster
+granularity: 4
 schulformen:
 - GS
 jahrgangsstufen:
@@ -27,6 +27,21 @@ prerequisites:
 - id: arithmetik__stellenwert_bis_100
   type: required
   mastery_level_needed: 0.8
+- id: arithmetik__groessen_geld
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: arithmetik__groessen_laengen
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: arithmetik__groessen_zeit
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
 lehrplan_ref:
 - schulform: GS
   dokument: lp_gs_mathematik_2025_kommentiert.pdf
@@ -37,4 +52,4 @@ tags:
 - einheiten
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 2
+version: 3

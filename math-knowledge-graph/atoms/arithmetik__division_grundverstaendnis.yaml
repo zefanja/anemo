@@ -17,10 +17,12 @@ weight:
   transfer_value: 0.95
   cognitive_load: 0.5
 prerequisites:
-- id: arithmetik__einmaleins
+- id: arithmetik__einmaleins_ableiten
   type: required
   mastery_level_needed: 0.85
-  note: Divisionsfakten werden über die Umkehrung der Malfolgen erschlossen.
+- id: arithmetik__multiplikationsverstaendnis
+  type: required
+  mastery_level_needed: 0.85
 lehrplan_ref:
 - schulform: GS
   dokument: lp_gs_mathematik_2025_kommentiert.pdf
@@ -30,4 +32,4 @@ tags:
 - umkehraufgaben
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

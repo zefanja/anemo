@@ -1,0 +1,41 @@
+id: analysis__extremwert_zielfunktion
+label: Zielfunktion mit Nebenbedingung aufstellen
+description: Aus einer Sachsituation Haupt- und Nebenbedingung formulieren und zu einer Zielfunktion mit
+  einer Variablen zusammenführen.
+domain: analysis
+subdomain: Differentialrechnung
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 11
+- 12
+weight:
+  mastery_required: 0.8
+  curriculum_centrality: 0.85
+  transfer_value: 0.7
+  cognitive_load: 0.8
+prerequisites:
+- id: algebra__formeln_umstellen
+  type: required
+  mastery_level_needed: 0.8
+- id: algebra__ganzrationale_grad_verlauf
+  type: required
+  mastery_level_needed: 0.75
+- id: algebra__gleichungen_aus_sachtexten
+  type: helpful
+  mastery_level_needed: 0.6
+related:
+- id: analysis__extremwertprobleme
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms analysis__extremwertprobleme
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Jg. 11/12 GK, LB 1
+tags:
+- zielfunktion
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

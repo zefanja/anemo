@@ -13,12 +13,16 @@ jahrgangsstufen:
 weight:
   mastery_required: 0.9
   curriculum_centrality: 0.9
-  transfer_value: 0.85
+  transfer_value: 0.7
   cognitive_load: 0.65
 prerequisites:
 - id: analysis__monotonie_extrema
   type: required
   mastery_level_needed: 0.85
+- id: analysis__tangentengleichung
+  type: helpful
+  mastery_level_needed: 0.6
+  note: Wendetangente.
 related:
 - id: analysis__kurvenuntersuchung
   relation: special_case_of
@@ -32,4 +36,4 @@ tags:
 - wendepunkte
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

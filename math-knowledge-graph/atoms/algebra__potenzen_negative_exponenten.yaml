@@ -16,7 +16,7 @@ weight:
   transfer_value: 0.9
   cognitive_load: 0.55
 prerequisites:
-- id: algebra__potenzgesetz_potenz_einer_potenz
+- id: algebra__potenzgesetz_gleiche_basis
   type: required
   mastery_level_needed: 0.85
 - id: arithmetik__brueche_multiplizieren_dividieren
@@ -35,4 +35,4 @@ tags:
 - negative_exponenten
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

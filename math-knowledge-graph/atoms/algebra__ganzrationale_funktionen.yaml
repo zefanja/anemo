@@ -4,7 +4,7 @@ description: Verlauf und Eigenschaften ganzrationaler Funktionen; Nullstellenbes
   und Substitution; Systematisierung reeller Funktionen.
 domain: algebra
 subdomain: Funktionen
-level: atom
+level: cluster
 granularity: 4
 schulformen:
 - GY
@@ -17,14 +17,29 @@ weight:
   cognitive_load: 0.7
 prerequisites:
 - id: algebra__potenzfunktionen
-  type: required
-  mastery_level_needed: 0.8
+  type: helpful
+  mastery_level_needed: 0.7
 - id: algebra__quadratische_gleichungen
   type: required
   mastery_level_needed: 0.8
 - id: algebra__terme_umformen
   type: required
   mastery_level_needed: 0.8
+- id: algebra__ganzrationale_grad_verlauf
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: algebra__ganzrationale_nullstellen_ausklammern
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: algebra__ganzrationale_nullstellen_substitution
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
 lehrplan_ref:
 - schulform: GY
   dokument: lp_gy_mathematik_2021.pdf
@@ -34,4 +49,4 @@ tags:
 - polynome
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

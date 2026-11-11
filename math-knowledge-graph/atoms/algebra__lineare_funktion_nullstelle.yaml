@@ -16,8 +16,14 @@ weight:
   cognitive_load: 0.55
 prerequisites:
 - id: algebra__lineare_funktion_gleichung_aufstellen
+  type: helpful
+  mastery_level_needed: 0.7
+- id: algebra__lineare_funktion_graph_zeichnen
   type: required
   mastery_level_needed: 0.8
+- id: algebra__lineare_gleichung_zweischritt
+  type: required
+  mastery_level_needed: 0.85
 related:
 - id: algebra__lineare_funktionen
   relation: special_case_of
@@ -31,4 +37,4 @@ tags:
 - nullstelle
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

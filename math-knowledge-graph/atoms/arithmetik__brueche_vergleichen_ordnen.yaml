@@ -19,6 +19,9 @@ prerequisites:
 - id: arithmetik__kuerzen_erweitern
   type: required
   mastery_level_needed: 0.85
+- id: arithmetik__brueche_gleichnamig_machen
+  type: required
+  mastery_level_needed: 0.85
 lehrplan_ref:
 - schulform: GY
   dokument: lp_gy_mathematik_2021.pdf
@@ -28,4 +31,4 @@ tags:
 - vergleichen
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2
