@@ -1,0 +1,41 @@
+id: analysis__ableitung_e_ln_sin
+label: Ableitungen von e-Funktion, ln, Sinus und Kosinus
+description: Die Ableitungen von e^x, ln(x), sin(x) und cos(x) kennen und in Summen/Vielfachen anwenden.
+domain: analysis
+subdomain: Differentialrechnung
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 11
+weight:
+  mastery_required: 0.9
+  curriculum_centrality: 0.9
+  transfer_value: 0.9
+  cognitive_load: 0.6
+prerequisites:
+- id: analysis__potenz_summen_faktorregel
+  type: required
+  mastery_level_needed: 0.85
+- id: algebra__logarithmus
+  type: required
+  mastery_level_needed: 0.75
+- id: algebra__sinusfunktion
+  type: required
+  mastery_level_needed: 0.7
+related:
+- id: analysis__ableitungsregeln
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms analysis__ableitungsregeln
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Jg. 11/12 GK, LB 1
+tags:
+- e_funktion
+- logarithmus
+- sinus
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

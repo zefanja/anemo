@@ -34,9 +34,16 @@
 				<a
 					href="/teacher/atoms/import"
 					class="t-nav-link"
-					class:active={path.startsWith('/teacher/atoms')}
+					class:active={path.startsWith('/teacher/atoms/import')}
 				>
 					Erklärungen
+				</a>
+				<a
+					href="/teacher/atoms/insights"
+					class="t-nav-link"
+					class:active={path.startsWith('/teacher/atoms/insights')}
+				>
+					Atom-Insights
 				</a>
 				<a
 					href="/teacher/settings"

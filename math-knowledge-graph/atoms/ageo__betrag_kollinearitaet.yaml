@@ -1,0 +1,38 @@
+id: ageo__betrag_kollinearitaet
+label: Betrag eines Vektors und Kollinearität
+description: Die Länge eines Vektors über den räumlichen Pythagoras berechnen; Kollinearität (Parallelität)
+  von Vektoren prüfen.
+domain: analytische_geometrie
+subdomain: Vektoren
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 11
+weight:
+  mastery_required: 0.9
+  curriculum_centrality: 0.9
+  transfer_value: 0.9
+  cognitive_load: 0.55
+prerequisites:
+- id: ageo__vektor_addition_skalarmultiplikation
+  type: required
+  mastery_level_needed: 0.85
+- id: geometrie__satz_des_pythagoras
+  type: required
+  mastery_level_needed: 0.75
+related:
+- id: ageo__vektoren_operationen
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms ageo__vektoren_operationen
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Jg. 11/12 GK, LB 3
+tags:
+- betrag
+- kollinearität
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

@@ -4,8 +4,8 @@ description: Inhalte begrenzter Flächen (auch zwischen Graphen) elementargeomet
   ermitteln; Vorzeichen von Flächenbilanzen deuten.
 domain: analysis
 subdomain: Integralrechnung
-level: atom
-granularity: 5
+level: cluster
+granularity: 4
 schulformen:
 - GY
 jahrgangsstufen:
@@ -23,6 +23,16 @@ prerequisites:
   type: required
   mastery_level_needed: 0.8
   note: Integrationsgrenzen sind oft Schnittstellen zweier Graphen.
+- id: analysis__flaeche_graph_achse
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: analysis__flaeche_zwischen_graphen
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
 lehrplan_ref:
 - schulform: GY
   dokument: lp_gy_mathematik_2021.pdf
@@ -31,4 +41,4 @@ tags:
 - flächenberechnung
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

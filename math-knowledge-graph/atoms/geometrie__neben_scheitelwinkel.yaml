@@ -1,0 +1,34 @@
+id: geometrie__neben_scheitelwinkel
+label: Neben- und Scheitelwinkel
+description: Neben- und Scheitelwinkel an sich schneidenden Geraden erkennen und Winkelgrößen daraus berechnen.
+domain: geometrie
+subdomain: Winkel
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 5
+weight:
+  mastery_required: 0.9
+  curriculum_centrality: 0.85
+  transfer_value: 0.85
+  cognitive_load: 0.4
+prerequisites:
+- id: geometrie__winkel_zeichnen_messen
+  type: required
+  mastery_level_needed: 0.8
+related:
+- id: geometrie__winkelbeziehungen
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms geometrie__winkelbeziehungen
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 5, LB 3 und Kl. 7, LB 1
+tags:
+- nebenwinkel
+- scheitelwinkel
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

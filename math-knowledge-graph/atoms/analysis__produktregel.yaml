@@ -1,0 +1,36 @@
+id: analysis__produktregel
+label: Produktregel
+description: Produkte von Funktionen mit der Produktregel ableiten.
+domain: analysis
+subdomain: Differentialrechnung
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 11
+weight:
+  mastery_required: 0.9
+  curriculum_centrality: 0.9
+  transfer_value: 0.9
+  cognitive_load: 0.65
+prerequisites:
+- id: analysis__potenz_summen_faktorregel
+  type: required
+  mastery_level_needed: 0.85
+- id: analysis__ableitung_e_ln_sin
+  type: helpful
+  mastery_level_needed: 0.7
+related:
+- id: analysis__produkt_kettenregel
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms analysis__produkt_kettenregel
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Jg. 11/12 GK, LB 1
+tags:
+- produktregel
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

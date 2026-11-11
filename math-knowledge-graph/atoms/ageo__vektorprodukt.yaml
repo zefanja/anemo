@@ -1,0 +1,35 @@
+id: ageo__vektorprodukt
+label: Vektorprodukt und Anwendungen
+description: Das Vektorprodukt berechnen und als Normalenvektor sowie für Flächeninhalte von Parallelogramm/Dreieck
+  nutzen.
+domain: analytische_geometrie
+subdomain: Produkte von Vektoren
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 12
+weight:
+  mastery_required: 0.85
+  curriculum_centrality: 0.85
+  transfer_value: 0.85
+  cognitive_load: 0.65
+prerequisites:
+- id: ageo__skalarprodukt_winkel
+  type: required
+  mastery_level_needed: 0.8
+related:
+- id: ageo__skalarprodukt_vektorprodukt
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms ageo__skalarprodukt_vektorprodukt
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Jg. 11/12 GK, LB 7
+tags:
+- vektorprodukt
+- normalenvektor
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

@@ -1,0 +1,37 @@
+id: geometrie__hoehensatz_kathetensatz
+label: Höhensatz und Kathetensatz
+description: Höhensatz und Kathetensatz im rechtwinkligen Dreieck kennen und für Berechnungen nutzen.
+domain: geometrie
+subdomain: Rechtwinklige Dreiecke
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 9
+weight:
+  mastery_required: 0.8
+  curriculum_centrality: 0.75
+  transfer_value: 0.75
+  cognitive_load: 0.65
+prerequisites:
+- id: geometrie__pythagoras_kathete
+  type: required
+  mastery_level_needed: 0.75
+- id: geometrie__strahlensaetze
+  type: helpful
+  mastery_level_needed: 0.6
+related:
+- id: geometrie__satz_des_pythagoras
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms geometrie__satz_des_pythagoras
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 9, LB 3
+tags:
+- höhensatz
+- kathetensatz
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

@@ -1,0 +1,37 @@
+id: geometrie__laengeneinheiten_umrechnen
+label: Längeneinheiten umrechnen
+description: Längeneinheiten (mm bis km) sicher umrechnen, auch mit Dezimalzahlen und in Kommaschreibweise.
+domain: geometrie
+subdomain: Messen
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 5
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.9
+  transfer_value: 0.9
+  cognitive_load: 0.4
+prerequisites:
+- id: arithmetik__groessen_geld_laenge_zeit
+  type: required
+  mastery_level_needed: 0.75
+- id: arithmetik__dezimalzahlen_stellenwert
+  type: required
+  mastery_level_needed: 0.75
+related:
+- id: geometrie__einheiten_umrechnen
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms geometrie__einheiten_umrechnen
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 5, LB 4
+tags:
+- längeneinheiten
+- umrechnen
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

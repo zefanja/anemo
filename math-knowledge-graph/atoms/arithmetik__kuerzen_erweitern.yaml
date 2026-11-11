@@ -5,7 +5,7 @@ description: Gleichwertigkeit von Brüchen; Kürzen und Erweitern als Verfeinern
 domain: arithmetik
 subdomain: Bruchrechnung
 level: cluster
-granularity: 5
+granularity: 4
 schulformen:
 - GY
 jahrgangsstufen:
@@ -43,4 +43,4 @@ tags:
 - erweitern
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 2
+version: 3

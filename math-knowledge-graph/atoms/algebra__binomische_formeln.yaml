@@ -5,7 +5,7 @@ description: Die drei binomischen Formeln herleiten (auch geometrisch interpreti
 domain: algebra
 subdomain: Terme
 level: cluster
-granularity: 5
+granularity: 4
 schulformen:
 - GY
 jahrgangsstufen:
@@ -38,4 +38,4 @@ tags:
 - faktorisieren
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 2
+version: 3

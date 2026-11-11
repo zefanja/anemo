@@ -1,0 +1,42 @@
+id: ageo__ebene_koordinaten_normalenform
+label: Koordinaten- und Normalenform der Ebene
+description: Ebenen in Koordinaten- und Normalenform darstellen, zwischen den Formen wechseln und den
+  Normalenvektor deuten.
+domain: analytische_geometrie
+subdomain: Geraden und Ebenen
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 11
+- 12
+weight:
+  mastery_required: 0.9
+  curriculum_centrality: 0.9
+  transfer_value: 0.95
+  cognitive_load: 0.7
+prerequisites:
+- id: ageo__ebene_parameterform
+  type: required
+  mastery_level_needed: 0.8
+- id: ageo__skalarprodukt_winkel
+  type: required
+  mastery_level_needed: 0.8
+- id: algebra__lineare_gleichungssysteme
+  type: required
+  mastery_level_needed: 0.8
+related:
+- id: ageo__ebenengleichungen
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms ageo__ebenengleichungen
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Jg. 11/12 GK, LB 3
+tags:
+- koordinatenform
+- normalenform
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

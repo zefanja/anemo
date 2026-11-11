@@ -5,7 +5,7 @@ description: Multiplizieren über Anteil-vom-Anteil; Dividieren als Multiplikati
 domain: arithmetik
 subdomain: Bruchrechnung
 level: cluster
-granularity: 5
+granularity: 4
 schulformen:
 - GY
 jahrgangsstufen:
@@ -50,4 +50,4 @@ tags:
 - kehrwert
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 2
+version: 3

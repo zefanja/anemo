@@ -166,7 +166,7 @@
 		}
 	});
 
-	async function loadTask(atomId: string) {
+	async function loadTask(atomId: string, isDiscrimination = false) {
 		isLoading = true;
 		currentTask = null;
 		answer = '';
@@ -180,7 +180,8 @@
 			const params = new URLSearchParams();
 			recentPrompts.slice(-5).forEach(p => params.append('ex', p));
 			const qs = params.toString();
-			const res = await fetch(`/api/task/${atomId}${qs ? '?' + qs : ''}`);
+			const base = isDiscrimination ? `/api/task/cluster/${atomId}` : `/api/task/${atomId}`;
+			const res = await fetch(`${base}${qs ? '?' + qs : ''}`);
 			if (!res.ok) throw new Error();
 			const task = await res.json();
 			currentTask = task;
@@ -194,7 +195,9 @@
 
 	async function submitAnswer() {
 		if (!currentTask || isSubmitting || !String(answer).trim()) return;
-		const atomId = phase === 'reviews' ? currentReview!.atomId : selectedAtom!.atomId;
+		// Always the atomId the task actually came from — for discrimination sets
+		// selectedAtom.atomId is the cluster id, not the resolved sub-atom.
+		const atomId = currentTask.atomId;
 		isSubmitting = true;
 		try {
 			const res = await fetch('/api/attempt', {
@@ -237,6 +240,9 @@
 				reviewIndex = next;
 				loadTask(reviews[next].atomId);
 			}
+		} else if (selectedAtom!.type === 'discrimination') {
+			// Mixed practice never "completes" — keep drawing from the same cluster.
+			loadTask(selectedAtom!.atomId, true);
 		} else {
 			if (lastResult?.justMastered) {
 				masteredAtomIds = new Set([...masteredAtomIds, selectedAtom!.atomId]);
@@ -257,12 +263,22 @@
 
 	function selectAtom(item: FrontierItem) {
 		selectedAtom = item;
-		loadTask(item.atomId);
+		loadTask(item.atomId, item.type === 'discrimination');
 	}
 
 	function selectAnswer(value: string) {
 		answer = value;
 		submitAnswer();
+	}
+
+	function toggleSign() {
+		const s = String(answer);
+		if (s.startsWith('-')) {
+			answer = s.slice(1);
+		} else {
+			answer = '-' + s;
+		}
+		answerInput?.focus();
 	}
 
 	function handleKeydown(e: KeyboardEvent) {
@@ -311,7 +327,7 @@
 				<h2>Was möchtest du üben?</h2>
 				<p class="text-muted">Wähle ein Thema aus</p>
 			</div>
-			{#if availableItems.length === 0}
+			{#if availableItems.length === 0 && data.plan.discriminationSets.length === 0}
 				<div class="screen-center">
 					<div class="empty-state">
 						<img src="/mascot.png" alt="" class="mascot-img" aria-hidden="true" />
@@ -321,22 +337,38 @@
 					</div>
 				</div>
 			{:else}
-				<div class="atom-grid">
-					{#each availableItems as item}
-						<button class="atom-card" onclick={() => selectAtom(item)}>
-							<div class="atom-type-badge" class:is-active={item.type === 'active'}>
-								{item.type === 'active' ? 'Weiterüben' : 'Neu'}
-							</div>
-							<div class="atom-card-label">{item.label}</div>
-							{#if item.mastery > 0}
-								<div class="atom-progress-track">
-									<div class="atom-progress-fill" style="width: {masteryBar(item.mastery)}"></div>
+				{#if availableItems.length > 0}
+					<div class="atom-grid">
+						{#each availableItems as item}
+							<button class="atom-card" onclick={() => selectAtom(item)}>
+								<div class="atom-type-badge" class:is-active={item.type === 'active'}>
+									{item.type === 'active' ? 'Weiterüben' : 'Neu'}
 								</div>
-								<div class="atom-mastery-pct">{Math.round(item.mastery * 100)}%</div>
-							{/if}
-						</button>
-					{/each}
-				</div>
+								<div class="atom-card-label">{item.label}</div>
+								{#if item.mastery > 0}
+									<div class="atom-progress-track">
+										<div class="atom-progress-fill" style="width: {masteryBar(item.mastery)}"></div>
+									</div>
+									<div class="atom-mastery-pct">{Math.round(item.mastery * 100)}%</div>
+								{/if}
+							</button>
+						{/each}
+					</div>
+				{/if}
+				{#if data.plan.discriminationSets.length > 0}
+					<div class="discrimination-section">
+						<h3 class="discrimination-heading">Vermischtes Üben</h3>
+						<p class="text-muted discrimination-subtitle">Du beherrschst diese Themen einzeln — jetzt gemischt üben.</p>
+						<div class="atom-grid">
+							{#each data.plan.discriminationSets as item}
+								<button class="atom-card discrimination-card" onclick={() => selectAtom(item)}>
+									<div class="atom-type-badge is-discrimination">Vermischt</div>
+									<div class="atom-card-label">{item.label}</div>
+								</button>
+							{/each}
+						</div>
+					</div>
+				{/if}
 			{/if}
 		</div>
 
@@ -375,7 +407,7 @@
 			{:else if !currentTask}
 				<div class="task-error">
 					<p>Aufgabe konnte nicht geladen werden.</p>
-					<button class="btn btn-outline" onclick={() => activeItem && loadTask(activeItem.atomId)}>
+					<button class="btn btn-outline" onclick={() => activeItem && loadTask(activeItem.atomId, activeItem.type === 'discrimination')}>
 						Nochmal versuchen
 					</button>
 				</div>
@@ -575,28 +607,33 @@
 								<button class="choice-btn choice-btn-symbol" onclick={() => selectAnswer('>')} disabled={isSubmitting}>&gt;</button>
 							</div>
 						{:else if currentTask.answerType === 'integer'}
-							<input
-								bind:this={answerInput}
-								class="answer-input"
-								type="number"
-								inputmode="numeric"
-								step="1"
-								bind:value={answer}
-								disabled={isSubmitting}
-								placeholder="Antwort"
-								autocomplete="off"
-							/>
+							<div class="input-with-sign">
+								<button class="sign-btn" type="button" onclick={toggleSign} disabled={isSubmitting} tabindex="-1">+/−</button>
+								<input
+									bind:this={answerInput}
+									class="answer-input"
+									type="text"
+									inputmode="numeric"
+									bind:value={answer}
+									disabled={isSubmitting}
+									placeholder="Antwort"
+									autocomplete="off"
+								/>
+							</div>
 						{:else if currentTask.answerType === 'number'}
-							<input
-								bind:this={answerInput}
-								class="answer-input"
-								type="text"
-								inputmode="decimal"
-								bind:value={answer}
-								disabled={isSubmitting}
-								placeholder="z. B. 3,14"
-								autocomplete="off"
-							/>
+							<div class="input-with-sign">
+								<button class="sign-btn" type="button" onclick={toggleSign} disabled={isSubmitting} tabindex="-1">+/−</button>
+								<input
+									bind:this={answerInput}
+									class="answer-input"
+									type="text"
+									inputmode="decimal"
+									bind:value={answer}
+									disabled={isSubmitting}
+									placeholder="z. B. 3,14"
+									autocomplete="off"
+								/>
+							</div>
 						{:else}
 							<input
 								bind:this={answerInput}
@@ -689,6 +726,12 @@
 		align-self: flex-start;
 	}
 	.atom-type-badge.is-active { background: var(--c-primary); }
+	.atom-type-badge.is-discrimination { background: var(--c-warning); }
+	.discrimination-section { margin-top: 1.75rem; }
+	.discrimination-heading { font-size: 1rem; font-weight: 700; color: var(--c-gray-900); }
+	.discrimination-subtitle { margin-bottom: 0.6rem; }
+	.discrimination-card { border-color: var(--c-warning-light); background: var(--c-warning-light); }
+	.discrimination-card:hover, .discrimination-card:focus-visible { border-color: var(--c-warning); }
 	.atom-card-label {
 		font-size: 0.9rem;
 		font-weight: 600;
@@ -888,6 +931,32 @@
 		display: flex;
 		justify-content: center;
 	}
+	.input-with-sign {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+	.sign-btn {
+		flex-shrink: 0;
+		width: 2.75rem;
+		height: 2.75rem;
+		border: 2px solid var(--c-gray-300);
+		border-radius: var(--radius);
+		background: var(--c-gray-50);
+		color: var(--c-gray-700);
+		font-size: 0.85rem;
+		font-weight: 700;
+		cursor: pointer;
+		transition: border-color .15s, background .15s;
+		line-height: 1;
+	}
+	.sign-btn:hover:not(:disabled) {
+		border-color: var(--c-primary);
+		background: var(--c-primary-light);
+		color: var(--c-primary);
+	}
+	.sign-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
 	.answer-input {
 		width: 100%;
 		max-width: 220px;

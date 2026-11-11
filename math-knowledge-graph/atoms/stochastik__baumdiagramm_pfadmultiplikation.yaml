@@ -1,0 +1,35 @@
+id: stochastik__baumdiagramm_pfadmultiplikation
+label: Baumdiagramm und Pfadmultiplikationsregel
+description: Mehrstufige Zufallsversuche im Baumdiagramm darstellen und Pfadwahrscheinlichkeiten durch
+  Multiplizieren berechnen.
+domain: stochastik
+subdomain: Wahrscheinlichkeit
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 8
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.95
+  transfer_value: 0.95
+  cognitive_load: 0.55
+prerequisites:
+- id: stochastik__laplace_formel
+  type: required
+  mastery_level_needed: 0.85
+related:
+- id: stochastik__mehrstufige_zufallsversuche
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms stochastik__mehrstufige_zufallsversuche
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 8, LB 2 und Jg. 11/12 GK, LB 4
+tags:
+- baumdiagramm
+- pfadregel
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

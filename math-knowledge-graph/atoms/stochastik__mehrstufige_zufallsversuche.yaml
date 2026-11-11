@@ -4,7 +4,7 @@ description: Urnenmodell (Ziehen mit/ohne Zurücklegen); Baumdiagramme; Pfadmult
   Simulation.
 domain: stochastik
 subdomain: Wahrscheinlichkeit
-level: atom
+level: cluster
 granularity: 4
 schulformen:
 - GY
@@ -23,6 +23,21 @@ prerequisites:
 - id: arithmetik__brueche_multiplizieren_dividieren
   type: required
   mastery_level_needed: 0.85
+- id: stochastik__baumdiagramm_pfadmultiplikation
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: stochastik__pfadadditionsregel
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: stochastik__ziehen_mit_ohne_zuruecklegen
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
 lehrplan_ref:
 - schulform: GY
   dokument: lp_gy_mathematik_2021.pdf
@@ -33,4 +48,4 @@ tags:
 - urnenmodell
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

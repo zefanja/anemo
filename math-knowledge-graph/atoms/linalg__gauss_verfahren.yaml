@@ -1,0 +1,38 @@
+id: linalg__gauss_verfahren
+label: Gauß-Verfahren (auch mit Parametern/Sonderfällen)
+description: LGS mit dem Gauß-(Jordan-)Verfahren systematisch lösen, auch unter- und überbestimmte Systeme
+  deuten (keine/unendlich viele Lösungen).
+domain: lineare_algebra
+subdomain: Matrizen
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 11
+weight:
+  mastery_required: 0.9
+  curriculum_centrality: 0.85
+  transfer_value: 0.9
+  cognitive_load: 0.7
+prerequisites:
+- id: linalg__erweiterte_koeffizientenmatrix
+  type: required
+  mastery_level_needed: 0.85
+- id: algebra__lgs_additionsverfahren
+  type: required
+  mastery_level_needed: 0.85
+related:
+- id: linalg__matrizen_gleichungssysteme
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms linalg__matrizen_gleichungssysteme
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Jg. 11/12 GK, LB 2
+tags:
+- gauß
+- zeilenumformung
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

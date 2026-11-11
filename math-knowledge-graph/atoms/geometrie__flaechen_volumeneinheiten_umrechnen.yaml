@@ -1,0 +1,38 @@
+id: geometrie__flaechen_volumeneinheiten_umrechnen
+label: Flächen- und Volumeneinheiten umrechnen
+description: Flächen- (Faktor 100) und Volumeneinheiten (Faktor 1000) umrechnen; typischen Fehler 'Faktor
+  10 wie bei Längen' adressieren.
+domain: geometrie
+subdomain: Messen
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 5
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.9
+  transfer_value: 0.9
+  cognitive_load: 0.6
+prerequisites:
+- id: geometrie__laengeneinheiten_umrechnen
+  type: required
+  mastery_level_needed: 0.85
+- id: geometrie__rechteck_flaeche_umfang
+  type: required
+  mastery_level_needed: 0.75
+related:
+- id: geometrie__einheiten_umrechnen
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms geometrie__einheiten_umrechnen
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 5, LB 4
+tags:
+- flächeneinheiten
+- volumeneinheiten
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

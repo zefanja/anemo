@@ -1,0 +1,35 @@
+id: geometrie__flaeche_trapez_zusammengesetzt
+label: Trapez und zusammengesetzte Figuren
+description: Den Flächeninhalt von Trapezen und zusammengesetzten Figuren durch Zerlegen in bekannte Teilflächen
+  bestimmen.
+domain: geometrie
+subdomain: Flächeninhalt
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 6
+weight:
+  mastery_required: 0.85
+  curriculum_centrality: 0.85
+  transfer_value: 0.85
+  cognitive_load: 0.6
+prerequisites:
+- id: geometrie__flaeche_dreieck
+  type: required
+  mastery_level_needed: 0.8
+related:
+- id: geometrie__dreiecke_vierecke_flaecheninhalt
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms geometrie__dreiecke_vierecke_flaecheninhalt
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 6, LB 3
+tags:
+- trapez
+- zusammengesetzte_figuren
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

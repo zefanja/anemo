@@ -1,0 +1,38 @@
+id: ageo__geradengleichung_aufstellen
+label: Geradengleichung in Parameterform aufstellen
+description: Geraden im Raum in Parameterform (Stütz- und Richtungsvektor) aus zwei Punkten oder Punkt
+  und Richtung aufstellen.
+domain: analytische_geometrie
+subdomain: Geraden und Ebenen
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 11
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.95
+  transfer_value: 0.95
+  cognitive_load: 0.55
+prerequisites:
+- id: ageo__vektor_addition_skalarmultiplikation
+  type: required
+  mastery_level_needed: 0.85
+- id: algebra__lineare_funktionen
+  type: helpful
+  mastery_level_needed: 0.7
+related:
+- id: ageo__geradengleichungen
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms ageo__geradengleichungen
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Jg. 11/12 GK, LB 3
+tags:
+- gerade
+- parameterform
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

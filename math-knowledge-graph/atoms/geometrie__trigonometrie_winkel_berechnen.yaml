@@ -1,0 +1,35 @@
+id: geometrie__trigonometrie_winkel_berechnen
+label: Winkel mit Umkehrfunktionen berechnen
+description: Winkelgrößen aus Seitenverhältnissen mit den Umkehrfunktionen (sin⁻¹, cos⁻¹, tan⁻¹ am Taschenrechner)
+  bestimmen.
+domain: geometrie
+subdomain: Trigonometrie
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 9
+weight:
+  mastery_required: 0.9
+  curriculum_centrality: 0.85
+  transfer_value: 0.85
+  cognitive_load: 0.55
+prerequisites:
+- id: geometrie__trigonometrie_seiten_berechnen
+  type: required
+  mastery_level_needed: 0.8
+related:
+- id: geometrie__trigonometrie_rechtwinkliges_dreieck
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms geometrie__trigonometrie_rechtwinkliges_dreieck
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 9, LB 3
+tags:
+- trigonometrie
+- winkel
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

@@ -8,9 +8,29 @@ auf Basis der sächsischen Lehrpläne im Projekt:
 
 ## Umfang
 
-- **219 Atome**, **514 gewichtete prerequisites-Kanten** (azyklisch, geprüft)
-- Domänenverteilung: arithmetik 95, algebra 65, geometrie 27, stochastik 11,
-  analysis 10, analytische_geometrie 8, logik_und_mengen 2, lineare_algebra 1
+- **291 Atome**, **700 gewichtete prerequisites-Kanten** (azyklisch, geprüft)
+- Domänenverteilung: arithmetik 95, algebra 65, geometrie 49, stochastik 30,
+  analysis 25, analytische_geometrie 22, lineare_algebra 3, logik_und_mengen 2
+
+### Feinatomisierung Geometrie, Stochastik, Analysis, Analytische Geometrie, Lineare Algebra (v2) + Gesamtreview
+
+30 weitere Cluster wurden in 72 Mikrofertigkeiten zerlegt (gleiche Mechanik):
+Geometrie (u. a. Flächenformeln einzeln, Pythagoras in 4 Teilfertigkeiten,
+Trigonometrie in 3, Flächen-/Volumeneinheiten getrennt von Längeneinheiten),
+Stochastik (Laplace, Baumdiagramm/Pfadregeln, Kenngrößen, Zufallsgrößen,
+Kombinatorik, Vierfeldertafel/Bayes, Bernoulli/Binomialverteilung),
+Analysis (Änderungsraten → Ableitungsbegriff → Regeln → Kurvenuntersuchung;
+Integral → Hauptsatz → Flächen), Analytische Geometrie (Vektoren, Geraden,
+Ebenenformen, Lagebeziehungen, Skalar-/Vektorprodukt, Abstände/Winkel) und
+Lineare Algebra (Koeffizientenmatrix, Gauß). logik_und_mengen blieb bewusst
+grob (2 kleine Quer­schnitts-Atome).
+
+Ein domänenübergreifender Review korrigierte dabei: 8 Cluster mit
+inkonsistenter Granularität 5 → 4; zwei blockierende Kanten, deren
+Voraussetzung erst später unterrichtet wird, wurden auf `helpful`
+herabgestuft (Pyramide/Kegel ← Sinussatz; Größen Kl. 1 ← Rechnen bis 100).
+Nicht-blockierende Rückwärtskanten vom Typ `deepens`/`helpful` sind
+beabsichtigt (spätere Vertiefung früherer Themen).
 
 ### Feinatomisierung Algebra (v2)
 
@@ -129,7 +149,7 @@ In der Erstellungsumgebung waren `jsonschema`/`networkx` nicht installierbar
 (Schema-Kernregeln, Referenz-Integrität, Zyklenfreiheit per eigener DFS):
 
 ```
-✅ Alle Prüfungen bestanden (219 Atome).
+✅ Alle Prüfungen bestanden (291 Atome).
 ```
 
 **Bitte zusätzlich auf deinem Rechner mit dem Original-Setup validieren**

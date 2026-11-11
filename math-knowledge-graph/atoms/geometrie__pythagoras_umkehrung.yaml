@@ -1,0 +1,37 @@
+id: geometrie__pythagoras_umkehrung
+label: 'Umkehrung: Rechtwinkligkeit prüfen'
+description: Mit der Umkehrung des Satzes prüfen, ob ein Dreieck rechtwinklig ist; Satz und Kehrsatz unterscheiden.
+domain: geometrie
+subdomain: Rechtwinklige Dreiecke
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 9
+weight:
+  mastery_required: 0.85
+  curriculum_centrality: 0.8
+  transfer_value: 0.8
+  cognitive_load: 0.55
+prerequisites:
+- id: geometrie__pythagoras_hypotenuse
+  type: required
+  mastery_level_needed: 0.8
+- id: logik__saetze_und_beweise
+  type: helpful
+  mastery_level_needed: 0.6
+related:
+- id: geometrie__satz_des_pythagoras
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms geometrie__satz_des_pythagoras
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 9, LB 3
+tags:
+- pythagoras
+- umkehrung
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

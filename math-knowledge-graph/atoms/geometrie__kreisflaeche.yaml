@@ -1,0 +1,34 @@
+id: geometrie__kreisflaeche
+label: Flächeninhalt des Kreises
+description: Den Flächeninhalt des Kreises berechnen (A = Pi·r²), auch Umkehraufgaben und einfache Kreisteile.
+domain: geometrie
+subdomain: Kreis
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 9
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.9
+  transfer_value: 0.9
+  cognitive_load: 0.5
+prerequisites:
+- id: geometrie__kreisumfang
+  type: required
+  mastery_level_needed: 0.85
+related:
+- id: geometrie__kreis_umfang_flaecheninhalt
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms geometrie__kreis_umfang_flaecheninhalt
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 9, LB 2
+tags:
+- kreis
+- flächeninhalt
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

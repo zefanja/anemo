@@ -1,0 +1,37 @@
+id: stochastik__vierfeldertafel
+label: Vierfeldertafel aufstellen und nutzen
+description: Absolute und relative Häufigkeiten bzw. Wahrscheinlichkeiten in der Vierfeldertafel darstellen
+  und fehlende Werte erschließen.
+domain: stochastik
+subdomain: Wahrscheinlichkeit
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 12
+weight:
+  mastery_required: 0.9
+  curriculum_centrality: 0.9
+  transfer_value: 0.9
+  cognitive_load: 0.55
+prerequisites:
+- id: stochastik__pfadadditionsregel
+  type: required
+  mastery_level_needed: 0.85
+- id: arithmetik__prozentrechnung
+  type: required
+  mastery_level_needed: 0.8
+related:
+- id: stochastik__bedingte_wahrscheinlichkeit
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms stochastik__bedingte_wahrscheinlichkeit
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Jg. 11/12 GK, LB 4
+tags:
+- vierfeldertafel
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

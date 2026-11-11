@@ -1,0 +1,37 @@
+id: stochastik__bernoulli_kette
+label: Bernoulli-Versuch und Bernoulli-Kette
+description: Bernoulli-Versuche (Treffer/Niete) erkennen und Bernoulli-Ketten mit Länge n und Trefferwahrscheinlichkeit
+  p modellieren.
+domain: stochastik
+subdomain: Zufallsgrößen
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 12
+weight:
+  mastery_required: 0.9
+  curriculum_centrality: 0.9
+  transfer_value: 0.9
+  cognitive_load: 0.55
+prerequisites:
+- id: stochastik__ziehen_mit_ohne_zuruecklegen
+  type: required
+  mastery_level_needed: 0.85
+- id: algebra__potenzgesetze
+  type: required
+  mastery_level_needed: 0.75
+related:
+- id: stochastik__binomialverteilung
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms stochastik__binomialverteilung
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Jg. 11/12 GK, LB 4
+tags:
+- bernoulli
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

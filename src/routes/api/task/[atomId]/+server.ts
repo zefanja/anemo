@@ -23,12 +23,12 @@ export const GET: RequestHandler = async ({ params, locals, url }) => {
 			eq(studentAtomStatus.studentId, locals.session.studentId),
 			eq(studentAtomStatus.atomId, params.atomId)
 		),
-		columns: { mastery: true }
+		columns: { stage: true }
 	});
-	const mastery = statusRow?.mastery ?? 0;
+	const stage = statusRow?.stage ?? 0;
 
 	const excludePrompts = url.searchParams.getAll('ex');
-	const task = await getTaskForAtom(params.atomId, excludePrompts, mastery);
+	const task = await getTaskForAtom(params.atomId, excludePrompts, stage);
 	if (!task) throw error(404, 'Keine Aufgabe verfügbar');
 
 	const baseInputData = task.inputData ?? null;

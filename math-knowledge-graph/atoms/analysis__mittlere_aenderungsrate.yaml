@@ -1,0 +1,38 @@
+id: analysis__mittlere_aenderungsrate
+label: Mittlere Änderungsrate (Differenzenquotient)
+description: Die mittlere Änderungsrate als Differenzenquotient berechnen und als Sekantensteigung sowie
+  im Sachkontext deuten.
+domain: analysis
+subdomain: Differentialrechnung
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 11
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.9
+  transfer_value: 0.95
+  cognitive_load: 0.55
+prerequisites:
+- id: algebra__lineare_funktionen
+  type: required
+  mastery_level_needed: 0.85
+- id: algebra__quadratische_funktionen
+  type: required
+  mastery_level_needed: 0.75
+related:
+- id: analysis__ableitungsbegriff
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms analysis__ableitungsbegriff
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Jg. 11/12 GK, LB 1
+tags:
+- änderungsrate
+- differenzenquotient
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

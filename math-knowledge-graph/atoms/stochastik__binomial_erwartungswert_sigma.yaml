@@ -1,0 +1,38 @@
+id: stochastik__binomial_erwartungswert_sigma
+label: Erwartungswert und Standardabweichung der Binomialverteilung
+description: Erwartungswert (n·p) und Standardabweichung der Binomialverteilung berechnen und zur Beschreibung
+  der Verteilung nutzen.
+domain: stochastik
+subdomain: Zufallsgrößen
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 12
+weight:
+  mastery_required: 0.85
+  curriculum_centrality: 0.85
+  transfer_value: 0.85
+  cognitive_load: 0.55
+prerequisites:
+- id: stochastik__binomialverteilung_formel
+  type: required
+  mastery_level_needed: 0.85
+- id: stochastik__erwartungswert
+  type: required
+  mastery_level_needed: 0.8
+related:
+- id: stochastik__binomialverteilung
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms stochastik__binomialverteilung
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Jg. 11/12 GK, LB 4
+tags:
+- erwartungswert
+- sigma
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

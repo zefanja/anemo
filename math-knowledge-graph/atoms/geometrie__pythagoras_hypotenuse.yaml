@@ -1,0 +1,37 @@
+id: geometrie__pythagoras_hypotenuse
+label: Hypotenuse mit dem Satz des Pythagoras berechnen
+description: Den Satz des Pythagoras verstehen (Flächendeutung) und die Hypotenuse aus den Katheten berechnen.
+domain: geometrie
+subdomain: Rechtwinklige Dreiecke
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 9
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 1.0
+  transfer_value: 0.95
+  cognitive_load: 0.5
+prerequisites:
+- id: algebra__wurzeln_reelle_zahlen
+  type: required
+  mastery_level_needed: 0.8
+- id: geometrie__dreiecke_vierecke_flaecheninhalt
+  type: required
+  mastery_level_needed: 0.75
+related:
+- id: geometrie__satz_des_pythagoras
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms geometrie__satz_des_pythagoras
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 9, LB 3
+tags:
+- pythagoras
+- hypotenuse
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

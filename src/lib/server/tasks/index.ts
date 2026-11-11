@@ -8,14 +8,36 @@ export type { GeneratedTask };
 export type TaskWithId = GeneratedTask & { id: string };
 
 /**
+ * Discrimination practice (DI mixed/interleaved review, see frontier.ts
+ * computeDiscriminationSets): pick one random sub-atom from the cluster's
+ * already-mastered pool and serve a task for it at that atom's current stage.
+ * The returned task carries the real sub-atom's atomId, so submission via
+ * /api/attempt needs no special handling — it looks like a normal atom task.
+ */
+export async function getTaskForCluster(
+	studentId: string,
+	subAtomIds: string[],
+	excludePrompts: string[] = []
+): Promise<TaskWithId | null> {
+	if (subAtomIds.length === 0) return null;
+	const atomId = subAtomIds[Math.floor(Math.random() * subAtomIds.length)];
+	const status = await db.query.studentAtomStatus.findFirst({
+		where: (s, { and, eq }) => and(eq(s.studentId, studentId), eq(s.atomId, atomId)),
+		columns: { stage: true }
+	});
+	return getTaskForAtom(atomId, excludePrompts, status?.stage ?? 0);
+}
+
+/**
  * Get one task for a given atom.
  * Priority: imported static tasks (random pick) → procedural generator.
  * Procedural tasks are saved to DB so the attempt handler can look up the
  * correct answer by ID without re-generating a different task.
  *
  * excludePrompts: prompts recently shown to the student — avoided when possible.
+ * stage: current difficulty stage within the atom's generator (DI expanding sequence, see mastery.ts computeStage).
  */
-export async function getTaskForAtom(atomId: string, excludePrompts: string[] = [], mastery?: number): Promise<TaskWithId | null> {
+export async function getTaskForAtom(atomId: string, excludePrompts: string[] = [], stage?: number): Promise<TaskWithId | null> {
 	// Try to pick an imported task not recently seen
 	let imported = excludePrompts.length > 0
 		? await db.query.tasks.findFirst({
@@ -54,7 +76,7 @@ export async function getTaskForAtom(atomId: string, excludePrompts: string[] = 
 		const excludeSet = new Set(excludePrompts);
 		let generated: GeneratedTask | null = null;
 		for (let attempt = 0; attempt < 5; attempt++) {
-			const candidate = generateTask(atomId, mastery);
+			const candidate = generateTask(atomId, stage);
 			if (!candidate) break;
 			if (!excludeSet.has(candidate.prompt)) { generated = candidate; break; }
 			if (!generated) generated = candidate; // keep as last-resort fallback

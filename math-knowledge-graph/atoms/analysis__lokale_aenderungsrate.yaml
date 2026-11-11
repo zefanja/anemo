@@ -1,0 +1,38 @@
+id: analysis__lokale_aenderungsrate
+label: Lokale Änderungsrate und Tangentensteigung
+description: Den Übergang von der Sekanten- zur Tangentensteigung über den Grenzwert verstehen; Ableitung
+  an einer Stelle als lokale Änderungsrate deuten.
+domain: analysis
+subdomain: Differentialrechnung
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 11
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 1.0
+  transfer_value: 1.0
+  cognitive_load: 0.7
+prerequisites:
+- id: analysis__mittlere_aenderungsrate
+  type: required
+  mastery_level_needed: 0.85
+- id: analysis__grenzwerte_funktionen
+  type: required
+  mastery_level_needed: 0.8
+related:
+- id: analysis__ableitungsbegriff
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms analysis__ableitungsbegriff
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Jg. 11/12 GK, LB 1
+tags:
+- tangente
+- ableitung
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

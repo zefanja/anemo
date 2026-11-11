@@ -4,7 +4,7 @@ description: Satz des Pythagoras kennen, beweisen und zum Berechnen von Strecken
   anwenden; Umkehrung; Höhen- und Kathetensatz.
 domain: geometrie
 subdomain: Rechtwinklige Dreiecke
-level: atom
+level: cluster
 granularity: 4
 schulformen:
 - GY
@@ -28,6 +28,26 @@ prerequisites:
 - id: logik__saetze_und_beweise
   type: helpful
   mastery_level_needed: 0.6
+- id: geometrie__pythagoras_hypotenuse
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: geometrie__pythagoras_kathete
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: geometrie__pythagoras_umkehrung
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: geometrie__hoehensatz_kathetensatz
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
 lehrplan_ref:
 - schulform: GY
   dokument: lp_gy_mathematik_2021.pdf
@@ -37,4 +57,4 @@ tags:
 - rechtwinklig
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

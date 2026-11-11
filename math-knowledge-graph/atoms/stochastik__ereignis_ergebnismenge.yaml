@@ -1,0 +1,35 @@
+id: stochastik__ereignis_ergebnismenge
+label: Zufallsversuch, Ergebnismenge, Ereignis
+description: 'Zufallsversuche beschreiben: Ergebnismenge angeben, Ereignisse als Teilmengen deuten, Gegenereignis
+  bilden.'
+domain: stochastik
+subdomain: Wahrscheinlichkeit
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 8
+weight:
+  mastery_required: 0.9
+  curriculum_centrality: 0.85
+  transfer_value: 0.9
+  cognitive_load: 0.45
+prerequisites:
+- id: stochastik__haeufigkeiten
+  type: required
+  mastery_level_needed: 0.8
+related:
+- id: stochastik__laplace_wahrscheinlichkeit
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms stochastik__laplace_wahrscheinlichkeit
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 8, LB 2
+tags:
+- ereignis
+- ergebnismenge
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

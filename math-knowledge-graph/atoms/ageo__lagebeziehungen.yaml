@@ -4,7 +4,7 @@ description: Lagebeziehungen untersuchen und Schnittpunkte bzw. Schnittgeraden b
   auf lineare Gleichungssysteme.
 domain: analytische_geometrie
 subdomain: Geraden und Ebenen
-level: atom
+level: cluster
 granularity: 4
 schulformen:
 - GY
@@ -22,6 +22,16 @@ prerequisites:
 - id: linalg__matrizen_gleichungssysteme
   type: helpful
   mastery_level_needed: 0.7
+- id: ageo__lage_gerade_gerade
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: ageo__lage_gerade_ebene_ebenen
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
 lehrplan_ref:
 - schulform: GY
   dokument: lp_gy_mathematik_2021.pdf
@@ -31,4 +41,4 @@ tags:
 - schnittpunkt
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

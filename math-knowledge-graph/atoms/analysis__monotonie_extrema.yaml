@@ -1,0 +1,39 @@
+id: analysis__monotonie_extrema
+label: Monotonie und Extrempunkte
+description: Monotonieintervalle über das Vorzeichen von f' bestimmen; Extrempunkte mit notwendiger und
+  hinreichender Bedingung nachweisen.
+domain: analysis
+subdomain: Differentialrechnung
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 11
+- 12
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 1.0
+  transfer_value: 0.95
+  cognitive_load: 0.65
+prerequisites:
+- id: analysis__ableitungsregeln
+  type: required
+  mastery_level_needed: 0.85
+- id: algebra__quadratische_gleichungen
+  type: required
+  mastery_level_needed: 0.85
+related:
+- id: analysis__kurvenuntersuchung
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms analysis__kurvenuntersuchung
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Jg. 11/12 GK, LB 1
+tags:
+- monotonie
+- extrema
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

@@ -1,0 +1,35 @@
+id: analysis__grenzwert_stelle_stetigkeit
+label: Grenzwert an einer Stelle und Stetigkeit
+description: Den Grenzwert einer Funktion an einer Stelle bestimmen und Stetigkeit anschaulich sowie über
+  Grenzwerte beurteilen.
+domain: analysis
+subdomain: Grenzwerte
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 11
+weight:
+  mastery_required: 0.85
+  curriculum_centrality: 0.8
+  transfer_value: 0.85
+  cognitive_load: 0.65
+prerequisites:
+- id: analysis__verhalten_im_unendlichen
+  type: required
+  mastery_level_needed: 0.8
+related:
+- id: analysis__grenzwerte_funktionen
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms analysis__grenzwerte_funktionen
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Jg. 11/12 GK, LB 1
+tags:
+- grenzwert
+- stetigkeit
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

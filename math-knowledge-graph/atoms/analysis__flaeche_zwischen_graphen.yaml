@@ -1,0 +1,34 @@
+id: analysis__flaeche_zwischen_graphen
+label: Fläche zwischen zwei Graphen
+description: Flächen zwischen zwei Graphen über die Differenzfunktion berechnen (Schnittstellen als Grenzen).
+domain: analysis
+subdomain: Integralrechnung
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 12
+weight:
+  mastery_required: 0.9
+  curriculum_centrality: 0.9
+  transfer_value: 0.85
+  cognitive_load: 0.65
+prerequisites:
+- id: analysis__flaeche_graph_achse
+  type: required
+  mastery_level_needed: 0.85
+related:
+- id: analysis__flaechenberechnung
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms analysis__flaechenberechnung
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Jg. 11/12 GK, LB 5 und LB 8
+tags:
+- flächenberechnung
+- differenzfunktion
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

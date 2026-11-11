@@ -1,0 +1,42 @@
+id: geometrie__sin_cos_tan_definition
+label: Sinus, Kosinus, Tangens definieren
+description: Sinus, Kosinus und Tangens als Seitenverhältnisse im rechtwinkligen Dreieck definieren; Gegenkathete/Ankathete
+  sicher zuordnen (Ähnlichkeit als Begründung).
+domain: geometrie
+subdomain: Trigonometrie
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 9
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.95
+  transfer_value: 0.95
+  cognitive_load: 0.6
+prerequisites:
+- id: geometrie__satz_des_pythagoras
+  type: required
+  mastery_level_needed: 0.8
+- id: geometrie__zentrische_streckung_aehnlichkeit
+  type: required
+  mastery_level_needed: 0.75
+- id: arithmetik__brueche_multiplizieren_dividieren
+  type: required
+  mastery_level_needed: 0.8
+related:
+- id: geometrie__trigonometrie_rechtwinkliges_dreieck
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms geometrie__trigonometrie_rechtwinkliges_dreieck
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 9, LB 3
+tags:
+- sinus
+- kosinus
+- tangens
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

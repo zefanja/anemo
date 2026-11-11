@@ -56,7 +56,7 @@
 	let showLeaderboard = $state(data.class.showLeaderboard);
 
 	// Sorting for students tab
-	type StudentSortKey = 'displayName' | 'level' | 'xp' | 'streakDays' | 'masteredCount' | 'lastActiveAt';
+	type StudentSortKey = 'displayName' | 'level' | 'xp' | 'streakDays' | 'masteredCount' | 'lastActiveAt' | 'todayMinutes' | 'weekMinutes';
 	let studentSortKey = $state<StudentSortKey>('displayName');
 	let studentSortDir = $state<'asc' | 'desc'>('asc');
 
@@ -143,6 +143,14 @@
 		if (pct >= 50) return '#d97706';
 		if (pct > 0) return '#f97316';
 		return '#e5e7eb';
+	}
+
+	function fmtMinutes(min: number): string {
+		if (min === 0) return '–';
+		if (min < 60) return `${min} Min.`;
+		const h = Math.floor(min / 60);
+		const m = min % 60;
+		return m === 0 ? `${h} Std.` : `${h} Std. ${m} Min.`;
 	}
 
 	function relativeDate(d: Date | string | null): string {
@@ -383,6 +391,8 @@ ${cards.map((c) => `<div class="card">
 								<th class="sort-th"><button class="sort-btn" class:sorted={studentSortKey==='xp'} onclick={() => toggleStudentSort('xp')}>XP <span class="sort-icon" class:active={studentSortKey==='xp'}>{studentSortIcon('xp')}</span></button></th>
 								<th class="sort-th"><button class="sort-btn" class:sorted={studentSortKey==='streakDays'} onclick={() => toggleStudentSort('streakDays')}>Streak <span class="sort-icon" class:active={studentSortKey==='streakDays'}>{studentSortIcon('streakDays')}</span></button></th>
 								<th class="sort-th"><button class="sort-btn" class:sorted={studentSortKey==='masteredCount'} onclick={() => toggleStudentSort('masteredCount')}>Gemeistert <span class="sort-icon" class:active={studentSortKey==='masteredCount'}>{studentSortIcon('masteredCount')}</span></button></th>
+								<th class="sort-th"><button class="sort-btn" class:sorted={studentSortKey==='todayMinutes'} onclick={() => toggleStudentSort('todayMinutes')}>Heute <span class="sort-icon" class:active={studentSortKey==='todayMinutes'}>{studentSortIcon('todayMinutes')}</span></button></th>
+								<th class="sort-th"><button class="sort-btn" class:sorted={studentSortKey==='weekMinutes'} onclick={() => toggleStudentSort('weekMinutes')}>Diese Woche <span class="sort-icon" class:active={studentSortKey==='weekMinutes'}>{studentSortIcon('weekMinutes')}</span></button></th>
 								<th class="sort-th"><button class="sort-btn" class:sorted={studentSortKey==='lastActiveAt'} onclick={() => toggleStudentSort('lastActiveAt')}>Zuletzt aktiv <span class="sort-icon" class:active={studentSortKey==='lastActiveAt'}>{studentSortIcon('lastActiveAt')}</span></button></th>
 								<th>Aktionen</th>
 							</tr>
@@ -427,6 +437,20 @@ ${cards.map((c) => `<div class="card">
 									<td class="center">{s.xp}</td>
 									<td class="center">🔥 {s.streakDays}</td>
 									<td class="center">{s.masteredCount}/{data.totalAtoms}</td>
+									<td class="center" class:muted={s.todayMinutes === 0 && s.todayTasks === 0}>
+										{#if s.todayTasks > 0}
+											{fmtMinutes(s.todayMinutes)} <span class="muted">({s.todayTasks})</span>
+										{:else}
+											–
+										{/if}
+									</td>
+									<td class="center" class:muted={s.weekMinutes === 0 && s.weekTasks === 0}>
+										{#if s.weekTasks > 0}
+											{fmtMinutes(s.weekMinutes)} <span class="muted">({s.weekTasks})</span>
+										{:else}
+											–
+										{/if}
+									</td>
 									<td class="center muted">{relativeDate(s.lastActiveAt)}</td>
 									<td class="actions-cell">
 										<form method="POST" action="?/resetCode" use:enhance class="inline-form">

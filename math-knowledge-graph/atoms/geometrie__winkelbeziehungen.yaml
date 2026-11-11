@@ -4,8 +4,8 @@ description: Winkel an sich schneidenden Geraden und an geschnittenen Parallelen
   und Berechnungen nutzen.
 domain: geometrie
 subdomain: Winkel
-level: atom
-granularity: 5
+level: cluster
+granularity: 4
 schulformen:
 - GY
 jahrgangsstufen:
@@ -20,6 +20,16 @@ prerequisites:
 - id: geometrie__winkel_zeichnen_messen
   type: required
   mastery_level_needed: 0.8
+- id: geometrie__neben_scheitelwinkel
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: geometrie__stufen_wechselwinkel
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
 lehrplan_ref:
 - schulform: GY
   dokument: lp_gy_mathematik_2021.pdf
@@ -29,4 +39,4 @@ tags:
 - parallelen
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

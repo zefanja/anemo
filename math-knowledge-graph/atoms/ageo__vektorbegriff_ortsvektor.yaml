@@ -1,0 +1,38 @@
+id: ageo__vektorbegriff_ortsvektor
+label: Vektorbegriff, Orts- und Verbindungsvektor
+description: Vektoren als gerichtete Größen deuten; Ortsvektoren und Verbindungsvektoren zwischen Punkten
+  im Raum bestimmen.
+domain: analytische_geometrie
+subdomain: Vektoren
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 11
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.95
+  transfer_value: 0.95
+  cognitive_load: 0.55
+prerequisites:
+- id: ageo__koordinatensystem_raum
+  type: required
+  mastery_level_needed: 0.85
+- id: arithmetik__rationale_zahlen_addieren_subtrahieren
+  type: required
+  mastery_level_needed: 0.85
+related:
+- id: ageo__vektoren_operationen
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms ageo__vektoren_operationen
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Jg. 11/12 GK, LB 3
+tags:
+- vektor
+- ortsvektor
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

@@ -4,7 +4,7 @@ description: Schnittwinkel (Gerade–Gerade, Gerade–Ebene, Ebene–Ebene) und 
   in inner- und außermathematischen Problemen ermitteln.
 domain: analytische_geometrie
 subdomain: Abstände und Winkel
-level: atom
+level: cluster
 granularity: 4
 schulformen:
 - GY
@@ -22,6 +22,21 @@ prerequisites:
 - id: ageo__lagebeziehungen
   type: required
   mastery_level_needed: 0.8
+- id: ageo__abstand_punkt_ebene
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: ageo__abstand_punkt_gerade_windschief
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: ageo__winkel_zwischen_objekten
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
 lehrplan_ref:
 - schulform: GY
   dokument: lp_gy_mathematik_2021.pdf
@@ -31,4 +46,4 @@ tags:
 - schnittwinkel
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

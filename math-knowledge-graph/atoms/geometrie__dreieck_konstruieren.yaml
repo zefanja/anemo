@@ -1,0 +1,35 @@
+id: geometrie__dreieck_konstruieren
+label: Dreiecke konstruieren
+description: Dreiecke aus gegebenen Stücken mit Zirkel und Lineal/Geodreieck konstruieren, Konstruktionsbeschreibung
+  anfertigen.
+domain: geometrie
+subdomain: Dreiecke
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 6
+weight:
+  mastery_required: 0.9
+  curriculum_centrality: 0.85
+  transfer_value: 0.8
+  cognitive_load: 0.6
+prerequisites:
+- id: geometrie__kongruenzsaetze
+  type: required
+  mastery_level_needed: 0.8
+related:
+- id: geometrie__kongruenz_dreieckskonstruktion
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms geometrie__kongruenz_dreieckskonstruktion
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 6, LB 3
+tags:
+- konstruktion
+- dreieck
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

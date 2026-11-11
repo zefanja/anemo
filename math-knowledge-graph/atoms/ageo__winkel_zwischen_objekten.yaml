@@ -1,0 +1,37 @@
+id: ageo__winkel_zwischen_objekten
+label: Winkel zwischen Geraden und Ebenen
+description: Schnittwinkel zwischen Geraden, zwischen Gerade und Ebene sowie zwischen Ebenen mit dem Skalarprodukt
+  berechnen.
+domain: analytische_geometrie
+subdomain: Abstände und Winkel
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 12
+weight:
+  mastery_required: 0.85
+  curriculum_centrality: 0.85
+  transfer_value: 0.85
+  cognitive_load: 0.6
+prerequisites:
+- id: ageo__skalarprodukt_winkel
+  type: required
+  mastery_level_needed: 0.85
+- id: ageo__lage_gerade_ebene_ebenen
+  type: required
+  mastery_level_needed: 0.75
+related:
+- id: ageo__abstaende_winkel
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms ageo__abstaende_winkel
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Jg. 11/12 GK, LB 7
+tags:
+- schnittwinkel
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

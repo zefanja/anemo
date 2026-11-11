@@ -1,0 +1,35 @@
+id: geometrie__kugel_volumen_oberflaeche
+label: 'Kugel: Volumen und Oberfläche'
+description: Volumen- und Oberflächenformel der Kugel anwenden, auch in Umkehraufgaben und Sachkontexten.
+domain: geometrie
+subdomain: Körperberechnung
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 9
+weight:
+  mastery_required: 0.85
+  curriculum_centrality: 0.8
+  transfer_value: 0.8
+  cognitive_load: 0.55
+prerequisites:
+- id: geometrie__zylinder_volumen_oberflaeche
+  type: required
+  mastery_level_needed: 0.75
+related:
+- id: geometrie__zylinder_kugel
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms geometrie__zylinder_kugel
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 9, LB 2
+tags:
+- kugel
+- volumen
+- oberfläche
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

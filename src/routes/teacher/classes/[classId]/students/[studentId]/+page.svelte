@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import MathText from '$lib/components/student/MathText.svelte';
+	import ActivityCharts from '$lib/components/teacher/ActivityCharts.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -170,6 +171,9 @@
 			<div class="stat-label">Noch nicht begonnen</div>
 		</div>
 	</div>
+
+	<!-- Activity: time spent, tasks done, mastery trend -->
+	<ActivityCharts dailyStats={data.dailyStats} masteryTimeline={data.masteryTimeline} />
 
 	<!-- Domain-unlock panel (only shown when class has restricted domains) -->
 	{#if lockedDomains.length > 0}

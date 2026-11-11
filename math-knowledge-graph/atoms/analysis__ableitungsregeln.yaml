@@ -4,7 +4,7 @@ description: Hilfsmittelfreies Ableiten ganzrationaler Funktionen und von Potenz
   Exponenten sowie von e^x, ln x und sin x.
 domain: analysis
 subdomain: Differentialrechnung
-level: atom
+level: cluster
 granularity: 4
 schulformen:
 - GY
@@ -28,6 +28,16 @@ prerequisites:
 - id: algebra__sinusfunktion
   type: required
   mastery_level_needed: 0.7
+- id: analysis__potenz_summen_faktorregel
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: analysis__ableitung_e_ln_sin
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
 lehrplan_ref:
 - schulform: GY
   dokument: lp_gy_mathematik_2021.pdf
@@ -37,4 +47,4 @@ tags:
 - potenzregel
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

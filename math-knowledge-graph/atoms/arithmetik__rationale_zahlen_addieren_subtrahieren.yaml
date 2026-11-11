@@ -5,7 +5,7 @@ description: Addition und Subtraktion mit negativen Zahlen (Vorzeichen- und Rech
 domain: arithmetik
 subdomain: Rationale Zahlen
 level: cluster
-granularity: 5
+granularity: 4
 schulformen:
 - GY
 jahrgangsstufen:
@@ -51,4 +51,4 @@ tags:
 - vorzeichenregeln
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 2
+version: 3

@@ -4,6 +4,7 @@ import { students, classes } from '$lib/server/db/schema.js';
 import { eq } from 'drizzle-orm';
 import { generateCode, hashCode } from '$lib/server/auth/codes.js';
 import { randomUUID } from 'node:crypto';
+import { getClassActivitySummary } from '$lib/server/analytics/activity.js';
 import type { Actions, PageServerLoad } from './$types';
 
 const ADJECTIVES = [
@@ -48,7 +49,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 
 	const studentIds = studentList.map((s) => s.id);
 
-	const [gamiStates, masteredStatuses, allAtoms, allAtomStatuses, rawAttempts] = await Promise.all([
+	const [gamiStates, masteredStatuses, allAtoms, allAtomStatuses, rawAttempts, activitySummary] = await Promise.all([
 		studentIds.length > 0
 			? db.query.gamificationState.findMany({
 					where: (g, { inArray }) => inArray(g.studentId, studentIds)
@@ -83,7 +84,8 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 						atom: { columns: { label: true } }
 					}
 				})
-			: Promise.resolve([])
+			: Promise.resolve([]),
+		getClassActivitySummary(studentIds)
 	]);
 
 	const enabledAtoms = cls.enabledDomains
@@ -183,6 +185,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 				const done = ids.filter((id) => mastered.has(id)).length;
 				return Math.round((done / ids.length) * 100);
 			});
+			const activity = activitySummary.get(s.id);
 			return {
 				id: s.id,
 				displayName: s.displayName,
@@ -191,7 +194,11 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 				level: gami?.level ?? 1,
 				streakDays: gami?.streakDays ?? 0,
 				masteredCount: mastered.size,
-				domainPct
+				domainPct,
+				todayMinutes: activity?.todayMinutes ?? 0,
+				todayTasks: activity?.todayTasks ?? 0,
+				weekMinutes: activity?.weekMinutes ?? 0,
+				weekTasks: activity?.weekTasks ?? 0
 			};
 		})
 	};

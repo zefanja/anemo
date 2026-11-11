@@ -1,0 +1,35 @@
+id: geometrie__trigonometrie_seiten_berechnen
+label: Seitenlängen mit sin/cos/tan berechnen
+description: Fehlende Seitenlängen im rechtwinkligen Dreieck über die passende Winkelfunktion berechnen
+  (Gleichung aufstellen und umstellen).
+domain: geometrie
+subdomain: Trigonometrie
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 9
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.9
+  transfer_value: 0.9
+  cognitive_load: 0.6
+prerequisites:
+- id: geometrie__sin_cos_tan_definition
+  type: required
+  mastery_level_needed: 0.85
+related:
+- id: geometrie__trigonometrie_rechtwinkliges_dreieck
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms geometrie__trigonometrie_rechtwinkliges_dreieck
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 9, LB 3
+tags:
+- trigonometrie
+- seiten
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

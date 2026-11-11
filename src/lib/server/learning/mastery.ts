@@ -1,6 +1,7 @@
 import { db } from '../db/index.js';
 import { studentAtomStatus } from '../db/schema.js';
 import { eq, and } from 'drizzle-orm';
+import { env } from '$env/dynamic/private';
 
 // Mastery uses an Exponentially Weighted Moving Average (EWMA).
 // α = 1 - DECAY_FACTOR is the weight of the current answer; older answers decay.
@@ -19,12 +20,31 @@ export function computeMastery(prevMastery: number, isCorrect: boolean, totalAtt
 	return raw;
 }
 
+// Stage progression implements a DI-style expanding sequence within an atom's
+// generator: a stage only counts as firm once STAGE_STREAK_TARGET consecutive
+// answers were correct, at which point the student advances to the next
+// (harder) stage. A wrong answer resets the streak and steps back one stage
+// (correction procedure) rather than dropping straight to stage 0.
+export function computeStage(
+	prevStage: number,
+	prevStreak: number,
+	isCorrect: boolean
+): { stage: number; stageStreak: number } {
+	const target = parseInt(env.STAGE_STREAK_TARGET ?? '4');
+	if (isCorrect) {
+		const streak = prevStreak + 1;
+		if (streak >= target) return { stage: prevStage + 1, stageStreak: 0 };
+		return { stage: prevStage, stageStreak: streak };
+	}
+	return { stage: Math.max(0, prevStage - 1), stageStreak: 0 };
+}
+
 export async function updateMastery(
 	studentId: string,
 	atomId: string,
 	isCorrect: boolean,
 	masteryRequired: number
-): Promise<{ mastery: number; justMastered: boolean }> {
+): Promise<{ mastery: number; justMastered: boolean; stage: number }> {
 	const existing = await db.query.studentAtomStatus.findFirst({
 		where: (s, { and, eq }) => and(eq(s.studentId, studentId), eq(s.atomId, atomId))
 	});
@@ -40,6 +60,7 @@ export async function updateMastery(
 	const effectiveRequired = Math.min(masteryRequired, 0.95);
 	const isMastered = mastery >= effectiveRequired;
 	const justMastered = !wasMastered && isMastered;
+	const { stage, stageStreak } = computeStage(existing?.stage ?? 0, existing?.stageStreak ?? 0, isCorrect);
 
 	const now = new Date();
 
@@ -51,6 +72,8 @@ export async function updateMastery(
 				correctAttempts: newCorrect,
 				mastery,
 				isMastered,
+				stage,
+				stageStreak,
 				masteredAt: justMastered ? now : existing.masteredAt,
 				lastPracticedAt: now,
 				updatedAt: now
@@ -64,13 +87,15 @@ export async function updateMastery(
 			correctAttempts: newCorrect,
 			mastery,
 			isMastered,
+			stage,
+			stageStreak,
 			masteredAt: justMastered ? now : null,
 			lastPracticedAt: now,
 			updatedAt: now
 		});
 	}
 
-	return { mastery, justMastered };
+	return { mastery, justMastered, stage };
 }
 
 // Cluster mastery = minimum mastery of all required sub-atoms.

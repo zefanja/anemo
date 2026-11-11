@@ -1,9 +1,9 @@
-import { computeFrontier, type FrontierAtom } from './frontier.js';
+import { computeFrontier, computeReinforcedAncestors, computeDiscriminationSets } from './frontier.js';
 import { getDueReviews } from './fsrs.js';
 import { db } from '../db/index.js';
 import { env } from '$env/dynamic/private';
 
-export type SessionItemType = 'review' | 'new' | 'active';
+export type SessionItemType = 'review' | 'new' | 'active' | 'discrimination';
 
 export interface SessionItem {
 	atomId: string;
@@ -20,6 +20,9 @@ export interface PracticeSession {
 	mandatoryReviews: SessionItem[];
 	// Available frontier items for free practice (after reviews done)
 	frontierItems: SessionItem[];
+	// Clusters whose sub-atoms are all individually mastered — mixed/interleaved
+	// practice across them (DI discrimination phase), available like frontier items.
+	discriminationSets: SessionItem[];
 	reviewsDone: boolean;
 }
 
@@ -49,9 +52,20 @@ export async function buildSession(
 				? [...new Set([...classDomains, ...extraDomains])]
 				: classDomains;
 
+	const [dueReviews, frontier, discriminationSetData] = await Promise.all([
+		getDueReviews(studentId),
+		computeFrontier(studentId, enabledDomains),
+		computeDiscriminationSets(studentId, enabledDomains)
+	]);
+
+	// Atoms the student is actively working on (started, not yet mastered) implicitly
+	// reinforce their own required prerequisites — those don't need a separate review.
+	const activeAtomIds = frontier.filter((a) => a.mastery > 0).map((a) => a.id);
+	const reinforcedAncestors = await computeReinforcedAncestors(activeAtomIds);
+	const relevantReviews = dueReviews.filter((r) => !reinforcedAncestors.has(r.atomId));
+
 	// FSRS reviews – mandatory, capped at maxReview
-	const dueReviews = await getDueReviews(studentId);
-	const mandatoryReviews: SessionItem[] = dueReviews.slice(0, maxReview).map((r) => ({
+	const mandatoryReviews: SessionItem[] = relevantReviews.slice(0, maxReview).map((r) => ({
 		atomId: r.atomId,
 		label: r.label,
 		type: 'review',
@@ -62,7 +76,6 @@ export async function buildSession(
 	}));
 
 	// Frontier atoms for free practice
-	const frontier = await computeFrontier(studentId, enabledDomains);
 	const frontierItems: SessionItem[] = frontier.map((a) => ({
 		atomId: a.id,
 		label: a.label,
@@ -73,9 +86,20 @@ export async function buildSession(
 		graphDepth: a.graphDepth
 	}));
 
+	const discriminationSets: SessionItem[] = discriminationSetData.map((d) => ({
+		atomId: d.clusterId,
+		label: d.label,
+		type: 'discrimination',
+		mastery: 1,
+		masteryRequired: 1,
+		cognitiveLoad: 0.5,
+		graphDepth: 0
+	}));
+
 	return {
 		mandatoryReviews,
 		frontierItems,
+		discriminationSets,
 		reviewsDone: mandatoryReviews.length === 0
 	};
 }

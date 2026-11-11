@@ -4,7 +4,7 @@ description: Vektorbegriff; Addition, Subtraktion und Vielfachenbildung mit Rech
   Veranschaulichung; lineare Abhängigkeit anschaulich.
 domain: analytische_geometrie
 subdomain: Vektoren
-level: atom
+level: cluster
 granularity: 4
 schulformen:
 - GY
@@ -22,6 +22,21 @@ prerequisites:
 - id: arithmetik__rationale_zahlen_addieren_subtrahieren
   type: required
   mastery_level_needed: 0.85
+- id: ageo__vektorbegriff_ortsvektor
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: ageo__vektor_addition_skalarmultiplikation
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: ageo__betrag_kollinearitaet
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
 lehrplan_ref:
 - schulform: GY
   dokument: lp_gy_mathematik_2021.pdf
@@ -30,4 +45,4 @@ tags:
 - vektoren
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

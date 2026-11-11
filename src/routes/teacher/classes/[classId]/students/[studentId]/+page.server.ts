@@ -3,7 +3,10 @@ import { db } from '$lib/server/db/index.js';
 import { eq } from 'drizzle-orm';
 import { students } from '$lib/server/db/schema.js';
 import { computeRetrievability, type FsrsState } from '$lib/server/learning/fsrs.js';
+import { getDailyStats, getMasteryTimeline } from '$lib/server/analytics/activity.js';
 import type { Actions, PageServerLoad } from './$types';
+
+const ACTIVITY_DAYS = 90;
 
 export const load: PageServerLoad = async ({ locals, params }) => {
 	if (!locals.session || locals.session.type !== 'teacher') {
@@ -21,7 +24,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 	});
 	if (!student) throw error(404, 'Schüler nicht gefunden');
 
-	const [allAtoms, atomStatuses, gami, recentAttempts] = await Promise.all([
+	const [allAtoms, atomStatuses, gami, dailyStats, masteryTimeline] = await Promise.all([
 		db.query.atoms.findMany({
 			where: (a, { eq: eqFn }) => eqFn(a.level, 'atom'),
 			columns: { id: true, label: true, domain: true, subdomain: true },
@@ -33,12 +36,8 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 		db.query.gamificationState.findFirst({
 			where: (g, { eq }) => eq(g.studentId, params.studentId)
 		}),
-		db.query.attempts.findMany({
-			where: (a, { eq }) => eq(a.studentId, params.studentId),
-			orderBy: (a, { desc }) => [desc(a.answeredAt)],
-			limit: 50,
-			columns: { atomId: true, isCorrect: true, answeredAt: true }
-		})
+		getDailyStats(params.studentId, ACTIVITY_DAYS),
+		getMasteryTimeline(params.studentId, ACTIVITY_DAYS)
 	]);
 
 	const classDomains = cls.enabledDomains ?? null;
@@ -87,15 +86,6 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 	const inProgressCount = atomStatuses.filter((s) => !s.isMastered && s.totalAttempts > 0 && enabledAtomIds.has(s.atomId)).length;
 	const startedCount = masteredCount + inProgressCount;
 
-	// Recent activity: last 7 days per day
-	const activityByDay: Record<string, { correct: number; total: number }> = {};
-	for (const a of recentAttempts) {
-		const day = new Date(a.answeredAt).toISOString().slice(0, 10);
-		if (!activityByDay[day]) activityByDay[day] = { correct: 0, total: 0 };
-		activityByDay[day].total++;
-		if (a.isCorrect) activityByDay[day].correct++;
-	}
-
 	// All unique domains in the graph for the domain-unlock panel
 	const allDomains = [...new Set(allAtoms.map((a) => a.domain))].sort();
 
@@ -119,7 +109,8 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 		inProgressCount,
 		startedCount,
 		atomsByDomain,
-		activityByDay
+		dailyStats,
+		masteryTimeline
 	};
 };
 

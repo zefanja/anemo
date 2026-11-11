@@ -1,0 +1,34 @@
+id: stochastik__streumasse
+label: Streumaße (Spannweite, mittlere Abweichung)
+description: Spannweite und einfache Streumaße bestimmen und zur Beurteilung von Datenreihen nutzen.
+domain: stochastik
+subdomain: Daten
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 9
+weight:
+  mastery_required: 0.85
+  curriculum_centrality: 0.8
+  transfer_value: 0.8
+  cognitive_load: 0.55
+prerequisites:
+- id: stochastik__median_quartile_boxplot
+  type: required
+  mastery_level_needed: 0.8
+related:
+- id: stochastik__daten_auswerten_kenngroessen
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms stochastik__daten_auswerten_kenngroessen
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 9, LB 4
+tags:
+- streumaße
+- spannweite
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

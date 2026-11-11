@@ -1,0 +1,38 @@
+id: ageo__skalarprodukt_winkel
+label: Skalarprodukt, Orthogonalität und Winkel
+description: Das Skalarprodukt berechnen, Orthogonalität prüfen und Winkel zwischen Vektoren bestimmen.
+domain: analytische_geometrie
+subdomain: Produkte von Vektoren
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 11
+- 12
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.95
+  transfer_value: 0.95
+  cognitive_load: 0.6
+prerequisites:
+- id: ageo__betrag_kollinearitaet
+  type: required
+  mastery_level_needed: 0.85
+- id: geometrie__trigonometrie_rechtwinkliges_dreieck
+  type: required
+  mastery_level_needed: 0.75
+related:
+- id: ageo__skalarprodukt_vektorprodukt
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms ageo__skalarprodukt_vektorprodukt
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Jg. 11/12 GK, LB 7
+tags:
+- skalarprodukt
+- orthogonalität
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

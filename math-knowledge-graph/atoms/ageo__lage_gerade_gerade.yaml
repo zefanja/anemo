@@ -1,0 +1,38 @@
+id: ageo__lage_gerade_gerade
+label: Lagebeziehungen zweier Geraden
+description: Identisch, parallel, schneidend oder windschief unterscheiden; Schnittpunkte über Gleichungssysteme
+  bestimmen.
+domain: analytische_geometrie
+subdomain: Geraden und Ebenen
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 11
+weight:
+  mastery_required: 0.9
+  curriculum_centrality: 0.9
+  transfer_value: 0.9
+  cognitive_load: 0.65
+prerequisites:
+- id: ageo__punktprobe_gerade
+  type: required
+  mastery_level_needed: 0.85
+- id: algebra__lineare_gleichungssysteme
+  type: required
+  mastery_level_needed: 0.8
+related:
+- id: ageo__lagebeziehungen
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms ageo__lagebeziehungen
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Jg. 11/12 GK, LB 3
+tags:
+- lagebeziehung
+- windschief
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

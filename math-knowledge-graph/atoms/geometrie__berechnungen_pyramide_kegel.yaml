@@ -24,8 +24,10 @@ prerequisites:
   type: required
   mastery_level_needed: 0.7
 - id: geometrie__sinussatz_kosinussatz
-  type: required
-  mastery_level_needed: 0.75
+  type: helpful
+  mastery_level_needed: 0.6
+  note: Sinus-/Kosinussatz erst für die Kl.-10-Vertiefung nötig; Kl.-9-Berechnungen kommen mit Trigonometrie
+    im rechtwinkligen Dreieck aus.
 - id: geometrie__trigonometrie_rechtwinkliges_dreieck
   type: required
   mastery_level_needed: 0.8
@@ -39,4 +41,4 @@ tags:
 - raumgeometrie
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

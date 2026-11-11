@@ -5,7 +5,7 @@ description: Gleichnamige und ungleichnamige Brüche addieren/subtrahieren; Haup
 domain: arithmetik
 subdomain: Bruchrechnung
 level: cluster
-granularity: 5
+granularity: 4
 schulformen:
 - GY
 jahrgangsstufen:
@@ -52,4 +52,4 @@ tags:
 - hauptnenner
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 2
+version: 3

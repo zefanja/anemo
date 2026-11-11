@@ -1,0 +1,39 @@
+id: geometrie__kreisumfang
+label: Kreisumfang (Kreiszahl Pi)
+description: Die Kreiszahl Pi als Verhältnis von Umfang zu Durchmesser verstehen und den Umfang berechnen
+  (u = Pi·d = 2·Pi·r), auch Umkehraufgaben.
+domain: geometrie
+subdomain: Kreis
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 9
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.9
+  transfer_value: 0.9
+  cognitive_load: 0.5
+prerequisites:
+- id: geometrie__rechteck_flaeche_umfang
+  type: required
+  mastery_level_needed: 0.8
+- id: algebra__variablen_terme
+  type: required
+  mastery_level_needed: 0.7
+related:
+- id: geometrie__kreis_umfang_flaecheninhalt
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms geometrie__kreis_umfang_flaecheninhalt
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 9, LB 2
+tags:
+- kreis
+- umfang
+- pi
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

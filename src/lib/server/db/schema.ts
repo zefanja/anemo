@@ -229,6 +229,11 @@ export const studentAtomStatus = pgTable(
 		mastery: real('mastery').notNull().default(0),
 		totalAttempts: integer('total_attempts').notNull().default(0),
 		correctAttempts: integer('correct_attempts').notNull().default(0),
+		// DI-style expanding sequence: current difficulty stage within the atom's
+		// generator (0 = easiest) and consecutive-correct streak at that stage.
+		// Advances on a streak, steps back one stage on a wrong answer.
+		stage: integer('stage').notNull().default(0),
+		stageStreak: integer('stage_streak').notNull().default(0),
 		// FSRS state (only set once atom is mastered)
 		fsrsState: jsonb('fsrs_state'), // { stability, difficulty, due, lapses, reps, state }
 		// derived: is this atom currently mastered?

@@ -4,7 +4,7 @@ description: Vierfeldertafel und Baumdiagramm verknüpfen; bedingte Wahrscheinli
   Deutung des Satzes von Bayes; stochastische Unabhängigkeit von Ereignissen.
 domain: stochastik
 subdomain: Wahrscheinlichkeit
-level: atom
+level: cluster
 granularity: 4
 schulformen:
 - GY
@@ -22,6 +22,21 @@ prerequisites:
 - id: arithmetik__prozentrechnung
   type: required
   mastery_level_needed: 0.8
+- id: stochastik__vierfeldertafel
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: stochastik__bedingte_wahrscheinlichkeit_begriff
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: stochastik__stochastische_unabhaengigkeit
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
 lehrplan_ref:
 - schulform: GY
   dokument: lp_gy_mathematik_2021.pdf
@@ -32,4 +47,4 @@ tags:
 - unabhängigkeit
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

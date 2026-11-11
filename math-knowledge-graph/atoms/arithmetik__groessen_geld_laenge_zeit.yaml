@@ -20,8 +20,10 @@ weight:
   cognitive_load: 0.5
 prerequisites:
 - id: arithmetik__addition_subtraktion_bis_100
-  type: required
-  mastery_level_needed: 0.8
+  type: helpful
+  mastery_level_needed: 0.6
+  note: Nur für das Rechnen mit Größen im Hunderterraum (ab Kl. 2) nötig, nicht für den Größenbegriff
+    in Kl. 1.
 - id: arithmetik__stellenwert_bis_100
   type: required
   mastery_level_needed: 0.8
@@ -35,4 +37,4 @@ tags:
 - einheiten
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

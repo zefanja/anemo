@@ -2,7 +2,7 @@ import { vi, describe, it, expect } from 'vitest';
 
 vi.mock('$lib/server/db/index.js', () => ({ db: {} }));
 
-import { computeMastery } from '$lib/server/learning/mastery.js';
+import { computeMastery, computeStage } from '$lib/server/learning/mastery.js';
 
 // EWMA with DECAY_FACTOR=0.7, MIN_ATTEMPTS=2
 // computeMastery(prevMastery, isCorrect, totalAttempts)
@@ -51,5 +51,38 @@ describe('computeMastery', () => {
 		let m = 0;
 		for (let i = 1; i <= 50; i++) m = computeMastery(m, true, i);
 		expect(m).toBeLessThanOrEqual(1.0);
+	});
+});
+
+// computeStage(prevStage, prevStreak, isCorrect) — STAGE_STREAK_TARGET=4 in test env mock
+describe('computeStage', () => {
+	it('increments the streak on a correct answer without reaching target', () => {
+		expect(computeStage(0, 0, true)).toEqual({ stage: 0, stageStreak: 1 });
+		expect(computeStage(0, 2, true)).toEqual({ stage: 0, stageStreak: 3 });
+	});
+
+	it('advances to the next stage once the streak hits target and resets the streak', () => {
+		expect(computeStage(0, 3, true)).toEqual({ stage: 1, stageStreak: 0 });
+	});
+
+	it('resets the streak and steps back one stage on a wrong answer', () => {
+		expect(computeStage(2, 2, false)).toEqual({ stage: 1, stageStreak: 0 });
+	});
+
+	it('never drops below stage 0', () => {
+		expect(computeStage(0, 3, false)).toEqual({ stage: 0, stageStreak: 0 });
+	});
+
+	it('advances through a full sequence: 4 correct in a row reaches stage 1', () => {
+		let s = { stage: 0, stageStreak: 0 };
+		for (let i = 0; i < 4; i++) s = computeStage(s.stage, s.stageStreak, true);
+		expect(s).toEqual({ stage: 1, stageStreak: 0 });
+	});
+
+	it('a single mistake mid-streak resets progress toward the current stage', () => {
+		let s = computeStage(0, 0, true); // {0,1}
+		s = computeStage(s.stage, s.stageStreak, true); // {0,2}
+		s = computeStage(s.stage, s.stageStreak, false); // wrong -> back to stage -1 clamped to 0, streak 0
+		expect(s).toEqual({ stage: 0, stageStreak: 0 });
 	});
 });

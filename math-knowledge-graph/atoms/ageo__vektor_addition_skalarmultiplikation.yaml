@@ -1,0 +1,35 @@
+id: ageo__vektor_addition_skalarmultiplikation
+label: Vektoraddition und Skalarmultiplikation
+description: Vektoren addieren, subtrahieren und mit Skalaren vervielfachen — rechnerisch und geometrisch
+  gedeutet.
+domain: analytische_geometrie
+subdomain: Vektoren
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 11
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.95
+  transfer_value: 0.95
+  cognitive_load: 0.5
+prerequisites:
+- id: ageo__vektorbegriff_ortsvektor
+  type: required
+  mastery_level_needed: 0.85
+related:
+- id: ageo__vektoren_operationen
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms ageo__vektoren_operationen
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Jg. 11/12 GK, LB 3
+tags:
+- vektoraddition
+- skalarmultiplikation
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

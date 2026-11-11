@@ -4,7 +4,7 @@ description: Bernoulli-Experiment und -Kette; Einzel- und kumulierte Wahrscheinl
   Erwartungswert, Varianz und Standardabweichung binomialverteilter Zufallsgrößen.
 domain: stochastik
 subdomain: Zufallsgrößen
-level: atom
+level: cluster
 granularity: 4
 schulformen:
 - GY
@@ -25,6 +25,26 @@ prerequisites:
 - id: algebra__potenzgesetze
   type: required
   mastery_level_needed: 0.75
+- id: stochastik__bernoulli_kette
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: stochastik__binomialverteilung_formel
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: stochastik__kumulierte_binomialverteilung
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: stochastik__binomial_erwartungswert_sigma
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
 lehrplan_ref:
 - schulform: GY
   dokument: lp_gy_mathematik_2021.pdf
@@ -34,4 +54,4 @@ tags:
 - bernoulli
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

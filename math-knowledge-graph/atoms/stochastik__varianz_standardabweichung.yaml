@@ -1,0 +1,35 @@
+id: stochastik__varianz_standardabweichung
+label: Varianz und Standardabweichung einer Zufallsgröße
+description: Varianz und Standardabweichung als Streumaße einer Zufallsgröße berechnen und vergleichend
+  deuten.
+domain: stochastik
+subdomain: Zufallsgrößen
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 10
+weight:
+  mastery_required: 0.85
+  curriculum_centrality: 0.8
+  transfer_value: 0.85
+  cognitive_load: 0.6
+prerequisites:
+- id: stochastik__erwartungswert
+  type: required
+  mastery_level_needed: 0.85
+related:
+- id: stochastik__zufallsgroessen_erwartungswert
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms stochastik__zufallsgroessen_erwartungswert
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 10, LB 2
+tags:
+- varianz
+- standardabweichung
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1
