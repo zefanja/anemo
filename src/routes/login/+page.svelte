@@ -38,13 +38,31 @@
 </svelte:head>
 
 <div class="login-wrap">
-	<div class="login-card">
-		<div class="logo">
-			<img src="/logo.png" alt="Anemo" class="logo-img" />
-		</div>
+	<div class="hero">
+		<svg class="hero-deco" viewBox="0 0 390 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+			<g fill="#fff" fill-opacity="0.5">
+				<circle cx="48" cy="60" r="3" /><circle cx="96" cy="32" r="2" /><circle cx="330" cy="48" r="3" />
+				<circle cx="356" cy="120" r="2" /><circle cx="30" cy="170" r="2" />
+			</g>
+			<g fill="none" stroke="#fff" stroke-opacity="0.35" stroke-width="1.5">
+				<path d="M48 60 L96 32 L150 56" /><path d="M330 48 L356 120 L300 140" />
+			</g>
+			<g fill="#fff" fill-opacity="0.55" font-weight="800" font-family="sans-serif">
+				<text x="60" y="130" font-size="26">π</text>
+				<text x="306" y="220" font-size="22">√x</text>
+				<text x="36" y="250" font-size="22">⅔</text>
+				<text x="296" y="100" font-size="20">+</text>
+			</g>
+		</svg>
+		<div class="bubble">Schön, dass du da bist!</div>
+		<img src="/mascot.png" alt="Anemo, der Lern-Roboter" class="mascot" />
+	</div>
 
-		<h1>Dein Code</h1>
-		<p class="hint">Gib deinen 6-stelligen Code ein, den du von deiner Lehrerin / deinem Lehrer bekommen hast.</p>
+	<div class="login-body">
+		<div class="intro">
+			<h1>Willkommen bei Anemo</h1>
+			<p>Gib deinen 6-stelligen Code ein, den du von deiner Lehrkraft bekommen hast.</p>
+		</div>
 
 		{#if form?.error}
 			<div class="error-box" role="alert">{form.error}</div>
@@ -54,146 +72,134 @@
 			<input type="hidden" name="next" value={data.next} />
 			<input type="hidden" name="code" value={code} />
 
-			<div class="code-slots" onpaste={handlePaste}>
-				{#each chars as ch, i}
-					<input
-						bind:this={inputs[i]}
-						type="text"
-						inputmode="text"
-						autocomplete="off"
-						autocorrect="off"
-						autocapitalize="characters"
-						maxlength="1"
-						value={ch}
-						oninput={(e) => handleInput(i, e)}
-						onkeydown={(e) => handleKeydown(i, e)}
-						class="slot"
-						aria-label="Zeichen {i + 1} von 6"
-					/>
-				{/each}
-			</div>
+			<fieldset>
+				<legend>Dein Code</legend>
+				<div class="code-slots" onpaste={handlePaste}>
+					{#each chars as ch, i}
+						<input
+							bind:this={inputs[i]}
+							type="text"
+							inputmode="text"
+							autocomplete="off"
+							autocorrect="off"
+							autocapitalize="characters"
+							maxlength="1"
+							value={ch}
+							oninput={(e) => handleInput(i, e)}
+							onkeydown={(e) => handleKeydown(i, e)}
+							class="slot"
+							class:filled={!!ch}
+							aria-label="Zeichen {i + 1} von 6"
+						/>
+					{/each}
+				</div>
+			</fieldset>
 
-			<button type="submit" class="btn-primary" disabled={code.length < 6}>
-				Anmelden
+			<button type="submit" class="btn-3d" disabled={code.length < 6}>
+				Los geht’s
+				<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14" /><path d="m13 6 6 6-6 6" /></svg>
 			</button>
 		</form>
 
-		<div class="teacher-link">
-			<a href="/teacher/login">Ich bin Lehrer/in →</a>
-		</div>
+		<p class="teacher-link">Du bist Lehrkraft? <a href="/teacher/login">Hier anmelden</a></p>
 	</div>
 </div>
 
 <style>
 	.login-wrap {
 		min-height: 100dvh;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		padding: 1rem;
-		background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
-	}
-
-	.login-card {
-		background: white;
-		border-radius: 1.25rem;
-		padding: 2rem 1.5rem;
-		width: 100%;
-		max-width: 380px;
-		box-shadow: 0 4px 24px rgba(79, 70, 229, 0.1);
-		text-align: center;
-	}
-
-	.logo {
+		background: var(--c-ground);
+		color: var(--c-navy);
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		margin-bottom: 1.5rem;
 	}
+	.hero {
+		position: relative;
+		width: 100%;
+		height: min(46dvh, 380px);
+		min-height: 260px;
+		background: var(--c-sky);
+		border-radius: 0 0 40px 40px;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: flex-end;
+		overflow: hidden;
+	}
+	.hero-deco { position: absolute; inset: 0; width: 100%; height: 100%; }
+	.bubble {
+		position: absolute;
+		top: 12%;
+		left: 50%;
+		transform: translateX(-50%);
+		background: #fff;
+		font-weight: 800;
+		font-size: 1rem;
+		padding: 0.6rem 1rem;
+		border-radius: 18px;
+		white-space: nowrap;
+		box-shadow: 0 6px 18px rgba(11, 42, 91, 0.15);
+		animation: pop 0.5s 0.2s both cubic-bezier(.2, 1.4, .4, 1);
+	}
+	.mascot {
+		position: relative;
+		height: 72%;
+		width: auto;
+		animation: float 4s ease-in-out infinite;
+	}
+	@keyframes float { 50% { transform: translateY(-8px); } }
+	@keyframes pop { from { opacity: 0; transform: translateX(-50%) scale(0.6); } }
 
-	.logo-img {
-		width: 180px;
-		height: auto;
+	.login-body {
+		width: 100%;
+		max-width: 420px;
+		padding: 1.75rem 1.5rem 1.5rem;
+		display: flex;
+		flex-direction: column;
+		gap: 1.25rem;
+		flex: 1;
 	}
-
-	h1 {
-		font-size: 1.25rem;
-		font-weight: 700;
-		margin: 0 0 0.5rem;
-		color: #111827;
-	}
-
-	.hint {
-		font-size: 0.875rem;
-		color: #6b7280;
-		margin: 0 0 1.5rem;
-		line-height: 1.5;
-	}
+	.intro { text-align: center; display: flex; flex-direction: column; gap: 0.35rem; }
+	h1 { font-size: 1.85rem; font-weight: 900; letter-spacing: -0.02em; line-height: 1.15; }
+	.intro p { color: var(--c-ink-2); font-weight: 600; }
 
 	.error-box {
-		background: #fef2f2;
+		background: var(--c-error-light);
 		border: 1px solid #fecaca;
-		color: #dc2626;
-		border-radius: 0.5rem;
+		color: #b91c1c;
+		border-radius: 0.75rem;
 		padding: 0.75rem 1rem;
-		font-size: 0.875rem;
-		margin-bottom: 1rem;
-	}
-
-	.code-slots {
-		display: flex;
-		gap: 0.5rem;
-		justify-content: center;
-		margin-bottom: 1.5rem;
-	}
-
-	.slot {
-		width: 2.75rem;
-		height: 3.25rem;
-		border: 2px solid #d1d5db;
-		border-radius: 0.5rem;
-		font-size: 1.25rem;
+		font-size: 0.9rem;
 		font-weight: 700;
+	}
+	form { display: flex; flex-direction: column; gap: 1.1rem; }
+	fieldset { border: 0; padding: 0; margin: 0; }
+	legend { font-size: 0.875rem; font-weight: 800; color: var(--c-ink-2); margin-bottom: 0.6rem; }
+	.code-slots { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0.5rem; }
+	.slot {
+		width: 100%;
+		height: 3.6rem;
+		border: 2px solid var(--c-line);
+		border-radius: 14px;
+		background: #fff;
+		font: 900 1.5rem var(--font);
 		text-align: center;
 		text-transform: uppercase;
-		color: #111827;
-		background: #f9fafb;
-		transition: border-color 0.15s;
+		color: var(--c-navy);
 		appearance: none;
 		-webkit-appearance: none;
+		transition: border-color .15s, background .15s;
 	}
-
-	.slot:focus {
-		outline: none;
-		border-color: #4f46e5;
-		background: #eef2ff;
-	}
-
-	.btn-primary {
-		width: 100%;
-		padding: 0.875rem;
-		background: #4f46e5;
-		color: white;
-		border: none;
-		border-radius: 0.75rem;
-		font-size: 1rem;
-		font-weight: 600;
-		cursor: pointer;
-		transition: background 0.15s, opacity 0.15s;
-	}
-
-	.btn-primary:hover:not(:disabled) { background: #4338ca; }
-	.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+	.slot.filled { border-color: var(--c-primary); }
+	.slot:focus { outline: none; border: 3px solid var(--c-sky); background: var(--c-primary-light); }
 
 	.teacher-link {
-		margin-top: 1.5rem;
-		font-size: 0.875rem;
+		margin-top: auto;
+		text-align: center;
+		font-size: 0.95rem;
+		font-weight: 700;
+		color: var(--c-ink-2);
 	}
-
-	.teacher-link a {
-		color: #6b7280;
-		text-decoration: none;
-	}
-
-	.teacher-link a:hover { color: #4f46e5; }
+	.teacher-link a { color: var(--c-primary); font-weight: 800; }
 </style>

@@ -408,7 +408,7 @@
 				y1={ln.y1}
 				x2={ln.x2}
 				y2={ln.y2}
-				stroke="#a5b4fc"
+				stroke="#7dd3fc"
 				stroke-width="1"
 				opacity={ln.op}
 			/>
@@ -440,8 +440,8 @@
 					filter="url(#sm-glow-gold)"
 				/>
 			{:else if star.status === 'active'}
-				<circle cx={star.x} cy={star.y} r={11} fill="#818cf8" opacity="0.12" />
-				<circle cx={star.x} cy={star.y} r={3.5} fill="#c7d2fe" filter="url(#sm-glow-blue)" />
+				<circle cx={star.x} cy={star.y} r={11} fill="#38bdf8" opacity="0.12" />
+				<circle cx={star.x} cy={star.y} r={3.5} fill="#bae6fd" filter="url(#sm-glow-blue)" />
 			{:else}
 				<circle cx={star.x} cy={star.y} r={1.5} fill="#334155" opacity="0.28" />
 			{/if}
@@ -525,7 +525,7 @@
 		transform: translateX(-50%);
 		min-width: 170px;
 		background: rgba(6, 13, 30, 0.92);
-		border: 1px solid rgba(165, 180, 252, 0.25);
+		border: 1px solid rgba(125, 211, 252, 0.25);
 		border-radius: 10px;
 		padding: 0.6rem 1rem 0.65rem;
 		text-align: center;
@@ -564,8 +564,8 @@
 	}
 
 	.tt-status.blue {
-		background: rgba(129, 140, 248, 0.18);
-		color: #a5b4fc;
+		background: rgba(56, 189, 248, 0.18);
+		color: #7dd3fc;
 	}
 
 	.sm-hint {

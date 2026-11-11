@@ -128,7 +128,7 @@
 			{@const mx = markerX}
 			<polygon
 				points={`${mx - 8},${lineY - 28} ${mx + 8},${lineY - 28} ${mx},${lineY - 12}`}
-				fill="#4f46e5"
+				fill="#0b6bcb"
 				style="pointer-events:none"
 			/>
 		{/if}
@@ -161,7 +161,7 @@
 	}
 
 	.nl-svg:focus {
-		outline: 2px solid #4f46e5;
+		outline: 2px solid #0b6bcb;
 		outline-offset: 4px;
 		border-radius: 4px;
 	}

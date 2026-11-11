@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { invalidate } from '$app/navigation';
 	import type { PageData } from './$types';
 	import FractionInput from '$lib/components/student/FractionInput.svelte';
@@ -10,6 +11,9 @@
 	import MathText from '$lib/components/student/MathText.svelte';
 	import AtomExplanation from '$lib/components/student/AtomExplanation.svelte';
 	import WrittenCalcFeedback from '$lib/components/student/WrittenCalcFeedback.svelte';
+	import Icon from '$lib/components/student/Icon.svelte';
+	import { ui } from '$lib/stores/ui.svelte.js';
+	import { BADGE_BY_TYPE, greeting, levelProgress } from '$lib/gamification.js';
 
 	let { data }: { data: PageData } = $props();
 
@@ -36,6 +40,14 @@
 		levelUp: boolean;
 		newBadges: string[];
 		streakDays: number;
+		combo: number;
+		comboBonus: number;
+		dailyXp: number;
+		dailyGoal: number;
+		dailyGoalReached: boolean;
+		streakFreezes: number;
+		freezeUsed: boolean;
+		freezeEarned: boolean;
 		hint?: string;
 		correctAnswer?: string;
 		submittedAnswer?: string;
@@ -43,27 +55,51 @@
 
 	type FrontierItem = (typeof data.plan.frontierItems)[0];
 
-	// ── Phase ──
-	let phase = $state<'reviews' | 'practice'>(
-		data.plan.mandatoryReviews.length > 0 ? 'reviews' : 'practice'
-	);
+	/** Tasks per practice round — after a round the session summary is shown. */
+	const ROUND_SIZE = 10;
 
-	// ── Review state ──
-	let reviewIndex = $state(0);
+	// ── View ──
+	let view = $state<'home' | 'task' | 'summary'>('home');
+	let mode = $state<'reviews' | 'practice'>('practice');
+
+	// ── Reviews ──
+	let reviewedIds = $state(new Set<string>());
 	let reviews = $state(data.plan.mandatoryReviews);
+	let reviewIndex = $state(0);
 	let currentReview = $derived(reviews[reviewIndex] ?? null);
+	let reviewsPending = $derived(reviews.length > 0);
 
-	// ── Practice state ──
+	// ── Practice ──
 	let selectedAtom = $state<FrontierItem | null>(null);
 	let masteredAtomIds = $state(new Set<string>());
-	let availableItems = $derived(data.plan.frontierItems.filter(item => !masteredAtomIds.has(item.atomId)));
+	let availableItems = $derived(data.plan.frontierItems.filter((item) => !masteredAtomIds.has(item.atomId)));
+	let masteryMap = $state<Record<string, number>>({});
+	let roundCount = $state(0);
+
+	// ── Session stats (reset after each summary) ──
+	let stats = $state({ xp: 0, correct: 0, total: 0, bestCombo: 0, mastered: [] as string[], goalReached: false, levelUp: 0 });
+	let summaryReason = $state<'reviews' | 'mastered' | 'round' | 'closed'>('round');
+	let combo = $state(0);
 
 	// ── Task + answer state ──
 	let currentTask = $state<TaskDisplay | null>(null);
 	let answer = $state('');
 	let isLoading = $state(false);
 	let isSubmitting = $state(false);
+	let submitError = $state(false);
 	let recentPrompts: string[] = [];
+
+	// ── Greeting (client time) ──
+	let greet = $state('Hallo');
+	onMount(() => {
+		greet = greeting();
+		return () => {
+			ui.focusMode = false;
+		};
+	});
+	$effect(() => {
+		ui.focusMode = view !== 'home';
+	});
 
 	// ── Input refs for auto-focus ──
 	let answerInput = $state<HTMLInputElement | null>(null);
@@ -131,7 +167,7 @@
 	}
 
 	$effect(() => {
-		if (currentTask && !showFeedback) {
+		if (view === 'task' && currentTask && !showFeedback) {
 			if (isFractionPart) {
 				fractionPartInput?.focus();
 			} else if (isMixedPart) {
@@ -151,20 +187,109 @@
 	});
 
 	// ── Explanation state ──
-	let showExplanationManual = $state(false); // toggled via ? button
-	let hadWrongAttempt = $state(false);       // auto-show after wrong answer
+	let showExplanationManual = $state(false);
+	let hadWrongAttempt = $state(false);
 
 	// ── Feedback state ──
 	let showFeedback = $state(false);
 	let lastResult = $state<AttemptResult | null>(null);
+	let masteryBefore = $state<number | null>(null);
 	let autoAdvanceTimer = $state<ReturnType<typeof setTimeout> | null>(null);
 
-	// Load first review on mount
-	$effect(() => {
-		if (phase === 'reviews' && currentReview) {
-			loadTask(currentReview.atomId);
+	let locked = $derived(isSubmitting || showFeedback);
+
+	// ── Derived display values ──
+	let activeItem = $derived(mode === 'reviews' ? currentReview : selectedAtom);
+	let progressPct = $derived(
+		mode === 'reviews'
+			? Math.round(((reviewIndex + (showFeedback ? 1 : 0)) / Math.max(1, reviews.length)) * 100)
+			: Math.round((roundCount / ROUND_SIZE) * 100)
+	);
+	let progressLabel = $derived(
+		mode === 'reviews'
+			? `Wiederholung ${Math.min(reviewIndex + 1, reviews.length)} von ${reviews.length}`
+			: `Aufgabe ${Math.min(roundCount + 1, ROUND_SIZE)} von ${ROUND_SIZE}`
+	);
+	let goalPct = $derived(Math.min(1, data.dailyXp / Math.max(1, data.dailyGoal)));
+	let goalRemaining = $derived(Math.max(0, data.dailyGoal - data.dailyXp));
+	let level = $derived(levelProgress(data.xp, data.level));
+
+	const RING_C = 2 * Math.PI * 38;
+
+	const MASCOT_TIPS = [
+		'Du schaffst das!',
+		'Lies die Aufgabe ganz in Ruhe.',
+		'Genauigkeit schlägt Tempo.',
+		'Feststecken ist okay – dafür gibt es Tipps.',
+		'Jeder Fehler bringt dich weiter.',
+		'Schritt für Schritt – wie ein Profi.'
+	];
+	let tipIndex = $state(0);
+
+	const CORRECT_TITLES = ['Richtig!', 'Stark, richtig!', 'Super!', 'Genau so!', 'Klasse!'];
+	let correctTitle = $state(CORRECT_TITLES[0]);
+
+	// ── Navigation between views ──
+	function resetStats() {
+		stats = { xp: 0, correct: 0, total: 0, bestCombo: 0, mastered: [], goalReached: false, levelUp: 0 };
+	}
+
+	function startReviews() {
+		mode = 'reviews';
+		reviewIndex = 0;
+		view = 'task';
+		loadTask(reviews[0].atomId);
+	}
+
+	function selectAtom(item: FrontierItem) {
+		mode = 'practice';
+		selectedAtom = item;
+		roundCount = 0;
+		if (masteryMap[item.atomId] === undefined) masteryMap[item.atomId] = item.mastery;
+		view = 'task';
+		loadTask(item.atomId, item.type === 'discrimination');
+	}
+
+	function showSummary(reason: typeof summaryReason) {
+		clearAutoAdvance();
+		summaryReason = reason;
+		showFeedback = false;
+		currentTask = null;
+		view = 'summary';
+	}
+
+	function closeTask() {
+		if (stats.total > 0) {
+			showSummary('closed');
+		} else {
+			goHome();
 		}
-	});
+	}
+
+	async function goHome() {
+		clearAutoAdvance();
+		view = 'home';
+		currentTask = null;
+		showFeedback = false;
+		selectedAtom = null;
+		mode = 'practice';
+		resetStats();
+		await invalidate('app:practice');
+		// Re-read due reviews, but never ask again for those done in this visit
+		reviews = data.plan.mandatoryReviews.filter((r) => !reviewedIds.has(r.atomId));
+		reviewIndex = 0;
+	}
+
+	function continueAfterSummary() {
+		resetStats();
+		if (summaryReason === 'reviews' || summaryReason === 'mastered' || !selectedAtom) {
+			goHome();
+			return;
+		}
+		roundCount = 0;
+		view = 'task';
+		loadTask(selectedAtom.atomId, selectedAtom.type === 'discrimination');
+	}
 
 	async function loadTask(atomId: string, isDiscrimination = false) {
 		isLoading = true;
@@ -172,13 +297,15 @@
 		answer = '';
 		showFeedback = false;
 		lastResult = null;
+		submitError = false;
 		showExplanationManual = false;
 		hadWrongAttempt = false;
 		pqStepIndex = 0;
 		pqStepHintVisible = false;
+		tipIndex = (tipIndex + 1) % MASCOT_TIPS.length;
 		try {
 			const params = new URLSearchParams();
-			recentPrompts.slice(-5).forEach(p => params.append('ex', p));
+			recentPrompts.slice(-5).forEach((p) => params.append('ex', p));
 			const qs = params.toString();
 			const base = isDiscrimination ? `/api/task/cluster/${atomId}` : `/api/task/${atomId}`;
 			const res = await fetch(`${base}${qs ? '?' + qs : ''}`);
@@ -187,83 +314,101 @@
 			currentTask = task;
 			recentPrompts = [...recentPrompts, task.prompt].slice(-10);
 		} catch {
-			// fall-through: isLoading = false shows error state via null task
+			// null task → error state
 		} finally {
 			isLoading = false;
 		}
 	}
 
 	async function submitAnswer() {
-		if (!currentTask || isSubmitting || !String(answer).trim()) return;
+		if (!currentTask || isSubmitting || showFeedback || !String(answer).trim()) return;
 		// Always the atomId the task actually came from — for discrimination sets
 		// selectedAtom.atomId is the cluster id, not the resolved sub-atom.
 		const atomId = currentTask.atomId;
 		isSubmitting = true;
+		submitError = false;
 		try {
 			const res = await fetch('/api/attempt', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ taskId: currentTask.taskId, atomId, answer: String(answer).trim(), isReview: phase === 'reviews' })
+				body: JSON.stringify({ taskId: currentTask.taskId, atomId, answer: String(answer).trim(), isReview: mode === 'reviews' })
 			});
 			if (!res.ok) throw new Error();
-			lastResult = await res.json();
+			const result: AttemptResult = await res.json();
+			masteryBefore = mode === 'practice' && selectedAtom?.type !== 'discrimination' ? (masteryMap[atomId] ?? null) : null;
+			if (mode === 'practice') masteryMap[atomId] = result.mastery;
+			lastResult = result;
 			showFeedback = true;
-			if (!lastResult.correct) hadWrongAttempt = true;
+			correctTitle = result.combo >= 3 ? 'Stark, richtig!' : CORRECT_TITLES[Math.floor(Math.random() * CORRECT_TITLES.length)];
+			if (!result.correct) hadWrongAttempt = true;
+
+			// session stats
+			combo = result.combo;
+			stats.total += 1;
+			stats.xp += result.xpGained;
+			if (result.correct) stats.correct += 1;
+			stats.bestCombo = Math.max(stats.bestCombo, result.combo);
+			if (result.justMastered) stats.mastered = [...stats.mastered, labelFor(atomId)];
+			if (result.dailyGoalReached) stats.goalReached = true;
+			if (result.levelUp) stats.levelUp = result.newLevel;
+			if (mode === 'practice') roundCount += 1;
+
 			invalidate('app:gami');
 			invalidate('app:progress');
-			if (lastResult.justMastered) {
-				invalidate('app:practice');
-			}
-			if (lastResult.correct && !lastResult.justMastered && !lastResult.levelUp && lastResult.newBadges.length === 0) {
+			if (result.justMastered) invalidate('app:practice');
+
+			const special = result.justMastered || result.levelUp || result.newBadges.length > 0 || result.dailyGoalReached || result.freezeUsed || result.freezeEarned;
+			if (result.correct && !special) {
 				autoAdvanceTimer = setTimeout(() => {
 					autoAdvanceTimer = null;
 					handleContinue();
-				}, 1000);
+				}, 1300);
 			}
 		} catch {
-			// show generic error?
+			submitError = true;
 		} finally {
 			isSubmitting = false;
 		}
 	}
 
-	function handleContinue() {
+	function labelFor(atomId: string): string {
+		if (selectedAtom && selectedAtom.atomId === atomId) return selectedAtom.label;
+		return data.plan.frontierItems.find((f) => f.atomId === atomId)?.label ?? currentReview?.label ?? 'Neues Thema';
+	}
+
+	function clearAutoAdvance() {
 		if (autoAdvanceTimer !== null) {
 			clearTimeout(autoAdvanceTimer);
 			autoAdvanceTimer = null;
 		}
-		if (phase === 'reviews') {
+	}
+
+	function handleContinue() {
+		clearAutoAdvance();
+		if (mode === 'reviews') {
+			if (currentReview) reviewedIds = new Set([...reviewedIds, currentReview.atomId]);
 			const next = reviewIndex + 1;
 			if (next >= reviews.length) {
-				startPracticePhase();
+				reviews = [];
+				reviewIndex = 0;
+				showSummary('reviews');
 			} else {
 				reviewIndex = next;
 				loadTask(reviews[next].atomId);
 			}
-		} else if (selectedAtom!.type === 'discrimination') {
-			// Mixed practice never "completes" — keep drawing from the same cluster.
-			loadTask(selectedAtom!.atomId, true);
-		} else {
-			if (lastResult?.justMastered) {
-				masteredAtomIds = new Set([...masteredAtomIds, selectedAtom!.atomId]);
-				selectedAtom = null;
-				currentTask = null;
-				showFeedback = false;
-			} else {
-				loadTask(selectedAtom!.atomId);
-			}
+			return;
 		}
-	}
-
-	function startPracticePhase() {
-		showFeedback = false;
-		currentTask = null;
-		phase = 'practice';
-	}
-
-	function selectAtom(item: FrontierItem) {
-		selectedAtom = item;
-		loadTask(item.atomId, item.type === 'discrimination');
+		if (lastResult?.justMastered && selectedAtom?.type !== 'discrimination') {
+			masteredAtomIds = new Set([...masteredAtomIds, selectedAtom!.atomId]);
+			showSummary('mastered');
+			return;
+		}
+		if (roundCount >= ROUND_SIZE) {
+			showSummary('round');
+			return;
+		}
+		// Mixed practice never "completes" — keep drawing from the same cluster.
+		loadTask(selectedAtom!.atomId, selectedAtom!.type === 'discrimination');
 	}
 
 	function selectAnswer(value: string) {
@@ -273,46 +418,37 @@
 
 	function toggleSign() {
 		const s = String(answer);
-		if (s.startsWith('-')) {
-			answer = s.slice(1);
-		} else {
-			answer = '-' + s;
-		}
+		answer = s.startsWith('-') ? s.slice(1) : '-' + s;
 		answerInput?.focus();
 	}
 
 	function handleKeydown(e: KeyboardEvent) {
-		if (e.key === 'Enter') {
-			if (showFeedback && !isSubmitting) {
-				handleContinue();
-			} else if (String(answer).trim() && !isSubmitting) {
-				submitAnswer();
-			}
+		if (view !== 'task' || e.key !== 'Enter') return;
+		if (showFeedback && !isSubmitting) {
+			e.preventDefault();
+			handleContinue();
+		} else if (String(answer).trim() && !isSubmitting) {
+			submitAnswer();
 		}
 	}
 
-	const BADGE_LABELS: Record<string, string> = {
-		first_atom:       '🌱 Erster Schritt – Atom gemeistert!',
-		atoms_5:          '📚 Abel – 5 Atome gemeistert!',
-		atoms_10:         '📖 Thales – 10 Atome gemeistert!',
-		atoms_25:         '🌿 Fibonacci – 25 Atome gemeistert!',
-		atoms_50:         '💡 Leibniz – 50 Atome gemeistert!',
-		atoms_all:        '🏆 Gauß – Alle Atome gemeistert!',
-		streak_3:         '🔥 Hypatia – 3 Tage Streak!',
-		streak_7:         '🔥 Pythagoras – 7 Tage Streak!',
-		streak_30:        '🔥 Archimedes – 30 Tage Streak!',
-		streak_100:       '🔥 Ramanujan – 100 Tage Streak!',
-		xp_100:           '⭐ Euklid – 100 XP erreicht!',
-		xp_500:           '🌟 Kepler – 500 XP erreicht!',
-		xp_1500:          '💫 Descartes – 1.500 XP erreicht!',
-		xp_4000:          '⚡ Newton – 4.000 XP erreicht!',
-		xp_8000:          '💎 Euler – 8.000 XP erreicht!',
-		cluster_complete: '📦 Bereich abgeschlossen!'
-	};
+	function badgeIcon(type: string): 'star' | 'flame' | 'bolt' | 'sparkle' {
+		const cat = BADGE_BY_TYPE[type]?.category;
+		return cat === 'atoms' ? 'star' : cat === 'streak' ? 'flame' : cat === 'xp' ? 'bolt' : 'sparkle';
+	}
 
-	function masteryBar(mastery: number): string {
-		const pct = Math.round(mastery * 100);
-		return `${pct}%`;
+	function summaryTitle(): string {
+		if (summaryReason === 'reviews') return 'Wiederholung geschafft!';
+		if (summaryReason === 'mastered') return 'Neuer Stern!';
+		if (summaryReason === 'closed') return 'Gut gemacht!';
+		return 'Runde geschafft!';
+	}
+
+	function summarySubtitle(): string {
+		if (stats.goalReached || data.dailyXp >= data.dailyGoal) return 'Du hast heute dein Tagesziel erreicht.';
+		if (summaryReason === 'reviews') return 'Jetzt bist du bereit für Neues.';
+		const left = Math.max(0, data.dailyGoal - data.dailyXp);
+		return `Noch ${left} XP bis zu deinem Tagesziel.`;
 	}
 </script>
 
@@ -320,199 +456,268 @@
 
 <div class="practice-page">
 
-	<!-- ── Practice: atom selection ── -->
-	{#if phase === 'practice' && !selectedAtom}
-		<div class="selection-page">
-			<div class="selection-header">
-				<h2>Was möchtest du üben?</h2>
-				<p class="text-muted">Wähle ein Thema aus</p>
+{#if view === 'home'}
+	<!-- ═══════════════ HOME ═══════════════ -->
+	<div class="home">
+		<header class="home-header">
+			<div class="hello">
+				<span class="hello-small">{greet}</span>
+				<h1 class="hello-name">{data.studentName}!</h1>
 			</div>
+			<div class="chips">
+				<span class="chip chip-streak" title="Tage am Stück geübt">
+					<Icon name="flame" size={18} color="var(--c-orange)" />
+					{data.streakDays}<span class="sr-only"> Tage Streak</span>
+				</span>
+				<a href="/badges" class="chip chip-level">
+					<Icon name="star" size={18} color="var(--c-primary)" />
+					Lv {data.level}
+				</a>
+			</div>
+		</header>
+
+		<section class="goal-card" aria-label="Tagesziel">
+			<svg class="goal-ring" width="92" height="92" viewBox="0 0 92 92" role="img" aria-label="Tagesziel zu {Math.round(goalPct * 100)} Prozent erreicht">
+				<circle cx="46" cy="46" r="38" fill="none" stroke="var(--c-navy-3)" stroke-width="10" />
+				<circle
+					cx="46" cy="46" r="38" fill="none"
+					stroke={goalPct >= 1 ? 'var(--c-star)' : 'var(--c-sky)'}
+					stroke-width="10" stroke-linecap="round"
+					stroke-dasharray="{goalPct * RING_C} {RING_C}"
+					transform="rotate(-90 46 46)"
+					class="goal-arc"
+				/>
+				{#if goalPct >= 1}
+					<path d="m33 47 9 9 17-19" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+				{:else}
+					<text x="46" y="45" text-anchor="middle" font-size="22" font-weight="900" fill="#fff">{data.dailyXp}</text>
+					<text x="46" y="62" text-anchor="middle" font-size="12" font-weight="800" fill="#bfdbfe">von {data.dailyGoal} XP</text>
+				{/if}
+			</svg>
+			<div class="goal-text">
+				<span class="eyebrow">Tagesziel</span>
+				{#if goalPct >= 1}
+					<strong>Tagesziel geschafft!</strong>
+					<span class="goal-sub">Alles ab jetzt ist Bonus für dein Level.</span>
+				{:else if data.dailyXp === 0}
+					<strong>Sammle heute {data.dailyGoal} XP</strong>
+					<span class="goal-sub">Schon ein paar Aufgaben reichen.</span>
+				{:else}
+					<strong>Nur noch {goalRemaining} XP bis zum Ziel!</strong>
+					<span class="goal-sub">Du bist auf einem super Weg.</span>
+				{/if}
+			</div>
+		</section>
+
+		<section class="card week-card" aria-label="Diese Woche">
+			<div class="week-top">
+				<h2 class="card-title">Diese Woche</h2>
+				<span class="freeze" title="Ein Streak-Schutz rettet deine Serie, wenn du einen Tag verpasst.">
+					<Icon name="shield" size={14} color="var(--c-primary)" />
+					Streak-Schutz: {data.streakFreezes}
+				</span>
+			</div>
+			<ol class="week">
+				{#each data.week as day}
+					<li class="day" class:active={day.active} class:today={day.isToday} class:future={day.isFuture}>
+						<span class="day-dot">
+							{#if day.active}
+								<Icon name="check" size={16} color="#fff" />
+							{:else if day.isToday}
+								heute
+							{/if}
+						</span>
+						<span class="day-label">{day.label}</span>
+						<span class="sr-only">{day.active ? 'geübt' : 'nicht geübt'}</span>
+					</li>
+				{/each}
+			</ol>
+			{#if data.streakAtRisk && !data.practicedToday && data.streakDays > 0}
+				<p class="risk">Übe heute, damit deine {data.streakDays}-Tage-Serie weiterläuft!</p>
+			{/if}
+		</section>
+
+		{#if reviewsPending}
+			<section class="review-card" aria-label="Wiederholen">
+				<img src="/mascot.png" alt="" class="review-mascot" />
+				<div class="review-text">
+					<strong>{reviews.length} {reviews.length === 1 ? 'Wiederholung' : 'Wiederholungen'} fällig</strong>
+					<span>Damit du nichts vergisst · ca. {Math.max(1, Math.round(reviews.length * 0.7))} Min.</span>
+				</div>
+				<button class="play-btn" onclick={startReviews} aria-label="Wiederholungen starten">
+					<Icon name="play" size={22} color="#fff" />
+				</button>
+			</section>
+		{/if}
+
+		<section class="topics" aria-label="Themen">
+			<div class="section-head">
+				<h2 class="section-title">{reviewsPending ? 'Danach geht’s weiter mit' : 'Bereit für Neues'}</h2>
+			</div>
+
 			{#if availableItems.length === 0 && data.plan.discriminationSets.length === 0}
-				<div class="screen-center">
-					<div class="empty-state">
-						<img src="/mascot.png" alt="" class="mascot-img" aria-hidden="true" />
-						<h3>Super gemacht!</h3>
-						<p>Alle verfügbaren Atome gemeistert. Schau in deinen Fortschritt!</p>
-						<a href="/progress" class="btn btn-primary">Zum Fortschritt</a>
-					</div>
+				<div class="empty-state">
+					<img src="/mascot.png" alt="" class="empty-mascot" />
+					<h3>Super gemacht!</h3>
+					<p>Alle verfügbaren Themen sind gemeistert. Schau dir deine Sternenkarte an!</p>
+					<a href="/progress" class="btn-3d">Zur Sternenkarte</a>
 				</div>
 			{:else}
-				{#if availableItems.length > 0}
-					<div class="atom-grid">
-						{#each availableItems as item}
-							<button class="atom-card" onclick={() => selectAtom(item)}>
-								<div class="atom-type-badge" class:is-active={item.type === 'active'}>
-									{item.type === 'active' ? 'Weiterüben' : 'Neu'}
-								</div>
-								<div class="atom-card-label">{item.label}</div>
-								{#if item.mastery > 0}
-									<div class="atom-progress-track">
-										<div class="atom-progress-fill" style="width: {masteryBar(item.mastery)}"></div>
-									</div>
-									<div class="atom-mastery-pct">{Math.round(item.mastery * 100)}%</div>
-								{/if}
+				{#if reviewsPending}
+					<p class="locked-note"><Icon name="lock" size={16} /> Erst die Wiederholungen, dann sind die Themen frei.</p>
+				{/if}
+				<div class="topic-grid">
+					{#each availableItems as item, i}
+						<button class="topic-card" class:recommended={i === 0 && !reviewsPending} disabled={reviewsPending} onclick={() => selectAtom(item)}>
+							{#if i === 0}
+								<span class="tag">Empfohlen</span>
+							{:else if item.type === 'active'}
+								<span class="tag">Weiterüben</span>
+							{:else}
+								<span class="tag tag-new">Neu</span>
+							{/if}
+							<span class="topic-label">{item.label}</span>
+							<span class="bar"><span style="width: {Math.round((masteryMap[item.atomId] ?? item.mastery) * 100)}%"></span></span>
+							<span class="topic-meta">
+								{(masteryMap[item.atomId] ?? item.mastery) > 0 ? `${Math.round((masteryMap[item.atomId] ?? item.mastery) * 100)} % gemeistert` : 'Noch nicht begonnen'}
+							</span>
+						</button>
+					{/each}
+				</div>
+
+				{#if data.plan.discriminationSets.length > 0}
+					<div class="section-head mixed-head">
+						<h2 class="section-title">Vermischtes Üben</h2>
+					</div>
+					<p class="section-sub">Du kannst diese Themen einzeln – jetzt gemischt!</p>
+					<div class="topic-grid">
+						{#each data.plan.discriminationSets as item}
+							<button class="topic-card mixed" disabled={reviewsPending} onclick={() => selectAtom(item)}>
+								<span class="tag tag-mixed">Vermischt</span>
+								<span class="topic-label">{item.label}</span>
+								<span class="topic-meta"><Icon name="shuffle" size={14} /> Bunt gemischt</span>
 							</button>
 						{/each}
 					</div>
 				{/if}
-				{#if data.plan.discriminationSets.length > 0}
-					<div class="discrimination-section">
-						<h3 class="discrimination-heading">Vermischtes Üben</h3>
-						<p class="text-muted discrimination-subtitle">Du beherrschst diese Themen einzeln — jetzt gemischt üben.</p>
-						<div class="atom-grid">
-							{#each data.plan.discriminationSets as item}
-								<button class="atom-card discrimination-card" onclick={() => selectAtom(item)}>
-									<div class="atom-type-badge is-discrimination">Vermischt</div>
-									<div class="atom-card-label">{item.label}</div>
-								</button>
-							{/each}
-						</div>
-					</div>
-				{/if}
 			{/if}
+		</section>
+	</div>
+
+{:else if view === 'summary'}
+	<!-- ═══════════════ SUMMARY ═══════════════ -->
+	<div class="summary">
+		<svg class="confetti" viewBox="0 0 390 320" preserveAspectRatio="xMidYMin slice" aria-hidden="true">
+			<g fill="#7dd3fc">
+				<circle cx="40" cy="60" r="2.5" /><circle cx="90" cy="130" r="1.5" /><circle cx="340" cy="40" r="2" />
+				<circle cx="360" cy="170" r="2.5" /><circle cx="300" cy="100" r="1.5" /><circle cx="30" cy="220" r="1.5" />
+			</g>
+			<g stroke-linecap="round" stroke-width="5">
+				<path d="M70 80 l12 -14" stroke="#f59e0b" /><path d="M320 70 l-6 -16" stroke="#38bdf8" />
+				<path d="M330 210 l16 -4" stroke="#f97316" /><path d="M50 180 l-14 -6" stroke="#34d399" />
+			</g>
+		</svg>
+		<div class="summary-inner">
+			<div class="summary-hero">
+				<img src="/mascot.png" alt="Anemo freut sich mit dir" class="summary-mascot" />
+				<h1>{summaryTitle()}</h1>
+				<p>{summarySubtitle()}</p>
+			</div>
+
+			<div class="stat-tiles">
+				<div class="stat-tile gold">
+					<Icon name="star" size={24} color="var(--c-gold)" />
+					<strong>+{stats.xp}</strong>
+					<span>XP verdient</span>
+				</div>
+				<div class="stat-tile green">
+					<Icon name="target" size={24} color="var(--c-success)" />
+					<strong>{stats.correct} / {stats.total}</strong>
+					<span>richtig</span>
+				</div>
+				<div class="stat-tile orange">
+					<Icon name="flame" size={24} color="var(--c-orange)" />
+					<strong>{data.streakDays}</strong>
+					<span>{data.streakDays === 1 ? 'Tag' : 'Tage'} Streak</span>
+				</div>
+			</div>
+
+			{#each stats.mastered as label}
+				<div class="new-star">
+					<span class="new-star-icon"><Icon name="sparkle" size={28} color="var(--c-star)" /></span>
+					<div>
+						<span class="eyebrow star">Neuer Stern</span>
+						<strong>{label} gemeistert</strong>
+						<span class="new-star-sub">Er leuchtet jetzt auf deiner Sternenkarte.</span>
+					</div>
+				</div>
+			{/each}
+
+			{#if stats.bestCombo >= 3}
+				<p class="summary-note"><Icon name="bolt" size={18} color="var(--c-orange)" /> Beste Combo: {stats.bestCombo} richtige Antworten in Folge</p>
+			{/if}
+			{#if stats.levelUp}
+				<p class="summary-note"><Icon name="star" size={18} color="var(--c-star)" /> Level {stats.levelUp} erreicht!</p>
+			{/if}
+
+			<div class="summary-level">
+				<div class="summary-level-top">
+					<span>Level {data.level}</span>
+					<span>{level.nextLevelXp ? `noch ${level.remaining} XP bis Level ${data.level + 1}` : 'Höchstes Level!'}</span>
+				</div>
+				<div class="summary-level-track" role="progressbar" aria-label="Fortschritt zum nächsten Level" aria-valuemin="0" aria-valuemax="100" aria-valuenow={level.pct}>
+					<span style="width: {level.pct}%"></span>
+				</div>
+			</div>
+
+			<div class="summary-actions">
+				<button class="btn-3d sky" onclick={continueAfterSummary}>
+					{summaryReason === 'round' || summaryReason === 'closed' ? (selectedAtom ? 'Weiter üben' : 'Zur Übersicht') : summaryReason === 'reviews' ? 'Neues Thema wählen' : 'Nächstes Thema'}
+				</button>
+				<button class="summary-home" onclick={goHome}>Zur Startseite</button>
+			</div>
+		</div>
+	</div>
+
+{:else}
+	<!-- ═══════════════ TASK ═══════════════ -->
+	<div class="task-view">
+		<header class="task-header">
+			<button class="icon-btn" onclick={closeTask} aria-label="Sitzung beenden">
+				<Icon name="close" size={24} />
+			</button>
+			<div class="task-progress" role="progressbar" aria-label={progressLabel} aria-valuemin="0" aria-valuemax="100" aria-valuenow={progressPct}>
+				<span style="width: {Math.max(4, progressPct)}%"></span>
+			</div>
+			<span class="chip chip-combo" class:hot={combo >= 3} class:off={combo < 2} aria-label="Combo: {combo} richtig in Folge">
+				<Icon name="bolt" size={16} color={combo >= 3 ? '#fff' : 'var(--c-orange)'} />
+				{combo}×
+			</span>
+		</header>
+
+		<div class="task-meta">
+			<span class="tag" class:tag-new={mode === 'practice' && activeItem?.type === 'new'} class:tag-mixed={activeItem?.type === 'discrimination'}>
+				{mode === 'reviews' ? 'Wiederholung' : activeItem?.type === 'discrimination' ? 'Vermischt' : activeItem?.type === 'new' ? 'Neues Thema' : 'Weiterüben'}
+			</span>
+			<span class="task-atom">{activeItem?.label}</span>
 		</div>
 
-	<!-- ── Task view (reviews + practice) ── -->
-	{:else}
-		{@const activeItem = phase === 'reviews' ? currentReview : selectedAtom}
-
-		<!-- Progress indicator for reviews -->
-		{#if phase === 'reviews'}
-			<div class="review-progress-bar">
-				<div class="review-progress-label">
-					Wiederholung {reviewIndex + 1} von {reviews.length}
-				</div>
-				<div class="review-track">
-					{#each reviews as _, i}
-						<div class="review-dot" class:done={i < reviewIndex} class:current={i === reviewIndex}></div>
-					{/each}
-				</div>
-			</div>
-		{:else}
-			<div class="back-bar">
-				<button class="back-btn" onclick={() => { selectedAtom = null; currentTask = null; invalidate('app:practice'); }}>
-					← Zurück
-				</button>
-				<span class="back-label">{selectedAtom?.label}</span>
-			</div>
-		{/if}
-
-		<!-- Task card -->
 		<div class="task-area">
 			{#if isLoading}
 				<div class="task-loading">
 					<div class="spinner"></div>
-					<span>Aufgabe laden…</span>
+					<span>Aufgabe wird geladen…</span>
 				</div>
 			{:else if !currentTask}
 				<div class="task-error">
-					<p>Aufgabe konnte nicht geladen werden.</p>
-					<button class="btn btn-outline" onclick={() => activeItem && loadTask(activeItem.atomId, activeItem.type === 'discrimination')}>
+					<p>Die Aufgabe konnte nicht geladen werden.</p>
+					<button class="btn-3d" onclick={() => activeItem && loadTask(activeItem.atomId, activeItem.type === 'discrimination')}>
 						Nochmal versuchen
 					</button>
 				</div>
-			{:else if showFeedback && lastResult}
-				<!-- Feedback overlay -->
-				<div class="feedback-card" class:correct={lastResult.correct} class:incorrect={!lastResult.correct}>
-					<div class="feedback-icon">{lastResult.correct ? '✓' : '✗'}</div>
-					<div class="feedback-text">
-						{lastResult.correct ? 'Richtig!' : 'Nicht ganz.'}
-					</div>
-
-					{#if !lastResult.correct && (lastResult.submittedAnswer || lastResult.correctAnswer)}
-						{#if writtenArith && lastResult.submittedAnswer && lastResult.correctAnswer}
-							<WrittenCalcFeedback
-								a={writtenArith.a}
-								b={writtenArith.b}
-								op={writtenArith.op}
-								submittedAnswer={lastResult.submittedAnswer}
-								correctAnswer={lastResult.correctAnswer}
-							/>
-						{:else}
-							<div class="answer-comparison">
-								{#if lastResult.submittedAnswer}
-									<div class="answer-row answer-row-wrong">
-										<span class="answer-label">Deine Antwort:</span>
-										<span class="answer-value"><MathText text={lastResult.submittedAnswer} /></span>
-									</div>
-								{/if}
-								{#if lastResult.correctAnswer}
-									<div class="answer-row answer-row-correct">
-										<span class="answer-label">Richtige Antwort:</span>
-										<span class="answer-value"><MathText text={lastResult.correctAnswer} /></span>
-									</div>
-								{/if}
-							</div>
-						{/if}
-					{/if}
-
-					{#if lastResult.xpGained > 0}
-						<div class="xp-gained">+{lastResult.xpGained} XP</div>
-					{/if}
-
-					{#if lastResult.levelUp}
-						<div class="level-up">
-							<img src="/mascot.png" alt="" class="mascot-inline" aria-hidden="true" />
-							Level {lastResult.newLevel} erreicht – weiter so!
-						</div>
-					{/if}
-
-					{#if lastResult.justMastered}
-						<div class="mastered-notice">⭐ Gemeistert!</div>
-					{/if}
-
-					{#if lastResult.newBadges.length > 0}
-						<div class="new-badges">
-							{#each lastResult.newBadges as badge}
-								<div class="badge-notice">{BADGE_LABELS[badge] ?? badge}</div>
-							{/each}
-						</div>
-					{/if}
-
-					{#if !lastResult.correct && currentTask?.explanation}
-						<AtomExplanation text={currentTask.explanation} illustrationConfig={currentTask.illustrationConfig} />
-					{:else if !lastResult.correct && Array.isArray(currentTask?.inputData?.steps)}
-						<div class="steps-box">
-							<div class="steps-title">Lösungsweg:</div>
-							{#each currentTask!.inputData!.steps as step, i}
-								<div class="step-row">
-									<span class="step-num">{i + 1}.</span>
-									<span class="step-text"><MathText text={String(step)} /></span>
-								</div>
-							{/each}
-						</div>
-					{:else if !lastResult.correct && lastResult.hint}
-						<div class="hint-box">💡 <MathText text={lastResult.hint} /></div>
-					{/if}
-
-					<button class="btn btn-primary btn-full btn-lg continue-btn" onclick={handleContinue}>
-						{#if phase === 'reviews' && reviewIndex + 1 < reviews.length}
-							Weiter →
-						{:else if phase === 'reviews'}
-							Zur freien Übung →
-						{:else if lastResult?.justMastered}
-							Anderes Thema wählen →
-						{:else}
-							Neue Aufgabe
-						{/if}
-					</button>
-				</div>
 			{:else}
-				<!-- Task prompt + answer input -->
-				<div class="task-card">
-					<div class="task-card-header">
-						<div class="atom-label-tag">{activeItem?.label}</div>
-						{#if currentTask.explanation}
-							<button
-								class="explanation-toggle"
-								class:active={showExplanationManual || hadWrongAttempt}
-								onclick={() => showExplanationManual = !showExplanationManual}
-								aria-label="Erklärung anzeigen"
-								title="Erklärung"
-							>?</button>
-						{/if}
-					</div>
-					{#if (showExplanationManual || hadWrongAttempt) && currentTask.explanation}
+				<div class="task-card" class:dimmed={showFeedback}>
+					{#if (showExplanationManual || hadWrongAttempt) && currentTask.explanation && !showFeedback}
 						<AtomExplanation text={currentTask.explanation} illustrationConfig={currentTask.illustrationConfig} />
 					{/if}
 					{#if currentTask.svg}
@@ -533,7 +738,7 @@
 								<div class="pq-subprompt"><MathText text={pqCurrentStep.subPrompt} /></div>
 								<div class="choice-buttons choice-buttons-multi">
 									{#each pqCurrentStep.choices as choice}
-										<button class="choice-btn" onclick={() => selectPqStep(choice)} disabled={isSubmitting}><MathText text={choice} /></button>
+										<button class="choice-btn" onclick={() => selectPqStep(choice)} disabled={locked}><MathText text={choice} /></button>
 									{/each}
 								</div>
 								{#if pqStepHintVisible}
@@ -543,7 +748,7 @@
 						{:else if currentTask.choices}
 							<div class="choice-buttons choice-buttons-multi">
 								{#each currentTask.choices as choice}
-									<button class="choice-btn" onclick={() => selectAnswer(choice)} disabled={isSubmitting}><MathText text={choice} /></button>
+									<button class="choice-btn" onclick={() => selectAnswer(choice)} disabled={locked}><MathText text={choice} /></button>
 								{/each}
 							</div>
 						{:else if isFractionPart}
@@ -555,7 +760,7 @@
 								knownNumerator={d.knownNum}
 								knownDenominator={d.knownDen}
 								emitFullFraction={currentTask.answerType === 'fraction'}
-								disabled={isSubmitting}
+								disabled={locked}
 								onsubmit={submitAnswer}
 							/>
 						{:else if isMixedPart}
@@ -568,14 +773,14 @@
 								numerator={d.numerator}
 								denominator={d.denominator}
 								emitFullFraction={currentTask.answerType === 'fraction'}
-								disabled={isSubmitting}
+								disabled={locked}
 								onsubmit={submitAnswer}
 							/>
 						{:else if currentTask.answerType === 'fraction'}
-							<FractionInput bind:this={fractionInput} bind:value={answer} disabled={isSubmitting} numDigits={currentTask.inputData?.numDigits as number | undefined} onsubmit={submitAnswer} />
+							<FractionInput bind:this={fractionInput} bind:value={answer} disabled={locked} numDigits={currentTask.inputData?.numDigits as number | undefined} onsubmit={submitAnswer} />
 						{:else if writtenArith}
 							{#key currentTask.taskId}
-								<WrittenCalcInput bind:this={writtenCalcInput} a={writtenArith.a} b={writtenArith.b} op={writtenArith.op} bind:value={answer} disabled={isSubmitting} onsubmit={submitAnswer} />
+								<WrittenCalcInput bind:this={writtenCalcInput} a={writtenArith.a} b={writtenArith.b} op={writtenArith.op} bind:value={answer} disabled={locked} onsubmit={submitAnswer} />
 							{/key}
 						{:else if isZahlenmauer}
 							{#key currentTask.taskId}
@@ -589,47 +794,47 @@
 									c={currentTask.inputData!.c as number}
 									missing={currentTask.inputData!.missing as 'a' | 'b' | 'c'}
 									bind:value={answer}
-									disabled={isSubmitting}
+									disabled={locked}
 									onsubmit={submitAnswer}
 								/>
 							{/key}
 						{:else if isNumberLine}
-							<NumberLineInput bind:this={numberLineInput} totalSections={currentTask.inputData!.totalSections as number} bind:value={answer} disabled={isSubmitting} onsubmit={submitAnswer} />
+							<NumberLineInput bind:this={numberLineInput} totalSections={currentTask.inputData!.totalSections as number} bind:value={answer} disabled={locked} onsubmit={submitAnswer} />
 						{:else if currentTask.answerType === 'boolean'}
 							<div class="choice-buttons">
-								<button class="choice-btn choice-btn-nein" onclick={() => selectAnswer('nein')} disabled={isSubmitting}>✗ Nein</button>
-								<button class="choice-btn choice-btn-ja" onclick={() => selectAnswer('ja')} disabled={isSubmitting}>✓ Ja</button>
+								<button class="choice-btn choice-btn-nein" onclick={() => selectAnswer('nein')} disabled={locked}>✗ Nein</button>
+								<button class="choice-btn choice-btn-ja" onclick={() => selectAnswer('ja')} disabled={locked}>✓ Ja</button>
 							</div>
 						{:else if currentTask.answerType === 'comparison'}
 							<div class="choice-buttons">
-								<button class="choice-btn choice-btn-symbol" onclick={() => selectAnswer('<')} disabled={isSubmitting}>&lt;</button>
-								<button class="choice-btn choice-btn-symbol" onclick={() => selectAnswer('=')} disabled={isSubmitting}>=</button>
-								<button class="choice-btn choice-btn-symbol" onclick={() => selectAnswer('>')} disabled={isSubmitting}>&gt;</button>
+								<button class="choice-btn choice-btn-symbol" onclick={() => selectAnswer('<')} disabled={locked}>&lt;</button>
+								<button class="choice-btn choice-btn-symbol" onclick={() => selectAnswer('=')} disabled={locked}>=</button>
+								<button class="choice-btn choice-btn-symbol" onclick={() => selectAnswer('>')} disabled={locked}>&gt;</button>
 							</div>
 						{:else if currentTask.answerType === 'integer'}
 							<div class="input-with-sign">
-								<button class="sign-btn" type="button" onclick={toggleSign} disabled={isSubmitting} tabindex="-1">+/−</button>
+								<button class="sign-btn" type="button" onclick={toggleSign} disabled={locked} tabindex="-1">+/−</button>
 								<input
 									bind:this={answerInput}
 									class="answer-input"
 									type="text"
 									inputmode="numeric"
 									bind:value={answer}
-									disabled={isSubmitting}
+									disabled={locked}
 									placeholder="Antwort"
 									autocomplete="off"
 								/>
 							</div>
 						{:else if currentTask.answerType === 'number'}
 							<div class="input-with-sign">
-								<button class="sign-btn" type="button" onclick={toggleSign} disabled={isSubmitting} tabindex="-1">+/−</button>
+								<button class="sign-btn" type="button" onclick={toggleSign} disabled={locked} tabindex="-1">+/−</button>
 								<input
 									bind:this={answerInput}
 									class="answer-input"
 									type="text"
 									inputmode="decimal"
 									bind:value={answer}
-									disabled={isSubmitting}
+									disabled={locked}
 									placeholder="z. B. 3,14"
 									autocomplete="off"
 								/>
@@ -640,26 +845,170 @@
 								class="answer-input"
 								type="text"
 								bind:value={answer}
-								disabled={isSubmitting}
+								disabled={locked}
 								placeholder="Antwort"
 								autocomplete="off"
 							/>
 						{/if}
 					</div>
 
-					{#if !currentTask.choices && currentTask.answerType !== 'boolean' && currentTask.answerType !== 'comparison' && !writtenArith && !isZahlenmauer && !isPqSteps}
+					{#if currentTask.explanation && !showFeedback}
 						<button
-							class="btn btn-primary btn-full btn-lg submit-btn"
-							onclick={submitAnswer}
-							disabled={isSubmitting || !String(answer).trim()}
+							class="tip-btn"
+							class:active={showExplanationManual || hadWrongAttempt}
+							onclick={() => (showExplanationManual = !showExplanationManual)}
+							aria-expanded={showExplanationManual || hadWrongAttempt}
 						>
-							{isSubmitting ? '…' : 'Antworten'}
+							<Icon name="bulb" size={18} />
+							{showExplanationManual || hadWrongAttempt ? 'Tipp ausblenden' : 'Tipp anzeigen'}
 						</button>
 					{/if}
 				</div>
+
+				{#if !showFeedback}
+					<div class="mascot-tip">
+						<img src="/mascot.png" alt="" />
+						<p>{MASCOT_TIPS[tipIndex]}</p>
+					</div>
+				{/if}
+
+				{#if submitError}
+					<p class="submit-error" role="alert">Das hat nicht geklappt. Bitte versuch es noch einmal.</p>
+				{/if}
+
+				{#if !showFeedback && !currentTask.choices && currentTask.answerType !== 'boolean' && currentTask.answerType !== 'comparison' && !writtenArith && !isZahlenmauer && !isPqSteps}
+					<div class="task-footer">
+						<button class="btn-3d" onclick={submitAnswer} disabled={isSubmitting || !String(answer).trim()}>
+							{isSubmitting ? 'Wird geprüft…' : 'Prüfen'}
+						</button>
+					</div>
+				{/if}
 			{/if}
 		</div>
-	{/if}
+
+		{#if showFeedback && lastResult}
+			<!-- Feedback sheet -->
+			<section class="sheet" class:correct={lastResult.correct} class:wrong={!lastResult.correct} aria-live="polite" aria-label="Rückmeldung">
+				{#if lastResult.correct}
+					<img src="/mascot.png" alt="" class="sheet-mascot" />
+				{/if}
+				<div class="sheet-head">
+					<span class="sheet-icon">
+						<Icon name={lastResult.correct ? 'check' : 'refresh'} size={26} color="#fff" />
+					</span>
+					<div>
+						<h2>{lastResult.correct ? correctTitle : 'Noch nicht ganz'}</h2>
+						<p>
+							{#if lastResult.correct && lastResult.combo >= 2}
+								{lastResult.combo} richtige Antworten in Folge
+							{:else if lastResult.correct}
+								Weiter so!
+							{:else}
+								Fehler gehören zum Lernen. Schau dir die Lösung an.
+							{/if}
+						</p>
+					</div>
+				</div>
+
+				{#if !lastResult.correct && (lastResult.submittedAnswer || lastResult.correctAnswer)}
+					{#if writtenArith && lastResult.submittedAnswer && lastResult.correctAnswer}
+						<WrittenCalcFeedback
+							a={writtenArith.a}
+							b={writtenArith.b}
+							op={writtenArith.op}
+							submittedAnswer={lastResult.submittedAnswer}
+							correctAnswer={lastResult.correctAnswer}
+						/>
+					{:else}
+						<div class="answer-comparison">
+							{#if lastResult.submittedAnswer}
+								<div class="answer-row answer-row-wrong">
+									<span class="answer-label">Deine Antwort</span>
+									<span class="answer-value"><MathText text={lastResult.submittedAnswer} /></span>
+								</div>
+							{/if}
+							{#if lastResult.correctAnswer}
+								<div class="answer-row answer-row-correct">
+									<span class="answer-label">Richtig wäre</span>
+									<span class="answer-value"><MathText text={lastResult.correctAnswer} /></span>
+								</div>
+							{/if}
+						</div>
+					{/if}
+				{/if}
+
+				{#if lastResult.correct && lastResult.xpGained > 0}
+					<div class="xp-tiles">
+						<div class="xp-tile">
+							<Icon name="star" size={28} color="var(--c-gold)" />
+							<div><strong class="gold-text">+{lastResult.xpGained - lastResult.comboBonus} XP</strong><span>für die Aufgabe</span></div>
+						</div>
+						{#if lastResult.comboBonus > 0}
+							<div class="xp-tile">
+								<Icon name="bolt" size={28} color="var(--c-orange)" />
+								<div><strong class="orange-text">+{lastResult.comboBonus} XP</strong><span>Combo-Bonus</span></div>
+							</div>
+						{/if}
+					</div>
+				{/if}
+
+				{#if lastResult.correct && masteryBefore !== null && !lastResult.justMastered}
+					{@const before = Math.min(masteryBefore, lastResult.mastery)}
+					<div class="mastery-box">
+						<div class="mastery-top"><span>{activeItem?.label}</span><span class="green-text">{Math.round(lastResult.mastery * 100)} % gemeistert</span></div>
+						<div class="bar mastery-bar">
+							<span style="width: {before * 100}%; background: var(--c-success); border-radius: 0"></span>
+							<span style="width: {(lastResult.mastery - before) * 100}%; background: #86efac; border-radius: 0"></span>
+						</div>
+					</div>
+				{/if}
+
+				{#if lastResult.justMastered}
+					<div class="event event-star"><Icon name="sparkle" size={22} color="var(--c-gold)" /> Neuer Stern: {activeItem?.label} gemeistert!</div>
+				{/if}
+				{#if lastResult.levelUp}
+					<div class="event"><Icon name="star" size={22} color="var(--c-primary)" /> Level {lastResult.newLevel} erreicht – weiter so!</div>
+				{/if}
+				{#if lastResult.dailyGoalReached}
+					<div class="event"><Icon name="target" size={22} color="var(--c-success)" /> Tagesziel erreicht!</div>
+				{/if}
+				{#if lastResult.freezeUsed}
+					<div class="event"><Icon name="shield" size={22} color="var(--c-primary)" /> Dein Streak-Schutz hat deine Serie gerettet.</div>
+				{/if}
+				{#if lastResult.freezeEarned}
+					<div class="event"><Icon name="shield" size={22} color="var(--c-primary)" /> Neuer Streak-Schutz verdient!</div>
+				{/if}
+				{#each lastResult.newBadges as badge}
+					<div class="event">
+						<Icon name={badgeIcon(badge)} size={22} color="var(--c-orange)" />
+						Abzeichen „{BADGE_BY_TYPE[badge]?.name ?? badge}“: {BADGE_BY_TYPE[badge]?.desc ?? ''}
+					</div>
+				{/each}
+
+				{#if !lastResult.correct && currentTask?.explanation}
+					<AtomExplanation text={currentTask.explanation} illustrationConfig={currentTask.illustrationConfig} />
+				{:else if !lastResult.correct && Array.isArray(currentTask?.inputData?.steps)}
+					<div class="steps-box">
+						<div class="steps-title">Lösungsweg</div>
+						{#each currentTask!.inputData!.steps as step, i}
+							<div class="step-row">
+								<span class="step-num">{i + 1}.</span>
+								<span class="step-text"><MathText text={String(step)} /></span>
+							</div>
+						{/each}
+					</div>
+				{:else if !lastResult.correct && lastResult.hint}
+					<div class="hint-box"><Icon name="bulb" size={18} /> <MathText text={lastResult.hint} /></div>
+				{/if}
+
+				<button class="btn-3d" class:green={lastResult.correct} class:orange={!lastResult.correct} onclick={handleContinue}>
+					{lastResult.correct ? 'Weiter' : 'Verstanden, weiter'}
+					<Icon name="arrow" size={22} />
+				</button>
+			</section>
+		{/if}
+	</div>
+{/if}
 </div>
 
 <style>
@@ -667,255 +1016,320 @@
 		min-height: 100%;
 		display: flex;
 		flex-direction: column;
+		color: var(--c-navy);
 	}
 
-	/* ── Screen-center helper ── */
-	.screen-center {
-		flex: 1;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		padding: 2rem;
-	}
-
-	/* ── Selection page ── */
-	.selection-page {
-		padding: 1.25rem;
+	/* ═════════ HOME ═════════ */
+	.home {
+		width: 100%;
 		max-width: 640px;
 		margin: 0 auto;
-		width: 100%;
-	}
-	.selection-header {
-		margin-bottom: 1.25rem;
-	}
-	.selection-header h2 { font-size: 1.25rem; font-weight: 700; }
-	.text-muted { color: var(--c-gray-600); font-size: 0.9rem; margin-top: 0.25rem; }
-
-	.atom-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-		gap: 0.75rem;
-		max-width: 900px;
-	}
-	.atom-card {
-		background: #fff;
-		border: 2px solid var(--c-gray-200);
-		border-radius: var(--radius);
-		padding: 0.9rem 0.75rem;
-		text-align: left;
-		cursor: pointer;
-		transition: border-color .15s, box-shadow .15s;
+		padding: 1.25rem 1.25rem 1.5rem;
 		display: flex;
 		flex-direction: column;
-		gap: 0.4rem;
+		gap: 1rem;
 	}
-	.atom-card:hover, .atom-card:focus-visible {
-		border-color: var(--c-primary);
-		box-shadow: var(--shadow-sm);
-		outline: none;
-	}
-	.atom-type-badge {
-		font-size: 0.65rem;
-		font-weight: 700;
-		text-transform: uppercase;
-		letter-spacing: .04em;
+	.home-header { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
+	.hello { display: flex; flex-direction: column; min-width: 0; }
+	.hello-small { font-size: 0.875rem; font-weight: 700; color: var(--c-ink-2); }
+	.hello-name { font-size: 1.5rem; font-weight: 900; letter-spacing: -0.01em; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.chips { display: flex; gap: 0.5rem; flex: none; }
+	a.chip { text-decoration: none; }
+
+	.goal-card {
+		background: var(--c-navy);
 		color: #fff;
-		background: var(--c-gray-400);
-		border-radius: 999px;
-		padding: 0.15rem 0.5rem;
-		align-self: flex-start;
+		border-radius: 24px;
+		padding: 1.25rem;
+		display: flex;
+		align-items: center;
+		gap: 1.1rem;
 	}
-	.atom-type-badge.is-active { background: var(--c-primary); }
-	.atom-type-badge.is-discrimination { background: var(--c-warning); }
-	.discrimination-section { margin-top: 1.75rem; }
-	.discrimination-heading { font-size: 1rem; font-weight: 700; color: var(--c-gray-900); }
-	.discrimination-subtitle { margin-bottom: 0.6rem; }
-	.discrimination-card { border-color: var(--c-warning-light); background: var(--c-warning-light); }
-	.discrimination-card:hover, .discrimination-card:focus-visible { border-color: var(--c-warning); }
-	.atom-card-label {
-		font-size: 0.9rem;
-		font-weight: 600;
-		color: var(--c-gray-900);
-		line-height: 1.3;
-		overflow-wrap: break-word;
-		word-break: break-word;
+	.goal-ring { flex: none; font-family: var(--font); }
+	.goal-arc { transition: stroke-dasharray .8s ease; }
+	.goal-text { display: flex; flex-direction: column; gap: 0.3rem; }
+	.eyebrow { font-size: 0.8rem; font-weight: 800; color: #bfdbfe; text-transform: uppercase; letter-spacing: 0.06em; }
+	.eyebrow.star { color: var(--c-star); }
+	.goal-text strong { font-size: 1.2rem; font-weight: 900; line-height: 1.2; }
+	.goal-sub { font-size: 0.875rem; font-weight: 700; color: #bfdbfe; }
+
+	.card { background: #fff; border-radius: 20px; padding: 0.9rem 1rem; box-shadow: var(--shadow-sm); }
+	.card-title { font-size: 0.95rem; font-weight: 900; }
+	.week-card { display: flex; flex-direction: column; gap: 0.65rem; }
+	.week-top { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; }
+	.freeze { display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.8rem; font-weight: 800; color: var(--c-ink-2); }
+	.week { list-style: none; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 0.35rem; }
+	.day { display: flex; flex-direction: column; align-items: center; gap: 0.25rem; }
+	.day-dot {
+		width: 2.15rem; height: 2.15rem; border-radius: 50%;
+		background: var(--c-track);
+		display: flex; align-items: center; justify-content: center;
+		font-size: 0.6rem; font-weight: 900; color: var(--c-orange-text);
 	}
-	.atom-progress-track {
-		height: 5px;
-		background: var(--c-gray-200);
-		border-radius: 999px;
+	.day.active .day-dot { background: var(--c-orange); }
+	.day.today:not(.active) .day-dot { background: #fff; border: 3px solid var(--c-orange); }
+	.day.future .day-dot { background: #f5f8fc; }
+	.day-label { font-size: 0.75rem; font-weight: 800; color: var(--c-ink-2); }
+	.day.today .day-label { color: var(--c-orange-text); font-weight: 900; }
+	.risk { font-size: 0.85rem; font-weight: 800; color: var(--c-orange-text); }
+
+	.review-card {
+		background: var(--c-primary-light);
+		border: 2px solid var(--c-sky-soft);
+		border-radius: 20px;
+		padding: 0.9rem 1rem;
+		display: flex;
+		align-items: center;
+		gap: 0.85rem;
+	}
+	.review-mascot { width: 68px; height: 68px; object-fit: contain; flex: none; }
+	.review-text { display: flex; flex-direction: column; gap: 0.1rem; flex: 1; min-width: 0; }
+	.review-text strong { font-size: 1.05rem; font-weight: 900; }
+	.review-text span { font-size: 0.875rem; font-weight: 700; color: #34507a; }
+	.play-btn {
+		width: 3.25rem; height: 3.25rem; flex: none;
+		border: 0; border-radius: 16px;
+		background: var(--c-primary); box-shadow: 0 4px 0 var(--c-primary-dark);
+		display: flex; align-items: center; justify-content: center;
+		animation: nudge 2.4s ease-in-out infinite;
+	}
+	.play-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--c-primary-dark); }
+	@keyframes nudge { 0%, 80%, 100% { transform: scale(1); } 88% { transform: scale(1.08); } }
+
+	.topics { display: flex; flex-direction: column; gap: 0.6rem; }
+	.section-head { display: flex; justify-content: space-between; align-items: baseline; }
+	.section-title { font-size: 1.15rem; font-weight: 900; }
+	.section-sub { font-size: 0.875rem; font-weight: 700; color: var(--c-ink-2); margin-top: -0.35rem; }
+	.mixed-head { margin-top: 0.75rem; }
+	.locked-note { display: flex; align-items: center; gap: 0.4rem; font-size: 0.875rem; font-weight: 700; color: var(--c-ink-2); }
+	.topic-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 0.65rem; }
+	.topic-card {
+		font-family: var(--font);
+		text-align: left;
+		background: #fff;
+		color: var(--c-navy);
+		border: 2px solid transparent;
+		border-radius: 18px;
+		padding: 0.85rem;
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		box-shadow: var(--shadow-sm);
+		cursor: pointer;
+		transition: border-color .15s, transform .1s;
+	}
+	.topic-card.recommended { border-color: var(--c-primary); }
+	.topic-card:hover:not(:disabled), .topic-card:focus-visible { border-color: var(--c-primary); outline: none; }
+	.topic-card:active:not(:disabled) { transform: scale(0.98); }
+	.topic-card:disabled { opacity: 0.55; cursor: not-allowed; }
+	.topic-card.mixed { background: #fffaf5; }
+	.topic-label { font-size: 0.95rem; font-weight: 900; line-height: 1.25; overflow-wrap: anywhere; }
+	.topic-meta { display: flex; align-items: center; gap: 0.3rem; font-size: 0.75rem; font-weight: 800; color: var(--c-ink-2); margin-top: auto; }
+
+	.empty-state { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 0.75rem; padding: 1.5rem 1rem; }
+	.empty-state h3 { font-size: 1.25rem; font-weight: 900; }
+	.empty-state p { color: var(--c-ink-2); font-weight: 700; }
+	.empty-mascot { width: 120px; height: auto; }
+
+	/* ═════════ SUMMARY ═════════ */
+	.summary {
+		position: relative;
+		flex: 1;
+		min-height: 100svh;
+		background: var(--c-navy);
+		color: #fff;
 		overflow: hidden;
 	}
-	.atom-progress-fill {
-		height: 100%;
-		background: var(--c-primary);
-		border-radius: 999px;
-	}
-	.atom-mastery-pct {
-		font-size: 0.7rem;
-		color: var(--c-gray-600);
-	}
-
-	/* ── Empty state ── */
-	.empty-state {
-		text-align: center;
+	.confetti { position: absolute; top: 0; left: 0; width: 100%; height: 320px; }
+	.summary-inner {
+		position: relative;
+		max-width: 480px;
+		margin: 0 auto;
+		min-height: 100svh;
+		padding: 1.5rem 1.25rem calc(1.25rem + env(safe-area-inset-bottom, 0px));
 		display: flex;
 		flex-direction: column;
-		align-items: center;
-		gap: 1rem;
-		max-width: 280px;
+		gap: 1.1rem;
 	}
-	.mascot-img {
-		width: 100px;
-		max-width: 35vw;
-		height: auto;
+	.summary-hero { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 0.25rem; }
+	.summary-mascot { width: 170px; height: 170px; object-fit: contain; animation: hop .7s cubic-bezier(.3, 1.6, .5, 1) both; }
+	@keyframes hop { from { transform: translateY(30px) scale(0.8); opacity: 0; } }
+	.summary-hero h1 { font-size: 2rem; font-weight: 900; letter-spacing: -0.02em; }
+	.summary-hero p { font-weight: 700; color: #bfdbfe; }
+	.stat-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.6rem; }
+	.stat-tile {
+		background: #fff; color: var(--c-navy);
+		border-radius: 18px; padding: 0.75rem 0.4rem;
+		display: flex; flex-direction: column; align-items: center; gap: 0.1rem;
+		border-bottom: 5px solid var(--c-line);
+		animation: rise .5s both;
 	}
-	.mascot-inline {
-		width: 48px;
-		height: auto;
-		vertical-align: middle;
-		margin-right: 0.35rem;
+	.stat-tile:nth-child(2) { animation-delay: .08s; }
+	.stat-tile:nth-child(3) { animation-delay: .16s; }
+	@keyframes rise { from { transform: translateY(14px); opacity: 0; } }
+	.stat-tile.gold { border-bottom-color: var(--c-gold); }
+	.stat-tile.green { border-bottom-color: var(--c-success); }
+	.stat-tile.orange { border-bottom-color: var(--c-orange); }
+	.stat-tile strong { font-size: 1.45rem; font-weight: 900; }
+	.stat-tile span { font-size: 0.75rem; font-weight: 800; color: var(--c-ink-2); }
+	.new-star {
+		background: var(--c-navy-2); border: 2px solid #2b5a9e; border-radius: 20px;
+		padding: 0.85rem 1rem; display: flex; align-items: center; gap: 0.85rem;
 	}
+	.new-star > div { display: flex; flex-direction: column; gap: 0.1rem; }
+	.new-star strong { font-size: 1.05rem; font-weight: 900; }
+	.new-star-icon {
+		width: 3.25rem; height: 3.25rem; flex: none; border-radius: 50%;
+		background: var(--c-navy); border: 2px solid var(--c-star);
+		display: flex; align-items: center; justify-content: center;
+		box-shadow: 0 0 18px rgba(252, 211, 77, .55);
+	}
+	.new-star-sub { font-size: 0.8rem; font-weight: 700; color: #bfdbfe; }
+	.summary-note { display: flex; align-items: center; gap: 0.45rem; font-weight: 800; color: #e0f2fe; }
+	.summary-level { display: flex; flex-direction: column; gap: 0.45rem; }
+	.summary-level-top { display: flex; justify-content: space-between; font-size: 0.875rem; font-weight: 800; color: #bfdbfe; }
+	.summary-level-track { height: 1rem; border-radius: 999px; background: var(--c-navy-3); overflow: hidden; }
+	.summary-level-track span { display: block; height: 100%; background: var(--c-sky); border-radius: 999px; transition: width .8s ease; }
+	.summary-actions { margin-top: auto; display: flex; flex-direction: column; gap: 0.5rem; }
+	.summary-home {
+		min-height: 3rem; border: 0; background: transparent; color: #fff;
+		font: 800 1.05rem var(--font); border-radius: 1rem; cursor: pointer;
+	}
+	.summary-home:hover { background: var(--c-navy-2); }
 
-	/* ── Review progress bar ── */
-	.review-progress-bar {
-		padding: 0.75rem 1.25rem 0;
-		max-width: 640px;
+	/* ═════════ TASK ═════════ */
+	.task-view {
+		flex: 1;
 		width: 100%;
-		margin: 0 auto;
-	}
-	.review-progress-label {
-		font-size: 0.8rem;
-		color: var(--c-gray-600);
-		margin-bottom: 0.4rem;
-	}
-	.review-track {
-		display: flex;
-		gap: 0.35rem;
-	}
-	.review-dot {
-		width: 10px;
-		height: 10px;
-		border-radius: 50%;
-		background: var(--c-gray-200);
-		flex-shrink: 0;
-	}
-	.review-dot.done { background: var(--c-success); }
-	.review-dot.current { background: var(--c-primary); }
-
-	/* ── Back bar ── */
-	.back-bar {
-		display: flex;
-		align-items: center;
-		gap: 0.75rem;
-		padding: 0.5rem 1rem;
-		border-bottom: 1px solid var(--c-gray-100);
 		max-width: 640px;
-		width: 100%;
 		margin: 0 auto;
+		display: flex;
+		flex-direction: column;
+		min-height: 100%;
 	}
-	.back-btn {
-		background: none;
-		border: none;
-		color: var(--c-primary);
-		font-size: 0.9rem;
-		font-weight: 600;
-		padding: 0.25rem 0;
-		cursor: pointer;
+	.task-header { display: flex; align-items: center; gap: 0.75rem; padding: 1rem 1.25rem 0.4rem; }
+	.icon-btn {
+		width: 2.75rem; height: 2.75rem; flex: none;
+		border: 0; background: transparent; color: var(--c-ink-2);
+		border-radius: 14px; display: flex; align-items: center; justify-content: center; cursor: pointer;
 	}
-	.back-label {
-		font-size: 0.9rem;
-		color: var(--c-gray-700);
-		font-weight: 500;
+	.icon-btn:hover { background: var(--c-track); }
+	.task-progress { flex: 1; height: 0.9rem; background: var(--c-line); border-radius: 999px; overflow: hidden; }
+	.task-progress span {
+		display: block; height: 100%; background: var(--c-sky); border-radius: 999px;
+		transition: width .45s ease; position: relative;
 	}
+	.task-progress span::after {
+		content: ''; position: absolute; top: 3px; left: 8px; right: 8px; height: 3px;
+		border-radius: 999px; background: #fff; opacity: 0.45;
+	}
+	.chip-combo { padding: 0.35rem 0.6rem; font-size: 0.95rem; transition: background .2s, color .2s, opacity .2s; }
+	.chip-combo.off { opacity: 0.55; }
+	.chip-combo.hot { background: var(--c-orange); color: #fff; box-shadow: 0 0 0 4px #ffe2cc; animation: pulse .4s; }
+	@keyframes pulse { 50% { transform: scale(1.15); } }
 
-	/* ── Task area ── */
+	.task-meta { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1.25rem 0; flex-wrap: wrap; }
+	.task-atom { font-size: 0.875rem; font-weight: 800; color: var(--c-ink-2); }
+
 	.task-area {
 		flex: 1;
-		padding: 1.25rem;
+		padding: 0.85rem 1.25rem 1.25rem;
 		display: flex;
 		flex-direction: column;
-		max-width: 640px;
-		width: 100%;
-		margin: 0 auto;
+		gap: 0.9rem;
 	}
-
 	.task-loading, .task-error {
-		flex: 1;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		gap: 1rem;
-		color: var(--c-gray-600);
+		flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+		gap: 1rem; color: var(--c-ink-2); font-weight: 700; text-align: center;
 	}
-
-	/* Spinner */
 	.spinner {
-		width: 36px;
-		height: 36px;
-		border: 3px solid var(--c-gray-200);
-		border-top-color: var(--c-primary);
-		border-radius: 50%;
-		animation: spin .7s linear infinite;
+		width: 36px; height: 36px; border: 4px solid var(--c-line); border-top-color: var(--c-sky);
+		border-radius: 50%; animation: spin .7s linear infinite;
 	}
 	@keyframes spin { to { transform: rotate(360deg); } }
 
-	/* ── Task card ── */
 	.task-card {
 		background: #fff;
-		border-radius: var(--radius);
-		padding: 1.5rem;
+		border-radius: 24px;
+		padding: 1.4rem 1.25rem;
 		box-shadow: var(--shadow-sm);
 		display: flex;
 		flex-direction: column;
-		gap: 1.25rem;
+		gap: 1.1rem;
+		transition: opacity .2s;
 	}
-	.task-svg {
-		width: 100%;
-		overflow: hidden;
-		background: var(--c-gray-50);
-		border-radius: 0.5rem;
-		padding: 0.75rem 0.5rem 0.5rem;
+	.task-card.dimmed { opacity: 0.6; }
+	.task-svg { width: 100%; overflow: hidden; background: var(--c-ground); border-radius: 12px; padding: 0.75rem 0.5rem 0.5rem; }
+	.tip-btn {
+		align-self: center;
+		min-height: 2.75rem;
+		display: inline-flex; align-items: center; gap: 0.45rem;
+		background: transparent; border: 2px solid var(--c-line); color: var(--c-primary-dark);
+		border-radius: 999px; padding: 0.4rem 1rem; font: 800 0.95rem var(--font); cursor: pointer;
 	}
-	.task-card-header {
+	.tip-btn:hover, .tip-btn.active { border-color: var(--c-sky); background: var(--c-primary-light); }
+
+	.mascot-tip { display: flex; align-items: flex-end; gap: 0.6rem; }
+	.mascot-tip img { width: 56px; height: 56px; object-fit: contain; flex: none; }
+	.mascot-tip p {
+		background: #fff; border-radius: 16px 16px 16px 4px; padding: 0.6rem 0.9rem;
+		font-size: 0.9rem; font-weight: 700; color: #34507a; box-shadow: var(--shadow-sm);
+	}
+	.submit-error { color: #b91c1c; font-weight: 800; text-align: center; }
+	.task-footer { margin-top: auto; position: sticky; bottom: 0; padding-top: 0.5rem; background: linear-gradient(transparent, var(--c-ground) 30%); }
+	.task-footer .btn-3d { width: 100%; }
+
+	/* Feedback sheet */
+	.sheet {
+		position: sticky;
+		bottom: 0;
+		margin-top: auto;
+		border-radius: 32px 32px 0 0;
+		padding: 1.25rem 1.25rem calc(1.25rem + env(safe-area-inset-bottom, 0px));
 		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 0.5rem;
+		flex-direction: column;
+		gap: 0.9rem;
+		max-height: 78svh;
+		overflow-y: auto;
+		animation: slide-up .28s cubic-bezier(.2, .9, .3, 1);
 	}
-	.explanation-toggle {
-		flex-shrink: 0;
-		width: 1.6rem;
-		height: 1.6rem;
-		border-radius: 50%;
-		border: 2px solid var(--c-gray-400);
-		background: #fff;
-		color: var(--c-gray-600);
-		font-size: 0.8rem;
-		font-weight: 700;
-		cursor: pointer;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		transition: border-color 0.15s, background 0.15s, color 0.15s;
+	@keyframes slide-up { from { transform: translateY(40%); opacity: 0; } }
+	.sheet.correct { background: var(--c-success-light); border-top: 3px solid #86efac; overflow: visible; }
+	.sheet.wrong { background: #fff7ed; border-top: 3px solid #fdba74; }
+	.sheet-mascot { position: absolute; right: 0.5rem; top: -84px; width: 116px; height: 116px; object-fit: contain; pointer-events: none; animation: hop .5s cubic-bezier(.3, 1.6, .5, 1) both; }
+	.sheet-head { display: flex; align-items: center; gap: 0.75rem; padding-right: 5rem; }
+	.sheet.wrong .sheet-head { padding-right: 0; }
+	.sheet-icon {
+		width: 3rem; height: 3rem; flex: none; border-radius: 50%;
+		display: flex; align-items: center; justify-content: center;
 	}
-	.explanation-toggle:hover {
-		border-color: var(--c-primary);
-		color: var(--c-primary);
+	.sheet.correct .sheet-icon { background: var(--c-success); }
+	.sheet.wrong .sheet-icon { background: #ea580c; }
+	.sheet-head h2 { font-size: 1.55rem; font-weight: 900; letter-spacing: -0.01em; line-height: 1.15; }
+	.sheet.correct h2 { color: #14532d; }
+	.sheet.wrong h2 { color: #9a3412; }
+	.sheet-head p { font-size: 0.95rem; font-weight: 800; }
+	.sheet.correct .sheet-head p { color: var(--c-success-dark); }
+	.sheet.wrong .sheet-head p { color: #9a3412; }
+	.xp-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.6rem; }
+	.xp-tile { background: #fff; border-radius: 16px; padding: 0.7rem 0.85rem; display: flex; align-items: center; gap: 0.6rem; animation: rise .35s both; }
+	.xp-tile:nth-child(2) { animation-delay: .1s; }
+	.xp-tile > div { display: flex; flex-direction: column; }
+	.xp-tile strong { font-size: 1.25rem; font-weight: 900; }
+	.xp-tile span { font-size: 0.75rem; font-weight: 800; color: var(--c-ink-2); }
+	.gold-text { color: var(--c-gold-text); }
+	.orange-text { color: var(--c-orange-text); }
+	.green-text { color: var(--c-success-dark); }
+	.mastery-box { background: #fff; border-radius: 16px; padding: 0.7rem 0.85rem; display: flex; flex-direction: column; gap: 0.45rem; }
+	.mastery-top { display: flex; justify-content: space-between; gap: 0.5rem; font-size: 0.875rem; font-weight: 800; }
+	.mastery-bar { height: 0.65rem; }
+	.event {
+		display: flex; align-items: center; gap: 0.55rem;
+		background: #fff; border-radius: 14px; padding: 0.6rem 0.8rem;
+		font-weight: 800; font-size: 0.95rem; animation: rise .35s both;
 	}
-	.explanation-toggle.active {
-		border-color: var(--c-primary);
-		background: var(--c-primary-light);
-		color: var(--c-primary);
-	}
-	.atom-label-tag {
-		font-size: 0.75rem;
-		font-weight: 600;
-		color: var(--c-primary);
-		text-transform: uppercase;
-		letter-spacing: .05em;
-	}
+	.event-star { background: #fef3c7; color: #78350f; }
+
 	/* .task-prompt lives in app.css (rendered via MathText component) */
 	.task-sublabel {
 		font-size: 0.85rem;
@@ -981,7 +1395,6 @@
 		border-color: var(--c-primary);
 		box-shadow: 0 0 0 3px var(--c-primary-light);
 	}
-	.submit-btn { margin-top: 0.25rem; }
 
 	/* ── Choice buttons (boolean / comparison) ── */
 	.choice-buttons {
@@ -993,11 +1406,11 @@
 		display: grid;
 		grid-template-columns: repeat(2, 1fr);
 	}
-	@media (min-width: 520px) {
+
 		.choice-buttons-multi {
 			grid-template-columns: repeat(4, 1fr);
 		}
-	}
+
 	.choice-btn {
 		min-width: 0;
 		padding: 0.75rem 0.75rem;
@@ -1038,63 +1451,6 @@
 	.choice-btn-ja:hover:not(:disabled) {
 		background: var(--c-success-light);
 		border-color: var(--c-success);
-	}
-
-	/* ── Feedback card ── */
-	.feedback-card {
-		background: #fff;
-		border-radius: var(--radius);
-		padding: 1.75rem 1.5rem;
-		box-shadow: var(--shadow-sm);
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 0.75rem;
-		text-align: center;
-		border-top: 4px solid var(--c-gray-200);
-	}
-	.feedback-card.correct { border-top-color: var(--c-success); }
-	.feedback-card.incorrect { border-top-color: var(--c-error); }
-	.feedback-icon {
-		font-size: 3rem;
-		line-height: 1;
-	}
-	.feedback-card.correct .feedback-icon { color: var(--c-success); }
-	.feedback-card.incorrect .feedback-icon { color: var(--c-error); }
-	.feedback-text {
-		font-size: 1.25rem;
-		font-weight: 700;
-	}
-	.feedback-card.correct .feedback-text { color: var(--c-success); }
-	.feedback-card.incorrect .feedback-text { color: var(--c-error); }
-	.xp-gained {
-		font-size: 1rem;
-		font-weight: 700;
-		color: #f59e0b;
-	}
-	.level-up {
-		font-size: 1rem;
-		font-weight: 700;
-		color: var(--c-primary);
-	}
-	.mastered-notice {
-		font-size: 1rem;
-		font-weight: 600;
-		color: var(--c-success);
-	}
-	.new-badges {
-		display: flex;
-		flex-direction: column;
-		gap: 0.35rem;
-		width: 100%;
-	}
-	.badge-notice {
-		background: var(--c-primary-light);
-		color: var(--c-primary-dark);
-		border-radius: var(--radius);
-		padding: 0.4rem 0.75rem;
-		font-size: 0.9rem;
-		font-weight: 600;
 	}
 	.hint-box {
 		background: var(--c-warning-light);
@@ -1160,7 +1516,6 @@
 	.step-text {
 		color: var(--c-gray-800);
 	}
-	.continue-btn { margin-top: 0.5rem; }
 
 	/* ── Answer comparison (wrong feedback) ── */
 	.answer-comparison {
@@ -1198,4 +1553,18 @@
 	}
 	.answer-row-wrong .answer-value { color: var(--c-error); }
 	.answer-row-correct .answer-value { color: var(--c-success); }
+	/* overrides for the restyled feedback */
+	.answer-comparison { background: #fff; border-radius: 16px; padding: 0.25rem; }
+	.answer-row { border-radius: 12px; }
+	.answer-row-wrong { background: transparent; }
+	.answer-row-wrong .answer-value { color: #9a3412; text-decoration: line-through; text-decoration-thickness: 2px; }
+	.answer-row-correct { background: var(--c-success-light); }
+	.answer-row-correct .answer-value { color: var(--c-success-dark); }
+	.answer-label { color: var(--c-ink-2); font-weight: 800; }
+	.hint-box { display: flex; gap: 0.45rem; align-items: flex-start; background: #fff; color: #78350f; font-weight: 700; border-radius: 14px; }
+	.steps-box { background: #fff; border: 0; border-radius: 14px; }
+	.choice-btn { border-radius: 14px; font-family: var(--font); font-weight: 800; box-shadow: 0 3px 0 var(--c-line); }
+	.choice-btn:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 1px 0 var(--c-line); }
+	.answer-input { border-radius: 14px; font-family: var(--font); font-weight: 800; border-color: var(--c-line); color: var(--c-navy); }
+	.answer-input:focus { border-color: var(--c-sky); box-shadow: 0 0 0 3px var(--c-primary-light); }
 </style>

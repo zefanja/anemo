@@ -1,57 +1,10 @@
 <script lang="ts">
-	import { goto, invalidate } from '$app/navigation';
+	import { invalidate } from '$app/navigation';
 	import { enhance } from '$app/forms';
 	import StarMap from '$lib/components/student/StarMap.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
-
-	let showConfirm = $state(false);
-	let resetting = $state(false);
-
-	async function resetProgress() {
-		resetting = true;
-		try {
-			const res = await fetch('/api/reset-progress', { method: 'POST' });
-			if (!res.ok) throw new Error();
-			goto('/placement');
-		} catch {
-			resetting = false;
-			alert('Fehler beim Zurücksetzen. Bitte versuche es erneut.');
-		}
-	}
-
-	interface BadgeDef {
-		type: string;
-		emoji: string;
-		label: string;
-		desc: string;
-	}
-
-	const ALL_BADGES: BadgeDef[] = [
-		// Atoms mastered
-		{ type: 'first_atom',      emoji: '🌱', label: 'Erster Schritt',  desc: '1. Atom gemeistert' },
-		{ type: 'atoms_5',         emoji: '📚', label: 'Abel',            desc: '5 Atome gemeistert' },
-		{ type: 'atoms_10',        emoji: '📖', label: 'Thales',          desc: '10 Atome gemeistert' },
-		{ type: 'atoms_25',        emoji: '🌿', label: 'Fibonacci',       desc: '25 Atome gemeistert' },
-		{ type: 'atoms_50',        emoji: '💡', label: 'Leibniz',         desc: '50 Atome gemeistert' },
-		{ type: 'atoms_all',       emoji: '🏆', label: 'Gauß',            desc: 'Alle Atome gemeistert' },
-		// Streaks
-		{ type: 'streak_3',        emoji: '🔥', label: 'Hypatia',         desc: '3 Tage Streak' },
-		{ type: 'streak_7',        emoji: '🔥', label: 'Pythagoras',      desc: '7 Tage Streak' },
-		{ type: 'streak_30',       emoji: '🔥', label: 'Archimedes',      desc: '30 Tage Streak' },
-		{ type: 'streak_100',      emoji: '🔥', label: 'Ramanujan',       desc: '100 Tage Streak' },
-		// XP milestones
-		{ type: 'xp_100',          emoji: '⭐', label: 'Euklid',          desc: '100 XP gesammelt' },
-		{ type: 'xp_500',          emoji: '🌟', label: 'Kepler',          desc: '500 XP gesammelt' },
-		{ type: 'xp_1500',         emoji: '💫', label: 'Descartes',       desc: '1.500 XP gesammelt' },
-		{ type: 'xp_4000',         emoji: '⚡', label: 'Newton',          desc: '4.000 XP gesammelt' },
-		{ type: 'xp_8000',         emoji: '💎', label: 'Euler',           desc: '8.000 XP gesammelt' },
-		// Other
-		{ type: 'cluster_complete',emoji: '📦', label: 'Bereich fertig', desc: 'Einen ganzen Bereich abgeschlossen' }
-	];
-
-	const earnedTypes = $derived(new Set<string>(data.badges));
 
 	function rankIcon(i: number): string {
 		if (i === 0) return '🥇';
@@ -73,9 +26,10 @@
 		return 'untouched';
 	}
 
-	let overallPct = $derived(
-		data.totalAtoms > 0 ? Math.round((data.masteredAtoms / data.totalAtoms) * 100) : 0
-	);
+	const starAtoms = $derived(data.starMapAtoms.filter((a) => a.level === 'atom'));
+	const glowing = $derived(starAtoms.filter((a) => a.isMastered).length);
+	const rising = $derived(starAtoms.filter((a) => !a.isMastered && a.mastery > 0).length);
+	const waiting = $derived(starAtoms.filter((a) => !a.isMastered && a.mastery === 0).length);
 
 	const MONTH_NAMES = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
 
@@ -144,32 +98,20 @@
 </script>
 
 <div class="progress-page">
-	<!-- ── Overall stats ── -->
-	<div class="stats-card">
-		<div class="stats-row">
-			<div class="stat">
-				<span class="stat-value">{data.masteredAtoms}</span>
-				<span class="stat-label">Gemeistert</span>
-			</div>
-			<div class="stat-divider"></div>
-			<div class="stat">
-				<span class="stat-value">{data.totalAtoms}</span>
-				<span class="stat-label">Gesamt</span>
-			</div>
-			<div class="stat-divider"></div>
-			<div class="stat">
-				<span class="stat-value">{overallPct}%</span>
-				<span class="stat-label">Fortschritt</span>
-			</div>
-		</div>
-		<div class="overall-track">
-			<div class="overall-fill" style="width: {overallPct}%"></div>
-		</div>
+	<header class="sky-header">
+		<h1>Deine Sternenkarte</h1>
+		<p>Jedes gemeisterte Thema lässt einen Stern leuchten.</p>
+	</header>
+
+	<div class="sky-stats">
+		<div class="sky-stat"><strong class="gold">{glowing}</strong><span>leuchten</span></div>
+		<div class="sky-stat"><strong class="sky">{rising}</strong><span>am Aufgehen</span></div>
+		<div class="sky-stat"><strong>{waiting}</strong><span>warten noch</span></div>
 	</div>
 
-	<!-- ── Star map ── -->
-	<div class="section-title">Deine Galaxie</div>
 	<StarMap atoms={data.starMapAtoms} />
+
+	<a href="/practice" class="btn-3d sky-cta">Nächsten Stern zünden</a>
 
 	<!-- ── Activity heatmap ── -->
 	<div class="heatmap-card">
@@ -250,19 +192,6 @@
 		{/if}
 	{/if}
 
-	<!-- ── Badges ── -->
-	<div class="section-title">Abzeichen</div>
-	<div class="badges-grid">
-		{#each ALL_BADGES as badge}
-			{@const earned = earnedTypes.has(badge.type)}
-			<div class="badge-card" class:earned class:locked={!earned} title={badge.desc}>
-				<span class="badge-emoji">{badge.emoji}</span>
-				<span class="badge-name">{badge.label}</span>
-				<span class="badge-desc">{badge.desc}</span>
-			</div>
-		{/each}
-	</div>
-
 	<!-- ── Active atoms by domain ── -->
 	{#if data.domains.length === 0}
 		<div class="empty-state">Alle aktuell erreichbaren Themen gemeistert!</div>
@@ -337,25 +266,6 @@
 
 	<div style="height: 1.5rem"></div>
 
-	<!-- ── Reset progress ── -->
-	<div class="reset-section">
-		{#if !showConfirm}
-			<button class="reset-btn" onclick={() => showConfirm = true}>
-				Lernfortschritt zurücksetzen
-			</button>
-		{:else}
-			<div class="confirm-box">
-				<p class="confirm-text">Wirklich alles zurücksetzen? XP, Abzeichen und Lernfortschritt werden gelöscht und der Einstufungstest startet neu.</p>
-				<div class="confirm-actions">
-					<button class="cancel-btn" onclick={() => showConfirm = false} disabled={resetting}>Abbrechen</button>
-					<button class="confirm-reset-btn" onclick={resetProgress} disabled={resetting}>
-						{resetting ? 'Wird zurückgesetzt…' : 'Ja, zurücksetzen'}
-					</button>
-				</div>
-			</div>
-		{/if}
-	</div>
-
 	<div style="height: 1rem"></div>
 </div>
 
@@ -371,73 +281,8 @@
 	}
 
 	/* ── Stats card ── */
-	.stats-card {
-		background: #fff;
-		border-radius: var(--radius);
-		padding: 1.25rem;
-		box-shadow: var(--shadow-sm);
-		margin-bottom: 0.5rem;
-	}
-	.stats-row {
-		display: flex;
-		align-items: center;
-		justify-content: space-around;
-		margin-bottom: 0.75rem;
-	}
-	.stat {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 2px;
-	}
-	.stat-value {
-		font-size: 1.5rem;
-		font-weight: 700;
-		color: var(--c-primary);
-	}
-	.stat-label {
-		font-size: 0.7rem;
-		color: var(--c-gray-600);
-		text-transform: uppercase;
-		letter-spacing: .05em;
-	}
-	.stat-divider {
-		width: 1px;
-		height: 32px;
-		background: var(--c-gray-200);
-	}
-	.overall-track {
-		height: 10px;
-		background: var(--c-gray-200);
-		border-radius: 999px;
-		overflow: hidden;
-	}
-	.overall-fill {
-		height: 100%;
-		background: var(--c-primary);
-		border-radius: 999px;
-		transition: width .4s ease;
-	}
 
 	/* ── Badges ── */
-	.badges-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
-		gap: 0.5rem;
-		margin-bottom: 0.5rem;
-	}
-	.badge-card {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 0.2rem;
-		padding: 0.65rem 0.4rem 0.5rem;
-		border-radius: var(--radius);
-		text-align: center;
-		cursor: default;
-		transition: transform .15s;
-	}
-	.badge-card:hover { transform: translateY(-2px); }
 	.badge-card.earned {
 		background: var(--c-primary-light);
 		border: 1.5px solid var(--c-primary);
@@ -447,35 +292,20 @@
 		border: 1.5px solid var(--c-gray-200);
 		opacity: 0.55;
 	}
-	.badge-emoji {
-		font-size: 1.6rem;
-		line-height: 1;
-	}
 	.badge-card.locked .badge-emoji {
 		filter: grayscale(1);
-	}
-	.badge-name {
-		font-size: 0.72rem;
-		font-weight: 700;
-		color: var(--c-primary-dark);
-		line-height: 1.2;
 	}
 	.badge-card.locked .badge-name {
 		color: var(--c-gray-500);
 	}
-	.badge-desc {
-		font-size: 0.6rem;
-		color: var(--c-gray-500);
-		line-height: 1.3;
-	}
 
 	/* ── Domain sections ── */
 	.section-title {
-		font-size: 0.7rem;
-		font-weight: 700;
+		font-size: 0.8rem;
+		font-weight: 900;
 		text-transform: uppercase;
 		letter-spacing: .08em;
-		color: var(--c-gray-600);
+		color: #bfdbfe;
 		padding: 0.5rem 0 0.25rem;
 	}
 	.domain-section {
@@ -565,7 +395,8 @@
 	.empty-state {
 		text-align: center;
 		padding: 2rem 1rem;
-		color: var(--c-gray-600);
+		color: #bfdbfe;
+		font-weight: 700;
 		font-size: 0.95rem;
 	}
 	.mini-track {
@@ -602,12 +433,12 @@
 	.lb-toggle-btn:hover { color: var(--c-primary); border-color: var(--c-primary); }
 	.lb-hidden-note {
 		font-size: 0.8rem;
-		color: var(--c-gray-500);
+		color: #bfdbfe;
 		text-align: center;
 		padding: 0.75rem 1rem;
-		background: var(--c-gray-50);
+		background: var(--c-navy-2);
 		border-radius: var(--radius);
-		border: 1px solid var(--c-gray-200);
+		border: 1px solid var(--c-navy-3);
 	}
 	.lb-card {
 		background: #fff;
@@ -644,61 +475,6 @@
 	.lb-xp { font-size: 0.8rem; font-weight: 700; color: var(--c-primary); white-space: nowrap; }
 
 	/* ── Reset section ── */
-	.reset-section {
-		margin-top: 0.5rem;
-	}
-	.reset-btn {
-		width: 100%;
-		padding: 0.75rem 1rem;
-		background: none;
-		border: 1px solid var(--c-gray-300);
-		border-radius: var(--radius);
-		color: var(--c-gray-500);
-		font-size: 0.85rem;
-		cursor: pointer;
-		transition: border-color .15s, color .15s;
-	}
-	.reset-btn:hover {
-		border-color: var(--c-error);
-		color: var(--c-error);
-	}
-	.confirm-box {
-		background: #fff;
-		border: 1px solid var(--c-error);
-		border-radius: var(--radius);
-		padding: 1rem;
-	}
-	.confirm-text {
-		font-size: 0.875rem;
-		color: var(--c-gray-900);
-		margin: 0 0 0.75rem;
-	}
-	.confirm-actions {
-		display: flex;
-		gap: 0.5rem;
-		justify-content: flex-end;
-	}
-	.cancel-btn {
-		padding: 0.5rem 1rem;
-		background: none;
-		border: 1px solid var(--c-gray-300);
-		border-radius: var(--radius);
-		color: var(--c-gray-700);
-		font-size: 0.85rem;
-		cursor: pointer;
-	}
-	.cancel-btn:disabled { opacity: 0.5; cursor: default; }
-	.confirm-reset-btn {
-		padding: 0.5rem 1rem;
-		background: var(--c-error);
-		border: none;
-		border-radius: var(--radius);
-		color: #fff;
-		font-size: 0.85rem;
-		font-weight: 600;
-		cursor: pointer;
-	}
-	.confirm-reset-btn:disabled { opacity: 0.6; cursor: default; }
 
 	/* ── Heatmap ── */
 	.heatmap-card {
@@ -739,9 +515,9 @@
 		flex-shrink: 0;
 	}
 	.heat-cell-lg[data-level="0"] { background: var(--c-gray-100); }
-	.heat-cell-lg[data-level="1"] { background: #c7d2fe; }
-	.heat-cell-lg[data-level="2"] { background: #818cf8; }
-	.heat-cell-lg[data-level="3"] { background: #6366f1; }
+	.heat-cell-lg[data-level="1"] { background: #bae6fd; }
+	.heat-cell-lg[data-level="2"] { background: #38bdf8; }
+	.heat-cell-lg[data-level="3"] { background: #0284c7; }
 	.heat-cell-lg[data-level="4"] { background: var(--c-primary-dark); }
 
 	/* Grid layout */
@@ -793,9 +569,9 @@
 	}
 	.heat-cell[data-level="-1"] { background: transparent; }
 	.heat-cell[data-level="0"]  { background: var(--c-gray-100); }
-	.heat-cell[data-level="1"]  { background: #c7d2fe; }
-	.heat-cell[data-level="2"]  { background: #818cf8; }
-	.heat-cell[data-level="3"]  { background: #6366f1; }
+	.heat-cell[data-level="1"]  { background: #bae6fd; }
+	.heat-cell[data-level="2"]  { background: #38bdf8; }
+	.heat-cell[data-level="3"]  { background: #0284c7; }
 	.heat-cell[data-level="4"]  { background: var(--c-primary-dark); }
 	.heat-cell.today {
 		outline: 2px solid var(--c-primary);
@@ -810,4 +586,16 @@
 		font-size: 0.7rem;
 		color: var(--c-gray-500);
 	}
+	.progress-page { color: var(--c-navy); }
+	.sky-header { color: #fff; padding-top: 0.5rem; }
+	.sky-header h1 { font-size: 1.65rem; font-weight: 900; letter-spacing: -0.01em; }
+	.sky-header p { font-weight: 700; color: #bfdbfe; }
+	.sky-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.5rem; margin: 0.25rem 0 0.5rem; }
+	.sky-stat { background: var(--c-navy-2); border-radius: 14px; padding: 0.6rem 0.75rem; display: flex; flex-direction: column; color: #fff; }
+	.sky-stat strong { font-size: 1.4rem; font-weight: 900; line-height: 1.2; }
+	.sky-stat strong.gold { color: var(--c-star); }
+	.sky-stat strong.sky { color: var(--c-sky-soft); }
+	.sky-stat span { font-size: 0.75rem; font-weight: 800; color: #bfdbfe; }
+	.sky-cta { margin: 0.5rem 0; }
+	.domain-title { background: var(--c-navy-2); }
 </style>

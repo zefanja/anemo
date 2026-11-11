@@ -85,6 +85,7 @@ Alle Einstellungen über Umgebungsvariablen (`.env`):
 | `COGNITIVE_WEIGHT` | – | `0.5` | Gewichtung der kognitiven Last im Frontier-Score |
 | `SESSION_MAX_TOTAL` | – | `20` | Max. Aufgaben pro Sitzung (serverweiter Standard) |
 | `SESSION_MAX_REVIEW` | – | `10` | Max. FSRS-Wiederholungen pro Sitzung |
+| `DAILY_XP_GOAL` | – | `50` | Tagesziel in XP (Ring auf der Schüler-Startseite) |
 
 ```dotenv
 # .env.example
@@ -138,7 +139,7 @@ Der Reset-Link wird in der **Serverkonsole** ausgegeben (kein E-Mail-Versand). S
 | `students` | Schüler (display_name + code_hash, kein Klarname) |
 | `student_atom_status` | Mastery + FSRS-Zustand pro Schüler×Atom |
 | `attempts` | Alle Antwortversuche (atomId, isCorrect, fsrsRating) |
-| `gamification_state` | XP, Level, Streak pro Schüler |
+| `gamification_state` | XP, Level, Streak, Streak-Schutz, Tages-XP pro Schüler |
 | `badges` | Errungenschaften (first_atom, streak_7, …) |
 | `tasks` | Importierte statische Aufgaben |
 | `sessions` | DB-backed Sessions (Schüler + Lehrer) |
@@ -164,6 +165,20 @@ Der Frontier enthält Atome, die noch nicht gemeistert sind und deren alle `requ
 
 1. **Pflicht:** Alle fälligen FSRS-Wiederholungen (max. `SESSION_MAX_REVIEW`)
 2. **Frei:** Unbegrenzte Übung mit Frontier-Atomen nach Wahl des Schülers
+
+
+### Motivation & Gamification (Schüler-App)
+
+| Element | Regel |
+|---|---|
+| **Tagesziel** | `DAILY_XP_GOAL` XP pro Tag (Standard 50), als Ring auf der Startseite |
+| **Combo** | Aufeinanderfolgende richtige Antworten (Pause < 15 Min.): ab 3 → +2 XP, ab 5 → +3 XP, ab 10 → +5 XP pro Aufgabe |
+| **Streak-Schutz** | Überbrückt je einen verpassten Tag. Start mit 1, alle 7 Streak-Tage +1 (max. 2) |
+| **Runden** | Freies Üben in Runden à 10 Aufgaben; danach (oder beim Meistern eines Themas / nach den Wiederholungen) erscheint eine Zusammenfassung |
+| **Sternenkarte** | Jedes gemeisterte Atom ist ein leuchtender Stern (`/progress`) |
+| **Abzeichen** | Eigene Seite `/badges` mit Fortschritt zum nächsten Abzeichen |
+
+Migration für bestehende Datenbanken: `drizzle/0010_daily_goal_streak_freeze.sql` (oder `npm run db:push`).
 
 ---
 
@@ -222,7 +237,7 @@ Aufgaben können als JSON-Array über `/teacher/tasks/import` oder per Script im
 ## Tests
 
 ```bash
-# Einmalig ausführen (58 Tests)
+# Einmalig ausführen
 npm test
 
 # Im Watch-Modus

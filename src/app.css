@@ -1,11 +1,28 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-	--c-primary: #4f46e5;
-	--c-primary-light: #eef2ff;
-	--c-primary-dark: #3730a3;
+	/* Brand: sky blue + navy (from logo & mascot) */
+	--c-primary: #0b6bcb;
+	--c-primary-light: #e0f2fe;
+	--c-primary-dark: #0a4f99;
+	--c-navy: #0b2a5b;
+	--c-navy-2: #13386f;
+	--c-navy-3: #1e3f75;
+	--c-ink-2: #4a5b78;
+	--c-sky: #38bdf8;
+	--c-sky-soft: #7dd3fc;
+	--c-ground: #f2f7fc;
+	--c-line: #dce7f3;
+	--c-track: #eef3f9;
+	--c-orange: #f97316;
+	--c-orange-text: #c2410c;
+	--c-orange-light: #fff1e6;
+	--c-gold: #f59e0b;
+	--c-gold-text: #92400e;
+	--c-star: #fcd34d;
 	--c-success: #16a34a;
-	--c-success-light: #f0fdf4;
+	--c-success-dark: #166534;
+	--c-success-light: #dcfce7;
 	--c-error: #dc2626;
 	--c-error-light: #fef2f2;
 	--c-warning: #d97706;
@@ -13,16 +30,20 @@
 	--c-gray-50: #f9fafb;
 	--c-gray-100: #f3f4f6;
 	--c-gray-200: #e5e7eb;
+	--c-gray-300: #d1d5db;
 	--c-gray-400: #9ca3af;
 	--c-gray-600: #4b5563;
 	--c-gray-700: #374151;
+	--c-gray-800: #1f2937;
 	--c-gray-900: #111827;
 	--radius: 0.75rem;
-	--shadow-sm: 0 1px 3px rgba(0,0,0,.08);
-	--shadow: 0 4px 16px rgba(0,0,0,.1);
+	--radius-lg: 1.25rem;
+	--shadow-sm: 0 1px 3px rgba(11,42,91,.08);
+	--shadow: 0 4px 16px rgba(11,42,91,.1);
+	--font: 'Nunito Variable', system-ui, -apple-system, sans-serif;
 }
 
-html { font-family: system-ui, -apple-system, sans-serif; font-size: 16px; }
+html { font-family: var(--font); font-size: 16px; }
 body { background: var(--c-gray-50); color: var(--c-gray-900); line-height: 1.5; -webkit-tap-highlight-color: transparent; }
 
 button { font-family: inherit; cursor: pointer; }
@@ -32,25 +53,66 @@ a { color: inherit; }
 /* Task prompt — used via MathText component */
 .task-prompt {
 	display: block;
-	font-size: 1.35rem;
-	font-weight: 600;
-	line-height: 1.5;
-	color: var(--c-gray-900);
+	font-size: 1.4rem;
+	font-weight: 800;
+	line-height: 1.45;
+	color: var(--c-navy);
 }
 /* MathJax SVG output sizing */
 .task-prompt mjx-container { vertical-align: middle; }
 .task-prompt mjx-container svg { font-size: 120% !important; }
 
 .btn {
+	font-weight: 800;
 	display: inline-flex; align-items: center; justify-content: center;
 	padding: 0.75rem 1.5rem; border: none; border-radius: var(--radius);
 	font-size: 1rem; font-weight: 600; cursor: pointer;
 	transition: opacity .15s, background .15s; user-select: none;
 }
 .btn:disabled { opacity: .4; cursor: not-allowed; }
-.btn-primary { background: var(--c-primary); color: #fff; }
+.btn-primary { background: var(--c-primary); color: #fff; box-shadow: 0 4px 0 var(--c-primary-dark); }
+.btn-primary:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 2px 0 var(--c-primary-dark); }
 .btn-primary:hover:not(:disabled) { background: var(--c-primary-dark); }
 .btn-success { background: var(--c-success); color: #fff; }
 .btn-outline { background: transparent; color: var(--c-primary); border: 2px solid var(--c-primary); }
 .btn-lg { padding: 1rem 2rem; font-size: 1.1rem; }
 .btn-full { width: 100%; }
+
+/* ── Student app helpers ── */
+.sr-only {
+	position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+	overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+.btn-3d {
+	display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+	min-height: 3.5rem; padding: 0 1.25rem; border: 0; border-radius: 1rem;
+	font: 900 1.15rem var(--font); text-decoration: none; cursor: pointer;
+	background: var(--c-primary); color: #fff; box-shadow: 0 4px 0 var(--c-primary-dark);
+	transition: transform .08s, box-shadow .08s, opacity .15s;
+}
+.btn-3d:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 1px 0 var(--c-primary-dark); }
+.btn-3d:disabled { opacity: .45; cursor: not-allowed; }
+.btn-3d.green { background: var(--c-success); box-shadow: 0 4px 0 var(--c-success-dark); }
+.btn-3d.green:active:not(:disabled) { box-shadow: 0 1px 0 var(--c-success-dark); }
+.btn-3d.sky { background: var(--c-sky); color: var(--c-navy); box-shadow: 0 4px 0 #0284c7; }
+.btn-3d.sky:active:not(:disabled) { box-shadow: 0 1px 0 #0284c7; }
+.btn-3d.orange { background: #ea580c; box-shadow: 0 4px 0 #9a3412; }
+.chip {
+	display: inline-flex; align-items: center; gap: 0.35rem;
+	font-weight: 900; font-size: 1rem; padding: 0.45rem 0.75rem; border-radius: 999px; white-space: nowrap;
+}
+.chip-streak { background: var(--c-orange-light); color: var(--c-orange-text); }
+.chip-level { background: var(--c-primary-light); color: var(--c-primary-dark); }
+.chip-combo { background: var(--c-orange-light); color: var(--c-orange-text); }
+.tag {
+	align-self: flex-start; font-size: 0.7rem; font-weight: 900; text-transform: uppercase;
+	letter-spacing: 0.04em; padding: 0.2rem 0.55rem; border-radius: 999px;
+	background: var(--c-primary-light); color: var(--c-primary-dark);
+}
+.tag-new { background: var(--c-success-light); color: var(--c-success-dark); }
+.tag-mixed { background: var(--c-orange-light); color: var(--c-orange-text); }
+.bar { height: 0.6rem; border-radius: 999px; background: var(--c-track); overflow: hidden; display: flex; }
+.bar > span { display: block; height: 100%; background: var(--c-sky); border-radius: 999px; transition: width .5s ease; }
+@media (prefers-reduced-motion: reduce) {
+	*, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}

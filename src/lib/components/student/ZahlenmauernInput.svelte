@@ -145,8 +145,8 @@
 
 	.cell-input {
 		background: #ede9fe;
-		border: 2px solid #4f46e5;
-		color: #4f46e5;
+		border: 2px solid #0b6bcb;
+		color: #0b6bcb;
 		font-size: 1.1rem;
 		font-weight: 700;
 		text-align: center;
@@ -165,7 +165,7 @@
 	}
 
 	.cell-input:focus {
-		box-shadow: 0 0 0 3px #c7d2fe;
+		box-shadow: 0 0 0 3px #bae6fd;
 	}
 
 	.cell-input:disabled {
@@ -181,14 +181,14 @@
 		font-weight: 700;
 		border: none;
 		border-radius: 8px;
-		background: #4f46e5;
+		background: #0b6bcb;
 		color: #fff;
 		cursor: pointer;
 		transition: background 0.15s, opacity 0.15s;
 	}
 
 	.submit-btn:hover:not(:disabled) {
-		background: #4338ca;
+		background: #0a4f99;
 	}
 
 	.submit-btn:disabled {
