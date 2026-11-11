@@ -29,6 +29,8 @@ export interface TaskImportRow {
 	distractors?: string[];
 	hint?: string;
 	difficulty?: number;
+	// accepted absolute deviation for integer/number answers (e.g. 0.05); omit for exact match
+	tolerance?: number;
 }
 
 export interface ImportResult {
@@ -55,6 +57,9 @@ export async function importTasks(rows: TaskImportRow[]): Promise<ImportResult> 
 		if (!r.correct_answer) errors.push(`Row ${i}: missing correct_answer`);
 		if (!['integer', 'number', 'fraction', 'text', 'boolean', 'comparison'].includes(r.answer_type)) {
 			errors.push(`Row ${i}: invalid answer_type "${r.answer_type}"`);
+		}
+		if (r.tolerance !== undefined && (typeof r.tolerance !== 'number' || !(r.tolerance >= 0))) {
+			errors.push(`Row ${i}: tolerance must be a non-negative number`);
 		}
 	}
 	if (errors.length > 0) return { inserted: 0, skipped: 0, errors };
@@ -88,6 +93,7 @@ export async function importTasks(rows: TaskImportRow[]): Promise<ImportResult> 
 				distractors: row.distractors ?? null,
 				hint: row.hint ?? null,
 				difficulty: row.difficulty ?? null,
+				tolerance: row.tolerance ?? null,
 				contentHash: hash,
 				importedAt: new Date()
 			})

@@ -28,7 +28,7 @@ export async function processAttempt(
 	task: GeneratedTask,
 	isReview: boolean
 ): Promise<AttemptResult> {
-	const correct = checkAnswer(submittedAnswer, task.correctAnswer, task.answerType);
+	const correct = checkAnswer(submittedAnswer, task.correctAnswer, task.answerType, task.tolerance);
 
 	// 1. Update mastery (for non-cluster atoms)
 	const atom = await db.query.atoms.findFirst({

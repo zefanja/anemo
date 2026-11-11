@@ -43,7 +43,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				answerType: dbTask.answerType as GeneratedTask['answerType'],
 				correctAnswer: dbTask.correctAnswer,
 				hint: dbTask.hint ?? undefined,
-				difficulty: dbTask.difficulty ?? undefined
+				difficulty: dbTask.difficulty ?? undefined,
+				tolerance: dbTask.tolerance ?? undefined
 			};
 		}
 	}

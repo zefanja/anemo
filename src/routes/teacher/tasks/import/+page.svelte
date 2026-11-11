@@ -129,6 +129,7 @@
 					<li><code>correct_answer</code> <span class="req">Pflicht</span></li>
 					<li><code>hint</code> optional</li>
 					<li><code>difficulty</code> optional (0–1)</li>
+					<li><code>tolerance</code> optional (erlaubte Abweichung bei Zahlen, z. B. 0.05)</li>
 					<li><code>distractors</code> optional (Array)</li>
 				</ul>
 
