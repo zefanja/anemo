@@ -46,6 +46,11 @@ prerequisites:
   mastery_level_needed: 0.8
   note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
     beherrscht sind.
+- id: algebra__quadratische_ergaenzung
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
 lehrplan_ref:
 - schulform: GY
   dokument: lp_gy_mathematik_2021.pdf
@@ -56,4 +61,4 @@ tags:
 - scheitelpunkt
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 2
+version: 3

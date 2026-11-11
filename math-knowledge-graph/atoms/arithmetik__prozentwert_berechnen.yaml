@@ -16,13 +16,13 @@ weight:
   transfer_value: 0.9
   cognitive_load: 0.55
 prerequisites:
-- id: arithmetik__prozentschreibweise
+- id: arithmetik__prozent_grundbegriffe
   type: required
   mastery_level_needed: 0.85
 - id: arithmetik__dezimal_mal_dezimal
   type: required
   mastery_level_needed: 0.8
-- id: algebra__proportionalitaet_dreisatz
+- id: algebra__proportionale_zuordnung
   type: required
   mastery_level_needed: 0.8
 lehrplan_ref:
@@ -38,4 +38,4 @@ tags:
 - dreisatz
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

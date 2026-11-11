@@ -17,9 +17,12 @@ weight:
   cognitive_load: 0.5
 prerequisites:
 - id: arithmetik__subtraktion_als_addition_gegenzahl
-  type: required
-  mastery_level_needed: 0.8
+  type: helpful
+  mastery_level_needed: 0.7
 - id: arithmetik__rechnen_mit_gebrochenen_zahlen
+  type: helpful
+  mastery_level_needed: 0.7
+- id: arithmetik__betrag_gegenzahl
   type: required
   mastery_level_needed: 0.85
 lehrplan_ref:
@@ -34,4 +37,4 @@ tags:
 - vorzeichenregeln
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

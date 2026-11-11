@@ -12,7 +12,7 @@ jahrgangsstufen:
 weight:
   mastery_required: 0.85
   curriculum_centrality: 0.85
-  transfer_value: 0.85
+  transfer_value: 0.5
   cognitive_load: 0.6
 prerequisites:
 - id: stochastik__bedingte_wahrscheinlichkeit_begriff
@@ -30,4 +30,4 @@ tags:
 - unabhängigkeit
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

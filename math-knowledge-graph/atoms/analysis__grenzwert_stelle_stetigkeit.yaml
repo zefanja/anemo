@@ -17,6 +17,12 @@ weight:
   cognitive_load: 0.65
 prerequisites:
 - id: analysis__verhalten_im_unendlichen
+  type: helpful
+  mastery_level_needed: 0.7
+- id: algebra__potenzfunktionen_negative_exponenten
+  type: required
+  mastery_level_needed: 0.75
+- id: algebra__definitions_wertebereich
   type: required
   mastery_level_needed: 0.8
 related:
@@ -32,4 +38,4 @@ tags:
 - stetigkeit
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

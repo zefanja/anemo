@@ -9,8 +9,8 @@ granularity: 4
 schulformen:
 - GY
 jahrgangsstufen:
-- 6
 - 7
+- 8
 - 9
 weight:
   mastery_required: 0.7
@@ -21,6 +21,10 @@ prerequisites:
 - id: arithmetik__bruchbegriff
   type: required
   mastery_level_needed: 0.75
+- id: arithmetik__negative_zahlen_zahlengerade
+  type: required
+  mastery_level_needed: 0.75
+  note: Ganze und rationale Zahlen (Z, Q).
 lehrplan_ref:
 - schulform: GY
   dokument: lp_gy_mathematik_2021.pdf
@@ -30,4 +34,4 @@ tags:
 - zahlbereiche
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

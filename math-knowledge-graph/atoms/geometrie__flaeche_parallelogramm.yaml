@@ -19,6 +19,13 @@ prerequisites:
 - id: geometrie__rechteck_flaeche_umfang
   type: required
   mastery_level_needed: 0.85
+- id: geometrie__hoehen_erkennen
+  type: required
+  mastery_level_needed: 0.8
+- id: geometrie__vierecke_systematisieren
+  type: required
+  mastery_level_needed: 0.7
+  note: Parallelogramm und Trapez müssen als Figuren bekannt sein.
 related:
 - id: geometrie__dreiecke_vierecke_flaecheninhalt
   relation: special_case_of
@@ -32,4 +39,4 @@ tags:
 - flächeninhalt
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

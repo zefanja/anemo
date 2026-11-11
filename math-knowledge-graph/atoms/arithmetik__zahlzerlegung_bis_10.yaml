@@ -16,9 +16,9 @@ weight:
   transfer_value: 0.95
   cognitive_load: 0.35
 prerequisites:
-- id: arithmetik__zahlverstaendnis_bis_20
+- id: arithmetik__zahlen_bis_10
   type: required
-  mastery_level_needed: 0.85
+  mastery_level_needed: 0.9
 lehrplan_ref:
 - schulform: GS
   dokument: lp_gs_mathematik_2025_kommentiert.pdf
@@ -32,4 +32,4 @@ tags:
 - teil_ganzes
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

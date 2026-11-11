@@ -1,0 +1,36 @@
+id: arithmetik__groessen_geld
+label: 'Geld: Euro und Cent (Beträge bestimmen, umrechnen)'
+description: Geldbeträge in Euro und Cent angeben, zwischen Euro und Cent umrechnen und Beträge zusammensetzen.
+domain: arithmetik
+subdomain: Größen und Messen
+level: atom
+granularity: 5
+schulformen:
+- GS
+jahrgangsstufen:
+- 1
+- 2
+- 3
+weight:
+  mastery_required: 0.85
+  curriculum_centrality: 0.85
+  transfer_value: 0.5
+  cognitive_load: 0.4
+prerequisites:
+- id: arithmetik__stellenwert_bis_100
+  type: required
+  mastery_level_needed: 0.8
+related:
+- id: arithmetik__groessen_geld_laenge_zeit
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms arithmetik__groessen_geld_laenge_zeit
+lehrplan_ref:
+- schulform: GS
+  dokument: lp_gs_mathematik_2025_kommentiert.pdf
+  abschnitt: Kl. 1/2 bis Kl. 4, LB 3 Größen und Messen
+tags:
+- geld
+- größen
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

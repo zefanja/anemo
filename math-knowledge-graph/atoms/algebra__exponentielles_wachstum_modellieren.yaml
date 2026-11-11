@@ -1,0 +1,42 @@
+id: algebra__exponentielles_wachstum_modellieren
+label: Wachstums- und Zerfallsprozesse modellieren (linear vs. exponentiell)
+description: Lineares und exponentielles Wachstum unterscheiden; Wachstums- und Zerfallsprozesse mit Exponentialfunktionen
+  modellieren (Verdopplungs- und Halbwertszeit).
+domain: algebra
+subdomain: Funktionen
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 10
+weight:
+  mastery_required: 0.85
+  curriculum_centrality: 0.85
+  transfer_value: 0.85
+  cognitive_load: 0.7
+prerequisites:
+- id: algebra__exponentialfunktion_graph
+  type: required
+  mastery_level_needed: 0.8
+- id: algebra__wachstumsfaktor
+  type: required
+  mastery_level_needed: 0.85
+- id: algebra__lineare_funktionen
+  type: required
+  mastery_level_needed: 0.8
+related:
+- id: algebra__exponentialfunktionen
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms algebra__exponentialfunktionen
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 10, LB 1
+tags:
+- wachstum
+- zerfall
+- modellieren
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

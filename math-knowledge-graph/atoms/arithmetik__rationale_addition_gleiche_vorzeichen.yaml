@@ -20,8 +20,8 @@ prerequisites:
   type: required
   mastery_level_needed: 0.85
 - id: arithmetik__rechnen_mit_gebrochenen_zahlen
-  type: required
-  mastery_level_needed: 0.8
+  type: helpful
+  mastery_level_needed: 0.7
 lehrplan_ref:
 - schulform: GY
   dokument: lp_gy_mathematik_2021.pdf
@@ -35,4 +35,4 @@ tags:
 - addition
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

@@ -32,6 +32,9 @@ prerequisites:
   type: required
   mastery_level_needed: 0.85
   note: Jeder Teilschritt der schriftlichen Division ist eine Division mit Rest.
+- id: arithmetik__halbschriftliche_division
+  type: required
+  mastery_level_needed: 0.8
 lehrplan_ref:
 - schulform: GS
   dokument: lp_gs_mathematik_2025_kommentiert.pdf
@@ -41,4 +44,4 @@ tags:
 - division
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 2
+version: 3

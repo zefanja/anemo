@@ -13,7 +13,7 @@ jahrgangsstufen:
 weight:
   mastery_required: 0.9
   curriculum_centrality: 0.85
-  transfer_value: 0.9
+  transfer_value: 0.7
   cognitive_load: 0.7
 prerequisites:
 - id: linalg__erweiterte_koeffizientenmatrix
@@ -35,4 +35,4 @@ tags:
 - zeilenumformung
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

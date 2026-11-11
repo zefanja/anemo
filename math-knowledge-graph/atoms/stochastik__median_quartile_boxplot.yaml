@@ -4,8 +4,8 @@ description: Median und Quartile bestimmen, Daten im Boxplot darstellen und Boxp
   vom arithmetischen Mittel abgrenzen.
 domain: stochastik
 subdomain: Daten
-level: atom
-granularity: 5
+level: cluster
+granularity: 4
 schulformen:
 - GY
 jahrgangsstufen:
@@ -22,6 +22,21 @@ prerequisites:
 - id: stochastik__haeufigkeiten
   type: required
   mastery_level_needed: 0.8
+- id: stochastik__median
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: stochastik__quartile
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: stochastik__boxplot
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
 related:
 - id: stochastik__daten_auswerten_kenngroessen
   relation: special_case_of
@@ -35,4 +50,4 @@ tags:
 - boxplot
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

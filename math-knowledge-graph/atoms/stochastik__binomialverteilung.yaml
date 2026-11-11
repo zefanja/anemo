@@ -22,9 +22,9 @@ prerequisites:
 - id: stochastik__kombinatorik_abzaehlverfahren
   type: required
   mastery_level_needed: 0.8
-- id: algebra__potenzgesetze
+- id: arithmetik__potenzieren_natuerliche_zahlen
   type: required
-  mastery_level_needed: 0.75
+  mastery_level_needed: 0.8
 - id: stochastik__bernoulli_kette
   type: required
   mastery_level_needed: 0.8
@@ -54,4 +54,4 @@ tags:
 - bernoulli
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 2
+version: 3

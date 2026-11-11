@@ -19,9 +19,6 @@ prerequisites:
 - id: algebra__funktion_darstellungsformen
   type: required
   mastery_level_needed: 0.85
-- id: algebra__binomische_formeln_vorwaerts
-  type: required
-  mastery_level_needed: 0.75
 related:
 - id: algebra__quadratische_funktionen
   relation: special_case_of
@@ -35,4 +32,4 @@ tags:
 - normalparabel
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

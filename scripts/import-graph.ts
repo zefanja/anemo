@@ -4,7 +4,8 @@
  * edges from math-knowledge-graph/edges.csv into the database.
  *
  * Idempotent: re-running updates atoms where the YAML version is higher,
- * and upserts edges unconditionally (edge_type/mastery_level_needed may change).
+ * upserts edges unconditionally (edge_type/mastery_level_needed may change)
+ * and deletes edges that are no longer listed in edges.csv.
  * Validates referential integrity and acyclicity before writing anything.
  * Aborts with a non-zero exit code on any validation error.
  */
@@ -17,7 +18,7 @@ import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 import * as schema from '../src/lib/server/db/schema.js';
 import { config } from 'dotenv';
-import { sql } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 
 config({ path: '.env' });
 
@@ -255,6 +256,19 @@ async function importGraph(): Promise<void> {
 		process.stdout.write(`\r  ${edgesProcessed}/${edges.length}`);
 	}
 	console.log(`\n  Done.`);
+
+	// ── Edges: remove edges that no longer exist in edges.csv ────────────────
+	// Without this, an edge that was rewired or dropped in the YAML sources would
+	// stay in the DB forever and keep gating the frontier.
+	const wanted = new Set(edges.map((e) => `${e.source_id}→${e.target_id}`));
+	const stored = await db.query.edges.findMany({ columns: { sourceId: true, targetId: true } });
+	const stale = stored.filter((e) => !wanted.has(`${e.sourceId}→${e.targetId}`));
+	for (const e of stale) {
+		await db
+			.delete(schema.edges)
+			.where(and(eq(schema.edges.sourceId, e.sourceId), eq(schema.edges.targetId, e.targetId)));
+	}
+	console.log(`Removed ${stale.length} stale edge(s).`);
 
 	await client.end();
 	console.log('\n✓ Graph import complete.');

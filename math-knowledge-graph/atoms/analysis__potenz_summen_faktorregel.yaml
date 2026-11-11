@@ -1,5 +1,5 @@
 id: analysis__potenz_summen_faktorregel
-label: Potenz-, Faktor- und Summenregel
+label: Potenz-, Faktor- und Summenregel (ganzrationale Funktionen)
 description: Ganzrationale Funktionen mit Potenz-, Faktor- und Summenregel ableiten.
 domain: analysis
 subdomain: Differentialrechnung
@@ -18,7 +18,7 @@ prerequisites:
 - id: analysis__ableitungsfunktion_graphisch
   type: required
   mastery_level_needed: 0.85
-- id: algebra__potenzgesetze
+- id: algebra__potenzgesetz_gleiche_basis
   type: required
   mastery_level_needed: 0.85
 related:
@@ -34,4 +34,4 @@ tags:
 - ableitungsregeln
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

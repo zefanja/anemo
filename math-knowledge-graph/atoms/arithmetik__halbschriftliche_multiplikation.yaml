@@ -1,0 +1,33 @@
+id: arithmetik__halbschriftliche_multiplikation
+label: Halbschriftliches Multiplizieren (7 · 34 = 7 · 30 + 7 · 4)
+description: Mehrstellige Zahlen durch Zerlegen in Stellenwerte mit einer einstelligen Zahl multiplizieren
+  (Distributivgesetz, Malkreuz).
+domain: arithmetik
+subdomain: Rechenstrategien
+level: atom
+granularity: 5
+schulformen:
+- GS
+jahrgangsstufen:
+- 3
+- 4
+weight:
+  mastery_required: 0.9
+  curriculum_centrality: 0.85
+  transfer_value: 0.85
+  cognitive_load: 0.5
+prerequisites:
+- id: arithmetik__zehnereinmaleins
+  type: required
+  mastery_level_needed: 0.85
+- id: arithmetik__addition_subtraktion_bis_100
+  type: required
+  mastery_level_needed: 0.85
+tags:
+- halbschriftlich
+- multiplikation
+notes: Beim Graph-Review (v4) als fehlende Teilfertigkeit ergänzt; Lehrplanbezug noch nicht gegen das
+  Lehrplan-PDF verifiziert.
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

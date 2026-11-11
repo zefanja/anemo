@@ -1,0 +1,37 @@
+id: analysis__ableitung_ln
+label: Ableitung der natürlichen Logarithmusfunktion
+description: Die Funktion ln x ableiten; (ln x)′ = 1/x.
+domain: analysis
+subdomain: Differentialrechnung
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 11
+weight:
+  mastery_required: 0.85
+  curriculum_centrality: 0.8
+  transfer_value: 0.8
+  cognitive_load: 0.55
+prerequisites:
+- id: analysis__ableitung_e_funktion
+  type: required
+  mastery_level_needed: 0.8
+- id: analysis__potenzregel_negative_rationale_exponenten
+  type: required
+  mastery_level_needed: 0.8
+related:
+- id: analysis__ableitung_e_ln_sin
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms analysis__ableitung_e_ln_sin
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Jg. 11/12 GK, LB 1
+tags:
+- ableitung
+- ln
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

@@ -1,0 +1,38 @@
+id: algebra__verhaeltnisgleichungen
+label: 'Verhältnisgleichungen lösen (a : b = c : x)'
+description: Gleichungen aus zwei gleichen Verhältnissen aufstellen und nach der gesuchten Größe auflösen
+  (über Kreuz multiplizieren).
+domain: algebra
+subdomain: Gleichungen
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 8
+weight:
+  mastery_required: 0.9
+  curriculum_centrality: 0.8
+  transfer_value: 0.85
+  cognitive_load: 0.55
+prerequisites:
+- id: algebra__lineare_gleichung_zweischritt
+  type: required
+  mastery_level_needed: 0.85
+- id: arithmetik__brueche_multiplizieren_dividieren
+  type: required
+  mastery_level_needed: 0.8
+- id: arithmetik__verhaeltnisse
+  type: helpful
+  mastery_level_needed: 0.7
+related:
+- id: algebra__lineare_gleichungen
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms algebra__lineare_gleichungen
+tags:
+- verhältnisgleichung
+notes: Beim Graph-Review (v4) als fehlende Teilfertigkeit ergänzt; Lehrplanbezug noch nicht gegen das
+  Lehrplan-PDF verifiziert.
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

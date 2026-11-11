@@ -1,0 +1,41 @@
+id: analysis__extremwert_loesen
+label: Extremwertproblem lösen (Extremum, Randwerte, Antwort)
+description: Das Extremum der Zielfunktion bestimmen, Definitionsbereich und Randwerte prüfen und das
+  Ergebnis im Sachzusammenhang angeben.
+domain: analysis
+subdomain: Differentialrechnung
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 11
+- 12
+weight:
+  mastery_required: 0.8
+  curriculum_centrality: 0.85
+  transfer_value: 0.7
+  cognitive_load: 0.75
+prerequisites:
+- id: analysis__extremwert_zielfunktion
+  type: required
+  mastery_level_needed: 0.8
+- id: analysis__extremstellen_hinreichende_bedingung
+  type: required
+  mastery_level_needed: 0.85
+- id: algebra__definitions_wertebereich
+  type: required
+  mastery_level_needed: 0.75
+related:
+- id: analysis__extremwertprobleme
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms analysis__extremwertprobleme
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Jg. 11/12 GK, LB 1
+tags:
+- extremwertproblem
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

@@ -15,9 +15,12 @@ weight:
   transfer_value: 0.8
   cognitive_load: 0.55
 prerequisites:
-- id: stochastik__median_quartile_boxplot
+- id: arithmetik__arithmetisches_mittel
   type: required
   mastery_level_needed: 0.8
+- id: stochastik__quartile
+  type: helpful
+  mastery_level_needed: 0.6
 related:
 - id: stochastik__daten_auswerten_kenngroessen
   relation: special_case_of
@@ -31,4 +34,4 @@ tags:
 - spannweite
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

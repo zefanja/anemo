@@ -1,0 +1,31 @@
+id: algebra__folgen_grenzwert
+label: Monotonie, Schranken und Grenzwert von Zahlenfolgen
+description: Folgen auf Monotonie und Beschränktheit untersuchen; den Grenzwertbegriff an Folgen inhaltlich
+  erfassen.
+domain: algebra
+subdomain: Folgen
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 10
+weight:
+  mastery_required: 0.7
+  curriculum_centrality: 0.65
+  transfer_value: 0.8
+  cognitive_load: 0.75
+prerequisites:
+- id: algebra__zahlenfolgen
+  type: required
+  mastery_level_needed: 0.7
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 10, LB 4
+tags:
+- zahlenfolge
+- grenzwert
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

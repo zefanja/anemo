@@ -13,10 +13,10 @@ jahrgangsstufen:
 weight:
   mastery_required: 0.95
   curriculum_centrality: 0.95
-  transfer_value: 0.95
+  transfer_value: 0.9
   cognitive_load: 0.6
 prerequisites:
-- id: ageo__betrag_kollinearitaet
+- id: ageo__betrag_abstand
   type: required
   mastery_level_needed: 0.85
 - id: geometrie__trigonometrie_rechtwinkliges_dreieck
@@ -35,4 +35,4 @@ tags:
 - orthogonalität
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

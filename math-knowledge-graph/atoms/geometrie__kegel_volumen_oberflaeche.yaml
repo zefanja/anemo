@@ -1,0 +1,40 @@
+id: geometrie__kegel_volumen_oberflaeche
+label: 'Kegel: Volumen, Mantel und Oberfläche'
+description: Volumen, Mantelfläche und Oberflächeninhalt des geraden Kreiskegels berechnen; Mantellinie
+  mit dem Satz des Pythagoras bestimmen.
+domain: geometrie
+subdomain: Körperberechnung
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 9
+- 10
+weight:
+  mastery_required: 0.85
+  curriculum_centrality: 0.8
+  transfer_value: 0.7
+  cognitive_load: 0.6
+prerequisites:
+- id: geometrie__kreisflaeche
+  type: required
+  mastery_level_needed: 0.85
+- id: geometrie__pyramiden
+  type: required
+  mastery_level_needed: 0.75
+- id: geometrie__pythagoras_hypotenuse
+  type: required
+  mastery_level_needed: 0.8
+- id: geometrie__kreisbogen_kreissektor
+  type: helpful
+  mastery_level_needed: 0.6
+tags:
+- kegel
+- volumen
+- mantel
+notes: Beim Graph-Review (v4) als fehlende Teilfertigkeit ergänzt; Lehrplanbezug noch nicht gegen das
+  Lehrplan-PDF verifiziert.
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

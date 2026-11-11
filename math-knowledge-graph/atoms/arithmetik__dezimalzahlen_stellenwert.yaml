@@ -1,5 +1,5 @@
 id: arithmetik__dezimalzahlen_stellenwert
-label: 'Dezimalzahlen: Stellenwerttafel, vergleichen, runden'
+label: 'Dezimalzahlen: Stellenwerttafel, lesen und schreiben'
 description: Erweiterung der Stellenwerttafel auf Zehntel/Hundertstel/Tausendstel; Dezimalzahlen lesen,
   vergleichen, ordnen, runden; Darstellung am Zahlenstrahl.
 domain: arithmetik
@@ -19,10 +19,9 @@ prerequisites:
 - id: arithmetik__natuerliche_zahlen_darstellen_ordnen
   type: required
   mastery_level_needed: 0.8
-- id: arithmetik__bruchbegriff
+- id: arithmetik__bruch_anteil_eines_ganzen
   type: required
   mastery_level_needed: 0.75
-  note: Zehntel und Hundertstel sind Zehnerbrüche.
 - id: arithmetik__groessen_masse_volumen
   type: helpful
   mastery_level_needed: 0.6
@@ -36,4 +35,4 @@ tags:
 - stellenwert
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

@@ -13,15 +13,16 @@ jahrgangsstufen:
 weight:
   mastery_required: 0.95
   curriculum_centrality: 0.9
-  transfer_value: 0.9
+  transfer_value: 0.8
   cognitive_load: 0.55
 prerequisites:
 - id: stochastik__zufallsgroesse_verteilung
   type: required
   mastery_level_needed: 0.85
-- id: stochastik__daten_auswerten_kenngroessen
+- id: arithmetik__arithmetisches_mittel
   type: required
   mastery_level_needed: 0.75
+  note: Erwartungswert als gewichtetes Mittel.
 related:
 - id: stochastik__zufallsgroessen_erwartungswert
   relation: special_case_of
@@ -34,4 +35,4 @@ tags:
 - erwartungswert
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

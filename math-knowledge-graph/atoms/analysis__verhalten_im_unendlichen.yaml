@@ -19,10 +19,10 @@ prerequisites:
 - id: algebra__ganzrationale_funktionen
   type: required
   mastery_level_needed: 0.8
-- id: algebra__zahlenfolgen
+- id: algebra__folgen_grenzwert
   type: required
-  mastery_level_needed: 0.75
-- id: algebra__potenzfunktionen
+  mastery_level_needed: 0.7
+- id: algebra__potenzfunktionen_negative_exponenten
   type: required
   mastery_level_needed: 0.75
 related:
@@ -38,4 +38,4 @@ tags:
 - unendlich
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

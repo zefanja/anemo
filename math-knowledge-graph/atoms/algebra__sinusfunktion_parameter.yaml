@@ -1,0 +1,37 @@
+id: algebra__sinusfunktion_parameter
+label: Allgemeine Sinusfunktion y = a · sin(bx + c) + d
+description: Einfluss der Parameter auf Amplitude, Periode und Verschiebung; periodische Vorgänge modellieren.
+domain: algebra
+subdomain: Funktionen
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 10
+weight:
+  mastery_required: 0.8
+  curriculum_centrality: 0.75
+  transfer_value: 0.75
+  cognitive_load: 0.75
+prerequisites:
+- id: algebra__sinusfunktion_graph
+  type: required
+  mastery_level_needed: 0.85
+- id: algebra__parametereinfluss_graphen
+  type: required
+  mastery_level_needed: 0.75
+related:
+- id: algebra__sinusfunktion
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms algebra__sinusfunktion
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 10, LB 1
+tags:
+- sinusfunktion
+- parameter
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

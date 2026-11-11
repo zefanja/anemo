@@ -1,0 +1,34 @@
+id: analysis__tangentengleichung
+label: Tangentengleichung an einer Stelle aufstellen
+description: Mit Ableitung und Funktionswert die Gleichung der Tangente an den Graphen in einem Punkt
+  bestimmen.
+domain: analysis
+subdomain: Differentialrechnung
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 11
+weight:
+  mastery_required: 0.9
+  curriculum_centrality: 0.9
+  transfer_value: 0.8
+  cognitive_load: 0.6
+prerequisites:
+- id: analysis__potenz_summen_faktorregel
+  type: required
+  mastery_level_needed: 0.85
+- id: analysis__lokale_aenderungsrate
+  type: required
+  mastery_level_needed: 0.85
+- id: algebra__lineare_funktion_gleichung_aufstellen
+  type: required
+  mastery_level_needed: 0.8
+tags:
+- tangente
+notes: Beim Graph-Review (v4) als fehlende Teilfertigkeit ergänzt; Lehrplanbezug noch nicht gegen das
+  Lehrplan-PDF verifiziert.
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

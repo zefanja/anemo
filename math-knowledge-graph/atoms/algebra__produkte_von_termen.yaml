@@ -1,0 +1,40 @@
+id: algebra__produkte_von_termen
+label: Produkte von Termen vereinfachen (3a · 4b, a · a = a²)
+description: Produkte aus Zahlen und Variablen ordnen und zusammenfassen; gleiche Variablen als Potenz
+  schreiben.
+domain: algebra
+subdomain: Terme
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 7
+- 8
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.9
+  transfer_value: 0.9
+  cognitive_load: 0.5
+prerequisites:
+- id: algebra__terme_zusammenfassen
+  type: required
+  mastery_level_needed: 0.85
+- id: arithmetik__potenzieren_natuerliche_zahlen
+  type: required
+  mastery_level_needed: 0.8
+- id: arithmetik__rationale_zahlen_multiplizieren_dividieren
+  type: required
+  mastery_level_needed: 0.85
+related:
+- id: algebra__terme_umformen
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms algebra__terme_umformen
+tags:
+- terme
+- produkte
+notes: Beim Graph-Review (v4) als fehlende Teilfertigkeit ergänzt; Lehrplanbezug noch nicht gegen das
+  Lehrplan-PDF verifiziert.
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

@@ -4,8 +4,8 @@ description: Die Länge eines Vektors über den räumlichen Pythagoras berechnen
   von Vektoren prüfen.
 domain: analytische_geometrie
 subdomain: Vektoren
-level: atom
-granularity: 5
+level: cluster
+granularity: 4
 schulformen:
 - GY
 jahrgangsstufen:
@@ -20,8 +20,18 @@ prerequisites:
   type: required
   mastery_level_needed: 0.85
 - id: geometrie__satz_des_pythagoras
+  type: helpful
+  mastery_level_needed: 0.6
+- id: ageo__betrag_abstand
   type: required
-  mastery_level_needed: 0.75
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: ageo__kollinearitaet
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
 related:
 - id: ageo__vektoren_operationen
   relation: special_case_of
@@ -35,4 +45,4 @@ tags:
 - kollinearität
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

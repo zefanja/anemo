@@ -1,0 +1,36 @@
+id: algebra__logarithmengesetze
+label: Logarithmengesetze anwenden
+description: Logarithmen von Produkten, Quotienten und Potenzen umformen.
+domain: algebra
+subdomain: Funktionen
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 10
+weight:
+  mastery_required: 0.8
+  curriculum_centrality: 0.7
+  transfer_value: 0.8
+  cognitive_load: 0.7
+prerequisites:
+- id: algebra__logarithmus_begriff
+  type: required
+  mastery_level_needed: 0.85
+- id: algebra__potenzgesetze
+  type: required
+  mastery_level_needed: 0.8
+related:
+- id: algebra__logarithmus
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms algebra__logarithmus
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 10, LB 4
+tags:
+- logarithmengesetze
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

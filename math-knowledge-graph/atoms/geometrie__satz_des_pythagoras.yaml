@@ -17,11 +17,11 @@ weight:
   cognitive_load: 0.6
 prerequisites:
 - id: algebra__wurzeln_reelle_zahlen
-  type: required
-  mastery_level_needed: 0.8
+  type: helpful
+  mastery_level_needed: 0.6
 - id: geometrie__dreiecke_vierecke_flaecheninhalt
-  type: required
-  mastery_level_needed: 0.75
+  type: helpful
+  mastery_level_needed: 0.6
 - id: algebra__quadratische_gleichungen
   type: helpful
   mastery_level_needed: 0.6
@@ -57,4 +57,4 @@ tags:
 - rechtwinklig
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 2
+version: 3

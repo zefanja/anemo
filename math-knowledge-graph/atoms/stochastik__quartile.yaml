@@ -1,0 +1,33 @@
+id: stochastik__quartile
+label: Quartile und Quartilsabstand
+description: Unteres und oberes Quartil einer Datenreihe bestimmen; Quartilsabstand als Streumaß.
+domain: stochastik
+subdomain: Daten
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 9
+weight:
+  mastery_required: 0.85
+  curriculum_centrality: 0.8
+  transfer_value: 0.8
+  cognitive_load: 0.55
+prerequisites:
+- id: stochastik__median
+  type: required
+  mastery_level_needed: 0.85
+related:
+- id: stochastik__median_quartile_boxplot
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms stochastik__median_quartile_boxplot
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Kl. 9, LB 4
+tags:
+- quartile
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

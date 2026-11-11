@@ -1,5 +1,5 @@
 id: arithmetik__halbschriftliches_rechnen
-label: Halbschriftliches Rechnen im Zahlenraum bis 1 000
+label: Halbschriftliches Addieren und Subtrahieren im Zahlenraum bis 1 000
 description: Flexible Rechenstrategien für alle vier Grundrechenarten im erweiterten Zahlenraum; Wahl
   effizienter Lösungswege.
 domain: arithmetik
@@ -34,4 +34,4 @@ tags:
 - rechenstrategien
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

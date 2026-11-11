@@ -18,6 +18,9 @@ prerequisites:
 - id: geometrie__zentrische_streckung_aehnlichkeit
   type: required
   mastery_level_needed: 0.8
+- id: algebra__verhaeltnisgleichungen
+  type: required
+  mastery_level_needed: 0.8
 lehrplan_ref:
 - schulform: GY
   dokument: lp_gy_mathematik_2021.pdf
@@ -26,4 +29,4 @@ tags:
 - strahlensätze
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

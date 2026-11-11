@@ -1,0 +1,35 @@
+id: arithmetik__prozent_grundbegriffe
+label: Grundwert, Prozentwert und Prozentsatz in Sachsituationen zuordnen
+description: In Texten und Sachsituationen erkennen, welche Angabe Grundwert, Prozentwert und Prozentsatz
+  ist und welche Größe gesucht wird.
+domain: arithmetik
+subdomain: Prozentrechnung
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 6
+- 7
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.95
+  transfer_value: 0.9
+  cognitive_load: 0.5
+prerequisites:
+- id: arithmetik__prozentschreibweise
+  type: required
+  mastery_level_needed: 0.85
+related:
+- id: arithmetik__prozentrechnung
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms arithmetik__prozentrechnung
+tags:
+- grundwert
+- prozentwert
+- prozentsatz
+notes: Beim Graph-Review (v4) als fehlende Teilfertigkeit ergänzt; Lehrplanbezug noch nicht gegen das
+  Lehrplan-PDF verifiziert.
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

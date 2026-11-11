@@ -12,8 +12,8 @@ Auf einem Rechner mit Internetzugang bitte zusätzlich ausführen:
     pip install jsonschema pyyaml networkx
     python validate_atoms.py --atoms ./atoms --schema ./atom.schema.json --stats
 
-Verwendung:
-    python3 validate_atoms_lite.py --atoms ./atoms
+Verwendung (aus beliebigem Verzeichnis; Standardpfade liegen neben diesem Skript):
+    python3 validate_atoms_lite.py [--atoms ./atoms] [--edges ./edges.csv]
 """
 
 import argparse
@@ -228,13 +228,73 @@ def detect_cycles(atoms):
     return cycles
 
 
+def check_consistency(atoms, atoms_dir, edges_path, errors):
+    """Inhaltliche Konsistenzregeln, die über das Schema hinausgehen."""
+    is_cluster = lambda a: a.get("level") == "cluster"  # noqa: E731
+
+    for aid, atom in atoms.items():
+        prereqs = atom.get("prerequisites") or []
+        required = [p for p in prereqs if p.get("type") == "required"]
+
+        # Jedes übbare Atom ab Kl. 3 braucht mindestens eine required-Voraussetzung,
+        # sonst ist es für jeden Lernenden sofort freigeschaltet.
+        if not is_cluster(atom) and not required and min(atom.get("jahrgangsstufen") or [1]) >= 3:
+            errors.append(f"[{aid}] keine required-Voraussetzung, obwohl Jahrgangsstufe >= 3")
+
+        for p in prereqs:
+            src = atoms.get(p.get("id"))
+            if not src:
+                continue
+            # Schwelle darf nicht über dem liegen, was das Quellatom selbst zum Meistern
+            # verlangt (die App kappt mastery_required bei 0,95).
+            if not is_cluster(src):
+                cap = min(src["weight"]["mastery_required"], 0.95)
+                if p.get("mastery_level_needed", 0) > cap + 1e-9:
+                    errors.append(
+                        f"[{aid}] mastery_level_needed {p['mastery_level_needed']} für "
+                        f"{p['id']} liegt über dessen mastery_required ({cap})")
+            # Eine blockierende Voraussetzung darf nicht erst nach dem Ziel-Atom
+            # unterrichtet werden.
+            if p.get("type") == "required" and not is_cluster(src) and not is_cluster(atom):
+                if min(src["jahrgangsstufen"]) > max(atom["jahrgangsstufen"]):
+                    errors.append(
+                        f"[{aid}] required-Voraussetzung {p['id']} wird erst später unterrichtet "
+                        f"(Kl. {min(src['jahrgangsstufen'])} > Kl. {max(atom['jahrgangsstufen'])})")
+
+        # Teilfertigkeit eines Clusters muss dort als required-Voraussetzung stehen.
+        for rel in atom.get("related") or []:
+            parent = atoms.get(rel.get("id"))
+            if rel.get("relation") == "special_case_of" and parent and is_cluster(parent):
+                ok = any(p.get("id") == aid and p.get("type") == "required"
+                         for p in parent.get("prerequisites") or [])
+                if not ok:
+                    errors.append(f"[{aid}] special_case_of {rel['id']}, fehlt dort aber als "
+                                  f"required-Voraussetzung")
+
+    # edges.csv ist ein abgeleitetes Artefakt und muss zu den YAMLs passen.
+    try:
+        from build_edges import build
+    except ImportError:
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        from build_edges import build
+    current = edges_path.read_bytes().decode("utf-8") if edges_path.exists() else ""
+    if current != build(atoms_dir):
+        errors.append(f"{edges_path.name} ist nicht synchron mit den YAML-Dateien "
+                      f"(python3 build_edges.py ausführen)")
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--atoms", default="./atoms", type=Path)
+    here = Path(__file__).resolve().parent
+    ap.add_argument("--atoms", default=here / "atoms", type=Path)
+    ap.add_argument("--edges", default=here / "edges.csv", type=Path)
     args = ap.parse_args()
 
     files = sorted(args.atoms.rglob("*.yaml"))
     atoms, errors = {}, []
+    if not files:
+        print(f"❌ Keine YAML-Dateien in {args.atoms} gefunden.")
+        sys.exit(1)
 
     for path in files:
         try:
@@ -251,7 +311,7 @@ def main():
             if path.stem != aid:
                 errors.append(f"[{path.name}] Dateiname passt nicht zur id {aid!r}")
 
-    print(f"[1/3] Schema-Kernregeln: {len(files)} Dateien geprüft")
+    print(f"[1/4] Schema-Kernregeln: {len(files)} Dateien geprüft")
 
     known = set(atoms)
     for aid, data in atoms.items():
@@ -264,12 +324,15 @@ def main():
         for ref in data.get("prerequisites", []) or []:
             if ref.get("id") == aid:
                 errors.append(f"[{aid}] prerequisites: Selbstreferenz")
-    print("[2/3] Referenz-Integrität geprüft")
+    print("[2/4] Referenz-Integrität geprüft")
 
     cycles = detect_cycles(atoms)
     for c in cycles:
         errors.append(f"Zyklus im prerequisites-Graph: {c}")
-    print("[3/3] Zyklenfreiheit geprüft (eigene DFS)")
+    print("[3/4] Zyklenfreiheit geprüft (eigene DFS)")
+
+    check_consistency(atoms, args.atoms, args.edges, errors)
+    print("[4/4] Graph-Konsistenz geprüft (Cluster, Schwellen, Jahrgänge, edges.csv)")
 
     print()
     if errors:

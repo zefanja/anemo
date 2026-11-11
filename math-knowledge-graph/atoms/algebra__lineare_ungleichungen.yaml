@@ -11,7 +11,7 @@ schulformen:
 jahrgangsstufen:
 - 8
 weight:
-  mastery_required: 0.6
+  mastery_required: 0.7
   curriculum_centrality: 0.5
   transfer_value: 0.6
   cognitive_load: 0.6
@@ -30,4 +30,4 @@ tags:
 - ungleichungen
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

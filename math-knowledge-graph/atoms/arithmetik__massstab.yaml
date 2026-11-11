@@ -1,0 +1,35 @@
+id: arithmetik__massstab
+label: Maßstab (Karte ↔ Wirklichkeit)
+description: Maßstabsangaben deuten; Längen in der Wirklichkeit und im Bild mit dem Maßstab ineinander
+  umrechnen.
+domain: arithmetik
+subdomain: Verhältnisse
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 5
+- 6
+weight:
+  mastery_required: 0.85
+  curriculum_centrality: 0.7
+  transfer_value: 0.6
+  cognitive_load: 0.55
+prerequisites:
+- id: geometrie__laengeneinheiten_umrechnen
+  type: required
+  mastery_level_needed: 0.8
+- id: arithmetik__kommaverschiebung
+  type: required
+  mastery_level_needed: 0.8
+- id: arithmetik__verhaeltnisse
+  type: helpful
+  mastery_level_needed: 0.6
+tags:
+- maßstab
+notes: Beim Graph-Review (v4) als fehlende Teilfertigkeit ergänzt; Lehrplanbezug noch nicht gegen das
+  Lehrplan-PDF verifiziert.
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

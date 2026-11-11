@@ -11,7 +11,7 @@ schulformen:
 jahrgangsstufen:
 - 4
 weight:
-  mastery_required: 0.6
+  mastery_required: 0.7
   curriculum_centrality: 0.3
   transfer_value: 0.15
   cognitive_load: 0.4
@@ -28,4 +28,4 @@ tags:
 - zahlsysteme
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

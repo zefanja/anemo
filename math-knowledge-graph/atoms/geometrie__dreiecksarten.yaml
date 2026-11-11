@@ -1,0 +1,33 @@
+id: geometrie__dreiecksarten
+label: Dreiecksarten (nach Seiten und Winkeln), Basiswinkel
+description: Dreiecke nach Seiten (gleichseitig, gleichschenklig, unregelmäßig) und Winkeln (spitz-, recht-,
+  stumpfwinklig) einteilen; Basiswinkel im gleichschenkligen Dreieck.
+domain: geometrie
+subdomain: Dreiecke
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 5
+- 6
+weight:
+  mastery_required: 0.9
+  curriculum_centrality: 0.85
+  transfer_value: 0.9
+  cognitive_load: 0.45
+prerequisites:
+- id: geometrie__winkel_zeichnen_messen
+  type: required
+  mastery_level_needed: 0.8
+- id: geometrie__ebene_figuren_grundschule
+  type: required
+  mastery_level_needed: 0.75
+tags:
+- dreiecksarten
+- basiswinkel
+notes: Beim Graph-Review (v4) als fehlende Teilfertigkeit ergänzt; Lehrplanbezug noch nicht gegen das
+  Lehrplan-PDF verifiziert.
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

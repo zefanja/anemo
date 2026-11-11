@@ -14,7 +14,7 @@ jahrgangsstufen:
 weight:
   mastery_required: 0.75
   curriculum_centrality: 0.8
-  transfer_value: 0.65
+  transfer_value: 0.5
   cognitive_load: 0.8
 prerequisites:
 - id: analysis__kurvenuntersuchung
@@ -23,9 +23,10 @@ prerequisites:
 - id: algebra__lineare_gleichungssysteme
   type: required
   mastery_level_needed: 0.85
-- id: linalg__matrizen_gleichungssysteme
-  type: helpful
-  mastery_level_needed: 0.6
+- id: linalg__gauss_verfahren
+  type: required
+  mastery_level_needed: 0.8
+  note: Steckbriefaufgaben führen auf LGS mit drei oder vier Unbekannten.
 lehrplan_ref:
 - schulform: GY
   dokument: lp_gy_mathematik_2021.pdf
@@ -34,4 +35,4 @@ tags:
 - steckbriefaufgaben
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

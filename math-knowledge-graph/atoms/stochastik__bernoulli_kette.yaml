@@ -19,9 +19,9 @@ prerequisites:
 - id: stochastik__ziehen_mit_ohne_zuruecklegen
   type: required
   mastery_level_needed: 0.85
-- id: algebra__potenzgesetze
+- id: arithmetik__potenzieren_natuerliche_zahlen
   type: required
-  mastery_level_needed: 0.75
+  mastery_level_needed: 0.8
 related:
 - id: stochastik__binomialverteilung
   relation: special_case_of
@@ -34,4 +34,4 @@ tags:
 - bernoulli
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

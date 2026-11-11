@@ -4,8 +4,8 @@ description: Ebenen in Koordinaten- und Normalenform darstellen, zwischen den Fo
   Normalenvektor deuten.
 domain: analytische_geometrie
 subdomain: Geraden und Ebenen
-level: atom
-granularity: 5
+level: cluster
+granularity: 4
 schulformen:
 - GY
 jahrgangsstufen:
@@ -26,6 +26,21 @@ prerequisites:
 - id: algebra__lineare_gleichungssysteme
   type: required
   mastery_level_needed: 0.8
+- id: ageo__normalenvektor
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: ageo__ebene_normalen_koordinatenform
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
+- id: ageo__ebenenformen_umwandeln
+  type: required
+  mastery_level_needed: 0.8
+  note: Teilfertigkeit dieses Clusters; das Cluster gilt erst als beherrscht, wenn alle Teilfertigkeiten
+    beherrscht sind.
 related:
 - id: ageo__ebenengleichungen
   relation: special_case_of
@@ -39,4 +54,4 @@ tags:
 - normalenform
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

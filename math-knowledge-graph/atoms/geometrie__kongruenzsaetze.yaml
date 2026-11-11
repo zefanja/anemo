@@ -22,6 +22,9 @@ prerequisites:
 - id: geometrie__innenwinkelsatz_dreieck
   type: required
   mastery_level_needed: 0.75
+- id: geometrie__dreiecksarten
+  type: helpful
+  mastery_level_needed: 0.6
 related:
 - id: geometrie__kongruenz_dreieckskonstruktion
   relation: special_case_of
@@ -35,4 +38,4 @@ tags:
 - kongruenzsätze
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

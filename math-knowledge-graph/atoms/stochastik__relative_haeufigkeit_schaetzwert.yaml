@@ -1,0 +1,36 @@
+id: stochastik__relative_haeufigkeit_schaetzwert
+label: Relative Häufigkeit als Schätzwert für Wahrscheinlichkeiten
+description: Relative Häufigkeiten bei vielen Versuchen als Schätzwert für Wahrscheinlichkeiten deuten
+  (empirisches Gesetz der großen Zahlen).
+domain: stochastik
+subdomain: Wahrscheinlichkeit
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 8
+weight:
+  mastery_required: 0.8
+  curriculum_centrality: 0.8
+  transfer_value: 0.7
+  cognitive_load: 0.5
+prerequisites:
+- id: stochastik__haeufigkeiten
+  type: required
+  mastery_level_needed: 0.8
+- id: stochastik__ereignis_ergebnismenge
+  type: required
+  mastery_level_needed: 0.8
+related:
+- id: stochastik__laplace_wahrscheinlichkeit
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms stochastik__laplace_wahrscheinlichkeit
+tags:
+- relative_häufigkeit
+- gesetz_der_großen_zahlen
+notes: Beim Graph-Review (v4) als fehlende Teilfertigkeit ergänzt; Lehrplanbezug noch nicht gegen das
+  Lehrplan-PDF verifiziert.
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

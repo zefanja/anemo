@@ -1,0 +1,36 @@
+id: algebra__steigung_aus_zwei_punkten
+label: Steigung aus zwei Punkten berechnen
+description: 'Die Steigung einer Geraden aus den Koordinaten zweier Punkte berechnen (m = (y₂ − y₁) :
+  (x₂ − x₁)).'
+domain: algebra
+subdomain: Funktionen
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 8
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 0.9
+  transfer_value: 0.95
+  cognitive_load: 0.55
+prerequisites:
+- id: algebra__lineare_funktion_steigung_achsenabschnitt
+  type: required
+  mastery_level_needed: 0.85
+- id: arithmetik__rationale_zahlen_addieren_subtrahieren
+  type: required
+  mastery_level_needed: 0.8
+related:
+- id: algebra__lineare_funktionen
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms algebra__lineare_funktionen
+tags:
+- steigung
+- differenzenquotient
+notes: Beim Graph-Review (v4) als fehlende Teilfertigkeit ergänzt; Lehrplanbezug noch nicht gegen das
+  Lehrplan-PDF verifiziert.
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

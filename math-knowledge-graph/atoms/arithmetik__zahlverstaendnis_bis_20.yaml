@@ -25,8 +25,11 @@ tags:
 - klasse1
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 2
+version: 3
 prerequisites:
 - id: arithmetik__zaehlen_zahlwortreihe
   type: required
   mastery_level_needed: 0.8
+- id: arithmetik__zahlen_bis_10
+  type: required
+  mastery_level_needed: 0.9

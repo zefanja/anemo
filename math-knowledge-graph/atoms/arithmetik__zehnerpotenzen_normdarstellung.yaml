@@ -9,12 +9,11 @@ granularity: 5
 schulformen:
 - GY
 jahrgangsstufen:
-- 8
 - 9
 weight:
   mastery_required: 0.85
   curriculum_centrality: 0.55
-  transfer_value: 0.8
+  transfer_value: 0.5
   cognitive_load: 0.55
 prerequisites:
 - id: arithmetik__kommaverschiebung
@@ -27,13 +26,17 @@ prerequisites:
   type: helpful
   mastery_level_needed: 0.6
   note: Für kleine Zahlen (negative Exponenten) werden Potenzen mit ganzzahligen Exponenten benötigt.
+- id: algebra__potenzen_negative_exponenten
+  type: required
+  mastery_level_needed: 0.8
+  note: Kleine Zahlen (10⁻³) setzen negative Exponenten voraus.
 tags:
 - zehnerpotenzen
 - normdarstellung
 - internationale_ergaenzung
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2
 notes: 'Ergänzung über den sächsischen Lehrplan hinaus: eigener Standard in internationalen Curricula
   (Common Core 8.EE.A.3/4). Im vorliegenden GY-Lehrplan tauchen Zehnerpotenzen in Kl. 5 auf, die Normdarstellung
   ist aber nicht als eigener Schwerpunkt ausgewiesen.'

@@ -15,12 +15,16 @@ weight:
   transfer_value: 0.95
   cognitive_load: 0.5
 prerequisites:
-- id: algebra__wurzeln_reelle_zahlen
+- id: algebra__quadratwurzel_begriff
   type: required
-  mastery_level_needed: 0.8
+  mastery_level_needed: 0.85
 - id: geometrie__dreiecke_vierecke_flaecheninhalt
+  type: helpful
+  mastery_level_needed: 0.6
+- id: geometrie__dreiecksarten
   type: required
   mastery_level_needed: 0.75
+  note: Rechtwinklige Dreiecke erkennen.
 related:
 - id: geometrie__satz_des_pythagoras
   relation: special_case_of
@@ -34,4 +38,4 @@ tags:
 - hypotenuse
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

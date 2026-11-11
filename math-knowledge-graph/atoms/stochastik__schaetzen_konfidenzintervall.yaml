@@ -1,0 +1,37 @@
+id: stochastik__schaetzen_konfidenzintervall
+label: 'Schätzen: Konfidenzintervall für eine unbekannte Wahrscheinlichkeit'
+description: Aus einer Stichprobe auf die zugrunde liegende Wahrscheinlichkeit schließen und ein Vertrauensintervall
+  angeben.
+domain: stochastik
+subdomain: Statistik
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 12
+weight:
+  mastery_required: 0.75
+  curriculum_centrality: 0.7
+  transfer_value: 0.5
+  cognitive_load: 0.85
+prerequisites:
+- id: stochastik__sigma_regeln
+  type: required
+  mastery_level_needed: 0.8
+- id: stochastik__relative_haeufigkeit_schaetzwert
+  type: helpful
+  mastery_level_needed: 0.6
+related:
+- id: stochastik__beurteilende_statistik
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms stochastik__beurteilende_statistik
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Jg. 11/12 GK, LB 6
+tags:
+- schätzen
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

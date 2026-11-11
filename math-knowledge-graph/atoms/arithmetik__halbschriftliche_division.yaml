@@ -1,0 +1,32 @@
+id: arithmetik__halbschriftliche_division
+label: 'Halbschriftliches Dividieren (84 : 4 = 80 : 4 + 4 : 4)'
+description: Dividenden geschickt in teilbare Teile zerlegen und schrittweise dividieren.
+domain: arithmetik
+subdomain: Rechenstrategien
+level: atom
+granularity: 5
+schulformen:
+- GS
+jahrgangsstufen:
+- 3
+- 4
+weight:
+  mastery_required: 0.85
+  curriculum_centrality: 0.8
+  transfer_value: 0.8
+  cognitive_load: 0.55
+prerequisites:
+- id: arithmetik__zehnereinmaleins
+  type: required
+  mastery_level_needed: 0.85
+- id: arithmetik__addition_subtraktion_bis_100
+  type: required
+  mastery_level_needed: 0.8
+tags:
+- halbschriftlich
+- division
+notes: Beim Graph-Review (v4) als fehlende Teilfertigkeit ergänzt; Lehrplanbezug noch nicht gegen das
+  Lehrplan-PDF verifiziert.
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

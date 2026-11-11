@@ -8,9 +8,88 @@ auf Basis der sächsischen Lehrpläne im Projekt:
 
 ## Umfang
 
-- **291 Atome**, **700 gewichtete prerequisites-Kanten** (azyklisch, geprüft)
-- Domänenverteilung: arithmetik 95, algebra 65, geometrie 49, stochastik 30,
-  analysis 25, analytische_geometrie 22, lineare_algebra 3, logik_und_mengen 2
+- **369 Atome** (296 übbare Atome, 73 Cluster), **993 gewichtete
+  prerequisites-Kanten** (877 required, 114 helpful, 2 deepens; azyklisch, geprüft)
+- Domänenverteilung: arithmetik 109, algebra 89, geometrie 55, analysis 40,
+  stochastik 40, analytische_geometrie 31, lineare_algebra 3, logik_und_mengen 2
+
+### Graph-Review (v4): Schlüssigkeit, Schrittgrößen, fehlende Atome
+
+Der gesamte Graph wurde auf Schlüssigkeit geprüft und überarbeitet
+(78 neue Atome, 140 geänderte Atome, Version jeweils +1).
+
+**Zu strenge Abhängigkeiten gelöst.** Eine `required`-Kante von einem Cluster
+auf ein übbares Atom lässt dieses auf *alle* Teilfertigkeiten des Clusters
+warten. Wo nur eine Teilfertigkeit gebraucht wird, zeigt die Kante jetzt auf
+genau diese, u. a.:
+
+| Atom | wartete unnötig auf | jetzt |
+|---|---|---|
+| Äquivalenzumformung | Ausklammern/Ausmultiplizieren | `terme_zusammenfassen` |
+| Negative Zahlen addieren, Vorzeichenregeln | gesamte Bruch-/Dezimalrechnung | `betrag_gegenzahl` (Brüche `helpful`) |
+| Monotonie/Extrema | Ableitung von ln/sin (→ Logarithmus, Höhensatz …) | `potenz_summen_faktorregel` |
+| sin/cos/tan-Definition | Höhen-/Kathetensatz, Umkehrung | `pythagoras_hypotenuse` |
+| Pythagoras Hypotenuse | Wurzelterme, irrationale Zahlen | `quadratwurzel_begriff` |
+| Prozentwert/-satz/Grundwert | antiproportionale Zuordnung | `proportionale_zuordnung` |
+| Division Grundverständnis | Einmaleins-Automatisierung | `einmaleins_ableiten` |
+| Bernoulli-Kette | rationale Exponenten | `potenzieren_natuerliche_zahlen` |
+| Erwartungswert | Boxplot/Streumaße | `arithmetisches_mittel` |
+
+Künstlich linearisierte Ketten wurden entkoppelt (Kosinussatz ← Sinussatz,
+Kugel ← Zylinder, Additions- ← Einsetzungsverfahren, Nullstelle ← Gleichung
+aufstellen, Lösungsformel ← Faktorisieren, Parabel-Nullstellen ← Scheitelform
+umwandeln, Integral als Fläche ← Stammfunktion: jeweils `helpful` statt
+`required`). Fehlende Kanten wurden ergänzt (z. B. Strahlensätze ←
+Verhältnisgleichungen, σ der Binomialverteilung ← Varianz, Steckbriefaufgaben
+← Gauß, Bruch → Dezimalzahl ← Dezimalzahl durch natürliche Zahl, Zahlbereiche
+← negative Zahlen, Flächenformeln ← Vierecksarten/Höhen).
+
+**Fehlende Atome ergänzt** (Feld `notes` vermerkt, dass der Lehrplanbezug noch
+nicht gegen das PDF verifiziert ist; daher ohne `lehrplan_ref`):
+
+- Arithmetik: Zahlen bis 10, ZE ± E mit Übergang, Zehnereinmaleins,
+  halbschriftliches Multiplizieren/Dividieren, Bruch als Quotient, Brüche
+  gleichnamig machen, Bruch durch natürliche Zahl, Dezimalzahl mal natürliche
+  Zahl, Grundwert/Prozentwert/Prozentsatz zuordnen, Maßstab.
+- Algebra: Produkte von Termen, Summen multiplizieren, Formeln umstellen,
+  Verhältnisgleichungen, Gleichungen aus Sachtexten, quadratische Ergänzung,
+  Steigung aus zwei Punkten, Grenzwert von Folgen.
+- Geometrie: senkrecht/parallel, Kreis-Grundbegriffe, Dreiecksarten, Höhen
+  erkennen, Kegel, Kreisbogen/Kreissektor.
+- Stochastik: Diagramme lesen/erstellen, Gegenereignis, relative Häufigkeit als
+  Schätzwert, Satz von Bayes.
+- Analysis: e-Funktion und ln, Potenzregel für negative/rationale Exponenten,
+  Tangentengleichung, Integral als rekonstruierter Bestand.
+
+**Zu große Schritte zerlegt** (Eltern bleiben als `level: cluster`, gleiche
+Mechanik wie v2): Größen Geld/Länge/Zeit; Kl.-10-Funktionen (Potenz-,
+ganzrationale, Exponential-, Logarithmus-, Sinusfunktion inkl. Einheitskreis
+und Bogenmaß); Analysis (Ableitung e/ln/sin, Monotonie/Extrema,
+Extremwertprobleme, Stammfunktion); Stochastik (Median/Quartile/Boxplot,
+beurteilende Statistik); Analytische Geometrie (Betrag/Kollinearität,
+Koordinaten-/Normalenform, Lage Gerade–Ebene/Ebene–Ebene, Abstände).
+
+Bewusst **nicht** in eigene Atome zerlegt wurden Atome, deren Generator die
+Teilschritte bereits als Stufen (`stage`) nacheinander übt: Rechteck
+Fläche/Umfang, Flächen-/Volumeneinheiten, Volumen/Oberfläche (Quader,
+Zylinder, Kugel), schriftliche Multiplikation, Zahlenfolgen.
+
+**Gewichte konsistent gemacht** (Regeln werden vom Validator geprüft bzw. sind
+unten dokumentiert): `transfer_value` wurde bei Atomen mit wenigen oder keinen
+Folge-Atomen abgesenkt; `mastery_required` hat die Untergrenze 0,7;
+`mastery_level_needed` liegt nie über dem `mastery_required` des Quellatoms.
+
+**Technik:** `edges.csv` wird jetzt mit `build_edges.py` aus den YAMLs erzeugt
+(zuvor wichen zwei laut README herabgestufte Kanten in der CSV ab). Die App
+berechnet die Graph-Tiefe nur noch über `required`-Kanten, der Import löscht
+Kanten, die es in `edges.csv` nicht mehr gibt, und ein Test stellt sicher, dass
+kein übbares Atom hinter einer Voraussetzung ohne Aufgaben-Generator liegt.
+Für alle neuen Atome auf solchen Pfaden (Arithmetik, Algebra bis Kl. 9,
+Geometrie, Logik) wurden Generatoren ergänzt.
+
+**Hinweis für bestehende Lernstände:** Wird ein bereits gemeistertes Atom zum
+Cluster (z. B. Größen Geld/Länge/Zeit), zählt es für Folge-Atome weiterhin als
+beherrscht; seine neuen Teilfertigkeiten erscheinen aber als neue Atome.
 
 ### Feinatomisierung Geometrie, Stochastik, Analysis, Analytische Geometrie, Lineare Algebra (v2) + Gesamtreview
 
@@ -103,9 +182,16 @@ groben Atome bleiben als `level: cluster` (version: 2) erhalten:
 ## Struktur
 
 ```
-atoms/<id>.yaml          # ein Atom pro Datei, Dateiname == id
-edges.csv                # alle prerequisites-Kanten: source_id,target_id,edge_type,mastery_level_needed
+atoms/<id>.yaml          # ein Atom pro Datei, Dateiname == id (Quelle der Wahrheit)
+edges.csv                # abgeleitet: source_id,target_id,edge_type,mastery_level_needed
+build_edges.py           # erzeugt edges.csv aus den YAMLs (nie von Hand editieren)
 validate_atoms_lite.py   # dependency-armer Validator (nur pyyaml)
+```
+
+Nach jeder Änderung an `prerequisites`:
+
+```bash
+python3 build_edges.py && python3 validate_atoms_lite.py
 ```
 
 `edges.csv` ist für den App-Import gedacht: Kante `source → target` bedeutet
@@ -119,8 +205,15 @@ sein muss, bevor das Ziel-Atom sinnvoll geübt werden kann.
 |---|---|
 | `mastery_required` | Wie sicher muss dieses Atom selbst beherrscht werden (0–1)? |
 | `curriculum_centrality` | Wie zentral im sächsischen Lehrplan (0 = Randthema, 1 = zentral)? |
-| `transfer_value` | Wie viele Folge-Atome bauen darauf auf (0 = Sackgasse, 1 = Fundament)? |
+| `transfer_value` | Wie viele Folge-Atome bauen darauf auf (0 = Sackgasse, 1 = Fundament)? Obergrenze nach Zahl der übbaren Folge-Atome: 0 → 0,5; ≤ 2 → 0,7; ≤ 5 → 0,8; ≤ 12 → 0,9 |
 | `cognitive_load` | Geschätzte kognitive Belastung beim Erwerb (relativ zum Jahrgang) |
+
+`mastery_level_needed` an einer Kante wirkt nur, solange es unter dem
+`mastery_required` des Quellatoms liegt (die App wertet ein gemeistertes Atom
+als 1,0); es erlaubt dann, das Ziel-Atom schon vor dem vollständigen Meistern
+der Voraussetzung zu beginnen. Die Reihenfolge im Lernpfad ergibt sich aus der
+Tiefe im `required`-Graphen; `helpful`/`deepens` blockieren nicht und dürfen
+auch rückwärts zeigen.
 
 ## Ehrliche Einordnung / Limitierungen
 
@@ -130,10 +223,13 @@ sein muss, bevor das Ziel-Atom sinnvoll geübt werden kann.
   jeweils Klassenstufe und Lernbereich); die Zahlenwerte der Gewichte und die
   `mastery_level_needed`-Werte sind dagegen nicht empirisch fundiert und
   sollten fachlich reviewt werden, bevor die App sie für Diagnosen nutzt.
-- **Granularität meist 3–4**: Die Atome entsprechen eher Lehrplan-Teilzielen
-  als Barton-feinen Mikro-Skills. Eine feinere Atomisierung (Granularität 5,
-  z. B. „Brüche addieren – gleicher Nenner" vs. „ungleicher Nenner") ist je
-  Domäne iterativ möglich.
+- **Granularität überwiegend 5**: 261 der 296 übbaren Atome sind
+  Mikrofertigkeiten; die übrigen (Granularität 3–4) sind vor allem
+  Grundschul-Geometrie, Größen Masse/Volumen, Sachaufgaben und einzelne
+  Sammelatome (zentrische Streckung, Pyramiden, Kreissätze).
+- **Ohne Aufgaben-Generator** sind weiterhin Stochastik, Analysis, Analytische
+  Geometrie, Lineare Algebra und die Funktionen der Kl. 10; diese Atome sind in
+  der App erst übbar, wenn Aufgaben importiert oder Generatoren ergänzt werden.
 - **Nur GS + GY abgedeckt**, da nur diese Lehrpläne im Projekt liegen.
   Oberschule (OS) und Leistungskurs 11/12 sind nicht modelliert.
 - **ID-Präfix-Workaround**: Das id-Pattern im Schema
@@ -146,10 +242,12 @@ sein muss, bevor das Ziel-Atom sinnvoll geübt werden kann.
 
 In der Erstellungsumgebung waren `jsonschema`/`networkx` nicht installierbar
 (PyPI blockiert), daher wurde mit `validate_atoms_lite.py` geprüft
-(Schema-Kernregeln, Referenz-Integrität, Zyklenfreiheit per eigener DFS):
+(Schema-Kernregeln, Referenz-Integrität, Zyklenfreiheit per eigener DFS sowie
+Graph-Konsistenz: Cluster-Zugehörigkeit, Schwellenwerte, Jahrgangsreihenfolge
+blockierender Kanten, Synchronität von `edges.csv`):
 
 ```
-✅ Alle Prüfungen bestanden (291 Atome).
+✅ Alle Prüfungen bestanden (369 Atome).
 ```
 
 **Bitte zusätzlich auf deinem Rechner mit dem Original-Setup validieren**

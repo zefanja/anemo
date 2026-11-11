@@ -1,0 +1,37 @@
+id: stochastik__satz_von_bayes
+label: Satz von Bayes (umgekehrtes Baumdiagramm)
+description: 'Von P(B|A) auf P(A|B) schließen: umgekehrtes Baumdiagramm bzw. Satz von Bayes, z. B. bei
+  Testverfahren.'
+domain: stochastik
+subdomain: Wahrscheinlichkeit
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 12
+weight:
+  mastery_required: 0.85
+  curriculum_centrality: 0.8
+  transfer_value: 0.5
+  cognitive_load: 0.75
+prerequisites:
+- id: stochastik__bedingte_wahrscheinlichkeit_begriff
+  type: required
+  mastery_level_needed: 0.85
+- id: stochastik__baumdiagramm_pfadmultiplikation
+  type: required
+  mastery_level_needed: 0.85
+related:
+- id: stochastik__bedingte_wahrscheinlichkeit
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms stochastik__bedingte_wahrscheinlichkeit
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Jg. 11/12 GK, LB 4
+tags:
+- bayes
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

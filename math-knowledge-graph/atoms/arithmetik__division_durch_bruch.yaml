@@ -19,6 +19,9 @@ prerequisites:
 - id: arithmetik__bruch_mal_bruch
   type: required
   mastery_level_needed: 0.85
+- id: arithmetik__bruch_durch_natuerliche_zahl
+  type: required
+  mastery_level_needed: 0.8
 lehrplan_ref:
 - schulform: GY
   dokument: lp_gy_mathematik_2021.pdf
@@ -33,4 +36,4 @@ tags:
 - kehrwert
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2

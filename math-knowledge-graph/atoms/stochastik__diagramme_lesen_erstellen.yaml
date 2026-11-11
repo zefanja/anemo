@@ -1,0 +1,38 @@
+id: stochastik__diagramme_lesen_erstellen
+label: Diagramme lesen und erstellen (Säulen-, Linien-, Kreisdiagramm)
+description: Daten aus Säulen-, Linien- und Kreisdiagrammen entnehmen und solche Diagramme zu gegebenen
+  Daten erstellen.
+domain: stochastik
+subdomain: Daten
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 5
+- 6
+weight:
+  mastery_required: 0.85
+  curriculum_centrality: 0.8
+  transfer_value: 0.8
+  cognitive_load: 0.5
+prerequisites:
+- id: stochastik__daten_erheben_darstellen_grundschule
+  type: required
+  mastery_level_needed: 0.7
+- id: arithmetik__natuerliche_zahlen_darstellen_ordnen
+  type: required
+  mastery_level_needed: 0.75
+- id: geometrie__winkel_zeichnen_messen
+  type: helpful
+  mastery_level_needed: 0.6
+- id: arithmetik__prozentschreibweise
+  type: helpful
+  mastery_level_needed: 0.6
+tags:
+- diagramme
+notes: Beim Graph-Review (v4) als fehlende Teilfertigkeit ergänzt; Lehrplanbezug noch nicht gegen das
+  Lehrplan-PDF verifiziert.
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

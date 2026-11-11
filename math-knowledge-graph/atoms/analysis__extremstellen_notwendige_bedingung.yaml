@@ -1,0 +1,37 @@
+id: analysis__extremstellen_notwendige_bedingung
+label: 'Extremstellen: notwendige Bedingung f′(x) = 0'
+description: Mögliche Extremstellen als Nullstellen der ersten Ableitung bestimmen.
+domain: analysis
+subdomain: Differentialrechnung
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 11
+- 12
+weight:
+  mastery_required: 0.95
+  curriculum_centrality: 1.0
+  transfer_value: 0.8
+  cognitive_load: 0.6
+prerequisites:
+- id: analysis__monotonie_ableitung
+  type: required
+  mastery_level_needed: 0.8
+- id: algebra__quadratische_gleichungen
+  type: required
+  mastery_level_needed: 0.85
+related:
+- id: analysis__monotonie_extrema
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms analysis__monotonie_extrema
+lehrplan_ref:
+- schulform: GY
+  dokument: lp_gy_mathematik_2021.pdf
+  abschnitt: Jg. 11/12 GK, LB 1
+tags:
+- extremstellen
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

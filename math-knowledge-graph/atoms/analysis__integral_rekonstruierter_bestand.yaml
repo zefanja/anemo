@@ -1,0 +1,39 @@
+id: analysis__integral_rekonstruierter_bestand
+label: Integral als rekonstruierter Bestand (Gesamtänderung aus Änderungsrate)
+description: Aus einer gegebenen Änderungsrate mit dem Integral die Gesamtänderung bzw. den Bestand rekonstruieren
+  und im Sachzusammenhang deuten.
+domain: analysis
+subdomain: Integralrechnung
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 12
+weight:
+  mastery_required: 0.85
+  curriculum_centrality: 0.85
+  transfer_value: 0.7
+  cognitive_load: 0.7
+prerequisites:
+- id: analysis__integral_orientierte_flaeche
+  type: required
+  mastery_level_needed: 0.85
+- id: analysis__mittlere_aenderungsrate
+  type: required
+  mastery_level_needed: 0.8
+- id: analysis__hauptsatz
+  type: required
+  mastery_level_needed: 0.8
+related:
+- id: analysis__bestimmtes_integral
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms analysis__bestimmtes_integral
+tags:
+- integral
+- bestand
+notes: Beim Graph-Review (v4) als fehlende Teilfertigkeit ergänzt; Lehrplanbezug noch nicht gegen das
+  Lehrplan-PDF verifiziert.
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

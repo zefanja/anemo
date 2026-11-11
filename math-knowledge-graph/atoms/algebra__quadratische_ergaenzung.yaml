@@ -1,0 +1,32 @@
+id: algebra__quadratische_ergaenzung
+label: Quadratische Ergänzung
+description: Einen quadratischen Term durch Ergänzen zu einem Binomquadrat umformen (x² + px + q = (x
+  + p/2)² + …).
+domain: algebra
+subdomain: Funktionen
+level: atom
+granularity: 5
+schulformen:
+- GY
+jahrgangsstufen:
+- 9
+weight:
+  mastery_required: 0.85
+  curriculum_centrality: 0.8
+  transfer_value: 0.85
+  cognitive_load: 0.7
+prerequisites:
+- id: algebra__binomische_formeln_rueckwaerts
+  type: required
+  mastery_level_needed: 0.85
+related:
+- id: algebra__quadratische_funktionen
+  relation: special_case_of
+  note: Teilfertigkeit des Cluster-Atoms algebra__quadratische_funktionen
+tags:
+- quadratische_ergänzung
+notes: Beim Graph-Review (v4) als fehlende Teilfertigkeit ergänzt; Lehrplanbezug noch nicht gegen das
+  Lehrplan-PDF verifiziert.
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

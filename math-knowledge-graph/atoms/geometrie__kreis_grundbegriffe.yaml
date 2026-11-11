@@ -1,0 +1,32 @@
+id: geometrie__kreis_grundbegriffe
+label: 'Kreis: Mittelpunkt, Radius, Durchmesser, Sehne'
+description: Kreise mit dem Zirkel zeichnen; Mittelpunkt, Radius, Durchmesser und Sehne benennen; Zusammenhang
+  d = 2 · r nutzen.
+domain: geometrie
+subdomain: Kreis
+level: atom
+granularity: 5
+schulformen:
+- GS
+- GY
+jahrgangsstufen:
+- 4
+- 5
+weight:
+  mastery_required: 0.9
+  curriculum_centrality: 0.8
+  transfer_value: 0.85
+  cognitive_load: 0.35
+prerequisites:
+- id: geometrie__ebene_figuren_grundschule
+  type: required
+  mastery_level_needed: 0.75
+tags:
+- kreis
+- radius
+- durchmesser
+notes: Beim Graph-Review (v4) als fehlende Teilfertigkeit ergänzt; Lehrplanbezug noch nicht gegen das
+  Lehrplan-PDF verifiziert.
+status: draft
+created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
+version: 1

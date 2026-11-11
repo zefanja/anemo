@@ -17,8 +17,14 @@ weight:
   cognitive_load: 0.65
 prerequisites:
 - id: algebra__lgs_einsetzungsverfahren
+  type: helpful
+  mastery_level_needed: 0.7
+- id: algebra__lgs_grafisch
   type: required
-  mastery_level_needed: 0.8
+  mastery_level_needed: 0.75
+- id: algebra__lineare_gleichung_variablen_beidseitig
+  type: required
+  mastery_level_needed: 0.85
 related:
 - id: algebra__lineare_gleichungssysteme
   relation: special_case_of
@@ -32,4 +38,4 @@ tags:
 - additionsverfahren
 status: draft
 created_by: llm:claude (Gewichte und Kanten sind didaktische Schätzungen, fachlich zu reviewen)
-version: 1
+version: 2
