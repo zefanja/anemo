@@ -12,6 +12,8 @@
 	import AtomExplanation from '$lib/components/student/AtomExplanation.svelte';
 	import WrittenCalcFeedback from '$lib/components/student/WrittenCalcFeedback.svelte';
 	import Icon from '$lib/components/student/Icon.svelte';
+	import NumPad from '$lib/components/student/NumPad.svelte';
+	import { pressKey, numpadInputs, setPadMode, type PadKey } from '$lib/numpad.js';
 	import { ui } from '$lib/stores/ui.svelte.js';
 	import { BADGE_BY_TYPE, greeting, levelProgress } from '$lib/gamification.js';
 
@@ -93,6 +95,12 @@
 	let greet = $state('Hallo');
 	onMount(() => {
 		greet = greeting();
+		coarsePointer = window.matchMedia?.('(pointer: coarse)').matches ?? false;
+		try {
+			padPreferred = localStorage.getItem('anemo-numpad') !== 'off';
+		} catch {
+			// storage unavailable → keep default
+		}
 		return () => {
 			ui.focusMode = false;
 		};
@@ -168,6 +176,8 @@
 
 	$effect(() => {
 		if (view === 'task' && currentTask && !showFeedback) {
+			// Set inputmode="none" before focusing, so no system keyboard flashes up
+			if (showPad && coarsePointer && cardEl) setPadMode(cardEl, true);
 			if (isFractionPart) {
 				fractionPartInput?.focus();
 			} else if (isMixedPart) {
@@ -197,6 +207,47 @@
 	let autoAdvanceTimer = $state<ReturnType<typeof setTimeout> | null>(null);
 
 	let locked = $derived(isSubmitting || showFeedback);
+
+	// ── On-screen number pad ──
+	let padPreferred = $state(true);
+	let coarsePointer = $state(false);
+	let cardEl = $state<HTMLElement | null>(null);
+	let lastFocusedInput: HTMLInputElement | null = null;
+	const padEligible = $derived(
+		!!currentTask &&
+		!currentTask.choices &&
+		currentTask.answerType !== 'boolean' &&
+		currentTask.answerType !== 'comparison' &&
+		currentTask.answerType !== 'text' &&
+		!isPqSteps &&
+		!isNumberLine &&
+		!writtenArith // has its own digit pad
+	);
+	const showPad = $derived(padEligible && padPreferred && !showFeedback);
+	/** Plain single answer field (not fraction / Zahlenmauer / written calculation) */
+	const simpleNumberField = $derived(
+		!!currentTask && (currentTask.answerType === 'integer' || currentTask.answerType === 'number') &&
+		!isFractionPart && !isMixedPart && !writtenArith && !isZahlenmauer
+	);
+
+	function onPad(key: PadKey) {
+		if (!cardEl || locked) return;
+		pressKey(cardEl, key, lastFocusedInput);
+	}
+
+	function trackFocus(e: FocusEvent) {
+		if (e.target instanceof HTMLInputElement) lastFocusedInput = e.target;
+	}
+
+	function setPadPreferred(on: boolean) {
+		padPreferred = on;
+		try {
+			localStorage.setItem('anemo-numpad', on ? 'on' : 'off');
+		} catch {
+			// ignore
+		}
+		if (!on) setTimeout(() => (lastFocusedInput ?? answerInput)?.focus(), 0);
+	}
 
 	// ── Derived display values ──
 	let activeItem = $derived(mode === 'reviews' ? currentReview : selectedAtom);
@@ -423,7 +474,8 @@
 	}
 
 	function handleKeydown(e: KeyboardEvent) {
-		if (view !== 'task' || e.key !== 'Enter') return;
+		// Already handled by an input component (e.g. fraction numerator → denominator)
+		if (view !== 'task' || e.key !== 'Enter' || e.defaultPrevented) return;
 		if (showFeedback && !isSubmitting) {
 			e.preventDefault();
 			handleContinue();
@@ -716,7 +768,7 @@
 					</button>
 				</div>
 			{:else}
-				<div class="task-card" class:dimmed={showFeedback}>
+				<div class="task-card" class:dimmed={showFeedback} bind:this={cardEl} onfocusin={trackFocus} use:numpadInputs={showPad && coarsePointer}>
 					{#if (showExplanationManual || hadWrongAttempt) && currentTask.explanation && !showFeedback}
 						<AtomExplanation text={currentTask.explanation} illustrationConfig={currentTask.illustrationConfig} />
 					{/if}
@@ -813,7 +865,9 @@
 							</div>
 						{:else if currentTask.answerType === 'integer'}
 							<div class="input-with-sign">
-								<button class="sign-btn" type="button" onclick={toggleSign} disabled={locked} tabindex="-1">+/−</button>
+								{#if !showPad}
+									<button class="sign-btn" type="button" onclick={toggleSign} disabled={locked} tabindex="-1">+/−</button>
+								{/if}
 								<input
 									bind:this={answerInput}
 									class="answer-input"
@@ -827,7 +881,9 @@
 							</div>
 						{:else if currentTask.answerType === 'number'}
 							<div class="input-with-sign">
-								<button class="sign-btn" type="button" onclick={toggleSign} disabled={locked} tabindex="-1">+/−</button>
+								{#if !showPad}
+									<button class="sign-btn" type="button" onclick={toggleSign} disabled={locked} tabindex="-1">+/−</button>
+								{/if}
 								<input
 									bind:this={answerInput}
 									class="answer-input"
@@ -876,7 +932,11 @@
 					<p class="submit-error" role="alert">Das hat nicht geklappt. Bitte versuch es noch einmal.</p>
 				{/if}
 
-				{#if !showFeedback && !currentTask.choices && currentTask.answerType !== 'boolean' && currentTask.answerType !== 'comparison' && !writtenArith && !isZahlenmauer && !isPqSteps}
+				{#if !showPad && padEligible && !showFeedback}
+					<button class="pad-switch" onclick={() => setPadPreferred(true)}>Zahlen-Tastenfeld anzeigen</button>
+				{/if}
+
+				{#if !showPad && !showFeedback && !currentTask.choices && currentTask.answerType !== 'boolean' && currentTask.answerType !== 'comparison' && !writtenArith && !isZahlenmauer && !isPqSteps}
 					<div class="task-footer">
 						<button class="btn-3d" onclick={submitAnswer} disabled={isSubmitting || !String(answer).trim()}>
 							{isSubmitting ? 'Wird geprüft…' : 'Prüfen'}
@@ -885,6 +945,19 @@
 				{/if}
 			{/if}
 		</div>
+
+		{#if showPad && currentTask && !isLoading}
+			<div class="pad-dock">
+				<NumPad
+					onpress={onPad}
+					canSubmit={!!String(answer).trim() && !locked}
+					submitting={isSubmitting}
+					showMinus={simpleNumberField}
+					showComma={simpleNumberField && currentTask.answerType === 'number'}
+					onkeyboard={() => setPadPreferred(false)}
+				/>
+			</div>
+		{/if}
 
 		{#if showFeedback && lastResult}
 			<!-- Feedback sheet -->
@@ -1278,6 +1351,11 @@
 	.submit-error { color: #b91c1c; font-weight: 800; text-align: center; }
 	.task-footer { margin-top: auto; position: sticky; bottom: 0; padding-top: 0.5rem; background: linear-gradient(transparent, var(--c-ground) 30%); }
 	.task-footer .btn-3d { width: 100%; }
+	.pad-dock { position: sticky; bottom: 0; margin-top: auto; z-index: 2; }
+	.pad-switch {
+		align-self: center; background: none; border: 0; min-height: 2.75rem; padding: 0 0.75rem;
+		font: 800 0.875rem var(--font); color: var(--c-primary); cursor: pointer; text-decoration: underline;
+	}
 
 	/* Feedback sheet */
 	.sheet {
