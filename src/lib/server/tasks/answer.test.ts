@@ -35,6 +35,26 @@ describe('checkAnswer – number', () => {
 		expect(checkAnswer('1.0', '1', 'number')).toBe(true);
 	});
 
+	it('requires an exact match without tolerance', () => {
+		expect(checkAnswer('12,56', '12,57', 'number')).toBe(false);
+	});
+
+	it('accepts answers within the given tolerance', () => {
+		expect(checkAnswer('12,56', '12,57', 'number', 0.01)).toBe(true);
+		expect(checkAnswer('12,58', '12,57', 'number', 0.01)).toBe(true);
+		expect(checkAnswer('37', '36,6', 'number', 0.5)).toBe(true);
+	});
+
+	it('rejects answers outside the tolerance', () => {
+		expect(checkAnswer('12,55', '12,57', 'number', 0.01)).toBe(false);
+		expect(checkAnswer('13', '12,57', 'number', 0.1)).toBe(false);
+	});
+
+	it('ignores tolerance for non-numeric answer types', () => {
+		expect(checkAnswer('1/2', '2/3', 'fraction', 1)).toBe(false);
+		expect(checkAnswer('nein', 'ja', 'boolean', 1)).toBe(false);
+	});
+
 	it('rejects wrong floats', () => {
 		expect(checkAnswer('3.15', '3.14', 'number')).toBe(false);
 	});

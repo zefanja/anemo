@@ -71,6 +71,12 @@ describe('every generator', () => {
 				expect(text.replace(/\d\. /g, '')).not.toMatch(/\d\.\d/);
 				if (task.answerType === 'integer') expect(task.correctAnswer).toMatch(/^-?\d+$/);
 				if (task.answerType === 'boolean') expect(['ja', 'nein']).toContain(task.correctAnswer);
+				if (task.tolerance !== undefined) {
+					// tolerance only makes sense for numeric answers and must stay small relative to the result
+					expect(['integer', 'number']).toContain(task.answerType);
+					expect(task.tolerance).toBeGreaterThanOrEqual(0);
+					expect(task.tolerance).toBeLessThanOrEqual(Math.max(0.1, Math.abs(parseFloat(task.correctAnswer.replace(',', '.'))) * 0.001 + 0.01));
+				}
 				if (task.choices) {
 					// exactly one offered choice is accepted — answers are compared case-insensitively,
 					// so "b = A : a" and "b = a : A" would both count as correct

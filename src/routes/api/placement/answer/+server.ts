@@ -31,16 +31,18 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	let correctAnswer = '';
 	let answerType: 'number' | 'integer' | 'fraction' | 'text' | 'boolean' | 'comparison' = 'number';
 	let hint: string | null = null;
+	let tolerance = 0;
 
 	if (taskId) {
 		const dbTask = await db.query.tasks.findFirst({
 			where: (t, { eq }) => eq(t.id, taskId),
-			columns: { correctAnswer: true, answerType: true, hint: true }
+			columns: { correctAnswer: true, answerType: true, hint: true, tolerance: true }
 		});
 		if (dbTask?.correctAnswer) {
 			correctAnswer = dbTask.correctAnswer;
 			answerType = dbTask.answerType as typeof answerType;
 			hint = dbTask.hint ?? null;
+			tolerance = dbTask.tolerance ?? 0;
 		}
 	}
 	if (!correctAnswer) {
@@ -49,9 +51,10 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		correctAnswer = fallback.correctAnswer;
 		answerType = fallback.answerType;
 		hint = fallback.hint ?? null;
+		tolerance = fallback.tolerance ?? 0;
 	}
 
-	const correct = checkAnswer(answer, correctAnswer, answerType);
+	const correct = checkAnswer(answer, correctAnswer, answerType, tolerance);
 
 	const graph = await loadPlacementGraph();
 	const newState = correct ? applyPass(atomId, state, graph) : applyFail(atomId, state, graph);

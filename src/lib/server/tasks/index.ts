@@ -66,7 +66,8 @@ export async function getTaskForAtom(atomId: string, excludePrompts: string[] = 
 			answerType: imported.answerType as GeneratedTask['answerType'],
 			correctAnswer: imported.correctAnswer,
 			hint: imported.hint ?? undefined,
-			difficulty: imported.difficulty ?? undefined
+			difficulty: imported.difficulty ?? undefined,
+			tolerance: imported.tolerance ?? undefined
 		};
 	}
 
@@ -91,6 +92,7 @@ export async function getTaskForAtom(atomId: string, excludePrompts: string[] = 
 			correctAnswer: generated.correctAnswer,
 			hint: generated.hint ?? null,
 			difficulty: generated.difficulty ?? null,
+			tolerance: generated.tolerance ?? null,
 			generatorId: atomId
 		});
 		return { ...generated, id };
@@ -102,11 +104,13 @@ export async function getTaskForAtom(atomId: string, excludePrompts: string[] = 
 /**
  * Check a submitted answer against the correct answer.
  * Handles integer, number, fraction, text, boolean, and comparison answer types.
+ * tolerance: accepted absolute deviation for integer/number answers (0 = exact match).
  */
 export function checkAnswer(
 	submitted: string,
 	correctAnswer: string,
-	answerType: GeneratedTask['answerType']
+	answerType: GeneratedTask['answerType'],
+	tolerance = 0
 ): boolean {
 	const s = submitted.trim().toLowerCase().replace(',', '.');
 	const c = correctAnswer.trim().toLowerCase().replace(',', '.');
@@ -139,7 +143,7 @@ export function checkAnswer(
 	// integer or number: compare as floats with small epsilon
 	const sn = parseFloat(s), cn = parseFloat(c);
 	if (isNaN(sn) || isNaN(cn)) return false;
-	return Math.abs(sn - cn) < 1e-9;
+	return Math.abs(sn - cn) <= Math.max(tolerance, 0) + 1e-9;
 }
 
 function gcd(a: number, b: number): number {
