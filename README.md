@@ -208,6 +208,7 @@ Aufgaben können als JSON-Array über `/teacher/tasks/import` oder per Script im
 | `correct_answer` | ✓ | Brüche als `"3/4"`, Dezimalzahlen mit Punkt |
 | `hint` | – | Hilfetext bei falscher Antwort |
 | `difficulty` | – | Float 0–1 |
+| `tolerance` | – | Erlaubte Abweichung bei `integer`/`number` (z. B. `0.05` bei gerundeten Ergebnissen); ohne Angabe muss die Antwort exakt stimmen |
 | `distractors` | – | Array falscher Antworten |
 
 **Idempotenz:** Derselbe Datensatz (SHA-256 aus `atom_id + prompt + correct_answer`) wird nicht doppelt eingefügt.

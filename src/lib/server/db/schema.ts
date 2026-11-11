@@ -201,6 +201,8 @@ export const tasks = pgTable(
 		distractors: jsonb('distractors').$type<string[]>(),
 		hint: text('hint'),
 		difficulty: real('difficulty'),
+		// accepted absolute deviation for numeric answers (null = exact match)
+		tolerance: real('tolerance'),
 		// generator reference for procedural tasks
 		generatorId: text('generator_id'),
 		// content hash for idempotent import
