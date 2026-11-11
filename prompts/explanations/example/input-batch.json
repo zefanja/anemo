@@ -1,0 +1,20 @@
+[
+  {
+    "id": "arithmetik__brueche_add_sub_gleichnamig",
+    "label": "Gleichnamige Brüche addieren und subtrahieren",
+    "description": "Gleichnamige Brüche addieren/subtrahieren: Zähler verrechnen, Nenner beibehalten; typische Fehlvorstellung 'Nenner mitaddieren' adressieren.",
+    "domain": "arithmetik",
+    "subdomain": "Bruchrechnung",
+    "jahrgangsstufen": [6],
+    "tags": ["brüche", "gleichnamig"]
+  },
+  {
+    "id": "algebra__binomische_formeln",
+    "label": "Binomische Formeln",
+    "description": "Die drei binomischen Formeln herleiten (auch geometrisch interpretieren), anwenden und zum Faktorisieren rückwärts nutzen.",
+    "domain": "algebra",
+    "subdomain": "Terme",
+    "jahrgangsstufen": [8],
+    "tags": ["binomische_formeln", "faktorisieren"]
+  }
+]

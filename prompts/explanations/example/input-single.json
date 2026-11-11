@@ -1,0 +1,9 @@
+{
+  "id": "arithmetik__brueche_add_sub_gleichnamig",
+  "label": "Gleichnamige Brüche addieren und subtrahieren",
+  "description": "Gleichnamige Brüche addieren/subtrahieren: Zähler verrechnen, Nenner beibehalten; typische Fehlvorstellung 'Nenner mitaddieren' adressieren.",
+  "domain": "arithmetik",
+  "subdomain": "Bruchrechnung",
+  "jahrgangsstufen": [6],
+  "tags": ["brüche", "gleichnamig"]
+}

@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Array von Atom-Erklärungen, bereit für den Import in Anemo (/teacher/atoms/import)",
+  "type": "array",
+  "minItems": 1,
+  "items": {
+    "type": "object",
+    "required": ["atom_id", "explanation"],
+    "additionalProperties": false,
+    "properties": {
+      "atom_id": {
+        "type": "string",
+        "description": "Exakte ID des Atoms, z.B. 'arithmetik__brueche_add_sub_gleichnamig'"
+      },
+      "explanation": {
+        "type": "string",
+        "minLength": 40,
+        "maxLength": 1200,
+        "description": "Erklärungstext. Absätze mit \\n\\n getrennt. LaTeX inline $…$ oder Display $$…$$. Kein Markdown."
+      },
+      "illustration_config": {
+        "type": "object",
+        "description": "Optional. Nur setzen wenn eine visuelle Skizze das Konzept besser erklärt als Text allein.",
+        "required": ["type", "content"],
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "svg",
+            "description": "Immer 'svg'."
+          },
+          "content": {
+            "type": "string",
+            "description": "Vollständiger SVG-Quelltext als einzelner String. Regeln: viewBox='0 0 400 200', width='100%', kein <text>, nur Farben #16a34a #2563eb #6b7280 #1f2937 #ffffff, role='img' aria-label='...' auf dem <svg>-Element."
+          }
+        }
+      }
+    }
+  }
+}

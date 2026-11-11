@@ -1,0 +1,22 @@
+Schreibe eine Erklärung (und ggf. eine Skizze) für das folgende Lern-Atom.
+
+ATOM:
+  id:              {{id}}
+  label:           {{label}}
+  description:     {{description}}
+  domain:          {{domain}}
+  subdomain:       {{subdomain}}
+  jahrgangsstufen: {{jahrgangsstufen}}
+  tags:            {{tags}}
+
+Gib exakt dieses JSON-Objekt zurück (atom_id unveränderlich übernehmen).
+illustration_config weglassen wenn keine sinnvolle Skizze möglich ist:
+
+{
+  "atom_id": "{{id}}",
+  "explanation": "<Erklärungstext, Absätze mit \\n\\n getrennt>",
+  "illustration_config": {
+    "type": "svg",
+    "content": "<svg viewBox=\"0 0 400 200\" width=\"100%\" xmlns=\"http://www.w3.org/2000/svg\" role=\"img\" aria-label=\"…\">…</svg>"
+  }
+}

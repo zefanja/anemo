@@ -1,0 +1,25 @@
+Schreibe Erklärungen (und ggf. Skizzen) für die folgenden Lern-Atome.
+
+ATOME (JSON-Array):
+{{atoms_json}}
+
+Gib ein JSON-Array zurück, das für jedes Atom genau einen Eintrag enthält.
+Die atom_id muss exakt dem id-Feld des Atoms entsprechen – unveränderlich.
+illustration_config nur setzen wenn eine Skizze wirklich hilft; sonst weglassen.
+Reihenfolge muss nicht beibehalten werden.
+
+Erwartetes Format:
+[
+  {
+    "atom_id": "…",
+    "explanation": "…",
+    "illustration_config": {
+      "type": "svg",
+      "content": "<svg viewBox=\"0 0 400 200\" width=\"100%\" xmlns=\"http://www.w3.org/2000/svg\" role=\"img\" aria-label=\"…\">…</svg>"
+    }
+  },
+  {
+    "atom_id": "…",
+    "explanation": "…"
+  }
+]
