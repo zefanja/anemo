@@ -13,6 +13,7 @@
 	import WrittenCalcFeedback from '$lib/components/student/WrittenCalcFeedback.svelte';
 	import Icon from '$lib/components/student/Icon.svelte';
 	import NumPad from '$lib/components/student/NumPad.svelte';
+	import LevelUpOverlay from '$lib/components/student/LevelUpOverlay.svelte';
 	import { pressKey, numpadInputs, setPadMode, type PadKey } from '$lib/numpad.js';
 	import { ui } from '$lib/stores/ui.svelte.js';
 	import { BADGE_BY_TYPE, greeting, levelProgress } from '$lib/gamification.js';
@@ -38,6 +39,7 @@
 		mastery: number;
 		justMastered: boolean;
 		xpGained: number;
+		newXp: number;
 		newLevel: number;
 		levelUp: boolean;
 		newBadges: string[];
@@ -82,6 +84,7 @@
 	let stats = $state({ xp: 0, correct: 0, total: 0, bestCombo: 0, mastered: [] as string[], goalReached: false, levelUp: 0 });
 	let summaryReason = $state<'reviews' | 'mastered' | 'round' | 'closed'>('round');
 	let combo = $state(0);
+	let levelUp = $state<{ level: number; xp: number } | null>(null);
 
 	// ── Task + answer state ──
 	let currentTask = $state<TaskDisplay | null>(null);
@@ -401,7 +404,10 @@
 			stats.bestCombo = Math.max(stats.bestCombo, result.combo);
 			if (result.justMastered) stats.mastered = [...stats.mastered, labelFor(atomId)];
 			if (result.dailyGoalReached) stats.goalReached = true;
-			if (result.levelUp) stats.levelUp = result.newLevel;
+			if (result.levelUp) {
+				stats.levelUp = result.newLevel;
+				levelUp = { level: result.newLevel, xp: result.newXp };
+			}
 			if (mode === 'practice') roundCount += 1;
 
 			invalidate('app:gami');
@@ -1081,6 +1087,9 @@
 			</section>
 		{/if}
 	</div>
+{/if}
+{#if levelUp}
+	<LevelUpOverlay level={levelUp.level} xp={levelUp.xp} onclose={() => (levelUp = null)} />
 {/if}
 </div>
 

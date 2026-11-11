@@ -12,6 +12,7 @@ export interface AttemptResult {
 	mastery: number;
 	justMastered: boolean;
 	xpGained: number;
+	newXp: number;
 	newLevel: number;
 	levelUp: boolean;
 	newBadges: string[];
@@ -86,6 +87,7 @@ export async function processAttempt(
 		mastery,
 		justMastered,
 		xpGained: gami.xpGained,
+		newXp: gami.newXp,
 		newLevel: gami.newLevel,
 		levelUp: gami.levelUp,
 		newBadges: gami.newBadges,
