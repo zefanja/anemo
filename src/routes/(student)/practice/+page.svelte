@@ -74,6 +74,10 @@
 	let reviewIndex = $state(0);
 	let currentReview = $derived(reviews[reviewIndex] ?? null);
 	let reviewsPending = $derived(reviews.length > 0);
+	// Whole backlog, not just this round (the server caps a round at sessionMaxReview)
+	let totalDueReviews = $derived(Math.max(reviews.length, data.plan.totalDueReviews));
+	// Topics stay locked while reviews are pending, unless an unlock rule is met
+	let topicsLocked = $derived(reviewsPending && !data.plan.topicsUnlocked);
 
 	// ── Practice ──
 	let selectedAtom = $state<FrontierItem | null>(null);
@@ -451,6 +455,8 @@
 				reviews = [];
 				reviewIndex = 0;
 				showSummary('reviews');
+				// Refresh backlog + unlock state for the summary text
+				invalidate('app:practice');
 			} else {
 				reviewIndex = next;
 				loadTask(reviews[next].atomId);
@@ -504,9 +510,19 @@
 		return 'Runde geschafft!';
 	}
 
+	function reviewWord(n: number): string {
+		return n === 1 ? 'Wiederholung' : 'Wiederholungen';
+	}
+
 	function summarySubtitle(): string {
+		if (summaryReason === 'reviews') {
+			const left = data.plan.totalDueReviews;
+			if (left === 0) return 'Jetzt bist du bereit für Neues.';
+			if (data.plan.topicsUnlocked) return `Die Themen sind frei! ${left} ${reviewWord(left)} kannst du freiwillig noch machen.`;
+			const n = data.plan.reviewsUntilUnlock;
+			return `Noch ${n} ${reviewWord(n)}, dann sind die Themen frei.`;
+		}
 		if (stats.goalReached || data.dailyXp >= data.dailyGoal) return 'Du hast heute dein Tagesziel erreicht.';
-		if (summaryReason === 'reviews') return 'Jetzt bist du bereit für Neues.';
 		const left = Math.max(0, data.dailyGoal - data.dailyXp);
 		return `Noch ${left} XP bis zu deinem Tagesziel.`;
 	}
@@ -609,8 +625,15 @@
 			<section class="review-card" aria-label="Wiederholen">
 				<span class="review-mascot"><Ato mood="denkt" size="100%" /></span>
 				<div class="review-text">
-					<strong>{reviews.length} {reviews.length === 1 ? 'Wiederholung' : 'Wiederholungen'} fällig</strong>
-					<span>Damit du nichts vergisst · ca. {Math.max(1, Math.round(reviews.length * 0.7))} Min.</span>
+					<strong>{totalDueReviews} {reviewWord(totalDueReviews)} fällig</strong>
+					{#if totalDueReviews > reviews.length}
+						<span>Nächste Runde: {reviews.length} · ca. {Math.max(1, Math.round(reviews.length * 0.7))} Min.</span>
+					{:else}
+						<span>Damit du nichts vergisst · ca. {Math.max(1, Math.round(reviews.length * 0.7))} Min.</span>
+					{/if}
+					{#if data.plan.reviewsDoneToday > 0}
+						<span>Heute schon {data.plan.reviewsDoneToday} geschafft</span>
+					{/if}
 				</div>
 				<button class="play-btn" onclick={startReviews} aria-label="Wiederholungen starten">
 					<Icon name="play" size={22} color="#fff" />
@@ -620,7 +643,7 @@
 
 		<section class="topics" aria-label="Themen">
 			<div class="section-head">
-				<h2 class="section-title">{reviewsPending ? 'Danach geht’s weiter mit' : 'Bereit für Neues'}</h2>
+				<h2 class="section-title">{topicsLocked ? 'Danach geht’s weiter mit' : 'Bereit für Neues'}</h2>
 			</div>
 
 			{#if availableItems.length === 0 && data.plan.discriminationSets.length === 0}
@@ -631,12 +654,21 @@
 					<a href="/progress" class="btn-3d">Zur Sternenkarte</a>
 				</div>
 			{:else}
-				{#if reviewsPending}
-					<p class="locked-note"><Icon name="lock" size={16} /> Erst die Wiederholungen, dann sind die Themen frei.</p>
+				{#if topicsLocked}
+					<p class="locked-note">
+						<Icon name="lock" size={16} />
+						{#if data.plan.reviewsUntilUnlock < totalDueReviews}
+							Noch {data.plan.reviewsUntilUnlock} {reviewWord(data.plan.reviewsUntilUnlock)}, dann sind die Themen frei.
+						{:else}
+							Erst die Wiederholungen, dann sind die Themen frei.
+						{/if}
+					</p>
+				{:else if reviewsPending}
+					<p class="section-sub">Die Themen sind frei. Die übrigen Wiederholungen kannst du freiwillig machen.</p>
 				{/if}
 				<div class="topic-grid">
 					{#each availableItems as item, i}
-						<button class="topic-card" class:recommended={i === 0 && !reviewsPending} disabled={reviewsPending} onclick={() => selectAtom(item)}>
+						<button class="topic-card" class:recommended={i === 0 && !topicsLocked} disabled={topicsLocked} onclick={() => selectAtom(item)}>
 							{#if i === 0}
 								<span class="tag">Empfohlen</span>
 							{:else if item.type === 'active'}
@@ -660,7 +692,7 @@
 					<p class="section-sub">Du kannst diese Themen einzeln – jetzt gemischt!</p>
 					<div class="topic-grid">
 						{#each data.plan.discriminationSets as item}
-							<button class="topic-card mixed" disabled={reviewsPending} onclick={() => selectAtom(item)}>
+							<button class="topic-card mixed" disabled={topicsLocked} onclick={() => selectAtom(item)}>
 								<span class="tag tag-mixed">Vermischt</span>
 								<span class="topic-label">{item.label}</span>
 								<span class="topic-meta"><Icon name="shuffle" size={14} /> Bunt gemischt</span>
