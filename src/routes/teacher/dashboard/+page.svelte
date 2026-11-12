@@ -23,13 +23,25 @@
 		return `${Math.round(v * 100)}%`;
 	}
 
+	let selectedClassId = $state<string | null>(null);
+
 	// ── Leaderboard sort ───────────────────────────────────────────────────────
 	type SortKey = 'displayName' | 'className' | 'level' | 'xp' | 'masteredCount' | 'streakDays';
 	let sortKey = $state<SortKey>('xp');
 	let sortDir = $state<'asc' | 'desc'>('desc');
 
+	const LEADERBOARD_N = 10;
+	const ACTIVITY_N = 15;
+
+	let filteredLeaderboard = $derived(
+		(selectedClassId === null
+			? data.leaderboard
+			: data.leaderboard.filter((e) => e.classId === selectedClassId)
+		).slice(0, LEADERBOARD_N)
+	);
+
 	let sortedLeaderboard = $derived(
-		[...data.leaderboard].sort((a, b) => {
+		[...filteredLeaderboard].sort((a, b) => {
 			const av = a[sortKey];
 			const bv = b[sortKey];
 			if (typeof av === 'string' && typeof bv === 'string') {
@@ -55,7 +67,6 @@
 
 	// ── Atom stats with class filter ───────────────────────────────────────────
 	const TOP_N = 5;
-	let selectedClassId = $state<string | null>(null);
 	let expandedAtomId = $state<string | null>(null);
 
 	let currentAtomStats = $derived(
@@ -76,6 +87,25 @@
 		expandedAtomId = expandedAtomId === atomId ? null : atomId;
 	}
 
+	let selectedClass = $derived(data.classes.find((c) => c.id === selectedClassId) ?? null);
+
+	let currentStats = $derived.by(() => {
+		if (selectedClassId === null) return data.stats;
+		const cs = data.classStats.find((c) => c.classId === selectedClassId);
+		return {
+			...data.stats,
+			studentCount: cs?.studentCount ?? 0,
+			masteredCount: cs?.masteredCount ?? 0
+		};
+	});
+
+	let currentActivity = $derived(
+		(selectedClassId === null
+			? data.recentActivity
+			: data.recentActivity.filter((a) => a.classId === selectedClassId)
+		).slice(0, ACTIVITY_N)
+	);
+
 	const showClassColumn = $derived(selectedClassId === null && data.classAtomStats.length > 1);
 </script>
 
@@ -84,6 +114,28 @@
 <div class="page">
 	<h1 class="page-title">Dashboard</h1>
 
+	<!-- Class filter tabs -->
+	{#if data.classes.length > 1}
+		<div class="class-tabs">
+			<button
+				class="class-tab"
+				class:active={selectedClassId === null}
+				onclick={() => toggleClass(null)}
+			>
+				Alle Klassen
+			</button>
+			{#each data.classes as cls}
+				<button
+					class="class-tab"
+					class:active={selectedClassId === cls.id}
+					onclick={() => toggleClass(cls.id)}
+				>
+					{cls.name}
+				</button>
+			{/each}
+		</div>
+	{/if}
+
 	<!-- Stat cards -->
 	<div class="stat-grid">
 		<div class="stat-card">
@@ -91,11 +143,11 @@
 			<div class="stat-lbl">Klassen</div>
 		</div>
 		<div class="stat-card">
-			<div class="stat-num">{data.stats.studentCount}</div>
+			<div class="stat-num">{currentStats.studentCount}</div>
 			<div class="stat-lbl">Schüler</div>
 		</div>
 		<div class="stat-card">
-			<div class="stat-num">{data.stats.masteredCount}</div>
+			<div class="stat-num">{currentStats.masteredCount}</div>
 			<div class="stat-lbl">Gemeisterte Atome</div>
 		</div>
 		<div class="stat-card">
@@ -106,28 +158,6 @@
 
 	<!-- Atom stats -->
 	{#if data.atomStats.length > 0}
-		<!-- Class filter tabs -->
-		{#if data.classAtomStats.length > 1}
-			<div class="class-tabs">
-				<button
-					class="class-tab"
-					class:active={selectedClassId === null}
-					onclick={() => toggleClass(null)}
-				>
-					Alle Klassen
-				</button>
-				{#each data.classAtomStats as cls}
-					<button
-						class="class-tab"
-						class:active={selectedClassId === cls.classId}
-						onclick={() => toggleClass(cls.classId)}
-					>
-						{cls.className}
-					</button>
-				{/each}
-			</div>
-		{/if}
-
 		<div class="two-col">
 			<section class="card">
 				<div class="card-header">
@@ -248,11 +278,11 @@
 	{/if}
 
 	<!-- School-wide leaderboard -->
-	{#if data.leaderboard.length > 0}
+	{#if sortedLeaderboard.length > 0}
 		<section class="card">
 			<div class="card-header">
-				<h2>Leaderboard – Schule gesamt</h2>
-				<span class="link-more">Top {data.leaderboard.length} · Spalten anklicken zum Sortieren</span>
+				<h2>Leaderboard – {selectedClass ? selectedClass.name : 'Schule gesamt'}</h2>
+				<span class="link-more">Top {sortedLeaderboard.length} · Spalten anklicken zum Sortieren</span>
 			</div>
 			<div class="lb-table-wrap">
 				<table class="lb-table">
@@ -344,13 +374,13 @@
 		<!-- Recent activity -->
 		<section class="card">
 			<div class="card-header">
-				<h2>Letzte Aktivitäten</h2>
+				<h2>Letzte Aktivitäten{selectedClass ? ` – ${selectedClass.name}` : ''}</h2>
 			</div>
-			{#if data.recentActivity.length === 0}
+			{#if currentActivity.length === 0}
 				<p class="empty-note">Noch keine Versuche vorhanden.</p>
 			{:else}
 				<ul class="activity-list">
-					{#each data.recentActivity as a}
+					{#each currentActivity as a}
 						<li class="activity-item">
 							<div class="activity-score-wrap">
 								<span class="activity-score" title="{a.correct}/{a.total} richtig">
