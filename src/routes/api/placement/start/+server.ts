@@ -13,9 +13,10 @@ export const GET: RequestHandler = async ({ locals }) => {
 	if (!locals.session || locals.session.type !== 'student') {
 		throw error(401, 'Nicht angemeldet');
 	}
+	const { studentId } = locals.session;
 
 	const student = await db.query.students.findFirst({
-		where: (s, { eq }) => eq(s.id, locals.session!.studentId),
+		where: (s, { eq }) => eq(s.id, studentId),
 		columns: { placementDone: true }
 	});
 	if (student?.placementDone) {

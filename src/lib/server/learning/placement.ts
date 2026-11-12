@@ -146,7 +146,7 @@ function makeFsrsState(daysUntilDue: number): FsrsState {
 		scheduled_days: card.scheduled_days,
 		reps: card.reps,
 		lapses: card.lapses,
-		learning_steps: (card as Record<string, unknown>).learning_steps as number ?? 0,
+		learning_steps: card.learning_steps ?? 0,
 		state: card.state as unknown as number,
 		last_review: undefined
 	};

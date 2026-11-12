@@ -6,6 +6,8 @@ import { eq } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
 import type { Actions, PageServerLoad } from './$types';
 
+type CreateErrors = { name?: string; email?: string; password?: string };
+
 function requireAdmin(locals: App.Locals) {
 	if (!locals.session || locals.session.type !== 'teacher' || !locals.session.isAdmin) {
 		throw redirect(303, '/teacher/dashboard');
@@ -42,7 +44,7 @@ export const actions: Actions = {
 		const password = (fd.get('password') as string) ?? '';
 		const isAdmin = fd.get('isAdmin') === 'on';
 
-		const errors: Record<string, string> = {};
+		const errors: CreateErrors = {};
 		if (!name) errors.name = 'Name ist erforderlich.';
 		if (!email || !email.includes('@')) errors.email = 'Gültige E-Mail-Adresse erforderlich.';
 		if (password.length < 8) errors.password = 'Passwort muss mindestens 8 Zeichen haben.';
@@ -55,7 +57,7 @@ export const actions: Actions = {
 			where: (t, { eq }) => eq(t.email, email)
 		});
 		if (existing) {
-			return fail(400, { createErrors: { email: 'Diese E-Mail-Adresse ist bereits vergeben.' }, createName: name, createEmail: email });
+			return fail(400, { createErrors: { email: 'Diese E-Mail-Adresse ist bereits vergeben.' } as CreateErrors, createName: name, createEmail: email });
 		}
 
 		// Inherit schoolId from the current admin

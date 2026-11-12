@@ -8,8 +8,9 @@ export const load: PageServerLoad = async ({ locals }) => {
 	if (!locals.session || locals.session.type !== 'student') {
 		throw redirect(303, '/login');
 	}
+	const { studentId } = locals.session;
 	const student = await db.query.students.findFirst({
-		where: (s, { eq }) => eq(s.id, locals.session!.studentId),
+		where: (s, { eq }) => eq(s.id, studentId),
 		columns: { placementDone: true }
 	});
 	if (student?.placementDone) {
