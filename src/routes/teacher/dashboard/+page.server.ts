@@ -1,5 +1,6 @@
 import { redirect } from '@sveltejs/kit';
 import { db } from '$lib/server/db/index.js';
+import { getPeriodXp } from '$lib/server/gamification/period-xp.js';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals }) => {
@@ -29,7 +30,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 				})
 			: [];
 
-	const [masteredStatuses, totalAtomCount, gamiStates, atomStatuses] = await Promise.all([
+	const [masteredStatuses, totalAtomCount, gamiStates, atomStatuses, periodXp] = await Promise.all([
 		studentIds.length > 0
 			? db.query.studentAtomStatus.findMany({
 					where: (s, { and, inArray, eq }) =>
@@ -52,7 +53,8 @@ export const load: PageServerLoad = async ({ locals }) => {
 					columns: { atomId: true, studentId: true, mastery: true, isMastered: true, totalAttempts: true },
 					with: { atom: { columns: { label: true, domain: true } } }
 				})
-			: Promise.resolve([])
+			: Promise.resolve([]),
+		getPeriodXp(studentIds)
 	]);
 
 	const masteredByStudent = new Map<string, number>();
@@ -72,7 +74,8 @@ export const load: PageServerLoad = async ({ locals }) => {
 				xp: gamiMap.get(s.id)?.xp ?? 0,
 				level: gamiMap.get(s.id)?.level ?? 1,
 				streakDays: gamiMap.get(s.id)?.streakDays ?? 0,
-				masteredCount: masteredByStudent.get(s.id) ?? 0
+				masteredCount: masteredByStudent.get(s.id) ?? 0,
+				periodXp: periodXp.get(s.id) ?? { day: 0, week: 0, month: 0 }
 			}))
 		)
 		.sort((a, b) => b.xp - a.xp);

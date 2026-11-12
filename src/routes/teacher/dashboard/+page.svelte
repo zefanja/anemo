@@ -33,11 +33,33 @@
 	const LEADERBOARD_N = 10;
 	const ACTIVITY_N = 15;
 
+	type LbPeriod = 'day' | 'week' | 'month' | 'all';
+	const LB_PERIODS: { key: LbPeriod; label: string; xpLabel: string }[] = [
+		{ key: 'day', label: 'Heute', xpLabel: 'XP heute' },
+		{ key: 'week', label: 'Woche', xpLabel: 'XP Woche' },
+		{ key: 'month', label: 'Monat', xpLabel: 'XP Monat' },
+		{ key: 'all', label: 'Gesamt', xpLabel: 'XP' }
+	];
+	let lbPeriod = $state<LbPeriod>('week');
+	const lbPeriodInfo = $derived(LB_PERIODS.find((p) => p.key === lbPeriod)!);
+
+	// In a period view `xp` is the XP earned in that period; only students who
+	// earned XP in it are listed. Top N is taken by XP before column sorting.
 	let filteredLeaderboard = $derived(
 		(selectedClassId === null
 			? data.leaderboard
 			: data.leaderboard.filter((e) => e.classId === selectedClassId)
-		).slice(0, LEADERBOARD_N)
+		)
+			.map((e) => ({ ...e, xp: lbPeriod === 'all' ? e.xp : e.periodXp[lbPeriod] }))
+			.filter((e) => lbPeriod === 'all' || e.xp > 0)
+			.sort((a, b) => b.xp - a.xp)
+			.slice(0, LEADERBOARD_N)
+	);
+
+	const hasStudents = $derived(
+		selectedClassId === null
+			? data.leaderboard.length > 0
+			: data.leaderboard.some((e) => e.classId === selectedClassId)
 	);
 
 	let sortedLeaderboard = $derived(
@@ -278,12 +300,31 @@
 	{/if}
 
 	<!-- School-wide leaderboard -->
-	{#if sortedLeaderboard.length > 0}
+	{#if hasStudents}
 		<section class="card">
-			<div class="card-header">
+			<div class="card-header lb-card-header">
 				<h2>Leaderboard – {selectedClass ? selectedClass.name : 'Schule gesamt'}</h2>
-				<span class="link-more">Top {sortedLeaderboard.length} · Spalten anklicken zum Sortieren</span>
+				<div class="period-tabs" role="tablist" aria-label="Zeitraum">
+					{#each LB_PERIODS as p}
+						<button
+							type="button"
+							role="tab"
+							aria-selected={lbPeriod === p.key}
+							class="period-tab"
+							class:active={lbPeriod === p.key}
+							onclick={() => (lbPeriod = p.key)}
+						>
+							{p.label}
+						</button>
+					{/each}
+				</div>
 			</div>
+			{#if sortedLeaderboard.length === 0}
+				<p class="empty-note">
+					{lbPeriod === 'day' ? 'Heute' : lbPeriod === 'week' ? 'Diese Woche' : 'Diesen Monat'} hat noch niemand XP gesammelt.
+				</p>
+			{:else}
+			<p class="lb-hint">Top {sortedLeaderboard.length} · Spalten anklicken zum Sortieren</p>
 			<div class="lb-table-wrap">
 				<table class="lb-table">
 					<thead>
@@ -306,7 +347,7 @@
 							</th>
 							<th class="lb-num">
 								<button class="sort-btn sort-btn-right" class:sorted={sortKey === 'xp'} onclick={() => toggleSort('xp')}>
-									<span class="sort-icon" class:active={sortKey === 'xp'}>{sortIcon('xp')}</span> XP
+									<span class="sort-icon" class:active={sortKey === 'xp'}>{sortIcon('xp')}</span> {lbPeriodInfo.xpLabel}
 								</button>
 							</th>
 							<th class="lb-num">
@@ -336,7 +377,7 @@
 									</a>
 								</td>
 								<td class="lb-num">Lv.{entry.level}</td>
-								<td class="lb-num lb-xp">{entry.xp.toLocaleString('de-DE')}</td>
+								<td class="lb-num lb-xp">{lbPeriod === 'all' ? '' : '+'}{entry.xp.toLocaleString('de-DE')}</td>
 								<td class="lb-num">{entry.masteredCount}</td>
 								<td class="lb-num">🔥 {entry.streakDays}</td>
 							</tr>
@@ -344,6 +385,7 @@
 					</tbody>
 				</table>
 			</div>
+			{/if}
 		</section>
 	{/if}
 
@@ -661,6 +703,28 @@
 	}
 
 	/* Leaderboard */
+	.lb-card-header { flex-wrap: wrap; gap: 0.5rem; }
+	.lb-hint { font-size: 0.75rem; color: #9ca3af; margin: -0.5rem 0 0.5rem; }
+	.period-tabs {
+		display: inline-flex;
+		gap: 0.2rem;
+		background: #f3f4f6;
+		border-radius: 9999px;
+		padding: 0.2rem;
+	}
+	.period-tab {
+		padding: 0.25rem 0.75rem;
+		border: none;
+		border-radius: 9999px;
+		background: none;
+		color: #6b7280;
+		font-size: 0.78rem;
+		font-weight: 600;
+		cursor: pointer;
+		transition: background 0.15s, color 0.15s;
+	}
+	.period-tab:hover { color: #16a34a; }
+	.period-tab.active { background: #fff; color: #16a34a; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
 	.lb-table-wrap { overflow-x: auto; }
 	.lb-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
 	.lb-table th {
