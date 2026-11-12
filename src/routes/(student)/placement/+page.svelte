@@ -7,6 +7,7 @@
 	import WrittenCalcInput from '$lib/components/student/WrittenCalcInput.svelte';
 	import NumberLineInput from '$lib/components/student/NumberLineInput.svelte';
 	import MathText from '$lib/components/student/MathText.svelte';
+	import Ato from '$lib/components/Ato.svelte';
 	import type { PlacementState } from '$lib/server/learning/placement.js';
 
 	type Phase = 'loading' | 'question' | 'feedback' | 'complete' | 'error';
@@ -229,7 +230,7 @@
 
 		{:else if phase === 'complete' && summary}
 			<div class="summary-card">
-				<img src="/mascot.png" alt="" class="mascot-img" aria-hidden="true" />
+				<span class="mascot-img"><Ato mood="jubel" size="100%" /></span>
 				<h2>Diagnose abgeschlossen</h2>
 				<p class="summary-sub">
 					Wir haben <strong>{summary.testedPassed + summary.assumedMastered} Atome</strong> als
@@ -554,9 +555,10 @@
 		text-align: center;
 	}
 	.mascot-img {
-		width: 130px;
-		height: auto;
-		filter: drop-shadow(0 4px 12px rgba(79, 70, 229, 0.15));
+		display: block;
+		width: 140px;
+		height: 140px;
+		filter: drop-shadow(0 4px 12px rgba(11, 42, 91, 0.15));
 	}
 	.summary-card h2 { font-size: 1.4rem; font-weight: 700; }
 	.summary-sub { font-size: 1rem; color: var(--c-gray-700); }
