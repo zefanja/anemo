@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import { enhance } from '$app/forms';
 	import type { ActionData, PageData } from './$types';
 
@@ -14,7 +15,9 @@
 
 	// Domain filter state: null = all enabled
 	let enabledDomains = $state<Set<string>>(
-		data.class.enabledDomains ? new Set(data.class.enabledDomains) : new Set(data.allDomains)
+		untrack(() =>
+			data.class.enabledDomains ? new Set(data.class.enabledDomains) : new Set(data.allDomains)
+		)
 	);
 	let allDomainsEnabled = $derived(enabledDomains.size === data.allDomains.length);
 
@@ -53,7 +56,7 @@
 				: null
 	);
 
-	let showLeaderboard = $state(data.class.showLeaderboard);
+	let showLeaderboard = $state(untrack(() => data.class.showLeaderboard));
 
 	// Sorting for students tab
 	type StudentSortKey = 'displayName' | 'level' | 'xp' | 'streakDays' | 'masteredCount' | 'lastActiveAt' | 'todayMinutes' | 'weekMinutes';

@@ -1,5 +1,6 @@
+
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, untrack } from 'svelte';
 	import { invalidate } from '$app/navigation';
 	import type { PageData } from './$types';
 	import FractionInput from '$lib/components/student/FractionInput.svelte';
@@ -69,7 +70,7 @@
 
 	// ── Reviews ──
 	let reviewedIds = $state(new Set<string>());
-	let reviews = $state(data.plan.mandatoryReviews);
+	let reviews = $state(untrack(() => data.plan.mandatoryReviews));
 	let reviewIndex = $state(0);
 	let currentReview = $derived(reviews[reviewIndex] ?? null);
 	let reviewsPending = $derived(reviews.length > 0);

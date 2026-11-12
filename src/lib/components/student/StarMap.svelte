@@ -334,6 +334,29 @@
 		vy = my - (e.offsetY / containerH) * vh;
 	}
 
+	function onKeyDown(e: KeyboardEvent) {
+		const step = vw * 0.1;
+		const zoom = (factor: number) => {
+			const cx = vx + vw / 2;
+			const cy = vy + vh / 2;
+			vw = Math.min(VW * 3, Math.max(VW * 0.2, vw * factor));
+			vh = vw;
+			vx = cx - vw / 2;
+			vy = cy - vh / 2;
+		};
+		switch (e.key) {
+			case 'ArrowLeft': vx -= step; break;
+			case 'ArrowRight': vx += step; break;
+			case 'ArrowUp': vy -= step; break;
+			case 'ArrowDown': vy += step; break;
+			case '+': case '=': zoom(0.88); break;
+			case '-': case '_': zoom(1.12); break;
+			case 'Escape': tooltip = null; break;
+			default: return;
+		}
+		e.preventDefault();
+	}
+
 	// ── Tooltip ────────────────────────────────────────────────
 	let tooltip = $state<(typeof stars)[0] | null>(null);
 
@@ -366,6 +389,9 @@
 	bind:clientWidth={containerW}
 	bind:clientHeight={containerH}
 >
+	<!-- Pan/zoom canvas: role="application" is correct and keyboard support exists (onKeyDown),
+	     but Svelte's linter treats that role as non-interactive. -->
+	<!-- svelte-ignore a11y_no_noninteractive_element_interactions, a11y_no_noninteractive_tabindex -->
 	<svg
 		bind:this={svgEl}
 		class="starmap"
@@ -376,8 +402,10 @@
 		onpointercancel={onPtrUp}
 		onwheel={onWheel}
 		onclick={onSvgClick}
-		role="img"
-		aria-label="Sternenkarte des Lernfortschritts"
+		onkeydown={onKeyDown}
+		role="application"
+		tabindex="0"
+		aria-label="Sternenkarte des Lernfortschritts – Pfeiltasten zum Verschieben, Plus/Minus zum Zoomen"
 		style="cursor: grab; touch-action: none;"
 	>
 		<defs>

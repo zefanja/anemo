@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import type { PageData } from './$types';
 	import MathText from '$lib/components/student/MathText.svelte';
 	import ActivityCharts from '$lib/components/teacher/ActivityCharts.svelte';
@@ -48,7 +49,7 @@
 			? data.allDomains.filter((d) => !data.class.enabledDomains!.includes(d))
 			: []
 	);
-	let selectedExtras = $state<Set<string>>(new Set(data.student.extraDomains ?? []));
+	let selectedExtras = $state<Set<string>>(untrack(() => new Set(data.student.extraDomains ?? [])));
 	let savingDomains = $state(false);
 	let domainSaveMsg = $state<string | null>(null);
 
@@ -425,7 +426,6 @@
 
 <style>
 	.page { display: flex; flex-direction: column; gap: 1.25rem; }
-	.page-header { }
 	.page-title { font-size: 1.5rem; font-weight: 700; margin: 0.25rem 0; }
 	.breadcrumb { font-size: 0.8rem; color: #6b7280; text-decoration: none; }
 	.breadcrumb:hover { color: #16a34a; }
@@ -589,7 +589,6 @@
 	}
 	.attempts-table td { padding: 0.4rem 0.6rem; border-bottom: 1px solid #f3f4f6; vertical-align: top; }
 	.attempts-table tr:last-child td { border-bottom: none; }
-	.attempt-correct td { }
 	.attempt-wrong td { opacity: 0.85; }
 	.attempt-time { white-space: nowrap; color: #6b7280; font-size: 0.75rem; }
 	.attempt-result { white-space: nowrap; }
