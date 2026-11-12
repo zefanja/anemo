@@ -8,6 +8,7 @@
 		submitting = false,
 		showComma = false,
 		showMinus = false,
+		submitLabel = 'Prüfen',
 		onkeyboard
 	}: {
 		onpress: (key: PadKey) => void;
@@ -15,6 +16,7 @@
 		submitting?: boolean;
 		showComma?: boolean;
 		showMinus?: boolean;
+		submitLabel?: string;
 		/** Switch to the device's own keyboard instead of the pad. */
 		onkeyboard?: () => void;
 	} = $props();
@@ -44,7 +46,7 @@
 			<button type="button" onpointerdown={keepFocus} onmousedown={keepFocus} class="key key-small" onclick={() => onpress(',')} aria-label="Komma">,</button>
 		{/if}
 		<button type="button" onpointerdown={keepFocus} onmousedown={keepFocus} class="btn-3d submit" onclick={() => onpress('Enter')} disabled={!canSubmit || submitting}>
-			{submitting ? 'Wird geprüft…' : 'Prüfen'}
+			{submitting ? 'Einen Moment…' : submitLabel}
 		</button>
 	</div>
 	{#if onkeyboard}

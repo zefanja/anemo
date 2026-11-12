@@ -155,7 +155,7 @@ function makeFsrsState(daysUntilDue: number): FsrsState {
 export async function finalizePlacement(
 	studentId: string,
 	state: PlacementState
-): Promise<{ testedPassed: number; assumedMastered: number }> {
+): Promise<{ testedPassed: number; assumedMastered: number; xpGained: number; newBadges: string[] }> {
 	const now = new Date();
 
 	const passedAtomIds = Object.entries(state.tested)
@@ -215,7 +215,12 @@ export async function finalizePlacement(
 
 	await db.update(students).set({ placementDone: true }).where(eq(students.id, studentId));
 
-	await recordPlacementCompletion(studentId, passedAtomIds.length);
+	const reward = await recordPlacementCompletion(studentId, passedAtomIds.length);
 
-	return { testedPassed: passedAtomIds.length, assumedMastered: state.propagated.length };
+	return {
+		testedPassed: passedAtomIds.length,
+		assumedMastered: state.propagated.length,
+		xpGained: reward.xpGained,
+		newBadges: reward.newBadges
+	};
 }
