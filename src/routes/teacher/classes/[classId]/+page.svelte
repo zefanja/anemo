@@ -12,6 +12,8 @@
 	let activeTab = $state<'students' | 'heatmap' | 'stats' | 'leaderboard' | 'settings'>('students');
 	let editingId = $state<string | null>(null);
 	let editingName = $state('');
+	let editingClassName = $state(false);
+	let classNameDraft = $state('');
 
 	// Domain filter state: null = all enabled
 	let enabledDomains = $state<Set<string>>(
@@ -236,7 +238,43 @@ ${cards.map((c) => `<div class="card">
 	<div class="page-header">
 		<div>
 			<a href="/teacher/classes" class="breadcrumb">← Klassen</a>
-			<h1 class="page-title">{data.class.name}</h1>
+			{#if editingClassName}
+				<form
+					method="POST"
+					action="?/renameClass"
+					use:enhance={() => {
+						return async ({ result, update }) => {
+							await update({ reset: false });
+							if (result.type === 'success') editingClassName = false;
+						};
+					}}
+					class="rename-form class-rename-form"
+				>
+					<!-- svelte-ignore a11y_autofocus -->
+					<input
+						name="name"
+						type="text"
+						bind:value={classNameDraft}
+						class="rename-input class-rename-input"
+						minlength="2"
+						required
+						autofocus
+						onkeydown={(e) => { if (e.key === 'Escape') editingClassName = false; }}
+					/>
+					<button type="submit" class="btn-action" title="Speichern">✓</button>
+					<button type="button" class="btn-action" onclick={() => (editingClassName = false)} title="Abbrechen">✕</button>
+				</form>
+			{:else}
+				<div class="title-row">
+					<h1 class="page-title">{data.class.name}</h1>
+					<button
+						class="btn-action btn-icon"
+						title="Klasse umbenennen"
+						aria-label="Klasse umbenennen"
+						onclick={() => { classNameDraft = data.class.name; editingClassName = true; }}
+					>✏️</button>
+				</div>
+			{/if}
 			<p class="meta">{data.students.length} Schüler · {data.totalAtoms} Atome{data.class.enabledDomains ? ' (aktiviert)' : ' gesamt'}</p>
 		</div>
 	</div>
@@ -291,6 +329,12 @@ ${cards.map((c) => `<div class="card">
 	{/if}
 	{#if form?.action === 'domains_saved'}
 		<div class="alert alert-success">Themenbereiche gespeichert.</div>
+	{/if}
+	{#if form?.action === 'class_renamed'}
+		<div class="alert alert-success">Klasse wurde umbenannt.</div>
+	{/if}
+	{#if form?.action === 'class_rename_error' && form.classRenameError}
+		<div class="alert alert-error">{form.classRenameError}</div>
 	{/if}
 	{#if form?.action === 'student_renamed'}
 		<div class="alert alert-success">Name wurde geändert.</div>
@@ -844,6 +888,9 @@ ${cards.map((c) => `<div class="card">
 	.page { display: flex; flex-direction: column; gap: 1rem; }
 	.page-header { display: flex; justify-content: space-between; align-items: flex-start; }
 	.page-title { font-size: 1.5rem; font-weight: 700; margin: 0.25rem 0; }
+	.title-row { display: flex; align-items: center; gap: 0.25rem; }
+	.class-rename-form { margin: 0.25rem 0; max-width: 28rem; }
+	.class-rename-input { font-size: 1.25rem; font-weight: 700; }
 	.breadcrumb { font-size: 0.8rem; color: #6b7280; text-decoration: none; }
 	.breadcrumb:hover { color: #16a34a; }
 	.meta { font-size: 0.8rem; color: #9ca3af; margin: 0; }
