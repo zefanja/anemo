@@ -1,0 +1,1 @@
+ALTER TABLE "attempts" ADD COLUMN IF NOT EXISTS "xp_gained" integer DEFAULT 0 NOT NULL;

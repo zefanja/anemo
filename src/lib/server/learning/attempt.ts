@@ -1,5 +1,6 @@
 import { db } from '../db/index.js';
 import { attempts } from '../db/schema.js';
+import { eq } from 'drizzle-orm';
 import { checkAnswer } from '../tasks/index.js';
 import { updateMastery } from './mastery.js';
 import { initFsrsForAtom, scheduleFsrsReview } from './fsrs.js';
@@ -67,8 +68,9 @@ export async function processAttempt(
 	}
 
 	// 3. Record attempt in DB
+	const attemptId = randomUUID();
 	await db.insert(attempts).values({
-		id: randomUUID(),
+		id: attemptId,
 		studentId,
 		atomId,
 		isCorrect: correct,
@@ -81,6 +83,9 @@ export async function processAttempt(
 
 	// 4. Gamification
 	const gami = await recordGamification(studentId, correct, isReview, justMastered, atomId, atomGrade);
+	if (gami.xpGained > 0) {
+		await db.update(attempts).set({ xpGained: gami.xpGained }).where(eq(attempts.id, attemptId));
+	}
 
 	return {
 		correct,
