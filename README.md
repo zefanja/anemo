@@ -85,6 +85,8 @@ Alle Einstellungen über Umgebungsvariablen (`.env`):
 | `COGNITIVE_WEIGHT` | – | `0.5` | Gewichtung der kognitiven Last im Frontier-Score |
 | `SESSION_MAX_TOTAL` | – | `20` | Max. Aufgaben pro Sitzung (serverweiter Standard) |
 | `SESSION_MAX_REVIEW` | – | `10` | Max. FSRS-Wiederholungen pro Sitzung |
+| `REVIEW_UNLOCK_DAILY` | – | `50` | Themen trotz offener Wiederholungen frei nach N Wiederholungen am Tag (`0` = aus) |
+| `REVIEW_UNLOCK_PERCENT` | – | `80` | … oder nach P % des Tages-Rückstands (`0` = aus) |
 | `DAILY_XP_GOAL` | – | `50` | Tagesziel in XP (Ring auf der Schüler-Startseite) |
 
 ```dotenv
@@ -94,6 +96,8 @@ SESSION_SECRET=ersetze-mich-mit-64-hex-zeichen-xxxxxxxx
 COGNITIVE_WEIGHT=0.5
 SESSION_MAX_TOTAL=20
 SESSION_MAX_REVIEW=10
+REVIEW_UNLOCK_DAILY=50
+REVIEW_UNLOCK_PERCENT=80
 ```
 
 Klassen können diese Servervorgaben im Lehrer-Dashboard pro Klasse überschreiben.
@@ -163,7 +167,8 @@ Der Frontier enthält Atome, die noch nicht gemeistert sind und deren alle `requ
 
 ### Sitzungsablauf
 
-1. **Pflicht:** Alle fälligen FSRS-Wiederholungen (max. `SESSION_MAX_REVIEW`)
+1. **Pflicht:** Fällige FSRS-Wiederholungen in Runden zu max. `SESSION_MAX_REVIEW`. Die Startseite zeigt die Runde und den gesamten Rückstand.
+   Themen werden schon vorher frei, sobald der Schüler heute `REVIEW_UNLOCK_DAILY` Wiederholungen gemacht **oder** `REVIEW_UNLOCK_PERCENT` % des Tages-Rückstands (heute erledigt + noch fällig) geschafft hat. Beides ist pro Klasse einstellbar. Restliche Wiederholungen bleiben freiwillig verfügbar.
 2. **Frei:** Unbegrenzte Übung mit Frontier-Atomen nach Wahl des Schülers
 
 

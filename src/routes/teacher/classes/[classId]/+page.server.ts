@@ -169,7 +169,11 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 			id: cls.id,
 			name: cls.name,
 			enabledDomains: cls.enabledDomains ?? null,
-			showLeaderboard: cls.showLeaderboard
+			showLeaderboard: cls.showLeaderboard,
+			sessionMaxReview: cls.sessionMaxReview,
+			sessionMaxTotal: cls.sessionMaxTotal,
+			reviewUnlockDaily: cls.reviewUnlockDaily,
+			reviewUnlockPercent: cls.reviewUnlockPercent
 		},
 		totalAtoms: enabledAtoms.length,
 		domains,
@@ -352,17 +356,28 @@ export const actions: Actions = {
 
 	updateSettings: async ({ request, locals, params }) => {
 		if (!locals.session || locals.session.type !== 'teacher') return fail(401);
+		const session = locals.session as { type: 'teacher'; teacherId: string };
+
+		const cls = await db.query.classes.findFirst({
+			where: (c, { and, eq }) => and(eq(c.id, params.classId), eq(c.teacherId, session.teacherId))
+		});
+		if (!cls) return fail(404);
 
 		const fd = await request.formData();
-		const maxReview = parseInt(fd.get('sessionMaxReview')?.toString() ?? '');
-		const maxTotal = parseInt(fd.get('sessionMaxTotal')?.toString() ?? '');
+		// Empty / invalid → null (server default); clamped to the input's range
+		const intSetting = (name: string, min: number, max: number) => {
+			const n = parseInt(fd.get(name)?.toString() ?? '');
+			return isNaN(n) ? null : Math.min(max, Math.max(min, n));
+		};
 		const showLeaderboard = fd.get('showLeaderboard') === 'true';
 
 		await db
 			.update(classes)
 			.set({
-				sessionMaxReview: isNaN(maxReview) ? null : maxReview,
-				sessionMaxTotal: isNaN(maxTotal) ? null : maxTotal,
+				sessionMaxReview: intSetting('sessionMaxReview', 1, 50),
+				sessionMaxTotal: intSetting('sessionMaxTotal', 1, 100),
+				reviewUnlockDaily: intSetting('reviewUnlockDaily', 0, 500),
+				reviewUnlockPercent: intSetting('reviewUnlockPercent', 0, 100),
 				showLeaderboard
 			})
 			.where(eq(classes.id, params.classId));

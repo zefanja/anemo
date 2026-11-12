@@ -732,6 +732,7 @@ ${cards.map((c) => `<div class="card">
 								min="1"
 								max="50"
 								placeholder="Standard: 10"
+								value={data.class.sessionMaxReview ?? ''}
 							/>
 						</div>
 						<div class="field">
@@ -743,9 +744,39 @@ ${cards.map((c) => `<div class="card">
 								min="1"
 								max="100"
 								placeholder="Standard: 20"
+								value={data.class.sessionMaxTotal ?? ''}
+							/>
+						</div>
+						<div class="field">
+							<label for="unlockDaily">Themen frei nach … Wiederholungen pro Tag</label>
+							<input
+								id="unlockDaily"
+								name="reviewUnlockDaily"
+								type="number"
+								min="0"
+								max="500"
+								placeholder="Standard: 50"
+								value={data.class.reviewUnlockDaily ?? ''}
+							/>
+						</div>
+						<div class="field">
+							<label for="unlockPercent">… oder nach % des Tages-Rückstands</label>
+							<input
+								id="unlockPercent"
+								name="reviewUnlockPercent"
+								type="number"
+								min="0"
+								max="100"
+								placeholder="Standard: 80"
+								value={data.class.reviewUnlockPercent ?? ''}
 							/>
 						</div>
 					</div>
+					<p class="form-hint">
+						Neue Themen sind gesperrt, solange Wiederholungen fällig sind. Bei großem Rückstand werden sie
+						trotzdem frei, sobald eine der beiden Regeln erfüllt ist. Die übrigen Wiederholungen bleiben freiwillig. 0 = Regel aus
+						(beide 0 = erst alle Wiederholungen).
+					</p>
 					<div class="field-toggle">
 						<label class="toggle-label">
 							<input

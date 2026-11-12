@@ -6,12 +6,15 @@ let edgesFixture: any[];
 let statuses: any[];
 let classRow: any;
 let studentRow: any;
+let reviewAttemptsToday: Array<{ atomId: string }>;
 
 vi.mock('$lib/server/db/index.js', () => ({
 	db: {
 		query: {
 			classes: { findFirst: async () => classRow },
 			students: { findFirst: async () => studentRow },
+			// countReviewsToday: review attempts (fsrsRating set) since the start of today
+			attempts: { findMany: async () => reviewAttemptsToday },
 			atoms: { findMany: async () => atoms },
 			edges: {
 				// computeReinforcedAncestors passes a `where` filtering on edgeType='required';
@@ -38,7 +41,7 @@ vi.mock('../tasks/generators.js', () => ({
 	hasGenerator: (id: string) => !id.startsWith('no_gen_')
 }));
 
-import { buildSession } from './session-builder.js';
+import { buildSession, evaluateReviewUnlock } from './session-builder.js';
 
 const dueYesterday = new Date(Date.now() - 86_400_000).toISOString();
 
@@ -70,6 +73,7 @@ function masteredStatus(atomId: string, overrides: Partial<Record<string, unknow
 beforeEach(() => {
 	classRow = { sessionMaxReview: 10, enabledDomains: null };
 	studentRow = { extraDomains: null };
+	reviewAttemptsToday = [];
 });
 
 describe('buildSession – relevant reviews', () => {
@@ -133,5 +137,59 @@ describe('buildSession – relevant reviews', () => {
 		const reviewIds = session.mandatoryReviews.map((r) => r.atomId);
 
 		expect(reviewIds).toEqual(['stellenwert']);
+	});
+});
+
+describe('evaluateReviewUnlock', () => {
+	const rules = { daily: 50, percent: 80 };
+
+	it('is unlocked when nothing is due', () => {
+		expect(evaluateReviewUnlock(0, 0, rules)).toEqual({ unlocked: true, remaining: 0 });
+	});
+
+	it('unlocks after the daily count even with a large backlog', () => {
+		// 300 at the start of the day: 80 % would be 240, the daily rule (50) wins
+		expect(evaluateReviewUnlock(49, 251, rules)).toEqual({ unlocked: false, remaining: 1 });
+		expect(evaluateReviewUnlock(50, 250, rules)).toEqual({ unlocked: true, remaining: 0 });
+	});
+
+	it('unlocks after the percentage of a small backlog', () => {
+		// 20 at the start of the day: 80 % = 16, before the daily rule (50)
+		expect(evaluateReviewUnlock(10, 10, rules)).toEqual({ unlocked: false, remaining: 6 });
+		expect(evaluateReviewUnlock(16, 4, rules)).toEqual({ unlocked: true, remaining: 0 });
+	});
+
+	it('never asks for more than what is due', () => {
+		expect(evaluateReviewUnlock(0, 3, { daily: 50, percent: 0 })).toEqual({ unlocked: false, remaining: 3 });
+	});
+
+	it('requires every review when both rules are off', () => {
+		expect(evaluateReviewUnlock(100, 5, { daily: 0, percent: 0 })).toEqual({ unlocked: false, remaining: 5 });
+	});
+});
+
+describe('buildSession – backlog and unlock', () => {
+	beforeEach(() => {
+		atoms = Array.from({ length: 25 }, (_, i) => atom(`a${i}`));
+		edgesFixture = [];
+		statuses = atoms.map((a) => masteredStatus(a.id));
+	});
+
+	it('caps the round but reports the whole backlog', async () => {
+		const session = await buildSession('student-1', 'class-1');
+		expect(session.mandatoryReviews).toHaveLength(10);
+		expect(session.totalDueReviews).toBe(25);
+		expect(session.topicsUnlocked).toBe(false);
+		// 80 % of 25 = 20
+		expect(session.reviewsUntilUnlock).toBe(20);
+	});
+
+	it('uses the class unlock settings and counts distinct reviewed atoms today', async () => {
+		classRow = { ...classRow, reviewUnlockDaily: 3, reviewUnlockPercent: 0 };
+		reviewAttemptsToday = [{ atomId: 'x1' }, { atomId: 'x1' }, { atomId: 'x2' }, { atomId: 'x3' }];
+		const session = await buildSession('student-1', 'class-1');
+		expect(session.reviewsDoneToday).toBe(3);
+		expect(session.topicsUnlocked).toBe(true);
+		expect(session.mandatoryReviews).toHaveLength(10);
 	});
 });

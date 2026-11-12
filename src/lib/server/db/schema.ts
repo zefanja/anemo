@@ -130,6 +130,10 @@ export const classes = pgTable('classes', {
 	// session settings (null = use server defaults)
 	sessionMaxTotal: integer('session_max_total'),
 	sessionMaxReview: integer('session_max_review'),
+	// New topics unlock despite pending reviews once the student has done this many
+	// reviews today, or this percentage of today's backlog (null = server default, 0 = rule off)
+	reviewUnlockDaily: integer('review_unlock_daily'),
+	reviewUnlockPercent: integer('review_unlock_percent'),
 	cognitiveWeight: real('cognitive_weight'),
 	// whether students can see the class leaderboard
 	showLeaderboard: boolean('show_leaderboard').notNull().default(true),
