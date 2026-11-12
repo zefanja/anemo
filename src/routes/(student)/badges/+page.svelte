@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { invalidate } from '$app/navigation';
+	import { enhance } from '$app/forms';
 	import Icon from '$lib/components/student/Icon.svelte';
 	import { BADGES, levelProgress, type BadgeDef } from '$lib/gamification.js';
 	import type { PageData } from './$types';
@@ -45,6 +47,57 @@
 			.sort((a, b) => b.progress - a.progress)[0] ?? null
 	);
 	const earnedCount = $derived(items.filter((b) => b.earned).length);
+
+	// ── Class leaderboard ──
+	type LbPeriod = 'day' | 'week' | 'month' | 'all';
+	const LB_TABS: { key: LbPeriod; label: string }[] = [
+		{ key: 'day', label: 'Heute' },
+		{ key: 'week', label: 'Woche' },
+		{ key: 'month', label: 'Monat' },
+		{ key: 'all', label: 'Gesamt' }
+	];
+	let lbPeriod = $state<LbPeriod>('day');
+	const lbEntries = $derived(lbPeriod === 'all' ? data.leaderboard : data.periodBoards[lbPeriod]);
+
+	// Competition ranking: equal XP → equal place (1, 2, 2, 4, …)
+	const lbRanks = $derived.by(() => {
+		const ranks: number[] = [];
+		lbEntries.forEach((e, i) => {
+			ranks.push(i > 0 && e.xp === lbEntries[i - 1].xp ? ranks[i - 1] : i);
+		});
+		return ranks;
+	});
+	const myIndex = $derived(lbEntries.findIndex((e) => e.id === data.studentId));
+	const myRank = $derived(myIndex >= 0 ? lbRanks[myIndex] : -1);
+	// myRank is the index of the first entry in my tie group, so the entry right
+	// before it is the closest one with more XP
+	const xpToNextRank = $derived(myRank > 0 ? lbEntries[myRank - 1].xp - lbEntries[myIndex].xp + 1 : 0);
+
+	function rankIcon(i: number): string {
+		return i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`;
+	}
+	function isoWeek(d: Date): number {
+		const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+		const day = t.getUTCDay() || 7;
+		t.setUTCDate(t.getUTCDate() + 4 - day);
+		const yearStart = new Date(Date.UTC(t.getUTCFullYear(), 0, 1));
+		return Math.ceil(((t.getTime() - yearStart.getTime()) / 86_400_000 + 1) / 7);
+	}
+	const MONTH_FULL = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+	const lbPeriodText = $derived.by(() => {
+		const now = new Date();
+		if (lbPeriod === 'day') return 'heute';
+		if (lbPeriod === 'week') return `diese Woche (KW ${isoWeek(now)})`;
+		if (lbPeriod === 'month') return `im ${MONTH_FULL[now.getMonth()]}`;
+		return 'insgesamt';
+	});
+	const lbEmptyText = $derived(
+		lbPeriod === 'day'
+			? 'Heute hat noch niemand XP gesammelt. Hol dir Platz 1!'
+			: lbPeriod === 'week'
+				? 'Diese Woche hat noch niemand XP gesammelt. Hol dir Platz 1!'
+				: 'Diesen Monat hat noch niemand XP gesammelt. Hol dir Platz 1!'
+	);
 </script>
 
 <svelte:head><title>Anemo – Abzeichen</title></svelte:head>
@@ -75,6 +128,65 @@
 				<div class="bar next-bar"><span style="width: {Math.round(next.progress * 100)}%; background: var(--c-orange)"></span></div>
 				<span class="next-progress">{next.progressLabel}</span>
 			</div>
+		</section>
+	{/if}
+
+	{#if data.showLeaderboard && data.leaderboard.length > 1}
+		<section aria-labelledby="lb-title" class="lb">
+			<div class="section-head">
+				<h2 id="lb-title">Rangliste – Meine Klasse</h2>
+				<form method="POST" action="?/toggleLeaderboard" use:enhance={() => () => invalidate('app:gami')}>
+					<button type="submit" class="lb-toggle">
+						{data.studentHidesLeaderboard ? 'Einblenden' : 'Ausblenden'}
+					</button>
+				</form>
+			</div>
+			{#if data.studentHidesLeaderboard}
+				<p class="lb-hidden">Die Rangliste ist ausgeblendet. Du kannst sie jederzeit wieder einblenden.</p>
+			{:else}
+				<div class="lb-card">
+					<div class="lb-tabs" role="tablist" aria-label="Zeitraum der Rangliste">
+						{#each LB_TABS as tab}
+							<button
+								type="button"
+								role="tab"
+								aria-selected={lbPeriod === tab.key}
+								class="lb-tab"
+								class:active={lbPeriod === tab.key}
+								onclick={() => (lbPeriod = tab.key)}
+							>
+								{tab.label}
+							</button>
+						{/each}
+					</div>
+					{#if lbEntries.length === 0}
+						<p class="lb-empty">{lbEmptyText}</p>
+					{:else}
+						<p class="lb-my-rank">
+							{#if myRank >= 0}
+								Du bist {lbPeriodText} auf Platz <strong>{myRank + 1}</strong> von {lbEntries.length}
+								{#if myRank === 0} – du führst die Rangliste an!
+								{:else if myRank < 3} – weiter so!
+								{:else}
+									– noch <strong>{fmt(xpToNextRank)} XP</strong> bis zum nächsten Platz!
+								{/if}
+							{:else}
+								Du hast {lbPeriodText} noch keine XP. Schon ein paar Aufgaben bringen dich auf die Liste!
+							{/if}
+						</p>
+						<ul class="lb-list">
+							{#each lbEntries as entry, i (entry.id)}
+								<li class="lb-row" class:me={entry.id === data.studentId} class:top3={lbRanks[i] < 3}>
+									<span class="lb-pos">{rankIcon(lbRanks[i])}</span>
+									<span class="lb-name">{entry.id === data.studentId ? 'Du' : entry.displayName}</span>
+									{#if lbPeriod === 'all'}<span class="lb-lv">Lv.{entry.level}</span>{/if}
+									<span class="lb-xp">{lbPeriod === 'all' ? '' : '+'}{fmt(entry.xp)} XP</span>
+								</li>
+							{/each}
+						</ul>
+					{/if}
+				</div>
+			{/if}
 		</section>
 	{/if}
 
@@ -119,6 +231,33 @@
 	h2 { font-size: 1.15rem; font-weight: 900; }
 	.muted { font-size: 0.85rem; font-weight: 800; color: var(--c-ink-2); }
 	.eyebrow { font-size: 0.75rem; font-weight: 900; color: var(--c-orange-text); text-transform: uppercase; letter-spacing: 0.06em; }
+
+	.lb { display: flex; flex-direction: column; gap: 0.6rem; }
+	.lb .section-head { margin-bottom: 0; align-items: center; }
+	.lb-toggle {
+		font: 800 0.75rem var(--font); color: var(--c-ink-2); background: none;
+		border: 1.5px solid var(--c-line); border-radius: 999px; padding: 0.2rem 0.7rem;
+	}
+	.lb-toggle:hover { color: var(--c-primary); border-color: var(--c-primary); }
+	.lb-hidden { font-size: 0.85rem; font-weight: 700; color: var(--c-ink-2); background: #fff; border-radius: 16px; padding: 0.8rem 1rem; text-align: center; }
+	.lb-card { background: #fff; border-radius: 20px; padding: 1rem; box-shadow: var(--shadow-sm); }
+	.lb-tabs {
+		display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.25rem;
+		background: var(--c-track); border-radius: 999px; padding: 0.2rem; margin-bottom: 0.75rem;
+	}
+	.lb-tab { font: 800 0.8rem var(--font); color: var(--c-ink-2); background: none; border: none; border-radius: 999px; padding: 0.4rem 0.25rem; }
+	.lb-tab:hover { color: var(--c-primary); }
+	.lb-tab.active { background: #fff; color: var(--c-primary); box-shadow: var(--shadow-sm); }
+	.lb-empty { font-size: 0.875rem; font-weight: 700; color: var(--c-ink-2); text-align: center; padding: 0.75rem 0.5rem; }
+	.lb-my-rank { font-size: 0.875rem; font-weight: 700; color: #34507a; margin-bottom: 0.6rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--c-track); }
+	.lb-list { list-style: none; display: flex; flex-direction: column; gap: 0.25rem; }
+	.lb-row { display: flex; align-items: center; gap: 0.6rem; padding: 0.45rem 0.6rem; border-radius: 12px; font-size: 0.9rem; font-weight: 700; }
+	.lb-row.top3 { background: #fffbeb; }
+	.lb-row.me { background: var(--c-primary-light); outline: 1.5px solid var(--c-primary); font-weight: 900; }
+	.lb-pos { width: 1.8rem; text-align: center; font-weight: 900; flex-shrink: 0; }
+	.lb-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.lb-lv { font-size: 0.75rem; color: var(--c-ink-2); white-space: nowrap; }
+	.lb-xp { font-size: 0.85rem; font-weight: 900; color: var(--c-primary); white-space: nowrap; }
 
 	.level-card {
 		background: #fff; border-radius: 22px; padding: 1rem;

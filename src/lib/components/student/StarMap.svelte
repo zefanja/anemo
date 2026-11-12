@@ -5,7 +5,7 @@
 	let { atoms }: { atoms: StarAtom[] } = $props();
 
 	// Hidden constellations shown per domain before the "more" toggle
-	const LOCKED_PREVIEW = 2;
+	const LOCKED_PREVIEW = 4;
 
 	const sky = $derived(buildSky(atoms));
 	const openSkies = $derived(sky.filter((d) => d.unlocked));
@@ -58,11 +58,10 @@
 	{/if}
 
 	{#each openSkies as d (d.domain)}
-		{@const visibleLocked = expanded[d.domain] ? Infinity : LOCKED_PREVIEW}
-		{@const lockedTotal = d.constellations.filter((c) => c.locked).length}
-		{@const shown = d.constellations.filter(
-			(c, i) => !c.locked || i - (d.constellations.length - lockedTotal) < visibleLocked
-		)}
+		{@const shown = d.constellations.filter((c) => !c.locked)}
+		{@const locked = d.constellations.filter((c) => c.locked)}
+		{@const lockedTotal = locked.length}
+		{@const lockedShown = expanded[d.domain] ? locked : locked.slice(0, LOCKED_PREVIEW)}
 		<section class="domain" aria-label={d.name}>
 			<header class="domain-head">
 				<h2>{d.name}</h2>
@@ -71,7 +70,7 @@
 
 			<div class="tiles">
 				{#each shown as c (c.key)}
-					<div class="tile" class:wide={c.wide} class:complete={c.complete} class:locked={c.locked}>
+					<div class="tile" class:wide={c.wide} class:complete={c.complete}>
 						<div class="tile-sky">
 							<svg viewBox="0 0 {c.width} {c.height}" role="group" aria-label="Sternbild {c.name}">
 								{#each c.lines as ln}
@@ -139,7 +138,7 @@
 						<div class="tile-foot">
 							<span class="tile-name">{c.name}</span>
 							<span class="tile-count">
-								{#if c.locked}{c.wide ? 'noch verborgen' : `0/${c.total}`}{:else if c.complete}✓ {c.total}/{c.total}{:else}{c.mastered}/{c.total}{/if}
+								{#if c.complete}✓ {c.total}/{c.total}{:else}{c.mastered}/{c.total}{/if}
 							</span>
 						</div>
 
@@ -157,6 +156,17 @@
 					</div>
 				{/each}
 			</div>
+
+			{#if lockedTotal > 0}
+				<ul class="chips" aria-label="Noch verborgene Sternbilder">
+					{#each lockedShown as c (c.key)}
+						<li class="chip">
+							<span class="tile-name">{c.name}</span>
+							<span class="chip-count">{c.total} ☆</span>
+						</li>
+					{/each}
+				</ul>
+			{/if}
 
 			{#if lockedTotal > LOCKED_PREVIEW}
 				<button
@@ -274,9 +284,33 @@
 		box-shadow: 0 0 18px rgba(245, 158, 11, 0.18);
 	}
 
-	.tile.locked {
-		background: rgba(255, 255, 255, 0.025);
+
+	.chips {
+		list-style: none;
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 0.5rem;
+	}
+
+	.chip {
+		display: flex;
+		justify-content: space-between;
+		align-items: baseline;
+		gap: 0.4rem;
+		padding: 0.6rem 0.75rem;
 		border: 1px dashed rgba(93, 113, 152, 0.7);
+		border-radius: 14px;
+		font-size: 0.74rem;
+		font-weight: 800;
+		color: var(--dim);
+	}
+
+	.chip .tile-name {
+		color: var(--dim);
+	}
+
+	.chip-count {
+		white-space: nowrap;
 	}
 
 	.tile-sky {
@@ -303,9 +337,6 @@
 		opacity: 0.5;
 	}
 
-	.locked .ln-dim {
-		opacity: 0.3;
-	}
 
 	.st-locked {
 		fill: var(--dim);
@@ -415,11 +446,6 @@
 		color: var(--star);
 	}
 
-	.locked .tile-name,
-	.locked .tile-count {
-		color: var(--dim);
-		font-weight: 800;
-	}
 
 	.tip {
 		position: absolute;

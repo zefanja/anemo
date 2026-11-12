@@ -12,6 +12,16 @@
 
 	const level = $derived(levelProgress(data.xp, data.level));
 	const initial = $derived((data.studentName ?? '?').trim().charAt(0).toUpperCase());
+	const masteredTotal = $derived(
+		data.masteredDomains.reduce((n, d) => n + d.groups.reduce((m, g) => m + g.atoms.length, 0), 0)
+	);
+
+	function cap(s: string): string {
+		return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+	}
+	function domainName(d: string): string {
+		return d.split('_').map((w, i) => (i > 0 && w === 'und' ? w : cap(w))).join(' ');
+	}
 
 	async function resetProgress() {
 		resetting = true;
@@ -62,6 +72,57 @@
 			<span>{level.nextLevelXp ? `${level.remaining.toLocaleString('de-DE')} XP` : 'Max'}</span>
 		</div>
 		<div class="bar"><span style="width: {level.pct}%"></span></div>
+	</section>
+
+	<section class="card topics" aria-labelledby="topics-title">
+		<h2 id="topics-title">Deine Themen</h2>
+		{#if data.domains.length === 0}
+			<p class="empty">Alle aktuell erreichbaren Themen gemeistert!</p>
+		{:else}
+			{#each data.domains as domain}
+				<div class="domain">
+					<h3>{domainName(domain.name)}</h3>
+					{#each domain.groups as group}
+						{#if group.name}<div class="sub">{cap(group.name)}</div>{/if}
+						<ul class="atoms">
+							{#each group.atoms as atom}
+								<li class:cluster={atom.level === 'cluster'}>
+									<span class="label">{cap(atom.label)}</span>
+									{#if atom.mastery > 0}
+										<span class="mini"><span style="width: {Math.round(atom.mastery * 100)}%"></span></span>
+										<span class="pct">{Math.round(atom.mastery * 100)} %</span>
+									{:else}
+										<span class="new">neu</span>
+									{/if}
+								</li>
+							{/each}
+						</ul>
+					{/each}
+				</div>
+			{/each}
+		{/if}
+
+		{#if masteredTotal > 0}
+			<details class="mastered">
+				<summary>
+					<Icon name="star" size={18} color="var(--c-gold)" />
+					<span>Gemeistert</span>
+					<span class="count">{masteredTotal}</span>
+				</summary>
+				{#each data.masteredDomains as domain}
+					<div class="domain">
+						<h3>{domainName(domain.name)}</h3>
+						<ul class="atoms">
+							{#each domain.groups as group}
+								{#each group.atoms as atom}
+									<li><span class="label">{cap(atom.label)}</span><span class="check" aria-label="gemeistert">✓</span></li>
+								{/each}
+							{/each}
+						</ul>
+					</div>
+				{/each}
+			</details>
+		{/if}
 	</section>
 
 	<section class="card info">
@@ -119,6 +180,33 @@
 	.row-top { display: flex; justify-content: space-between; font-weight: 800; }
 	.row-top span { color: var(--c-ink-2); }
 	h2 { font-size: 1.05rem; font-weight: 900; }
+	.topics { gap: 0.9rem; }
+	.empty { font-weight: 700; color: var(--c-ink-2); }
+	.domain { display: flex; flex-direction: column; gap: 0.3rem; }
+	h3 { font-size: 0.78rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.08em; color: var(--c-primary); }
+	.sub { font-size: 0.78rem; font-weight: 800; color: var(--c-ink-2); margin-top: 0.25rem; }
+	.atoms { list-style: none; display: flex; flex-direction: column; }
+	.atoms li {
+		display: flex; align-items: center; gap: 0.5rem;
+		padding: 0.5rem 0; border-bottom: 1px solid var(--c-track);
+		font-size: 0.9rem; font-weight: 700;
+	}
+	.atoms li:last-child { border-bottom: none; }
+	.atoms li.cluster .label { font-weight: 900; }
+	.label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.mini { width: 48px; height: 6px; border-radius: 999px; background: var(--c-track); overflow: hidden; flex: none; }
+	.mini span { display: block; height: 100%; background: var(--c-sky); border-radius: 999px; }
+	.pct { font-size: 0.75rem; font-weight: 800; color: var(--c-ink-2); min-width: 2.6rem; text-align: right; }
+	.new { font-size: 0.72rem; font-weight: 800; color: var(--c-ink-2); background: var(--c-track); border-radius: 999px; padding: 0.05rem 0.5rem; }
+	.check { color: var(--c-success); font-weight: 900; }
+	.mastered { border-top: 1px solid var(--c-line); padding-top: 0.75rem; display: flex; flex-direction: column; gap: 0.75rem; }
+	.mastered[open] summary { margin-bottom: 0.6rem; }
+	summary { display: flex; align-items: center; gap: 0.5rem; font-weight: 900; cursor: pointer; list-style: none; }
+	summary::-webkit-details-marker { display: none; }
+	summary::after { content: '▾'; margin-left: auto; color: var(--c-ink-2); transition: transform .15s; }
+	.mastered[open] summary::after { transform: rotate(180deg); }
+	.count { font-size: 0.8rem; font-weight: 900; color: var(--c-gold-text); background: #fef3c7; border-radius: 999px; padding: 0 0.5rem; }
+	.mastered .domain + .domain { margin-top: 0.6rem; }
 	.info ul { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
 	.info li { display: flex; gap: 0.6rem; align-items: flex-start; font-size: 0.925rem; font-weight: 600; color: #34507a; }
 	.info li strong { color: var(--c-navy); }
