@@ -1042,6 +1042,7 @@
 						/>
 					</span>
 				{/if}
+				<div class="sheet-body">
 				<div class="sheet-head">
 					<span class="sheet-icon">
 						<Icon name={lastResult.correct ? 'check' : 'refresh'} size={26} color="#fff" />
@@ -1172,6 +1173,7 @@
 						</div>
 					{/if}
 				{/if}
+				</div>
 
 				<button class="btn-3d" class:green={lastResult.correct} class:orange={!lastResult.correct} onclick={handleContinue}>
 					{lastResult.correct ? 'Weiter' : 'Verstanden, weiter'}
@@ -1500,11 +1502,25 @@
 		flex-direction: column;
 		gap: 0.9rem;
 		max-height: 78svh;
-		overflow-y: auto;
+		/* visible so the mascot can stick out above the sheet; the content scrolls in .sheet-body */
+		overflow: visible;
 		animation: slide-up .28s cubic-bezier(.2, .9, .3, 1);
 	}
+	.sheet-body {
+		display: flex;
+		flex-direction: column;
+		gap: 0.9rem;
+		min-height: 0;
+		flex: 1 1 auto;
+		overflow-y: auto;
+		overscroll-behavior: contain;
+		-webkit-overflow-scrolling: touch;
+		/* room for focus rings / shadows that would otherwise be clipped by the scroll box */
+		margin: -0.25rem;
+		padding: 0.25rem;
+	}
 	@keyframes slide-up { from { transform: translateY(40%); opacity: 0; } }
-	.sheet.correct { background: var(--c-success-light); border-top: 3px solid #86efac; overflow: visible; }
+	.sheet.correct { background: var(--c-success-light); border-top: 3px solid #86efac; }
 	.sheet.wrong { background: #fff7ed; border-top: 3px solid #fdba74; }
 	.sheet-mascot { display: block; position: absolute; right: 0.5rem; top: -84px; width: 116px; height: 116px; pointer-events: none; animation: hop .5s cubic-bezier(.3, 1.6, .5, 1) both; }
 	.sheet-head { display: flex; align-items: center; gap: 0.75rem; padding-right: 5rem; }
