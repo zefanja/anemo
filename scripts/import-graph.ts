@@ -10,7 +10,7 @@
  * Aborts with a non-zero exit code on any validation error.
  */
 
-import { readFileSync, readdirSync } from 'fs';
+import { existsSync, readFileSync, readdirSync } from 'fs';
 import { join, resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import yaml from 'js-yaml';
@@ -26,6 +26,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, '..');
 const ATOMS_DIR = join(ROOT, 'math-knowledge-graph', 'atoms');
 const EDGES_FILE = join(ROOT, 'math-knowledge-graph', 'edges.csv');
+const EXPLANATIONS_FILE = join(ROOT, 'math-knowledge-graph', 'explanations.json');
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -269,6 +270,22 @@ async function importGraph(): Promise<void> {
 			.where(and(eq(schema.edges.sourceId, e.sourceId), eq(schema.edges.targetId, e.targetId)));
 	}
 	console.log(`Removed ${stale.length} stale edge(s).`);
+
+	// ── Explanations: fill atoms that have none yet (never overwrites; for a full
+	// refresh run scripts/import-explanations.ts) ────────────────────────────────
+	if (existsSync(EXPLANATIONS_FILE)) {
+		const rows: { atom_id: string; explanation: string }[] = JSON.parse(readFileSync(EXPLANATIONS_FILE, 'utf8'));
+		let filled = 0;
+		for (const row of rows) {
+			const res = await db
+				.update(schema.atoms)
+				.set({ explanation: row.explanation.trim() })
+				.where(and(eq(schema.atoms.id, row.atom_id), sql`coalesce(trim(${schema.atoms.explanation}), '') = ''`))
+				.returning({ id: schema.atoms.id });
+			filled += res.length;
+		}
+		console.log(`Filled ${filled} missing explanation(s).`);
+	}
 
 	await client.end();
 	console.log('\n✓ Graph import complete.');

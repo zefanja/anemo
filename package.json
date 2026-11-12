@@ -15,6 +15,7 @@
 		"db:push": "drizzle-kit push",
 		"import-graph": "tsx scripts/import-graph.ts",
 		"generate-explanations": "tsx scripts/generate-explanations.ts",
+		"import-explanations": "tsx scripts/import-explanations.ts",
 		"seed": "tsx scripts/seed.ts",
 		"test": "vitest run",
 		"test:watch": "vitest"

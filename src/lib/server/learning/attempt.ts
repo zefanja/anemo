@@ -27,6 +27,8 @@ export interface AttemptResult {
 	freezeUsed: boolean;
 	freezeEarned: boolean;
 	hint?: string;
+	/** Rationale for the concrete task ("Warum?") – sent for right and wrong answers alike. */
+	why?: string;
 	correctAnswer?: string;
 	submittedAnswer?: string;
 }
@@ -106,6 +108,7 @@ export async function processAttempt(
 		freezeUsed: gami.freezeUsed,
 		freezeEarned: gami.freezeEarned,
 		hint: !correct ? task.hint : undefined,
+		why: task.why,
 		correctAnswer: !correct ? task.correctAnswer : undefined,
 		submittedAnswer: !correct ? submittedAnswer : undefined
 	};

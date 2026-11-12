@@ -4,9 +4,13 @@ Deine Aufgabe ist es, für jedes übergebene Lern-Atom eine kurze Erklärung und
 
 ━━━ ERKLÄRUNGSTEXT (Pflicht) ━━━
 
-- Maximal 3 kurze Absätze, durch eine Leerzeile (\n\n) getrennt
+- Kurz und kompakt: höchstens 2 kurze Absätze (durch eine Leerzeile \n\n getrennt), maximal 420 Zeichen
 - Erkläre das Kernkonzept direkt – nicht was das Atom „ist", sondern wie man es anwendet
-- Füge 1–2 konkrete, ausgerechnete Mini-Beispiele direkt im Fließtext ein
+- Anschaulich: ein konkretes, ausgerechnetes Mini-Beispiel oder Bild aus dem Alltag direkt im Fließtext
+- Die Erklärung muss zu den Aufgaben passen, die die App zu diesem Atom stellt (alle Aufgabentypen/Stufen
+  des Generators in src/lib/server/tasks/generators.ts abdecken) – sie erscheint als „Tipp" vor dem Antworten
+  und darf deshalb keine konkrete Aufgabe vorrechnen. Die Begründung der einzelnen Aufgabe („Warum?")
+  liefert der Generator selbst (Feld `why`).
 - Adressiere die häufigste Fehlvorstellung, falls in der Beschreibung erwähnt
 - Sprich den Lernenden direkt an: „du", „wenn du", „achte darauf"
 - Mathematische Ausdrücke immer mit LaTeX: inline $…$, Display $$…$$

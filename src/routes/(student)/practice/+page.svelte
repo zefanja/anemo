@@ -55,6 +55,7 @@
 		freezeUsed: boolean;
 		freezeEarned: boolean;
 		hint?: string;
+		why?: string;
 		correctAnswer?: string;
 		submittedAnswer?: string;
 	};
@@ -217,6 +218,22 @@
 
 	let locked = $derived(isSubmitting || showFeedback);
 
+	// ── "Warum?" – short rationale for the task just answered ──
+	// Sources, most specific first: the task's own `why` text, its worked steps, the hint
+	// (wrong answers only) and finally the general explanation of the topic.
+	let showWhy = $state(false);
+	let showTopic = $state(false);
+	const whySteps = $derived(
+		Array.isArray(currentTask?.inputData?.steps) ? (currentTask!.inputData!.steps as unknown[]).map(String) : null
+	);
+	const whyText = $derived(lastResult?.why ?? (whySteps ? null : (lastResult?.hint ?? null)));
+	const hasTaskWhy = $derived(!!whyText || !!whySteps);
+
+	function openWhy() {
+		clearAutoAdvance();
+		showWhy = true;
+	}
+
 	// ── On-screen number pad ──
 	let padPreferred = $state(true);
 	let coarsePointer = $state(false);
@@ -360,6 +377,8 @@
 		submitError = false;
 		showExplanationManual = false;
 		hadWrongAttempt = false;
+		showWhy = false;
+		showTopic = false;
 		pqStepIndex = 0;
 		pqStepHintVisible = false;
 		tipIndex = (tipIndex + 1) % MASCOT_TIPS.length;
@@ -398,6 +417,9 @@
 			masteryBefore = mode === 'practice' && selectedAtom?.type !== 'discrimination' ? (masteryMap[atomId] ?? null) : null;
 			if (mode === 'practice') masteryMap[atomId] = result.mastery;
 			lastResult = result;
+			// After a mistake the rationale is shown right away; after a correct answer it waits behind the button.
+			showWhy = !result.correct;
+			showTopic = false;
 			showFeedback = true;
 			correctTitle = result.combo >= 3 ? 'Stark, richtig!' : CORRECT_TITLES[Math.floor(Math.random() * CORRECT_TITLES.length)];
 			if (!result.correct) hadWrongAttempt = true;
@@ -422,10 +444,12 @@
 
 			const special = result.justMastered || result.levelUp || result.newBadges.length > 0 || result.dailyGoalReached || result.freezeUsed || result.freezeEarned;
 			if (result.correct && !special) {
+				// A little longer when there is a "Warum?" to tap – tapping it stops the timer.
+				const canAskWhy = !!result.why || Array.isArray(currentTask.inputData?.steps) || !!currentTask.explanation;
 				autoAdvanceTimer = setTimeout(() => {
 					autoAdvanceTimer = null;
 					handleContinue();
-				}, 1300);
+				}, canAskWhy ? 2000 : 1300);
 			}
 		} catch {
 			submitError = true;
@@ -1114,20 +1138,39 @@
 					</div>
 				{/each}
 
-				{#if !lastResult.correct && currentTask?.explanation}
-					<AtomExplanation text={currentTask.explanation} illustrationConfig={currentTask.illustrationConfig} />
-				{:else if !lastResult.correct && Array.isArray(currentTask?.inputData?.steps)}
-					<div class="steps-box">
-						<div class="steps-title">Lösungsweg</div>
-						{#each currentTask!.inputData!.steps as step, i}
-							<div class="step-row">
-								<span class="step-num">{i + 1}.</span>
-								<span class="step-text"><MathText text={String(step)} /></span>
-							</div>
-						{/each}
-					</div>
-				{:else if !lastResult.correct && lastResult.hint}
-					<div class="hint-box"><Icon name="bulb" size={18} /> <MathText text={lastResult.hint} /></div>
+				{#if hasTaskWhy || currentTask?.explanation}
+					{#if !showWhy}
+						<button class="why-btn" onclick={openWhy} aria-expanded="false">
+							<Icon name="bulb" size={18} />
+							Warum?
+						</button>
+					{:else}
+						<div class="why-box">
+							<div class="why-title"><Icon name="bulb" size={18} /> Warum?</div>
+							{#if whyText}
+								<p class="why-text"><MathText text={whyText} /></p>
+							{/if}
+							{#if whySteps}
+								<div class="why-steps">
+									{#each whySteps as step, i}
+										<div class="step-row">
+											<span class="step-num">{i + 1}.</span>
+											<span class="step-text"><MathText text={step} /></span>
+										</div>
+									{/each}
+								</div>
+							{/if}
+							{#if !hasTaskWhy && currentTask?.explanation}
+								<AtomExplanation text={currentTask.explanation} illustrationConfig={currentTask.illustrationConfig} />
+							{:else if currentTask?.explanation}
+								{#if showTopic}
+									<AtomExplanation text={currentTask.explanation} illustrationConfig={currentTask.illustrationConfig} />
+								{:else}
+									<button class="why-more" onclick={() => (showTopic = true)}>Mehr zum Thema</button>
+								{/if}
+							{/if}
+						</div>
+					{/if}
 				{/if}
 
 				<button class="btn-3d" class:green={lastResult.correct} class:orange={!lastResult.correct} onclick={handleContinue}>
@@ -1405,6 +1448,32 @@
 	}
 	.tip-btn:hover, .tip-btn.active { border-color: var(--c-sky); background: var(--c-primary-light); }
 
+	/* "Warum?" – rationale for the task just answered */
+	.why-btn {
+		align-self: flex-start;
+		min-height: 2.75rem;
+		display: inline-flex; align-items: center; gap: 0.4rem;
+		background: #fff; border: 2px solid var(--c-line); color: var(--c-navy);
+		border-radius: 999px; padding: 0.35rem 1rem; font: 800 0.95rem var(--font); cursor: pointer;
+		box-shadow: 0 3px 0 var(--c-line);
+	}
+	.why-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--c-line); }
+	.why-box {
+		background: #fff; border-radius: 14px; padding: 0.7rem 0.85rem;
+		display: flex; flex-direction: column; gap: 0.45rem;
+		text-align: left; color: var(--c-navy); font-size: 0.95rem; line-height: 1.5;
+		animation: why-in .2s ease-out;
+	}
+	@keyframes why-in { from { opacity: 0; transform: translateY(6px); } }
+	.why-title { display: flex; align-items: center; gap: 0.35rem; font-weight: 800; color: var(--c-ink-2); font-size: 0.85rem; }
+	.why-text { margin: 0; font-weight: 700; }
+	.why-steps { font-size: 0.9rem; }
+	.why-more {
+		align-self: flex-start; background: none; border: 0; padding: 0.35rem 0; min-height: 2.25rem;
+		color: var(--c-primary-dark); font: 800 0.85rem var(--font); text-decoration: underline; cursor: pointer;
+	}
+	@media (prefers-reduced-motion: reduce) { .why-box { animation: none; } }
+
 	.mascot-tip { display: flex; align-items: flex-end; gap: 0.6rem; }
 	.mascot-tip .tip-ato { display: block; width: 56px; height: 56px; flex: none; }
 	.mascot-tip p {
@@ -1631,20 +1700,6 @@
 		font-weight: 600;
 		color: var(--c-gray-900);
 	}
-	.steps-box {
-		background: var(--c-gray-50);
-		border: 1px solid var(--c-gray-200);
-		border-radius: var(--radius);
-		padding: 0.75rem;
-		font-size: 0.9rem;
-		width: 100%;
-		text-align: left;
-	}
-	.steps-title {
-		font-weight: 700;
-		color: var(--c-gray-700);
-		margin-bottom: 0.4rem;
-	}
 	.step-row {
 		display: flex;
 		gap: 0.5rem;
@@ -1706,7 +1761,6 @@
 	.answer-row-correct .answer-value { color: var(--c-success-dark); }
 	.answer-label { color: var(--c-ink-2); font-weight: 800; }
 	.hint-box { display: flex; gap: 0.45rem; align-items: flex-start; background: #fff; color: #78350f; font-weight: 700; border-radius: 14px; }
-	.steps-box { background: #fff; border: 0; border-radius: 14px; }
 	.choice-btn { border-radius: 14px; font-family: var(--font); font-weight: 800; box-shadow: 0 3px 0 var(--c-line); }
 	.choice-btn:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 1px 0 var(--c-line); }
 	.answer-input { border-radius: 14px; font-family: var(--font); font-weight: 800; border-color: var(--c-line); color: var(--c-navy); }
