@@ -354,6 +354,24 @@ export const actions: Actions = {
 		return { action: 'student_deleted' as const, studentName: student.displayName };
 	},
 
+	renameClass: async ({ request, locals, params }) => {
+		if (!locals.session || locals.session.type !== 'teacher') return fail(401);
+		const session = locals.session as { type: 'teacher'; teacherId: string };
+
+		const cls = await db.query.classes.findFirst({
+			where: (c, { and, eq }) => and(eq(c.id, params.classId), eq(c.teacherId, session.teacherId))
+		});
+		if (!cls) return fail(404);
+
+		const fd = await request.formData();
+		const name = fd.get('name')?.toString().trim();
+		if (!name || name.length < 2)
+			return fail(400, { action: 'class_rename_error' as const, classRenameError: 'Name muss mindestens 2 Zeichen haben.' });
+
+		await db.update(classes).set({ name }).where(eq(classes.id, params.classId));
+		return { action: 'class_renamed' as const };
+	},
+
 	updateSettings: async ({ request, locals, params }) => {
 		if (!locals.session || locals.session.type !== 'teacher') return fail(401);
 		const session = locals.session as { type: 'teacher'; teacherId: string };
