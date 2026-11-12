@@ -1,7 +1,8 @@
 import { redirect, fail } from '@sveltejs/kit';
 import { db } from '$lib/server/db/index.js';
 import { attempts as attemptsTable, students } from '$lib/server/db/schema.js';
-import { and, eq, gte, inArray, sql } from 'drizzle-orm';
+import { and, eq, gte, sql } from 'drizzle-orm';
+import { getPeriodXp } from '$lib/server/gamification/period-xp.js';
 import { computeFrontier } from '$lib/server/learning/frontier.js';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -56,7 +57,7 @@ export const load: PageServerLoad = async ({ locals, depends }) => {
 			columns: { id: true, displayName: true }
 		});
 		const classmateIds = classmates.map((s) => s.id);
-		const [classmateGami, classmateMastered, periodRows] = await Promise.all([
+		const [classmateGami, classmateMastered, periodMap] = await Promise.all([
 			classmateIds.length > 0
 				? db.query.gamificationState.findMany({
 						where: (g, { inArray }) => inArray(g.studentId, classmateIds)
@@ -69,26 +70,7 @@ export const load: PageServerLoad = async ({ locals, depends }) => {
 						columns: { studentId: true }
 					})
 				: Promise.resolve([]),
-			classmateIds.length > 0
-				? db
-						.select({
-							studentId: attemptsTable.studentId,
-							day: sql<number>`cast(coalesce(sum(${attemptsTable.xpGained}) filter (where ${attemptsTable.answeredAt} >= date_trunc('day', now())), 0) as int)`,
-							week: sql<number>`cast(coalesce(sum(${attemptsTable.xpGained}) filter (where ${attemptsTable.answeredAt} >= date_trunc('week', now())), 0) as int)`,
-							month: sql<number>`cast(coalesce(sum(${attemptsTable.xpGained}) filter (where ${attemptsTable.answeredAt} >= date_trunc('month', now())), 0) as int)`
-						})
-						.from(attemptsTable)
-						.where(
-							and(
-								inArray(attemptsTable.studentId, classmateIds),
-								gte(
-									attemptsTable.answeredAt,
-									sql`least(date_trunc('week', now()), date_trunc('month', now()))`
-								)
-							)
-						)
-						.groupBy(attemptsTable.studentId)
-				: Promise.resolve([])
+			getPeriodXp(classmateIds)
 		]);
 		const gamiMap = new Map(classmateGami.map((g) => [g.studentId, g]));
 		const masteredCountMap = new Map<string, number>();
@@ -105,7 +87,6 @@ export const load: PageServerLoad = async ({ locals, depends }) => {
 			}))
 			.sort((a, b) => b.xp - a.xp);
 
-		const periodMap = new Map(periodRows.map((r) => [r.studentId, r]));
 		for (const period of ['day', 'week', 'month'] as const) {
 			periodBoards[period] = leaderboard
 				.map((e) => ({ ...e, xp: periodMap.get(e.id)?.[period] ?? 0 }))

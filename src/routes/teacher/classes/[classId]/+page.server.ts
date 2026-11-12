@@ -5,6 +5,7 @@ import { eq } from 'drizzle-orm';
 import { generateCode, hashCode } from '$lib/server/auth/codes.js';
 import { randomUUID } from 'node:crypto';
 import { getClassActivitySummary } from '$lib/server/analytics/activity.js';
+import { getPeriodXp } from '$lib/server/gamification/period-xp.js';
 import type { Actions, PageServerLoad } from './$types';
 
 const ADJECTIVES = [
@@ -49,7 +50,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 
 	const studentIds = studentList.map((s) => s.id);
 
-	const [gamiStates, masteredStatuses, allAtoms, allAtomStatuses, rawAttempts, activitySummary] = await Promise.all([
+	const [gamiStates, masteredStatuses, allAtoms, allAtomStatuses, rawAttempts, activitySummary, periodXp] = await Promise.all([
 		studentIds.length > 0
 			? db.query.gamificationState.findMany({
 					where: (g, { inArray }) => inArray(g.studentId, studentIds)
@@ -85,7 +86,8 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 					}
 				})
 			: Promise.resolve([]),
-		getClassActivitySummary(studentIds)
+		getClassActivitySummary(studentIds),
+		getPeriodXp(studentIds)
 	]);
 
 	const enabledAtoms = cls.enabledDomains
@@ -197,6 +199,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 				xp: gami?.xp ?? 0,
 				level: gami?.level ?? 1,
 				streakDays: gami?.streakDays ?? 0,
+				periodXp: periodXp.get(s.id) ?? { day: 0, week: 0, month: 0 },
 				masteredCount: mastered.size,
 				domainPct,
 				todayMinutes: activity?.todayMinutes ?? 0,
