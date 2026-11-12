@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import Ato from '$lib/components/Ato.svelte';
 	import type { ActionData, PageData } from './$types';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
@@ -55,7 +56,7 @@
 			</g>
 		</svg>
 		<div class="bubble">Schön, dass du da bist!</div>
-		<img src="/mascot.png" alt="Anemo, der Lern-Roboter" class="mascot" />
+		<span class="mascot"><Ato mood="freude" size="100%" label="Ato, das Lern-Atom" /></span>
 	</div>
 
 	<div class="login-body">
@@ -144,8 +145,9 @@
 	}
 	.mascot {
 		position: relative;
+		display: block;
 		height: 72%;
-		width: auto;
+		aspect-ratio: 1;
 		animation: float 4s ease-in-out infinite;
 	}
 	@keyframes float { 50% { transform: translateY(-8px); } }

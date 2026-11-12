@@ -54,19 +54,20 @@ export function advanceStreak(
 /**
  * Streak as it should be displayed today (before any activity today):
  * still alive if practised today/yesterday or if the missed days can be covered by freezes.
+ * `frozen` is true while missed days are being bridged by streak freezes.
  */
 export function displayedStreak(
 	lastDate: string | null,
 	today: string,
 	streakDays: number,
 	freezes: number
-): { streakDays: number; atRisk: boolean } {
-	if (!lastDate || streakDays <= 0) return { streakDays: 0, atRisk: false };
+): { streakDays: number; atRisk: boolean; frozen: boolean } {
+	if (!lastDate || streakDays <= 0) return { streakDays: 0, atRisk: false, frozen: false };
 	const missed = daysBetween(lastDate, today) - 1;
-	if (missed < 0) return { streakDays, atRisk: false };
-	if (missed === 0) return { streakDays, atRisk: true };
-	if (missed <= freezes) return { streakDays, atRisk: true };
-	return { streakDays: 0, atRisk: false };
+	if (missed < 0) return { streakDays, atRisk: false, frozen: false };
+	if (missed === 0) return { streakDays, atRisk: true, frozen: false };
+	if (missed <= freezes) return { streakDays, atRisk: true, frozen: true };
+	return { streakDays: 0, atRisk: false, frozen: false };
 }
 
 /** Number of consecutive correct answers at the head of a newest-first attempt list. */

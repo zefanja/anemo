@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { levelProgress } from '$lib/gamification.js';
+	import Ato from '$lib/components/Ato.svelte';
 
 	let { level, xp, onclose }: { level: number; xp: number; onclose: () => void } = $props();
 
@@ -50,7 +51,7 @@
 		</div>
 
 		<div class="quote">
-			<img src="/mascot.png" alt="" />
+			<span class="quote-ato"><Ato mood="jubel" size="100%" /></span>
 			<p>
 				{#if next.nextLevelXp}
 					„Wow! Bis Level {level + 1} sind es {fmt(next.remaining)} XP. Ich glaub an dich!“
@@ -117,7 +118,7 @@
 		gap: 0.75rem;
 		text-align: left;
 	}
-	.quote img { width: 64px; height: 64px; object-fit: contain; flex: none; }
+	.quote-ato { display: block; width: 64px; height: 64px; flex: none; }
 	.quote p { font-weight: 700; color: #e0f2fe; line-height: 1.4; }
 	.actions { margin-top: auto; align-self: stretch; display: flex; flex-direction: column; gap: 0.5rem; }
 	.btn-3d.gold { background: var(--c-star); color: var(--c-navy); box-shadow: 0 5px 0 #b45309; }

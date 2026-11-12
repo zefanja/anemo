@@ -12,6 +12,7 @@
 	import AtomExplanation from '$lib/components/student/AtomExplanation.svelte';
 	import WrittenCalcFeedback from '$lib/components/student/WrittenCalcFeedback.svelte';
 	import Icon from '$lib/components/student/Icon.svelte';
+	import Ato from '$lib/components/Ato.svelte';
 	import NumPad from '$lib/components/student/NumPad.svelte';
 	import LevelUpOverlay from '$lib/components/student/LevelUpOverlay.svelte';
 	import { pressKey, numpadInputs, setPadMode, type PadKey } from '$lib/numpad.js';
@@ -590,14 +591,22 @@
 					</li>
 				{/each}
 			</ol>
-			{#if data.streakAtRisk && !data.practicedToday && data.streakDays > 0}
+			{#if data.streakFrozen && !data.practicedToday && data.streakDays > 0}
+				<div class="frozen-note">
+					<span class="frozen-ato"><Ato mood="schlaf" size="100%" /></span>
+					<p>
+						<strong>Ato hält deine Serie warm.</strong>
+						Dein Streak-Schutz rettet deine {data.streakDays}-Tage-Serie – übe heute, damit sie weiterläuft.
+					</p>
+				</div>
+			{:else if data.streakAtRisk && !data.practicedToday && data.streakDays > 0}
 				<p class="risk">Übe heute, damit deine {data.streakDays}-Tage-Serie weiterläuft!</p>
 			{/if}
 		</section>
 
 		{#if reviewsPending}
 			<section class="review-card" aria-label="Wiederholen">
-				<img src="/mascot.png" alt="" class="review-mascot" />
+				<span class="review-mascot"><Ato mood="denkt" size="100%" /></span>
 				<div class="review-text">
 					<strong>{reviews.length} {reviews.length === 1 ? 'Wiederholung' : 'Wiederholungen'} fällig</strong>
 					<span>Damit du nichts vergisst · ca. {Math.max(1, Math.round(reviews.length * 0.7))} Min.</span>
@@ -615,7 +624,7 @@
 
 			{#if availableItems.length === 0 && data.plan.discriminationSets.length === 0}
 				<div class="empty-state">
-					<img src="/mascot.png" alt="" class="empty-mascot" />
+					<span class="empty-mascot"><Ato mood="jubel" size="100%" /></span>
 					<h3>Super gemacht!</h3>
 					<p>Alle verfügbaren Themen sind gemeistert. Schau dir deine Sternenkarte an!</p>
 					<a href="/progress" class="btn-3d">Zur Sternenkarte</a>
@@ -677,7 +686,7 @@
 		</svg>
 		<div class="summary-inner">
 			<div class="summary-hero">
-				<img src="/mascot.png" alt="Anemo freut sich mit dir" class="summary-mascot" />
+				<span class="summary-mascot"><Ato mood="jubel" size="100%" label="Ato freut sich mit dir" /></span>
 				<h1>{summaryTitle()}</h1>
 				<p>{summarySubtitle()}</p>
 			</div>
@@ -929,7 +938,7 @@
 
 				{#if !showFeedback}
 					<div class="mascot-tip">
-						<img src="/mascot.png" alt="" />
+						<span class="tip-ato"><Ato mood="freude" size="100%" /></span>
 						<p>{MASCOT_TIPS[tipIndex]}</p>
 					</div>
 				{/if}
@@ -969,7 +978,12 @@
 			<!-- Feedback sheet -->
 			<section class="sheet" class:correct={lastResult.correct} class:wrong={!lastResult.correct} aria-live="polite" aria-label="Rückmeldung">
 				{#if lastResult.correct}
-					<img src="/mascot.png" alt="" class="sheet-mascot" />
+					<span class="sheet-mascot">
+						<Ato
+							mood={lastResult.combo >= 3 ? 'feuer' : lastResult.justMastered || lastResult.levelUp || lastResult.dailyGoalReached ? 'jubel' : 'freude'}
+							size="100%"
+						/>
+					</span>
 				{/if}
 				<div class="sheet-head">
 					<span class="sheet-icon">
@@ -987,6 +1001,9 @@
 							{/if}
 						</p>
 					</div>
+					{#if !lastResult.correct}
+						<span class="sheet-ato"><Ato mood="denkt" size="100%" /></span>
+					{/if}
 				</div>
 
 				{#if !lastResult.correct && (lastResult.submittedAnswer || lastResult.correctAnswer)}
@@ -1052,7 +1069,7 @@
 					<div class="event"><Icon name="target" size={22} color="var(--c-success)" /> Tagesziel erreicht!</div>
 				{/if}
 				{#if lastResult.freezeUsed}
-					<div class="event"><Icon name="shield" size={22} color="var(--c-primary)" /> Dein Streak-Schutz hat deine Serie gerettet.</div>
+					<div class="event event-freeze"><span class="event-ato"><Ato mood="schlaf" size="100%" /></span> Dein Streak-Schutz hat deine Serie gerettet.</div>
 				{/if}
 				{#if lastResult.freezeEarned}
 					<div class="event"><Icon name="shield" size={22} color="var(--c-primary)" /> Neuer Streak-Schutz verdient!</div>
@@ -1154,6 +1171,10 @@
 	.day-label { font-size: 0.75rem; font-weight: 800; color: var(--c-ink-2); }
 	.day.today .day-label { color: var(--c-orange-text); font-weight: 900; }
 	.risk { font-size: 0.85rem; font-weight: 800; color: var(--c-orange-text); }
+	.frozen-note { display: flex; align-items: center; gap: 0.6rem; background: var(--c-primary-light); border-radius: 14px; padding: 0.5rem 0.75rem 0.5rem 0.4rem; }
+	.frozen-note p { margin: 0; font-size: 0.85rem; font-weight: 700; color: var(--c-navy); line-height: 1.35; }
+	.frozen-note strong { display: block; font-weight: 900; }
+	.frozen-ato { display: block; width: 56px; height: 56px; flex: none; }
 
 	.review-card {
 		background: var(--c-primary-light);
@@ -1164,7 +1185,7 @@
 		align-items: center;
 		gap: 0.85rem;
 	}
-	.review-mascot { width: 68px; height: 68px; object-fit: contain; flex: none; }
+	.review-mascot { display: block; width: 68px; height: 68px; flex: none; }
 	.review-text { display: flex; flex-direction: column; gap: 0.1rem; flex: 1; min-width: 0; }
 	.review-text strong { font-size: 1.05rem; font-weight: 900; }
 	.review-text span { font-size: 0.875rem; font-weight: 700; color: #34507a; }
@@ -1211,7 +1232,7 @@
 	.empty-state { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 0.75rem; padding: 1.5rem 1rem; }
 	.empty-state h3 { font-size: 1.25rem; font-weight: 900; }
 	.empty-state p { color: var(--c-ink-2); font-weight: 700; }
-	.empty-mascot { width: 120px; height: auto; }
+	.empty-mascot { display: block; width: 120px; height: 120px; }
 
 	/* ═════════ SUMMARY ═════════ */
 	.summary {
@@ -1234,7 +1255,7 @@
 		gap: 1.1rem;
 	}
 	.summary-hero { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 0.25rem; }
-	.summary-mascot { width: 170px; height: 170px; object-fit: contain; animation: hop .7s cubic-bezier(.3, 1.6, .5, 1) both; }
+	.summary-mascot { display: block; width: 170px; height: 170px; animation: hop .7s cubic-bezier(.3, 1.6, .5, 1) both; }
 	@keyframes hop { from { transform: translateY(30px) scale(0.8); opacity: 0; } }
 	.summary-hero h1 { font-size: 2rem; font-weight: 900; letter-spacing: -0.02em; }
 	.summary-hero p { font-weight: 700; color: #bfdbfe; }
@@ -1352,7 +1373,7 @@
 	.tip-btn:hover, .tip-btn.active { border-color: var(--c-sky); background: var(--c-primary-light); }
 
 	.mascot-tip { display: flex; align-items: flex-end; gap: 0.6rem; }
-	.mascot-tip img { width: 56px; height: 56px; object-fit: contain; flex: none; }
+	.mascot-tip .tip-ato { display: block; width: 56px; height: 56px; flex: none; }
 	.mascot-tip p {
 		background: #fff; border-radius: 16px 16px 16px 4px; padding: 0.6rem 0.9rem;
 		font-size: 0.9rem; font-weight: 700; color: #34507a; box-shadow: var(--shadow-sm);
@@ -1383,9 +1404,10 @@
 	@keyframes slide-up { from { transform: translateY(40%); opacity: 0; } }
 	.sheet.correct { background: var(--c-success-light); border-top: 3px solid #86efac; overflow: visible; }
 	.sheet.wrong { background: #fff7ed; border-top: 3px solid #fdba74; }
-	.sheet-mascot { position: absolute; right: 0.5rem; top: -84px; width: 116px; height: 116px; object-fit: contain; pointer-events: none; animation: hop .5s cubic-bezier(.3, 1.6, .5, 1) both; }
+	.sheet-mascot { display: block; position: absolute; right: 0.5rem; top: -84px; width: 116px; height: 116px; pointer-events: none; animation: hop .5s cubic-bezier(.3, 1.6, .5, 1) both; }
 	.sheet-head { display: flex; align-items: center; gap: 0.75rem; padding-right: 5rem; }
 	.sheet.wrong .sheet-head { padding-right: 0; }
+	.sheet-ato { display: block; width: 64px; height: 64px; flex: none; margin-left: auto; }
 	.sheet-icon {
 		width: 3rem; height: 3rem; flex: none; border-radius: 50%;
 		display: flex; align-items: center; justify-content: center;
@@ -1416,6 +1438,8 @@
 		font-weight: 800; font-size: 0.95rem; animation: rise .35s both;
 	}
 	.event-star { background: #fef3c7; color: #78350f; }
+	.event-freeze { padding-block: 0.3rem; }
+	.event-ato { display: block; width: 44px; height: 44px; flex: none; }
 
 	/* .task-prompt lives in app.css (rendered via MathText component) */
 	.task-sublabel {

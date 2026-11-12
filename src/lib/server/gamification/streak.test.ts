@@ -33,16 +33,16 @@ describe('advanceStreak', () => {
 
 describe('displayedStreak', () => {
 	it('is safe when practised today', () => {
-		expect(displayedStreak('2026-05-10', '2026-05-10', 3, 1)).toEqual({ streakDays: 3, atRisk: false });
+		expect(displayedStreak('2026-05-10', '2026-05-10', 3, 1)).toEqual({ streakDays: 3, atRisk: false, frozen: false });
 	});
 	it('is at risk when last practised yesterday', () => {
-		expect(displayedStreak('2026-05-09', '2026-05-10', 3, 0)).toEqual({ streakDays: 3, atRisk: true });
+		expect(displayedStreak('2026-05-09', '2026-05-10', 3, 0)).toEqual({ streakDays: 3, atRisk: true, frozen: false });
 	});
 	it('survives a missed day while a freeze is left', () => {
-		expect(displayedStreak('2026-05-08', '2026-05-10', 3, 1)).toEqual({ streakDays: 3, atRisk: true });
+		expect(displayedStreak('2026-05-08', '2026-05-10', 3, 1)).toEqual({ streakDays: 3, atRisk: true, frozen: true });
 	});
 	it('shows 0 once the streak is lost', () => {
-		expect(displayedStreak('2026-05-08', '2026-05-10', 3, 0)).toEqual({ streakDays: 0, atRisk: false });
+		expect(displayedStreak('2026-05-08', '2026-05-10', 3, 0)).toEqual({ streakDays: 0, atRisk: false, frozen: false });
 	});
 });
 

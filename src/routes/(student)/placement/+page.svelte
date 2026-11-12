@@ -9,6 +9,7 @@
 	import NumberLineInput from '$lib/components/student/NumberLineInput.svelte';
 	import MathText from '$lib/components/student/MathText.svelte';
 	import Icon from '$lib/components/student/Icon.svelte';
+	import Ato from '$lib/components/Ato.svelte';
 	import NumPad from '$lib/components/student/NumPad.svelte';
 	import { pressKey, numpadInputs, setPadMode, type PadKey } from '$lib/numpad.js';
 	import type { PlacementState } from '$lib/server/learning/placement.js';
@@ -292,7 +293,7 @@
 				<g fill="#2b4a7a"><circle cx="54" cy="110" r="5" /><circle cx="96" cy="86" r="5" /><circle cx="130" cy="118" r="5" /><circle cx="276" cy="104" r="5" /><circle cx="318" cy="128" r="5" /><circle cx="352" cy="100" r="5" /></g>
 			</svg>
 			<div class="bubble">Ich zeig dir deinen Sternenhimmel!</div>
-			<img src="/mascot.png" alt="Anemo" class="hero-mascot" />
+			<span class="hero-mascot"><Ato mood="freude" size="100%" label="Ato, das Lern-Atom" /></span>
 		</div>
 
 		<div class="intro-body">
@@ -333,7 +334,7 @@
 
 {:else if phase === 'error'}
 	<div class="center-state">
-		<img src="/mascot.png" alt="" class="error-mascot" />
+		<span class="error-mascot"><Ato mood="denkt" size="100%" /></span>
 		<p>{errorMessage}</p>
 		<button class="btn-3d" onclick={start}>Nochmal versuchen</button>
 	</div>
@@ -362,7 +363,7 @@
 					{/if}
 				{/each}
 			</svg>
-			<img src="/mascot.png" alt="Anemo freut sich" class="sky-mascot" />
+			<span class="sky-mascot"><Ato mood="jubel" size="100%" label="Ato freut sich" /></span>
 		</div>
 
 		<div class="result-tiles">
@@ -587,7 +588,7 @@
 		animation: pop 0.5s 0.2s both cubic-bezier(.2, 1.4, .4, 1);
 	}
 	@keyframes pop { from { opacity: 0; transform: translateX(-50%) scale(0.6); } }
-	.hero-mascot { position: relative; height: 70%; width: auto; animation: float 4s ease-in-out infinite; }
+	.hero-mascot { position: relative; display: block; height: 70%; aspect-ratio: 1; animation: float 4s ease-in-out infinite; }
 	@keyframes float { 50% { transform: translateY(-8px); } }
 	.intro-body {
 		flex: 1; width: 100%; max-width: 480px; margin: 0 auto;
@@ -623,7 +624,7 @@
 		gap: 1rem; padding: 2rem; text-align: center; font-weight: 700; color: var(--c-ink-2);
 	}
 	.dark .center-state { color: #bfdbfe; }
-	.error-mascot { width: 110px; height: auto; }
+	.error-mascot { display: block; width: 110px; height: 110px; }
 	.spinner {
 		width: 36px; height: 36px; border: 4px solid var(--c-line); border-top-color: var(--c-sky);
 		border-radius: 50%; animation: spin .7s linear infinite;
@@ -711,7 +712,7 @@
 	.glow { animation: fade-in .8s both; }
 	@keyframes twinkle-in { from { transform: scale(0); opacity: 0; } 60% { transform: scale(1.4); } }
 	@keyframes fade-in { from { opacity: 0; } }
-	.sky-mascot { position: absolute; right: -6px; bottom: -14px; width: 110px; height: 110px; object-fit: contain; }
+	.sky-mascot { display: block; position: absolute; right: -6px; bottom: -14px; width: 110px; height: 110px; }
 	.result-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.6rem; }
 	.result-tile {
 		background: #fff; color: var(--c-navy); border-radius: 18px; padding: 0.75rem 0.9rem;
