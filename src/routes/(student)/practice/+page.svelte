@@ -585,7 +585,15 @@
 					</li>
 				{/each}
 			</ol>
-			{#if data.streakAtRisk && !data.practicedToday && data.streakDays > 0}
+			{#if data.streakFrozen && !data.practicedToday && data.streakDays > 0}
+				<div class="frozen-note">
+					<span class="frozen-ato"><Ato mood="schlaf" size="100%" /></span>
+					<p>
+						<strong>Ato hält deine Serie warm.</strong>
+						Dein Streak-Schutz rettet deine {data.streakDays}-Tage-Serie – übe heute, damit sie weiterläuft.
+					</p>
+				</div>
+			{:else if data.streakAtRisk && !data.practicedToday && data.streakDays > 0}
 				<p class="risk">Übe heute, damit deine {data.streakDays}-Tage-Serie weiterläuft!</p>
 			{/if}
 		</section>
@@ -1055,7 +1063,7 @@
 					<div class="event"><Icon name="target" size={22} color="var(--c-success)" /> Tagesziel erreicht!</div>
 				{/if}
 				{#if lastResult.freezeUsed}
-					<div class="event"><Icon name="shield" size={22} color="var(--c-primary)" /> Dein Streak-Schutz hat deine Serie gerettet.</div>
+					<div class="event event-freeze"><span class="event-ato"><Ato mood="schlaf" size="100%" /></span> Dein Streak-Schutz hat deine Serie gerettet.</div>
 				{/if}
 				{#if lastResult.freezeEarned}
 					<div class="event"><Icon name="shield" size={22} color="var(--c-primary)" /> Neuer Streak-Schutz verdient!</div>
@@ -1154,6 +1162,10 @@
 	.day-label { font-size: 0.75rem; font-weight: 800; color: var(--c-ink-2); }
 	.day.today .day-label { color: var(--c-orange-text); font-weight: 900; }
 	.risk { font-size: 0.85rem; font-weight: 800; color: var(--c-orange-text); }
+	.frozen-note { display: flex; align-items: center; gap: 0.6rem; background: var(--c-primary-light); border-radius: 14px; padding: 0.5rem 0.75rem 0.5rem 0.4rem; }
+	.frozen-note p { margin: 0; font-size: 0.85rem; font-weight: 700; color: var(--c-navy); line-height: 1.35; }
+	.frozen-note strong { display: block; font-weight: 900; }
+	.frozen-ato { display: block; width: 56px; height: 56px; flex: none; }
 
 	.review-card {
 		background: var(--c-primary-light);
@@ -1417,6 +1429,8 @@
 		font-weight: 800; font-size: 0.95rem; animation: rise .35s both;
 	}
 	.event-star { background: #fef3c7; color: #78350f; }
+	.event-freeze { padding-block: 0.3rem; }
+	.event-ato { display: block; width: 44px; height: 44px; flex: none; }
 
 	/* .task-prompt lives in app.css (rendered via MathText component) */
 	.task-sublabel {

@@ -251,6 +251,7 @@ export async function getGamificationState(studentId: string) {
 		level,
 		streakDays: streak.streakDays,
 		streakAtRisk: streak.atRisk,
+		streakFrozen: streak.frozen,
 		practicedToday: state?.streakLastDate === todayStr,
 		streakFreezes: freezes,
 		dailyXp: state?.dailyXpDate === todayStr ? state.dailyXp : 0,
