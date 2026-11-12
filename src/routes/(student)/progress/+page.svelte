@@ -13,7 +13,57 @@
 		return `${i + 1}.`;
 	}
 
-	const myRank = $derived(data.leaderboard.findIndex((e) => e.id === data.studentId));
+	type LbPeriod = 'day' | 'week' | 'month' | 'all';
+	const LB_TABS: { key: LbPeriod; label: string }[] = [
+		{ key: 'day', label: 'Heute' },
+		{ key: 'week', label: 'Woche' },
+		{ key: 'month', label: 'Monat' },
+		{ key: 'all', label: 'Gesamt' }
+	];
+	let lbPeriod = $state<LbPeriod>('day');
+
+	const lbEntries = $derived(lbPeriod === 'all' ? data.leaderboard : data.periodBoards[lbPeriod]);
+
+	// Competition ranking: equal XP → equal place (1, 2, 2, 4, …)
+	const lbRanks = $derived.by(() => {
+		const ranks: number[] = [];
+		lbEntries.forEach((e, i) => {
+			ranks.push(i > 0 && e.xp === lbEntries[i - 1].xp ? ranks[i - 1] : i);
+		});
+		return ranks;
+	});
+
+	const myIndex = $derived(lbEntries.findIndex((e) => e.id === data.studentId));
+	const myRank = $derived(myIndex >= 0 ? lbRanks[myIndex] : -1);
+	// myRank is the index of the first entry in my tie group, so the entry right
+	// before it is the closest one with more XP
+	const xpToNextRank = $derived(myRank > 0 ? lbEntries[myRank - 1].xp - lbEntries[myIndex].xp + 1 : 0);
+
+	function isoWeek(d: Date): number {
+		const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+		const day = t.getUTCDay() || 7;
+		t.setUTCDate(t.getUTCDate() + 4 - day);
+		const yearStart = new Date(Date.UTC(t.getUTCFullYear(), 0, 1));
+		return Math.ceil(((t.getTime() - yearStart.getTime()) / 86_400_000 + 1) / 7);
+	}
+
+	const MONTH_FULL = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+
+	const lbPeriodText = $derived.by(() => {
+		const now = new Date();
+		if (lbPeriod === 'day') return 'heute';
+		if (lbPeriod === 'week') return `diese Woche (KW ${isoWeek(now)})`;
+		if (lbPeriod === 'month') return `im ${MONTH_FULL[now.getMonth()]}`;
+		return 'insgesamt';
+	});
+
+	const lbEmptyText = $derived(
+		lbPeriod === 'day'
+			? 'Heute hat noch niemand XP gesammelt. Hol dir Platz 1!'
+			: lbPeriod === 'week'
+				? 'Diese Woche hat noch niemand XP gesammelt. Hol dir Platz 1!'
+				: 'Diesen Monat hat noch niemand XP gesammelt. Hol dir Platz 1!'
+	);
 
 	function capitalize(s: string): string {
 		return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
@@ -170,24 +220,48 @@
 			</div>
 		{:else}
 			<div class="lb-card">
-				{#if myRank >= 0}
+				<div class="lb-tabs" role="tablist" aria-label="Zeitraum der Rangliste">
+					{#each LB_TABS as tab}
+						<button
+							type="button"
+							role="tab"
+							aria-selected={lbPeriod === tab.key}
+							class="lb-tab"
+							class:active={lbPeriod === tab.key}
+							onclick={() => (lbPeriod = tab.key)}
+						>
+							{tab.label}
+						</button>
+					{/each}
+				</div>
+				{#if lbEntries.length === 0}
+					<div class="lb-empty">{lbEmptyText}</div>
+				{:else}
 					<div class="lb-my-rank">
-						Du bist auf Platz <strong>{myRank + 1}</strong> von {data.leaderboard.length}
-						{#if myRank === 0} – du führst die Rangliste an!
-						{:else if myRank < 3} – weiter so!
+						{#if myRank >= 0}
+							Du bist {lbPeriodText} auf Platz <strong>{myRank + 1}</strong> von {lbEntries.length}
+							{#if myRank === 0} – du führst die Rangliste an!
+							{:else if myRank < 3} – weiter so!
+							{:else}
+								– noch <strong>{xpToNextRank.toLocaleString('de-DE')} XP</strong> bis zum nächsten Platz!
+							{/if}
+						{:else}
+							Du hast {lbPeriodText} noch keine XP. Schon ein paar Aufgaben bringen dich auf die Liste!
 						{/if}
 					</div>
+					<ul class="lb-list">
+						{#each lbEntries as entry, i (entry.id)}
+							<li class="lb-row" class:lb-me={entry.id === data.studentId} class:lb-top3={lbRanks[i] < 3}>
+								<span class="lb-pos">{rankIcon(lbRanks[i])}</span>
+								<span class="lb-name">{entry.id === data.studentId ? 'Du' : entry.displayName}</span>
+								{#if lbPeriod === 'all'}
+									<span class="lb-lv">Lv.{entry.level}</span>
+								{/if}
+								<span class="lb-xp">{lbPeriod === 'all' ? '' : '+'}{entry.xp.toLocaleString('de-DE')} XP</span>
+							</li>
+						{/each}
+					</ul>
 				{/if}
-				<ul class="lb-list">
-					{#each data.leaderboard as entry, i}
-						<li class="lb-row" class:lb-me={entry.id === data.studentId} class:lb-top3={i < 3}>
-							<span class="lb-pos">{rankIcon(i)}</span>
-							<span class="lb-name">{entry.id === data.studentId ? 'Du' : entry.displayName}</span>
-							<span class="lb-lv">Lv.{entry.level}</span>
-							<span class="lb-xp">{entry.xp.toLocaleString('de-DE')} XP</span>
-						</li>
-					{/each}
-				</ul>
 			</div>
 		{/if}
 	{/if}
@@ -446,6 +520,39 @@
 		padding: 1rem 1.25rem;
 		box-shadow: var(--shadow-sm);
 		margin-bottom: 0.25rem;
+	}
+	.lb-tabs {
+		display: grid;
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+		gap: 0.25rem;
+		background: var(--c-gray-100);
+		border-radius: 999px;
+		padding: 0.2rem;
+		margin-bottom: 0.75rem;
+	}
+	.lb-tab {
+		font-size: 0.78rem;
+		font-weight: 800;
+		color: var(--c-gray-600);
+		background: none;
+		border: none;
+		border-radius: 999px;
+		padding: 0.35rem 0.25rem;
+		cursor: pointer;
+		transition: background .15s, color .15s;
+	}
+	.lb-tab:hover { color: var(--c-primary); }
+	.lb-tab.active {
+		background: #fff;
+		color: var(--c-primary);
+		box-shadow: var(--shadow-sm);
+	}
+	.lb-empty {
+		font-size: 0.85rem;
+		font-weight: 700;
+		color: var(--c-gray-600);
+		text-align: center;
+		padding: 0.75rem 0.5rem;
 	}
 	.lb-my-rank {
 		font-size: 0.825rem;

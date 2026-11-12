@@ -278,6 +278,9 @@ export const attempts = pgTable(
 		correctAnswer: text('correct_answer'),
 		// FSRS rating used (1=Again, 2=Hard, 3=Good, 4=Easy) — null for non-mastered
 		fsrsRating: integer('fsrs_rating'),
+		// XP awarded for this attempt (incl. mastery + combo bonus) — drives the
+		// daily/weekly/monthly leaderboards
+		xpGained: integer('xp_gained').notNull().default(0),
 		answeredAt: timestamp('answered_at', { withTimezone: true }).notNull().defaultNow()
 	},
 	(t) => [
