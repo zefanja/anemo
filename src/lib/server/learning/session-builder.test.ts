@@ -33,6 +33,11 @@ vi.mock('$lib/server/db/index.js', () => ({
 	}
 }));
 
+// Fixture ids are made up; treat every id as having a generator except those prefixed `no_gen_`.
+vi.mock('../tasks/generators.js', () => ({
+	hasGenerator: (id: string) => !id.startsWith('no_gen_')
+}));
+
 import { buildSession } from './session-builder.js';
 
 const dueYesterday = new Date(Date.now() - 86_400_000).toISOString();
@@ -115,5 +120,18 @@ describe('buildSession – relevant reviews', () => {
 		const reviewIds = session.mandatoryReviews.map((r) => r.atomId);
 
 		expect(reviewIds).toEqual(expect.arrayContaining(['stellenwert', 'add_ohne']));
+	});
+
+	it('skips legacy mastered rows of clusters and atoms without a generator', async () => {
+		// A status row can outlive a graph change: groessen_geld_laenge_zeit was an atom
+		// before graph v4 and is now a cluster, which has no task generator.
+		atoms = [atom('stellenwert'), atom('groessen_cluster', { level: 'cluster' }), atom('no_gen_atom')];
+		edgesFixture = [];
+		statuses = [masteredStatus('stellenwert'), masteredStatus('groessen_cluster'), masteredStatus('no_gen_atom')];
+
+		const session = await buildSession('student-1', 'class-1');
+		const reviewIds = session.mandatoryReviews.map((r) => r.atomId);
+
+		expect(reviewIds).toEqual(['stellenwert']);
 	});
 });

@@ -2,6 +2,7 @@ import { fsrs, createEmptyCard, Rating, type Card, type Grade } from 'ts-fsrs';
 import { db } from '../db/index.js';
 import { studentAtomStatus } from '../db/schema.js';
 import { and, eq, lte } from 'drizzle-orm';
+import { hasGenerator } from '../tasks/generators.js';
 
 export { Rating };
 
@@ -98,6 +99,10 @@ export async function getDueReviews(
 	return dueStatuses
 		.filter((s) => {
 			if (!s.fsrsState) return false;
+			// Status rows can outlive graph changes: an atom mastered before it became a
+			// cluster (e.g. arithmetik__groessen_geld_laenge_zeit since graph v4) keeps its
+			// fsrsState, but clusters have no generator and would fail to load as a task.
+			if (s.atom.level !== 'atom' || !hasGenerator(s.atomId)) return false;
 			const state = s.fsrsState as FsrsState;
 			return new Date(state.due) <= now;
 		})
