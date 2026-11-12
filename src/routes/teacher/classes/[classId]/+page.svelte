@@ -94,8 +94,23 @@
 	let lbSortKey = $state<LbSortKey>('xp');
 	let lbSortDir = $state<'asc' | 'desc'>('desc');
 
+	type LbPeriod = 'day' | 'week' | 'month' | 'all';
+	const LB_PERIODS: { key: LbPeriod; label: string; xpLabel: string; empty: string }[] = [
+		{ key: 'day', label: 'Heute', xpLabel: 'XP heute', empty: 'Heute hat noch niemand XP gesammelt.' },
+		{ key: 'week', label: 'Woche', xpLabel: 'XP Woche', empty: 'Diese Woche hat noch niemand XP gesammelt.' },
+		{ key: 'month', label: 'Monat', xpLabel: 'XP Monat', empty: 'Diesen Monat hat noch niemand XP gesammelt.' },
+		{ key: 'all', label: 'Gesamt', xpLabel: 'XP', empty: '' }
+	];
+	let lbPeriod = $state<LbPeriod>('week');
+	const lbPeriodInfo = $derived(LB_PERIODS.find((p) => p.key === lbPeriod)!);
+
+	// In a period view `xp` is the XP earned in that period; only students who
+	// earned XP in it are listed
 	let leaderboard = $derived(
-		[...data.students].sort((a, b) => {
+		data.students
+			.map((s) => ({ ...s, xp: lbPeriod === 'all' ? s.xp : s.periodXp[lbPeriod] }))
+			.filter((s) => lbPeriod === 'all' || s.xp > 0)
+			.sort((a, b) => {
 			const av = a[lbSortKey], bv = b[lbSortKey];
 			if (typeof av === 'string' && typeof bv === 'string') {
 				return lbSortDir === 'asc' ? av.localeCompare(bv, 'de') : bv.localeCompare(av, 'de');
@@ -726,6 +741,23 @@ ${cards.map((c) => `<div class="card">
 			{#if data.students.length === 0}
 				<p class="muted">Noch keine Schüler vorhanden.</p>
 			{:else}
+				<div class="period-tabs" role="tablist" aria-label="Zeitraum">
+					{#each LB_PERIODS as p}
+						<button
+							type="button"
+							role="tab"
+							aria-selected={lbPeriod === p.key}
+							class="period-tab"
+							class:active={lbPeriod === p.key}
+							onclick={() => (lbPeriod = p.key)}
+						>
+							{p.label}
+						</button>
+					{/each}
+				</div>
+				{#if leaderboard.length === 0}
+					<p class="muted">{lbPeriodInfo.empty}</p>
+				{:else}
 				<div class="table-wrap">
 					<table class="t">
 						<thead>
@@ -733,7 +765,7 @@ ${cards.map((c) => `<div class="card">
 								<th class="lb-rank-col">#</th>
 								<th class="sort-th"><button class="sort-btn" class:sorted={lbSortKey==='displayName'} onclick={() => toggleLbSort('displayName')}>Name <span class="sort-icon" class:active={lbSortKey==='displayName'}>{lbSortIcon('displayName')}</span></button></th>
 								<th class="sort-th"><button class="sort-btn" class:sorted={lbSortKey==='level'} onclick={() => toggleLbSort('level')}>Level <span class="sort-icon" class:active={lbSortKey==='level'}>{lbSortIcon('level')}</span></button></th>
-								<th class="sort-th"><button class="sort-btn" class:sorted={lbSortKey==='xp'} onclick={() => toggleLbSort('xp')}>XP <span class="sort-icon" class:active={lbSortKey==='xp'}>{lbSortIcon('xp')}</span></button></th>
+								<th class="sort-th"><button class="sort-btn" class:sorted={lbSortKey==='xp'} onclick={() => toggleLbSort('xp')}>{lbPeriodInfo.xpLabel} <span class="sort-icon" class:active={lbSortKey==='xp'}>{lbSortIcon('xp')}</span></button></th>
 								<th class="sort-th"><button class="sort-btn" class:sorted={lbSortKey==='masteredCount'} onclick={() => toggleLbSort('masteredCount')}>Gemeistert <span class="sort-icon" class:active={lbSortKey==='masteredCount'}>{lbSortIcon('masteredCount')}</span></button></th>
 								<th class="sort-th"><button class="sort-btn" class:sorted={lbSortKey==='streakDays'} onclick={() => toggleLbSort('streakDays')}>Streak <span class="sort-icon" class:active={lbSortKey==='streakDays'}>{lbSortIcon('streakDays')}</span></button></th>
 							</tr>
@@ -748,7 +780,7 @@ ${cards.map((c) => `<div class="card">
 										</a>
 									</td>
 									<td class="center">Lv.{s.level}</td>
-									<td class="center lb-xp">{s.xp.toLocaleString('de-DE')}</td>
+									<td class="center lb-xp">{lbPeriod === 'all' ? '' : '+'}{s.xp.toLocaleString('de-DE')}</td>
 									<td class="center">{s.masteredCount}/{data.totalAtoms}</td>
 									<td class="center">🔥 {s.streakDays}</td>
 								</tr>
@@ -756,6 +788,7 @@ ${cards.map((c) => `<div class="card">
 						</tbody>
 					</table>
 				</div>
+				{/if}
 			{/if}
 		</div>
 
@@ -1105,6 +1138,27 @@ ${cards.map((c) => `<div class="card">
 	.lb-rank-col { text-align: center; width: 2.5rem; font-weight: 700; }
 	.lb-top3 td { background: #fafff7; }
 	.lb-xp { font-weight: 700; color: #16a34a; }
+	.period-tabs {
+		display: inline-flex;
+		align-self: flex-start;
+		gap: 0.2rem;
+		background: #f3f4f6;
+		border-radius: 9999px;
+		padding: 0.2rem;
+	}
+	.period-tab {
+		padding: 0.25rem 0.75rem;
+		border: none;
+		border-radius: 9999px;
+		background: none;
+		color: #6b7280;
+		font-size: 0.78rem;
+		font-weight: 600;
+		cursor: pointer;
+		transition: background 0.15s, color 0.15s;
+	}
+	.period-tab:hover { color: #16a34a; }
+	.period-tab.active { background: #fff; color: #16a34a; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
 	.lb-disabled-note {
 		background: #fffbeb;
 		border: 1px solid #fde68a;
