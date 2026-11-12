@@ -1,5 +1,10 @@
 # Erklärungen generieren – Prompt-Sammlung
 
+> **Stand:** Für alle übbaren Atome liegt eine geprüfte Erklärung in
+> `math-knowledge-graph/explanations.json`. `npm run import-graph` füllt damit fehlende Erklärungen,
+> `npm run import-explanations` überschreibt alle Texte (`-- --missing`: nur Lücken füllen).
+> Die Prompts hier braucht man nur noch für neue Atome.
+
 Dieser Ordner enthält alles, um Atom-Erklärungen mit einem beliebigen LLM zu generieren.
 Das Ergebnis (JSON-Datei) kann direkt unter `/teacher/atoms/import` importiert werden.
 

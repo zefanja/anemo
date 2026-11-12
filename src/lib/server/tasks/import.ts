@@ -9,6 +9,7 @@
  *   "correct_answer": "5/7",                                       // required
  *   "distractors":    ["4/7", "6/7"],                             // optional
  *   "hint":           "Gleichnamige Brüche: Zähler addieren.",     // optional
+ *   "why":            "Gleiche Nenner: 3 + 2 = 5 Siebtel.",        // optional, "Warum?" after answering
  *   "difficulty":     0.4                                          // optional 0–1
  * }
  *
@@ -28,6 +29,8 @@ export interface TaskImportRow {
 	correct_answer: string;
 	distractors?: string[];
 	hint?: string;
+	// short rationale for this concrete task, shown behind the "Warum?" button after answering
+	why?: string;
 	difficulty?: number;
 	// accepted absolute deviation for integer/number answers (e.g. 0.05); omit for exact match
 	tolerance?: number;
@@ -92,6 +95,7 @@ export async function importTasks(rows: TaskImportRow[]): Promise<ImportResult> 
 				correctAnswer: row.correct_answer,
 				distractors: row.distractors ?? null,
 				hint: row.hint ?? null,
+				why: row.why?.trim() || null,
 				difficulty: row.difficulty ?? null,
 				tolerance: row.tolerance ?? null,
 				contentHash: hash,

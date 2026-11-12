@@ -8,7 +8,8 @@
  *   "illustration_config": { "type": "fraction_bar", "parts": 7 }        // optional
  * }
  *
- * Overwrites existing explanations unconditionally (last-write wins).
+ * Overwrites existing explanation texts unconditionally (last-write wins). An illustration
+ * already stored for the atom is kept unless the row brings its own illustration_config.
  * Unknown atom_ids cause the entire import to fail (atomic).
  */
 
@@ -59,7 +60,7 @@ export async function importExplanations(
 			.update(atoms)
 			.set({
 				explanation: row.explanation.trim(),
-				illustrationConfig: row.illustration_config ?? null
+				...(row.illustration_config ? { illustrationConfig: row.illustration_config } : {})
 			})
 			.where(eq(atoms.id, row.atom_id))
 			.returning({ id: atoms.id });

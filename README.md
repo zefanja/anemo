@@ -72,6 +72,22 @@ docker compose exec app npx drizzle-kit migrate
 docker compose exec app npx tsx scripts/import-graph.ts
 ```
 
+Nach einem Update mit neuen Migrationen, Atomen oder Erklärungen:
+
+```bash
+docker compose exec app node scripts/migrate.js
+docker compose exec app npx tsx scripts/import-graph.ts --update      # füllt auch fehlende Erklärungen
+docker compose exec app npx tsx scripts/import-explanations.ts        # überschreibt alle Erklärungstexte (--missing: nur Lücken)
+```
+
+### Erklärungen und „Warum?"
+
+- **Erklärung zum Thema** (`atoms.explanation`): kurzer Tipp pro Atom, Quelle ist
+  `math-knowledge-graph/explanations.json`. Erscheint vor dem Antworten über „Tipp anzeigen".
+- **„Warum?"** (`tasks.why`): Begründung der konkreten Aufgabe mit ihren eigenen Zahlen. Jeder
+  Generator liefert sie mit (per Test abgesichert); nach einer falschen Antwort steht sie direkt
+  da, nach einer richtigen hinter dem Button „Warum?".
+
 ---
 
 ## Konfiguration
@@ -199,6 +215,7 @@ Aufgaben können als JSON-Array über `/teacher/tasks/import` oder per Script im
     "answer_type":    "fraction",
     "correct_answer": "5/7",
     "hint":           "Gleichnamige Brüche: Zähler addieren, Nenner bleibt.",
+    "why":            "Gleiche Nenner: nur die Zähler zählen, 3 + 2 = 5 Siebtel.",
     "difficulty":     0.3,
     "distractors":    ["4/7", "6/9"]
   }
@@ -212,6 +229,7 @@ Aufgaben können als JSON-Array über `/teacher/tasks/import` oder per Script im
 | `answer_type` | ✓ | `integer` \| `number` \| `fraction` \| `text` |
 | `correct_answer` | ✓ | Brüche als `"3/4"`, Dezimalzahlen mit Punkt |
 | `hint` | – | Hilfetext bei falscher Antwort |
+| `why` | – | Kurze Begründung der Lösung; erscheint nach dem Antworten unter „Warum?“ |
 | `difficulty` | – | Float 0–1 |
 | `tolerance` | – | Erlaubte Abweichung bei `integer`/`number` (z. B. `0.05` bei gerundeten Ergebnissen); ohne Angabe muss die Antwort exakt stimmen |
 | `distractors` | – | Array falscher Antworten |

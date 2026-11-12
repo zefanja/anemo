@@ -1,0 +1,1186 @@
+[
+  {
+    "atom_id": "ageo__abstand_punkt_ebene",
+    "explanation": "Der Abstand ist die Länge des Lots vom Punkt auf die Ebene. Mit der Koordinatenform $n_1 x + n_2 y + n_3 z = d$: $\\text{Abstand} = \\frac{|n_1 p_1 + n_2 p_2 + n_3 p_3 - d|}{|\\vec{n}|}$.\n\nAlternativ: Lotgerade durch P mit Richtung $\\vec{n}$ aufstellen, mit der Ebene schneiden (Lotfußpunkt) und den Abstand der beiden Punkte berechnen."
+  },
+  {
+    "atom_id": "ageo__abstand_punkt_gerade",
+    "explanation": "Gesucht ist der Punkt F auf der Geraden, der P am nächsten liegt (Lotfußpunkt). Dort steht $\\overrightarrow{FP}$ senkrecht auf dem Richtungsvektor.\n\nSchreibe F allgemein mit dem Parameter t, setze das Skalarprodukt $\\overrightarrow{FP} \\cdot \\vec{u} = 0$ und löse nach t. Der Abstand ist dann die Länge von $\\overrightarrow{FP}$."
+  },
+  {
+    "atom_id": "ageo__abstand_windschiefe_geraden",
+    "explanation": "Windschiefe Geraden haben einen kürzesten Abstand – gemessen entlang einer Richtung, die auf beiden Geraden senkrecht steht.\n\nBilde $\\vec{n} = \\vec{u} \\times \\vec{v}$ aus den Richtungsvektoren. Dann ist der Abstand $\\frac{|(\\vec{q} - \\vec{p}) \\cdot \\vec{n}|}{|\\vec{n}|}$, wobei $\\vec{p}$ und $\\vec{q}$ die Stützvektoren sind."
+  },
+  {
+    "atom_id": "ageo__betrag_abstand",
+    "explanation": "Die Länge eines Vektors berechnest du mit dem Pythagoras im Raum: $|\\vec{a}| = \\sqrt{a_1^2 + a_2^2 + a_3^2}$. Für $(2 | 3 | 6)$: $\\sqrt{4 + 9 + 36} = 7$.\n\nDer Abstand zweier Punkte ist die Länge ihres Verbindungsvektors. Teilst du einen Vektor durch seine Länge, entsteht der Einheitsvektor mit Länge 1."
+  },
+  {
+    "atom_id": "ageo__ebene_normalen_koordinatenform",
+    "explanation": "Koordinatenform: $n_1 x + n_2 y + n_3 z = d$. Die Zahlen vor x, y, z bilden den Normalenvektor; d erhältst du, indem du einen Punkt der Ebene einsetzt.\n\nPunktprobe: Koordinaten einsetzen und prüfen. $E\\colon 2x - y + z = 4$ und $P(1 | 0 | 2)$: $2 - 0 + 2 = 4$ ✓ – der Punkt liegt in E."
+  },
+  {
+    "atom_id": "ageo__ebene_parameterform",
+    "explanation": "Eine Ebene: $E\\colon \\vec{x} = \\vec{p} + s \\cdot \\vec{u} + t \\cdot \\vec{v}$. Der Stützvektor führt zu einem Punkt der Ebene, die beiden Spannvektoren spannen sie auf.\n\nAus drei Punkten A, B, C: Stützvektor A, Spannvektoren $\\overrightarrow{AB}$ und $\\overrightarrow{AC}$. Die Spannvektoren dürfen nicht kollinear sein – sonst entsteht nur eine Gerade."
+  },
+  {
+    "atom_id": "ageo__ebenenformen_umwandeln",
+    "explanation": "Von der Parameterform zur Koordinatenform: Normalenvektor aus den Spannvektoren bestimmen (Vektorprodukt), dann den Stützpunkt einsetzen, um d zu berechnen.\n\nZurück: Suche drei Punkte, die die Koordinatengleichung erfüllen (z. B. die Achsenschnittpunkte), und stelle damit die Parameterform auf."
+  },
+  {
+    "atom_id": "ageo__geradengleichung_aufstellen",
+    "explanation": "Eine Gerade im Raum: $g\\colon \\vec{x} = \\vec{p} + t \\cdot \\vec{u}$. Der Stützvektor $\\vec{p}$ führt zu einem Punkt der Geraden, der Richtungsvektor $\\vec{u}$ zeigt, wohin sie läuft.\n\nAus zwei Punkten A und B: Stützvektor ist A, Richtungsvektor ist $\\overrightarrow{AB} = B - A$. Für jedes t ergibt sich ein Punkt der Geraden."
+  },
+  {
+    "atom_id": "ageo__kollinearitaet",
+    "explanation": "Zwei Vektoren sind kollinear (parallel), wenn einer ein Vielfaches des anderen ist. Prüfe, ob in allen drei Koordinaten derselbe Faktor passt.\n\n$(2 | 4 | -6)$ und $(1 | 2 | -3)$: überall Faktor 2 → kollinear. Passt der Faktor in einer Koordinate nicht, sind sie es nicht."
+  },
+  {
+    "atom_id": "ageo__koordinatensystem_raum",
+    "explanation": "Im Raum hat ein Punkt drei Koordinaten: $P(x | y | z)$. Im Schrägbild zeigt die x-Achse schräg nach vorn, die y-Achse nach rechts und die z-Achse nach oben.\n\nZu $P(2 | 3 | 4)$ gehst du 2 nach vorn, 3 nach rechts und 4 nach oben. Punkte mit $z = 0$ liegen in der Bodenebene (xy-Ebene)."
+  },
+  {
+    "atom_id": "ageo__lage_ebene_ebene",
+    "explanation": "Vergleiche die Normalenvektoren. Sind sie kollinear, sind die Ebenen parallel – oder identisch, wenn ein Punkt der einen auch in der anderen liegt.\n\nSonst schneiden sich die Ebenen in einer Geraden. Die Schnittgerade bekommst du, indem du beide Gleichungen als System mit einem freien Parameter löst."
+  },
+  {
+    "atom_id": "ageo__lage_gerade_ebene",
+    "explanation": "Setze die Gerade in die Koordinatenform der Ebene ein – es entsteht eine Gleichung für t.\n\nGenau eine Lösung: Die Gerade durchstößt die Ebene; t eingesetzt liefert den Durchstoßpunkt. Falsche Aussage (z. B. $0 = 5$): parallel. Wahre Aussage ($0 = 0$): Die Gerade liegt in der Ebene."
+  },
+  {
+    "atom_id": "ageo__lage_gerade_gerade",
+    "explanation": "Prüfe zuerst die Richtungsvektoren. Sind sie kollinear, sind die Geraden parallel – oder identisch, wenn ein Punkt der einen auf der anderen liegt.\n\nSonst setze die Geraden gleich: Hat das Gleichungssystem eine Lösung, schneiden sie sich; hat es keine, sind sie windschief – sie laufen im Raum aneinander vorbei."
+  },
+  {
+    "atom_id": "ageo__normalenvektor",
+    "explanation": "Ein Normalenvektor steht senkrecht auf der Ebene, also auf beiden Spannvektoren. Sein Skalarprodukt mit jedem Spannvektor ist 0 – das liefert zwei Gleichungen.\n\nSchneller geht es mit dem Vektorprodukt der Spannvektoren: $\\vec{n} = \\vec{u} \\times \\vec{v}$. Jedes Vielfache von $\\vec{n}$ ist ebenfalls ein Normalenvektor."
+  },
+  {
+    "atom_id": "ageo__punktprobe_gerade",
+    "explanation": "Ein Punkt liegt auf der Geraden, wenn es ein t gibt, das in allen drei Koordinaten passt. Setze den Punkt ein, berechne t aus der ersten Zeile und prüfe es in den beiden anderen.\n\nUmgekehrt liefert jedes eingesetzte t einen Punkt der Geraden – $t = 0$ ergibt den Stützpunkt."
+  },
+  {
+    "atom_id": "ageo__skalarprodukt_winkel",
+    "explanation": "Das Skalarprodukt ist eine Zahl: $\\vec{a} \\cdot \\vec{b} = a_1 b_1 + a_2 b_2 + a_3 b_3$. Ist es 0, stehen die Vektoren senkrecht aufeinander.\n\nDen Winkel berechnest du mit $\\cos \\varphi = \\frac{\\vec{a} \\cdot \\vec{b}}{|\\vec{a}| \\cdot |\\vec{b}|}$. Für $(1 | 2 | 0)$ und $(2 | -1 | 5)$: $2 - 2 + 0 = 0$ – orthogonal."
+  },
+  {
+    "atom_id": "ageo__vektor_addition_skalarmultiplikation",
+    "explanation": "Vektoren addierst du koordinatenweise: $(1 | 2 | 3) + (4 | 0 | -1) = (5 | 2 | 2)$. Geometrisch hängst du die Pfeile aneinander.\n\nBeim Vervielfachen wird jede Koordinate multipliziert: $2 \\cdot (1 | 2 | 3) = (2 | 4 | 6)$. Der Pfeil wird doppelt so lang; ein negativer Faktor dreht die Richtung um."
+  },
+  {
+    "atom_id": "ageo__vektorbegriff_ortsvektor",
+    "explanation": "Ein Vektor beschreibt eine Verschiebung: wie weit es in x-, y- und z-Richtung geht. Der Ortsvektor führt vom Ursprung zu einem Punkt und hat dessen Koordinaten.\n\nDen Verbindungsvektor von A nach B bekommst du mit „Spitze minus Fuß\": $\\overrightarrow{AB} = B - A$. Für $A(1 | 2 | 0)$ und $B(4 | 6 | 2)$ ist das $(3 | 4 | 2)$."
+  },
+  {
+    "atom_id": "ageo__vektorprodukt",
+    "explanation": "Das Vektorprodukt $\\vec{a} \\times \\vec{b}$ ist ein Vektor, der senkrecht auf beiden Vektoren steht – ideal als Normalenvektor.\n\nSeine Länge ist der Flächeninhalt des Parallelogramms, das $\\vec{a}$ und $\\vec{b}$ aufspannen. Die Hälfte davon ist die Fläche des Dreiecks. Probe: Das Skalarprodukt mit $\\vec{a}$ und mit $\\vec{b}$ muss 0 ergeben."
+  },
+  {
+    "atom_id": "ageo__vernetzung_geometrie_analysis",
+    "explanation": "Viele Aufgaben verbinden Geometrie und Analysis. Den kürzesten Abstand eines Punktes zu einem Graphen findest du, indem du die Abstandsfunktion aufstellst und ihr Minimum mit der Ableitung bestimmst.\n\nBei einer Schar steht ein Parameter in der Gleichung: Behandle ihn wie eine feste Zahl und rechne wie gewohnt."
+  },
+  {
+    "atom_id": "ageo__winkel_zwischen_objekten",
+    "explanation": "Zwischen zwei Geraden nimmst du die Richtungsvektoren, zwischen zwei Ebenen die Normalenvektoren: $\\cos \\varphi = \\frac{|\\vec{u} \\cdot \\vec{v}|}{|\\vec{u}| \\cdot |\\vec{v}|}$. Der Betrag sorgt für einen Winkel bis 90°.\n\nZwischen Gerade und Ebene steht stattdessen der Sinus: $\\sin \\varphi = \\frac{|\\vec{u} \\cdot \\vec{n}|}{|\\vec{u}| \\cdot |\\vec{n}|}$, weil der Normalenvektor senkrecht zur Ebene steht."
+  },
+  {
+    "atom_id": "algebra__aequivalenzumformung_prinzip",
+    "explanation": "Eine Gleichung ist wie eine Waage im Gleichgewicht: Was du links tust, musst du auch rechts tun. Aus $x + 4 = 9$ wird mit $-4$ auf beiden Seiten $x = 5$.\n\nDu wählst immer die Umkehroperation: $+4$ wird mit $-4$ entfernt, $\\cdot 3$ mit $:3$."
+  },
+  {
+    "atom_id": "algebra__antiproportionale_zuordnung",
+    "explanation": "Antiproportional heißt: je mehr, desto weniger – doppelt so viele Arbeiter brauchen halb so lange. Das Produkt bleibt gleich.\n\n3 Arbeiter brauchen 8 Tage: Gesamtarbeit $3 \\cdot 8 = 24$. 6 Arbeiter brauchen $24 : 6 = 4$ Tage."
+  },
+  {
+    "atom_id": "algebra__ausklammern_faktorisieren",
+    "explanation": "Ausklammern ist Ausmultiplizieren rückwärts: Suche den größten gemeinsamen Faktor und teile jedes Glied dadurch. $12x + 18 = 6(2x + 3)$.\n\nProbe durch Ausmultiplizieren: $6 \\cdot 2x + 6 \\cdot 3$ ergibt wieder $12x + 18$."
+  },
+  {
+    "atom_id": "algebra__ausmultiplizieren_distributiv",
+    "explanation": "Der Faktor vor der Klammer wird mit jedem Glied in der Klammer multipliziert: $3(x + 4) = 3x + 12$.\n\nHäufiger Fehler: nur das erste Glied multiplizieren. Bei zwei Klammern rechnest du jedes mit jedem: $(x + 2)(x + 3) = x^2 + 3x + 2x + 6$."
+  },
+  {
+    "atom_id": "algebra__binomische_formeln_rueckwaerts",
+    "explanation": "Erkenne das Muster und gehe rückwärts: $x^2 - 49$ ist eine Differenz zweier Quadrate, also $(x + 7)(x - 7)$.\n\n$x^2 + 6x + 9$: Die 9 ist $3^2$ und $6x = 2 \\cdot 3 \\cdot x$ – also $(x + 3)^2$. Ziehe die Wurzel aus der letzten Zahl und prüfe das mittlere Glied."
+  },
+  {
+    "atom_id": "algebra__binomische_formeln_vorwaerts",
+    "explanation": "$(a + b)^2 = a^2 + 2ab + b^2$, $(a - b)^2 = a^2 - 2ab + b^2$, $(a + b)(a - b) = a^2 - b^2$.\n\nBeispiel: $(x + 5)^2 = x^2 + 10x + 25$. Vergiss das mittlere Glied $2ab$ nicht – es entsteht, weil $5x$ zweimal vorkommt."
+  },
+  {
+    "atom_id": "algebra__bogenmass",
+    "explanation": "Das Bogenmaß misst einen Winkel als Bogenlänge am Einheitskreis. Der volle Kreis ist $360° = 2\\pi$, also $180° = \\pi$.\n\nUmrechnen: Grad mal $\\frac{\\pi}{180}$ ergibt Bogenmaß, z. B. $90° = \\frac{\\pi}{2}$ und $60° = \\frac{\\pi}{3}$. Zurück mal $\\frac{180}{\\pi}$."
+  },
+  {
+    "atom_id": "algebra__definitions_wertebereich",
+    "explanation": "Der Definitionsbereich sagt, welche x du einsetzen darfst. Zwei Verbote: nicht durch 0 teilen und keine Wurzel aus negativen Zahlen. Bei $\\sqrt{x - 3}$ muss $x \\geq 3$ sein.\n\nDer Wertebereich sagt, welche y herauskommen können. $x^2 + 2$ ist nie kleiner als 2, also $y \\geq 2$."
+  },
+  {
+    "atom_id": "algebra__einheitskreis",
+    "explanation": "Am Einheitskreis (Radius 1) gehört zu jedem Winkel ein Punkt: Seine x-Koordinate ist der Kosinus, seine y-Koordinate der Sinus.\n\nSo bekommen auch Winkel über 90° Werte. Die Vorzeichen folgen dem Quadranten: Bei 150° liegt der Punkt links oben, also ist $\\cos$ negativ und $\\sin$ positiv."
+  },
+  {
+    "atom_id": "algebra__exponentialfunktion_graph",
+    "explanation": "Bei $y = a \\cdot b^x$ ist $a$ der Startwert (bei $x = 0$) und $b$ der Faktor pro Schritt. Für $y = 3 \\cdot 2^x$: 3, 6, 12, 24 … – jedes Mal das Doppelte.\n\nIst $b > 1$, wächst der Graph immer schneller; bei $0 < b < 1$ fällt er und nähert sich der x-Achse, ohne sie zu erreichen."
+  },
+  {
+    "atom_id": "algebra__exponentialgleichungen",
+    "explanation": "Steht x im Exponenten, bringe beide Seiten auf dieselbe Basis: $2^x = 32 = 2^5$, also $x = 5$.\n\nGeht das nicht, logarithmiere: $3^x = 20$ → $x = \\frac{\\log 20}{\\log 3} \\approx 2{,}73$. Isoliere vorher die Potenz, z. B. erst durch den Startwert teilen."
+  },
+  {
+    "atom_id": "algebra__exponentielles_wachstum_modellieren",
+    "explanation": "Linear: In gleichen Zeitschritten kommt immer derselbe Betrag dazu (+5, +5, +5). Exponentiell: Es wird immer mit demselben Faktor multipliziert (·2, ·2, ·2).\n\nDie Verdopplungszeit ist bei exponentiellem Wachstum immer gleich lang, ebenso die Halbwertszeit beim Zerfall. Modell: $y = a \\cdot b^x$ mit Startwert a."
+  },
+  {
+    "atom_id": "algebra__folgen_grenzwert",
+    "explanation": "Eine Folge ist monoton wachsend, wenn jedes Glied größer ist als das vorige, und beschränkt, wenn sie eine Grenze nie überschreitet.\n\nDer Grenzwert ist die Zahl, der die Glieder beliebig nahe kommen: $\\frac{1}{n}$ liefert 1, $\\frac{1}{2}$, $\\frac{1}{3}$ … und nähert sich 0, ohne sie je zu erreichen."
+  },
+  {
+    "atom_id": "algebra__formeln_umstellen",
+    "explanation": "Behandle die Formel wie eine Gleichung: Die gesuchte Größe soll allein stehen. Mache dazu Schritt für Schritt rückgängig, was mit ihr passiert.\n\n$A = l \\cdot b$ nach $b$: beide Seiten durch $l$ → $b = A : l$. Bei $u = 2a + 2b$ nach $a$: erst $-2b$, dann $:2$."
+  },
+  {
+    "atom_id": "algebra__funktion_darstellungsformen",
+    "explanation": "Eine Funktion kann als Gleichung, Tabelle, Graph oder Text gegeben sein. Aus der Gleichung bekommst du Werte durch Einsetzen: Für $f(x) = 2x + 3$ ist $f(4) = 2 \\cdot 4 + 3 = 11$.\n\nDas Paar $(4 | 11)$ steht dann in der Tabelle und ist ein Punkt des Graphen."
+  },
+  {
+    "atom_id": "algebra__funktion_eindeutige_zuordnung",
+    "explanation": "Eine Funktion ordnet jedem x genau ein y zu. Prüfe: Kommt ein x-Wert zweimal mit verschiedenen y-Werten vor? Dann ist es keine Funktion.\n\nErlaubt ist, dass verschiedene x denselben y-Wert haben – wie bei $(1 | 4)$ und $(2 | 4)$."
+  },
+  {
+    "atom_id": "algebra__ganzrationale_grad_verlauf",
+    "explanation": "Der Grad ist der höchste Exponent von x. Für große $|x|$ bestimmt allein dieses höchste Glied den Verlauf: Bei $f(x) = 2x^3 - 5x$ verhält sich der Graph wie $2x^3$ – von links unten nach rechts oben.\n\nSymmetrie liest du an den Exponenten ab: nur gerade → achsensymmetrisch zur y-Achse, nur ungerade → punktsymmetrisch zum Ursprung."
+  },
+  {
+    "atom_id": "algebra__ganzrationale_nullstellen_ausklammern",
+    "explanation": "Fehlt die Zahl ohne x, klammere x aus: $x^3 - 4x^2 + 3x = x(x^2 - 4x + 3)$.\n\nEin Produkt ist 0, wenn ein Faktor 0 ist: also $x = 0$ oder $x^2 - 4x + 3 = 0$. Die Klammer löst du mit der pq-Formel: $x = 1$ und $x = 3$."
+  },
+  {
+    "atom_id": "algebra__ganzrationale_nullstellen_substitution",
+    "explanation": "Kommen nur $x^4$ und $x^2$ vor, ersetze $x^2$ durch z: Aus $x^4 - 5x^2 + 4 = 0$ wird $z^2 - 5z + 4 = 0$ mit $z = 1$ und $z = 4$.\n\nDann zurück: $x^2 = 1$ gibt $x = \\pm 1$, $x^2 = 4$ gibt $x = \\pm 2$. Ein negatives z liefert keine Lösung."
+  },
+  {
+    "atom_id": "algebra__gleichungen_aus_sachtexten",
+    "explanation": "Lege fest, was x ist, und übersetze den Text Stück für Stück in eine Gleichung. „Das Dreifache einer Zahl, vermehrt um 4, ergibt 19\": $3x + 4 = 19$, also $x = 5$.\n\nPrüfe am Ende am Text, nicht nur an der Gleichung, ob die Antwort passt."
+  },
+  {
+    "atom_id": "algebra__gleichungen_inhaltlich_loesen",
+    "explanation": "Frage dich: Welche Zahl passt? Bei $x + 5 = 12$ rechnest du rückwärts: $12 - 5 = 7$.\n\nJede Rechenart hat ihre Umkehrung: Plus ↔ Minus, Mal ↔ Geteilt. Mache die Probe, indem du dein Ergebnis einsetzt."
+  },
+  {
+    "atom_id": "algebra__irrationale_reelle_zahlen",
+    "explanation": "Rationale Zahlen lassen sich als Bruch schreiben – ihre Dezimaldarstellung bricht ab oder ist periodisch. Irrationale Zahlen wie $\\sqrt{2}$ oder $\\pi$ haben unendlich viele Nachkommastellen ohne Muster.\n\nAufpassen: $\\sqrt{16} = 4$ ist rational. Nur Wurzeln aus Nicht-Quadratzahlen sind irrational."
+  },
+  {
+    "atom_id": "algebra__lgs_additionsverfahren",
+    "explanation": "Addiere oder subtrahiere die Gleichungen so, dass eine Variable wegfällt. Aus $3x + 2y = 16$ und $x + 2y = 8$ wird durch Subtrahieren $2x = 8$, also $x = 4$.\n\nDann x einsetzen und y berechnen. Haben die Variablen noch nicht die gleiche Zahl davor, multipliziere erst eine Gleichung."
+  },
+  {
+    "atom_id": "algebra__lgs_einsetzungsverfahren",
+    "explanation": "Ist eine Gleichung schon nach y aufgelöst, setzt du diesen Term in die andere ein. $y = 2x + 1$ in $3x + y = 11$: $3x + (2x + 1) = 11$ → $5x = 10$ → $x = 2$.\n\nDanach x einsetzen und y berechnen: $y = 5$."
+  },
+  {
+    "atom_id": "algebra__lgs_gleichsetzungsverfahren",
+    "explanation": "Sind beide Gleichungen nach y aufgelöst, setzt du die rechten Seiten gleich: $2x + 1 = x + 4$ → $x = 3$.\n\nDann x in eine der Gleichungen einsetzen: $y = 2 \\cdot 3 + 1 = 7$. Gleiches y, also müssen auch die Terme gleich sein."
+  },
+  {
+    "atom_id": "algebra__lgs_grafisch",
+    "explanation": "Jede Gleichung beschreibt eine Gerade. Die Lösung des Systems ist der Punkt, der auf beiden Geraden liegt – ihr Schnittpunkt.\n\nLies ihn ab und prüfe: Seine Koordinaten müssen beide Gleichungen erfüllen."
+  },
+  {
+    "atom_id": "algebra__lineare_funktion_gleichung_aufstellen",
+    "explanation": "Du brauchst Steigung $m$ und y-Achsenabschnitt $n$ für $y = mx + n$.\n\nAus zwei Punkten: erst $m$ berechnen, dann einen Punkt einsetzen und $n$ bestimmen. Für $(1 | 5)$ und $(3 | 9)$: $m = 2$; aus $5 = 2 \\cdot 1 + n$ folgt $n = 3$, also $y = 2x + 3$."
+  },
+  {
+    "atom_id": "algebra__lineare_funktion_graph_zeichnen",
+    "explanation": "Ein Punkt liegt auf dem Graphen, wenn seine Koordinaten die Gleichung erfüllen. Für $f(x) = 2x - 1$: $x = 3$ einsetzen ergibt 5, also liegt $(3 | 5)$ darauf.\n\nZum Zeichnen reichen zwei Punkte – oder du startest bei $n$ auf der y-Achse und gehst mit dem Steigungsdreieck weiter."
+  },
+  {
+    "atom_id": "algebra__lineare_funktion_nullstelle",
+    "explanation": "An der Nullstelle schneidet der Graph die x-Achse – dort ist $y = 0$. Setze den Funktionsterm gleich 0 und löse nach x auf.\n\n$f(x) = 2x - 6$: $2x - 6 = 0$ → $2x = 6$ → $x = 3$."
+  },
+  {
+    "atom_id": "algebra__lineare_funktion_steigung_achsenabschnitt",
+    "explanation": "In $y = mx + n$ ist $m$ die Steigung (Zahl vor x) und $n$ der y-Achsenabschnitt (Zahl ohne x). Bei $y = 2x - 3$ ist $m = 2$ und $n = -3$.\n\n$m$ sagt: 1 nach rechts, $m$ nach oben. $n$ sagt, wo die Gerade die y-Achse schneidet. Steht nur $x$ da, ist $m = 1$."
+  },
+  {
+    "atom_id": "algebra__lineare_gleichung_klammern_brueche",
+    "explanation": "Löse zuerst Klammern auf: $2(x + 3) = 14$ wird zu $2x + 6 = 14$, dann wie gewohnt: $x = 4$.\n\nEinen Bruch wirst du los, indem du mit dem Nenner multiplizierst: $\\frac{x}{3} + 2 = 6$ → $\\frac{x}{3} = 4$ → $x = 12$."
+  },
+  {
+    "atom_id": "algebra__lineare_gleichung_sonderfaelle",
+    "explanation": "Fällt beim Umformen das x weg, schau, was übrig bleibt. Eine wahre Aussage wie $6 = 6$ bedeutet: Jede Zahl ist Lösung (unendlich viele). Eine falsche wie $3 = 4$ bedeutet: keine Lösung.\n\nBleibt $x = \\text{Zahl}$ stehen, gibt es genau eine Lösung."
+  },
+  {
+    "atom_id": "algebra__lineare_gleichung_variablen_beidseitig",
+    "explanation": "Bringe alle x auf eine Seite und alle Zahlen auf die andere. $5x + 2 = 3x + 10$: $-3x$ ergibt $2x + 2 = 10$, $-2$ ergibt $2x = 8$, $:2$ ergibt $x = 4$.\n\nZiehe am besten das kleinere x-Glied ab, dann bleibt x positiv."
+  },
+  {
+    "atom_id": "algebra__lineare_gleichung_zweischritt",
+    "explanation": "Erst die Zahl ohne x wegbringen, dann durch die Zahl vor x teilen. $3x + 5 = 20$: $-5$ ergibt $3x = 15$, dann $:3$ ergibt $x = 5$.\n\nMache die Probe: $3 \\cdot 5 + 5 = 20$ ✓."
+  },
+  {
+    "atom_id": "algebra__lineare_ungleichungen",
+    "explanation": "Forme um wie bei einer Gleichung: $2x + 3 > 11$ → $2x > 8$ → $x > 4$.\n\nEine Besonderheit: Wenn du mit einer negativen Zahl multiplizierst oder durch sie teilst, dreht sich das Zeichen um. $-2x > 6$ wird zu $x < -3$."
+  },
+  {
+    "atom_id": "algebra__logarithmengesetze",
+    "explanation": "Aus Mal wird Plus, aus Geteilt wird Minus, und ein Exponent darf nach vorn: $\\log(u \\cdot v) = \\log u + \\log v$, $\\log\\frac{u}{v} = \\log u - \\log v$, $\\log(u^r) = r \\cdot \\log u$.\n\nBeispiel: $\\log_2 (8 \\cdot 4) = 3 + 2 = 5$. Für Summen gibt es kein Gesetz!"
+  },
+  {
+    "atom_id": "algebra__logarithmus_begriff",
+    "explanation": "Der Logarithmus fragt nach dem Exponenten: $\\log_2 8$ bedeutet „2 hoch wie viel ergibt 8?\" – Antwort 3, denn $2^3 = 8$.\n\nEbenso $\\log_{10} 1000 = 3$ und $\\log_3 \\frac{1}{9} = -2$. Der Logarithmus kehrt das Potenzieren um."
+  },
+  {
+    "atom_id": "algebra__normalparabel_streckung",
+    "explanation": "$y = x^2 + c$ verschiebt die Normalparabel um c nach oben (bei Minus nach unten). $y = (x - c)^2$ verschiebt um c nach rechts, $(x + c)^2$ nach links – also entgegen dem Vorzeichen.\n\nEin Faktor vor $x^2$ ändert die Form: größer als 1 macht die Parabel schmaler, zwischen 0 und 1 breiter."
+  },
+  {
+    "atom_id": "algebra__parabel_nullstellen",
+    "explanation": "Nullstellen sind die x-Werte mit $f(x) = 0$. In faktorisierter Form liest du sie ab: $(x - 2)(x + 5)$ hat die Nullstellen 2 und $-5$.\n\nIn der allgemeinen Form setzt du $x^2 + px + q = 0$ und nutzt die pq-Formel."
+  },
+  {
+    "atom_id": "algebra__parametereinfluss_graphen",
+    "explanation": "Jede Zahl in der Funktionsgleichung verändert den Graphen auf ihre Art. Bei $y = a \\cdot x^2$: $a > 1$ schmaler, $0 < a < 1$ breiter, $a < 0$ nach unten geöffnet.\n\n$+c$ außen verschiebt nach oben, $(x - c)$ innen nach rechts. Bei Geraden $y = mx + n$: $m$ kippt, $n$ hebt an."
+  },
+  {
+    "atom_id": "algebra__potenzen_negative_exponenten",
+    "explanation": "Ein negativer Exponent bedeutet Kehrwert: $2^{-3} = \\frac{1}{2^3} = \\frac{1}{8}$.\n\nDas Ergebnis ist nicht negativ! Die Reihe $2^2 = 4$, $2^1 = 2$, $2^0 = 1$, $2^{-1} = \\frac{1}{2}$ zeigt: Bei jedem Schritt wird durch 2 geteilt."
+  },
+  {
+    "atom_id": "algebra__potenzen_rationale_exponenten",
+    "explanation": "Ein Bruch im Exponenten bedeutet Wurzel: $9^{\\frac{1}{2}} = \\sqrt{9} = 3$ und $8^{\\frac{1}{3}} = \\sqrt[3]{8} = 2$.\n\nDer Nenner ist die Wurzel, der Zähler die Potenz: $8^{\\frac{2}{3}} = (\\sqrt[3]{8})^2 = 2^2 = 4$."
+  },
+  {
+    "atom_id": "algebra__potenzfunktionen_natuerliche_exponenten",
+    "explanation": "Bei $y = x^n$ entscheidet der Exponent: Ist n gerade ($x^2$, $x^4$), sieht der Graph wie eine Parabel aus und ist symmetrisch zur y-Achse. Ist n ungerade ($x^3$, $x^5$), kommt er von links unten, geht nach rechts oben und ist punktsymmetrisch zum Ursprung.\n\nAlle Graphen gehen durch $(0 | 0)$ und $(1 | 1)$. Je größer n, desto flacher nahe 0 und desto steiler außen."
+  },
+  {
+    "atom_id": "algebra__potenzfunktionen_negative_exponenten",
+    "explanation": "$y = x^{-1} = \\frac{1}{x}$ ist eine Hyperbel. Für $x = 0$ ist sie nicht definiert, denn durch 0 kann man nicht teilen.\n\nDer Graph schmiegt sich an beide Achsen an (Asymptoten), ohne sie zu berühren: Für große x wird $\\frac{1}{x}$ winzig, nahe 0 riesig. Bei $x^{-2}$ liegen beide Äste oberhalb der x-Achse."
+  },
+  {
+    "atom_id": "algebra__potenzgesetz_gleiche_basis",
+    "explanation": "Bei gleicher Basis werden beim Multiplizieren die Exponenten addiert: $a^3 \\cdot a^2 = a^5$ – drei Faktoren und zwei Faktoren sind fünf Faktoren.\n\nBeim Dividieren werden sie subtrahiert: $a^5 : a^2 = a^3$, weil sich zwei Faktoren wegkürzen."
+  },
+  {
+    "atom_id": "algebra__potenzgesetz_potenz_einer_potenz",
+    "explanation": "Wird eine Potenz potenziert, multiplizierst du die Exponenten: $(a^3)^2 = a^3 \\cdot a^3 = a^6$.\n\nNicht verwechseln mit $a^3 \\cdot a^2 = a^5$ – dort werden die Exponenten addiert."
+  },
+  {
+    "atom_id": "algebra__produkte_von_termen",
+    "explanation": "Multipliziere Zahlen mit Zahlen und Variablen mit Variablen: $3a \\cdot 4b = 12ab$.\n\nGleiche Variablen werden zur Potenz: $2x \\cdot 5x = 10x^2$ und $x^3 \\cdot x = x^4$ (ein Faktor x mehr)."
+  },
+  {
+    "atom_id": "algebra__proportionale_zuordnung",
+    "explanation": "Proportional heißt: doppelt so viel → doppelter Preis. Rechne über die Einheit (Dreisatz): 4 Hefte kosten 12 €, also kostet 1 Heft 3 € und 7 Hefte kosten 21 €.\n\nDer Wert pro Stück bleibt immer gleich."
+  },
+  {
+    "atom_id": "algebra__quadratische_ergaenzung",
+    "explanation": "Mache aus $x^2 + 6x$ ein Binomquadrat: Halbiere die Zahl vor x und quadriere sie – $3^2 = 9$. Dann ist $x^2 + 6x + 9 = (x + 3)^2$.\n\nSteht schon eine andere Zahl da, gleichst du aus: $x^2 + 6x + 11 = (x + 3)^2 + 2$."
+  },
+  {
+    "atom_id": "algebra__quadratische_gleichung_diskriminante",
+    "explanation": "Die Diskriminante $D = \\left(\\frac{p}{2}\\right)^2 - q$ ist die Zahl unter der Wurzel der pq-Formel. Sie verrät die Anzahl der Lösungen:\n\n$D > 0$: zwei Lösungen. $D = 0$: genau eine. $D < 0$: keine, weil man aus einer negativen Zahl keine Wurzel ziehen kann."
+  },
+  {
+    "atom_id": "algebra__quadratische_gleichung_faktorisiert",
+    "explanation": "Ein Produkt ist 0, wenn einer der Faktoren 0 ist. Bei $(x - 3)(x + 5) = 0$ setzt du jede Klammer gleich 0: $x = 3$ oder $x = -5$.\n\nAchte auf das Vorzeichen: Die Lösung ist jeweils die Gegenzahl der Zahl in der Klammer."
+  },
+  {
+    "atom_id": "algebra__quadratische_gleichung_loesungsformel",
+    "explanation": "Für $x^2 + px + q = 0$ gilt die pq-Formel: $x = -\\frac{p}{2} \\pm \\sqrt{\\left(\\frac{p}{2}\\right)^2 - q}$.\n\nLies $p$ und $q$ mit Vorzeichen ab. Bei $x^2 - 6x + 5 = 0$ ist $p = -6$, $q = 5$: $x = 3 \\pm \\sqrt{9 - 5} = 3 \\pm 2$, also 1 und 5."
+  },
+  {
+    "atom_id": "algebra__quadratische_gleichung_reinquadratisch",
+    "explanation": "Bei $x^2 = 25$ gibt es zwei Lösungen: $x = 5$ und $x = -5$, denn auch $(-5)^2 = 25$.\n\nSteht eine Zahl vor $x^2$, teile zuerst: $3x^2 = 48$ → $x^2 = 16$. Ist die rechte Seite negativ, gibt es keine Lösung – ein Quadrat ist nie negativ."
+  },
+  {
+    "atom_id": "algebra__quadratwurzel_begriff",
+    "explanation": "Die Wurzel aus einer Zahl ist die positive Zahl, die mit sich selbst multipliziert diese Zahl ergibt: $\\sqrt{49} = 7$, denn $7 \\cdot 7 = 49$.\n\nWurzelziehen ist die Umkehrung des Quadrierens. Lerne die Quadratzahlen bis $12^2 = 144$."
+  },
+  {
+    "atom_id": "algebra__scheitelform_umwandeln",
+    "explanation": "Von der Scheitelform zur allgemeinen Form: Binom ausmultiplizieren und zusammenfassen. $(x - 3)^2 + 2 = x^2 - 6x + 9 + 2 = x^2 - 6x + 11$.\n\nVergiss das Quadrat der Zahl ($3^2 = 9$) und das mittlere Glied nicht."
+  },
+  {
+    "atom_id": "algebra__scheitelpunktform",
+    "explanation": "Aus $f(x) = a(x - d)^2 + e$ liest du den Scheitelpunkt $S(d | e)$ direkt ab. Bei $(x - 2)^2 + 3$ ist $S(2 | 3)$.\n\nAchtung beim Vorzeichen in der Klammer: $(x + 4)^2 - 1$ hat den Scheitel bei $(-4 | -1)$."
+  },
+  {
+    "atom_id": "algebra__sinusfunktion_graph",
+    "explanation": "Die Sinuskurve schwingt zwischen $-1$ und 1 und wiederholt sich nach $2\\pi$ (360°). Sie startet in $(0 | 0)$, hat Nullstellen bei $0, \\pi, 2\\pi$ … und ihr Maximum bei $\\frac{\\pi}{2}$.\n\nDie Kosinuskurve sieht genauso aus, ist aber um $\\frac{\\pi}{2}$ nach links verschoben und startet bei $(0 | 1)$."
+  },
+  {
+    "atom_id": "algebra__sinusfunktion_parameter",
+    "explanation": "Bei $y = a \\cdot \\sin(bx + c) + d$ hat jeder Parameter eine Aufgabe: $a$ ist die Amplitude (Höhe des Ausschlags), $d$ verschiebt nach oben oder unten.\n\n$b$ ändert die Periode auf $\\frac{2\\pi}{b}$ – bei $b = 2$ schwingt die Kurve doppelt so schnell. $c$ verschiebt entlang der x-Achse."
+  },
+  {
+    "atom_id": "algebra__steigung_aus_zwei_punkten",
+    "explanation": "Die Steigung ist Höhenunterschied durch Seitenunterschied: $m = \\frac{y_2 - y_1}{x_2 - x_1}$. Für $P(1 | 2)$ und $Q(3 | 8)$: $m = \\frac{8 - 2}{3 - 1} = 3$.\n\nZiehe oben und unten in derselben Reihenfolge ab. Fällt die Gerade, wird m negativ."
+  },
+  {
+    "atom_id": "algebra__summen_multiplizieren",
+    "explanation": "Jedes Glied der ersten Klammer wird mit jedem Glied der zweiten multipliziert: $(x + 2)(x + 5) = x^2 + 5x + 2x + 10 = x^2 + 7x + 10$.\n\nDie beiden x-Glieder fasst du zusammen. Achte auf Vorzeichen: $(x + 2)(x - 5)$ liefert $-5x + 2x = -3x$."
+  },
+  {
+    "atom_id": "algebra__terme_zusammenfassen",
+    "explanation": "Nur gleichartige Glieder lassen sich zusammenfassen – wie 3 Äpfel und 4 Äpfel: $3x + 4x = 7x$.\n\nVerschiedene Variablen bleiben getrennt: $5a + 2b - 3a = 2a + 2b$. Äpfel und Birnen kann man nicht verrechnen."
+  },
+  {
+    "atom_id": "algebra__termwert_berechnen",
+    "explanation": "Setze die Zahl überall für die Variable ein und rechne aus. $3x - 2$ für $x = 4$: $3 \\cdot 4 - 2 = 10$.\n\nNegative Zahlen setzt du in Klammern: Für $x = -2$ ist $x^2 = (-2)^2 = 4$. Erst potenzieren, dann Punkt vor Strich."
+  },
+  {
+    "atom_id": "algebra__umkehrfunktion",
+    "explanation": "Die Umkehrfunktion macht rückgängig, was die Funktion tut. Rechnerisch: Gleichung nach x auflösen, dann x und y tauschen. Aus $y = 2x + 3$ wird $y = \\frac{x - 3}{2}$.\n\nIm Bild wird der Graph an der Geraden $y = x$ gespiegelt. Umkehrbar ist eine Funktion nur, wenn jeder y-Wert genau einmal vorkommt – bei $x^2$ muss man deshalb auf $x \\geq 0$ einschränken."
+  },
+  {
+    "atom_id": "algebra__variablenbegriff",
+    "explanation": "Eine Variable ist ein Platzhalter für eine Zahl, die man (noch) nicht kennt. Kostet ein Heft $a$ Euro, dann kosten 5 Hefte $5 \\cdot a$, kurz $5a$.\n\nÜbersetze den Text: „je\" und „pro\" bedeuten Mal, „jünger\" und „weniger\" bedeuten Minus ($x - 3$)."
+  },
+  {
+    "atom_id": "algebra__verhaeltnisgleichungen",
+    "explanation": "Sind zwei Brüche gleich, darfst du über Kreuz multiplizieren: $\\frac{x}{12} = \\frac{2}{3}$ → $3x = 24$ → $x = 8$.\n\nSteht x im Nenner, geht es genauso: $\\frac{4}{6} = \\frac{10}{x}$ → $4x = 60$ → $x = 15$."
+  },
+  {
+    "atom_id": "algebra__verkettung_verknuepfung",
+    "explanation": "Funktionen kann man addieren, multiplizieren oder dividieren, z. B. $\\tan x = \\frac{\\sin x}{\\cos x}$.\n\nVerketten heißt nacheinander ausführen: Bei $f(g(x))$ rechnest du erst $g$, dann $f$. Mit $g(x) = x + 1$ und $f(x) = x^2$ ist $f(g(x)) = (x + 1)^2$ – die Reihenfolge ist nicht egal, denn $g(f(x)) = x^2 + 1$."
+  },
+  {
+    "atom_id": "algebra__wachstumsfaktor",
+    "explanation": "Eine Zunahme um 5 % bedeutet: mal 1,05. Eine Abnahme um 5 % bedeutet: mal 0,95. Der Wachstumsfaktor ist also $1 \\pm \\frac{p}{100}$.\n\nWächst etwas mehrmals hintereinander, multiplizierst du mehrmals: 200 € bei 5 % nach 3 Jahren sind $200 \\cdot 1{,}05^3$."
+  },
+  {
+    "atom_id": "algebra__wurzelfunktionen",
+    "explanation": "$y = \\sqrt{x}$ ist nur für $x \\geq 0$ definiert und liefert nur Werte $\\geq 0$. Der Graph startet in $(0 | 0)$ und steigt immer langsamer: $\\sqrt{4} = 2$, $\\sqrt{9} = 3$.\n\nEr ist die an der Geraden $y = x$ gespiegelte halbe Normalparabel – Wurzelziehen kehrt das Quadrieren um."
+  },
+  {
+    "atom_id": "algebra__wurzelgleichungen",
+    "explanation": "Steht x unter der Wurzel, quadrierst du beide Seiten: $\\sqrt{x + 3} = 4$ → $x + 3 = 16$ → $x = 13$.\n\nMache immer die Probe – beim Quadrieren können Scheinlösungen entstehen: $\\sqrt{13 + 3} = 4$ ✓."
+  },
+  {
+    "atom_id": "algebra__wurzelterme_umformen",
+    "explanation": "Teilweises Wurzelziehen: Zerlege die Zahl in eine Quadratzahl mal Rest. $\\sqrt{50} = \\sqrt{25 \\cdot 2} = 5\\sqrt{2}$.\n\nSuche dafür den größten quadratischen Teiler (4, 9, 16, 25, 36 …)."
+  },
+  {
+    "atom_id": "algebra__zahlenfolgen",
+    "explanation": "Finde die Regel zwischen den Gliedern. Kommt immer dieselbe Zahl dazu, ist die Folge arithmetisch (3, 7, 11 …: plus 4). Wird immer mit derselben Zahl multipliziert, ist sie geometrisch (2, 6, 18 …: mal 3).\n\nMit einer Bildungsvorschrift setzt du die Platznummer ein: $a_n = 2 + (n - 1) \\cdot 3$ ergibt $a_5 = 14$."
+  },
+  {
+    "atom_id": "algebra__zuordnungen",
+    "explanation": "Eine Zuordnung verbindet Werte paarweise, z. B. Anzahl → Preis. Sie ist eine Funktion, wenn zu jedem x genau ein y gehört.\n\nKommt ein x mit zwei verschiedenen y vor, ist es keine Funktion. Dass zwei verschiedene x denselben y-Wert haben, ist dagegen erlaubt."
+  },
+  {
+    "atom_id": "analysis__ableitung_e_funktion",
+    "explanation": "Die e-Funktion ist ihre eigene Ableitung: $(e^x)' = e^x$. An jeder Stelle ist die Steigung so groß wie der Funktionswert.\n\nEin Faktor bleibt erhalten: $(3e^x)' = 3e^x$."
+  },
+  {
+    "atom_id": "analysis__ableitung_ln",
+    "explanation": "Die Ableitung des natürlichen Logarithmus ist $(\\ln x)' = \\frac{1}{x}$ (für $x > 0$).\n\nDer Graph von $\\ln x$ steigt immer, aber immer langsamer: Bei $x = 1$ ist die Steigung 1, bei $x = 10$ nur noch 0,1."
+  },
+  {
+    "atom_id": "analysis__ableitung_sin_cos",
+    "explanation": "$(\\sin x)' = \\cos x$ und $(\\cos x)' = -\\sin x$. Achte auf das Minus beim Kosinus.\n\nZur Kontrolle am Graphen: Bei $x = 0$ steigt die Sinuskurve am stärksten – und $\\cos 0 = 1$. An ihrem Hochpunkt ist die Steigung 0, dort hat der Kosinus eine Nullstelle."
+  },
+  {
+    "atom_id": "analysis__ableitungsfunktion_graphisch",
+    "explanation": "Die Ableitungsfunktion $f'$ gibt zu jedem x die Steigung des Graphen von f an. Wo f steigt, liegt $f'$ über der x-Achse; wo f fällt, darunter.\n\nAn Hoch- und Tiefpunkten von f ist die Steigung 0 – dort hat $f'$ eine Nullstelle. Je steiler f, desto weiter ist $f'$ von 0 entfernt."
+  },
+  {
+    "atom_id": "analysis__e_funktion_ln",
+    "explanation": "Die eulersche Zahl $e \\approx 2{,}718$ ist die Basis der natürlichen Exponentialfunktion $e^x$. Ihre Umkehrung ist der natürliche Logarithmus: $\\ln x$ fragt „e hoch wie viel ergibt x?\".\n\nDamit löst du Gleichungen: $e^x = 5$ → $x = \\ln 5$, und $\\ln x = 2$ → $x = e^2$. Merke: $\\ln 1 = 0$ und $\\ln e = 1$."
+  },
+  {
+    "atom_id": "analysis__extremstellen_hinreichende_bedingung",
+    "explanation": "Setze die Kandidaten aus $f'(x) = 0$ in die zweite Ableitung ein: $f''(x) < 0$ bedeutet Hochpunkt, $f''(x) > 0$ Tiefpunkt.\n\nIst $f''(x) = 0$, prüfe den Vorzeichenwechsel von $f'$: von plus nach minus → Hochpunkt, von minus nach plus → Tiefpunkt. Den y-Wert erhältst du durch Einsetzen in f."
+  },
+  {
+    "atom_id": "analysis__extremstellen_notwendige_bedingung",
+    "explanation": "An einem Hoch- oder Tiefpunkt verläuft die Tangente waagerecht – die Steigung ist 0. Kandidaten für Extremstellen findest du deshalb mit $f'(x) = 0$.\n\nFür $f(x) = x^3 - 3x$: $3x^2 - 3 = 0$ → $x = \\pm 1$. Das sind nur Kandidaten – ob wirklich ein Extremum vorliegt, muss noch geprüft werden."
+  },
+  {
+    "atom_id": "analysis__extremwert_loesen",
+    "explanation": "Leite die Zielfunktion ab, setze die Ableitung gleich 0 und prüfe, ob ein Maximum oder Minimum vorliegt. Für $A(a) = 10a - a^2$: $A'(a) = 10 - 2a = 0$ → $a = 5$.\n\nKontrolliere, ob der Wert im erlaubten Bereich liegt, und vergleiche mit den Rändern. Formuliere am Ende einen Antwortsatz mit Einheit."
+  },
+  {
+    "atom_id": "analysis__extremwert_zielfunktion",
+    "explanation": "Bei Extremwertaufgaben soll eine Größe möglichst groß oder klein werden. Schreibe sie als Formel (Hauptbedingung) – meist hängt sie von zwei Variablen ab.\n\nDie Nebenbedingung verbindet beide Variablen. Löse sie nach einer auf und setze ein: Rechteck mit 20 m Zaun → $2a + 2b = 20$, also $b = 10 - a$ und $A(a) = a \\cdot (10 - a)$."
+  },
+  {
+    "atom_id": "analysis__flaeche_graph_achse",
+    "explanation": "Für den Flächeninhalt zwischen Graph und x-Achse darfst du nicht einfach über Nullstellen hinweg integrieren – Flächen unter der Achse würden abgezogen.\n\nBestimme zuerst die Nullstellen, integriere jeden Abschnitt einzeln und addiere die Beträge der Teilergebnisse."
+  },
+  {
+    "atom_id": "analysis__flaeche_zwischen_graphen",
+    "explanation": "Die Fläche zwischen zwei Graphen berechnest du mit der Differenzfunktion: $A = \\int_a^b (f(x) - g(x))\\,dx$, obere minus untere Funktion.\n\nDie Grenzen sind die Schnittstellen – setze dafür $f(x) = g(x)$. Wechseln die Graphen zwischendurch die Lage, teilst du an den Schnittstellen auf und nimmst Beträge."
+  },
+  {
+    "atom_id": "analysis__funktionsbestimmung",
+    "explanation": "Übersetze jede Eigenschaft in eine Gleichung: „geht durch $P(1 | 3)$\" heißt $f(1) = 3$; „Extrempunkt bei $x = 2$\" heißt $f'(2) = 0$; „Wendestelle bei $x = 0$\" heißt $f''(0) = 0$.\n\nSetze in den allgemeinen Ansatz ein (z. B. $f(x) = ax^2 + bx + c$) und löse das Gleichungssystem. Du brauchst so viele Bedingungen wie Unbekannte."
+  },
+  {
+    "atom_id": "analysis__grenzwert_stelle_stetigkeit",
+    "explanation": "Der Grenzwert an einer Stelle beschreibt, welchem Wert sich $f(x)$ nähert, wenn x immer näher an diese Stelle rückt – von links und von rechts.\n\nStetig ist eine Funktion dort, wo Grenzwert und Funktionswert übereinstimmen. Anschaulich: Du kannst den Graphen zeichnen, ohne den Stift abzusetzen."
+  },
+  {
+    "atom_id": "analysis__hauptsatz",
+    "explanation": "Der Hauptsatz verbindet Integrieren und Ableiten: $\\int_a^b f(x)\\,dx = F(b) - F(a)$, wobei F eine Stammfunktion von f ist.\n\n$\\int_1^3 2x\\,dx$: $F(x) = x^2$, also $3^2 - 1^2 = 8$. Erst die obere Grenze einsetzen, dann die untere abziehen."
+  },
+  {
+    "atom_id": "analysis__integral_orientierte_flaeche",
+    "explanation": "Das bestimmte Integral $\\int_a^b f(x)\\,dx$ summiert unendlich viele schmale Rechteckstreifen unter dem Graphen.\n\nFlächen oberhalb der x-Achse zählen positiv, Flächen unterhalb negativ. Das Integral ist also eine Bilanz: Liegt gleich viel Fläche über wie unter der Achse, ist es 0."
+  },
+  {
+    "atom_id": "analysis__integral_rekonstruierter_bestand",
+    "explanation": "Ist eine Änderungsrate gegeben (z. B. Zufluss in Litern pro Minute), liefert das Integral die Gesamtänderung im Zeitraum.\n\nFließen konstant 3 l/min zu, sind nach 10 Minuten $3 \\cdot 10 = 30$ Liter dazugekommen – die Fläche unter dem Graphen der Rate. Neuer Bestand = Anfangsbestand + Integral."
+  },
+  {
+    "atom_id": "analysis__kettenregel",
+    "explanation": "Bei einer Verkettung gilt „äußere Ableitung mal innere Ableitung\": $(u(v(x)))' = u'(v(x)) \\cdot v'(x)$.\n\nFür $f(x) = (3x + 1)^4$ ist die äußere Funktion „hoch 4\", die innere $3x + 1$: $f'(x) = 4(3x + 1)^3 \\cdot 3$. Das Nachdifferenzieren mit der inneren Ableitung wird oft vergessen."
+  },
+  {
+    "atom_id": "analysis__kruemmung_wendepunkte",
+    "explanation": "Die zweite Ableitung beschreibt die Krümmung: $f''(x) > 0$ bedeutet Linkskurve, $f''(x) < 0$ Rechtskurve.\n\nAm Wendepunkt wechselt die Krümmung. Bedingung: $f''(x) = 0$ und $f'''(x) \\neq 0$. Für $f(x) = x^3$ ist $f''(x) = 6x = 0$ bei $x = 0$ – dort liegt der Wendepunkt."
+  },
+  {
+    "atom_id": "analysis__lokale_aenderungsrate",
+    "explanation": "Rückt der zweite Punkt immer näher an den ersten, wird aus der Sekante die Tangente. Ihre Steigung ist die lokale Änderungsrate – die Ableitung $f'(x_0)$.\n\nSie sagt, wie stark sich die Funktion genau an dieser Stelle ändert, z. B. die Momentangeschwindigkeit auf dem Tacho."
+  },
+  {
+    "atom_id": "analysis__mittlere_aenderungsrate",
+    "explanation": "Die mittlere Änderungsrate ist die Steigung der Geraden durch zwei Punkte des Graphen (Sekante): $\\frac{f(b) - f(a)}{b - a}$.\n\nFür $f(x) = x^2$ zwischen 1 und 3: $\\frac{9 - 1}{3 - 1} = 4$. Im Sachkontext ist das z. B. die Durchschnittsgeschwindigkeit in einem Zeitraum."
+  },
+  {
+    "atom_id": "analysis__monotonie_ableitung",
+    "explanation": "Das Vorzeichen der Ableitung zeigt die Richtung: $f'(x) > 0$ bedeutet, der Graph steigt; $f'(x) < 0$ bedeutet, er fällt.\n\nBestimme die Nullstellen von $f'$ und prüfe in jedem Abschnitt dazwischen das Vorzeichen. Für $f(x) = x^2$ ist $f'(x) = 2x$: fallend für $x < 0$, steigend für $x > 0$."
+  },
+  {
+    "atom_id": "analysis__potenz_summen_faktorregel",
+    "explanation": "Potenzregel: Der Exponent kommt als Faktor nach vorn und wird um 1 kleiner – aus $x^n$ wird $n \\cdot x^{n-1}$. Zahlen vor x bleiben stehen, Summen leitest du gliedweise ab.\n\n$f(x) = 3x^4 - 5x + 2$ ergibt $f'(x) = 12x^3 - 5$. Eine einzelne Zahl fällt weg, denn sie ändert die Steigung nicht."
+  },
+  {
+    "atom_id": "analysis__potenzregel_negative_rationale_exponenten",
+    "explanation": "Schreibe Brüche und Wurzeln erst als Potenz: $\\frac{1}{x^2} = x^{-2}$ und $\\sqrt{x} = x^{\\frac{1}{2}}$. Dann gilt die Potenzregel wie gewohnt.\n\n$(x^{-2})' = -2x^{-3} = -\\frac{2}{x^3}$ und $(x^{\\frac{1}{2}})' = \\frac{1}{2} x^{-\\frac{1}{2}} = \\frac{1}{2\\sqrt{x}}$."
+  },
+  {
+    "atom_id": "analysis__produktregel",
+    "explanation": "Bei einem Produkt reicht es nicht, beide Faktoren einzeln abzuleiten. Es gilt: $(u \\cdot v)' = u' \\cdot v + u \\cdot v'$.\n\nFür $f(x) = x^2 \\cdot e^x$: $f'(x) = 2x \\cdot e^x + x^2 \\cdot e^x$. Erst den einen Faktor ableiten und den anderen stehen lassen, dann umgekehrt."
+  },
+  {
+    "atom_id": "analysis__stammfunktion_lineare_substitution",
+    "explanation": "Steht innen ein linearer Term $ax + b$, bildest du die Stammfunktion der äußeren Funktion und teilst durch a: $\\int f(ax + b)\\,dx = \\frac{1}{a} F(ax + b) + C$.\n\n$f(x) = e^{2x}$ hat $F(x) = \\frac{1}{2} e^{2x}$. Probe mit der Kettenregel: $\\frac{1}{2} \\cdot e^{2x} \\cdot 2 = e^{2x}$ ✓."
+  },
+  {
+    "atom_id": "analysis__stammfunktion_potenzregel",
+    "explanation": "Eine Stammfunktion F ist das Gegenstück zur Ableitung: $F'(x) = f(x)$. Bei Potenzen wird der Exponent um 1 größer, und du teilst durch den neuen Exponenten: Aus $x^n$ wird $\\frac{x^{n+1}}{n+1}$.\n\n$f(x) = 6x^2 + 4$ hat $F(x) = 2x^3 + 4x + C$. Die Konstante C steht da, weil Zahlen beim Ableiten wegfallen."
+  },
+  {
+    "atom_id": "analysis__stammfunktion_weitere",
+    "explanation": "Stammfunktionen wichtiger Grundfunktionen: $e^x \\to e^x$, $\\sin x \\to -\\cos x$, $\\cos x \\to \\sin x$, $\\frac{1}{x} \\to \\ln|x|$.\n\nWurzeln schreibst du als Potenz: $\\sqrt{x} = x^{\\frac{1}{2}}$ hat die Stammfunktion $\\frac{2}{3} x^{\\frac{3}{2}}$. Prüfe immer durch Ableiten."
+  },
+  {
+    "atom_id": "analysis__tangentengleichung",
+    "explanation": "Die Tangente im Punkt $P(x_0 | f(x_0))$ ist eine Gerade $y = mx + n$ mit der Steigung $m = f'(x_0)$. Danach setzt du den Punkt ein, um n zu bestimmen.\n\nFür $f(x) = x^2$ bei $x_0 = 1$: $m = 2$, Punkt $(1 | 1)$, also $1 = 2 \\cdot 1 + n$ → $n = -1$. Tangente: $y = 2x - 1$."
+  },
+  {
+    "atom_id": "analysis__verhalten_im_unendlichen",
+    "explanation": "Für sehr große $|x|$ bestimmt bei ganzrationalen Funktionen allein das Glied mit dem höchsten Exponenten den Verlauf. $f(x) = -2x^3 + 5x^2$ verhält sich wie $-2x^3$: für $x \\to \\infty$ geht $f(x) \\to -\\infty$, für $x \\to -\\infty$ geht $f(x) \\to \\infty$.\n\nBei Brüchen wie $\\frac{1}{x}$ nähert sich der Wert 0."
+  },
+  {
+    "atom_id": "arithmetik__add_sub_bis_100_mit_uebergang",
+    "explanation": "Erst die Zehner, dann die Einer. $37 + 46$: $37 + 40 = 77$, dann $77 + 6 = 83$ – dabei wird ein neuer Zehner voll.\n\n$63 - 35$: $63 - 30 = 33$, dann $33 - 5 = 28$ – dabei gehst du über einen Zehner zurück."
+  },
+  {
+    "atom_id": "arithmetik__add_sub_bis_100_ohne_uebergang",
+    "explanation": "Rechne Zehner und Einer nacheinander. $34 + 25$: erst $34 + 20 = 54$, dann $54 + 5 = 59$.\n\n$68 - 23$: erst $68 - 20 = 48$, dann $48 - 3 = 45$."
+  },
+  {
+    "atom_id": "arithmetik__add_sub_bis_100_ze_e_mit_uebergang",
+    "explanation": "Geh in zwei Schritten über den Zehner. $47 + 8$: erst bis zur 50 (das sind 3), dann die restlichen 5 dazu – 55.\n\n$52 - 7$: erst zurück zur 50 (das sind 2), dann noch 5 weg – 45."
+  },
+  {
+    "atom_id": "arithmetik__add_sub_bis_20_ohne_uebergang",
+    "explanation": "Der Zehner bleibt stehen, du rechnest nur mit den Einern. $13 + 4$: Aus $3 + 4 = 7$ wird 17.\n\n$18 - 5$: Aus $8 - 5 = 3$ wird 13. Die kleine Aufgabe hilft der großen."
+  },
+  {
+    "atom_id": "arithmetik__add_sub_zehnerzahlen",
+    "explanation": "Mit Zehnerzahlen rechnest du wie mit Einern – nur eben mit Zehnern. $30 + 40$: 3 Zehner + 4 Zehner = 7 Zehner, also 70.\n\n$80 - 50$: 8 Zehner − 5 Zehner = 3 Zehner, also 30."
+  },
+  {
+    "atom_id": "arithmetik__addition_subtraktion_bis_10",
+    "explanation": "Plus heißt dazutun, Minus heißt wegnehmen. $4 + 3$: Zähle von 4 aus drei weiter – 5, 6, 7.\n\n$8 - 3$: Nimm von 8 drei weg, es bleiben 5. Probe mit der Umkehraufgabe: $5 + 3 = 8$."
+  },
+  {
+    "atom_id": "arithmetik__arithmetisches_mittel",
+    "explanation": "Der Durchschnitt verteilt alles gleichmäßig: Addiere alle Werte und teile durch ihre Anzahl. Für 4, 7 und 10: $4 + 7 + 10 = 21$, $21 : 3 = 7$.\n\nDer Mittelwert liegt immer zwischen dem kleinsten und dem größten Wert."
+  },
+  {
+    "atom_id": "arithmetik__betrag_gegenzahl",
+    "explanation": "Der Betrag ist der Abstand einer Zahl zur 0 – immer positiv oder 0: $|-5| = 5$ und $|5| = 5$.\n\nDie Gegenzahl liegt gleich weit von der 0 entfernt, aber auf der anderen Seite: Die Gegenzahl von $-5$ ist 5, die von 3 ist $-3$."
+  },
+  {
+    "atom_id": "arithmetik__bruch_als_quotient",
+    "explanation": "Der Bruchstrich bedeutet „geteilt durch\": $3 : 4 = \\frac{3}{4}$. Der Dividend wird zum Zähler, der Divisor zum Nenner.\n\nTeilen sich 4 Kinder 3 Pizzen gerecht, bekommt jedes $\\frac{3}{4}$ Pizza."
+  },
+  {
+    "atom_id": "arithmetik__bruch_anteil_einer_menge",
+    "explanation": "„Bruch von einer Zahl\": erst durch den Nenner teilen, dann mit dem Zähler malnehmen. $\\frac{3}{5}$ von 20: $20 : 5 = 4$, $4 \\cdot 3 = 12$.\n\nEin Fünftel sind also 4 – drei Fünftel dreimal so viel."
+  },
+  {
+    "atom_id": "arithmetik__bruch_anteil_eines_ganzen",
+    "explanation": "Ein Bruch beschreibt einen Anteil: Der Nenner gibt an, in wie viele gleich große Teile das Ganze geteilt ist, der Zähler, wie viele davon gemeint sind.\n\nHat ein Ganzes 12 Teile, dann sind $\\frac{2}{3}$ davon: $12 : 3 = 4$ Teile für ein Drittel, also 8 Teile für zwei Drittel."
+  },
+  {
+    "atom_id": "arithmetik__bruch_durch_natuerliche_zahl",
+    "explanation": "Geht der Zähler auf, teilst du ihn: $\\frac{6}{7} : 3 = \\frac{2}{7}$ – sechs Stücke auf drei verteilt.\n\nGeht er nicht auf, multiplizierst du den Nenner: $\\frac{3}{4} : 2 = \\frac{3}{8}$. Jedes Stück wird halbiert, die Stücke werden kleiner."
+  },
+  {
+    "atom_id": "arithmetik__bruch_mal_bruch",
+    "explanation": "Zähler mal Zähler, Nenner mal Nenner: $\\frac{2}{3} \\cdot \\frac{4}{5} = \\frac{8}{15}$. Ein gemeinsamer Nenner ist hier nicht nötig.\n\n$\\frac{1}{2} \\cdot \\frac{1}{3}$ heißt „die Hälfte von einem Drittel\" – deshalb ist das Ergebnis kleiner als beide Brüche. Am Ende kürzen."
+  },
+  {
+    "atom_id": "arithmetik__bruch_mal_natuerliche_zahl",
+    "explanation": "Nur der Zähler wird multipliziert, der Nenner bleibt: $\\frac{2}{5} \\cdot 3 = \\frac{6}{5}$. Dreimal zwei Fünftel sind sechs Fünftel.\n\nKürze das Ergebnis, wenn möglich – manchmal entsteht eine ganze Zahl: $\\frac{3}{4} \\cdot 8 = \\frac{24}{4} = 6$."
+  },
+  {
+    "atom_id": "arithmetik__bruch_zu_dezimalzahl",
+    "explanation": "Erweitere den Bruch auf den Nenner 10 oder 100 und lies ab: $\\frac{3}{5} = \\frac{6}{10} = 0{,}6$ und $\\frac{7}{20} = \\frac{35}{100} = 0{,}35$.\n\nKlappt das nicht bequem, teile Zähler durch Nenner: $\\frac{3}{8} = 3 : 8 = 0{,}375$."
+  },
+  {
+    "atom_id": "arithmetik__bruchteile_im_alltag",
+    "explanation": "Der Nenner sagt, in wie viele gleiche Teile geteilt wird, der Zähler, wie viele davon gemeint sind. $\\frac{3}{4}$ von 12 Bonbons: $12 : 4 = 3$ (ein Viertel), mal 3 → 9.\n\nAlso: erst durch den Nenner teilen, dann mit dem Zähler malnehmen."
+  },
+  {
+    "atom_id": "arithmetik__brueche_add_sub_gleichnamig",
+    "explanation": "Bei gleichem Nenner sind die Stücke gleich groß – du rechnest nur mit den Zählern, der Nenner bleibt: $\\frac{3}{7} + \\frac{2}{7} = \\frac{5}{7}$.\n\nHäufiger Fehler: die Nenner auch addieren. Drei Siebtel und zwei Siebtel sind fünf Siebtel, nicht fünf Vierzehntel. Am Ende kürzen, wenn es geht."
+  },
+  {
+    "atom_id": "arithmetik__brueche_add_sub_ungleichnamig",
+    "explanation": "Verschiedene Nenner bedeuten verschieden große Stücke. Mache die Brüche zuerst gleichnamig, dann rechne mit den Zählern: $\\frac{1}{2} + \\frac{1}{3} = \\frac{3}{6} + \\frac{2}{6} = \\frac{5}{6}$.\n\nNie Zähler plus Zähler und Nenner plus Nenner rechnen."
+  },
+  {
+    "atom_id": "arithmetik__brueche_am_zahlenstrahl",
+    "explanation": "Der Nenner sagt, in wie viele gleiche Abschnitte die Strecke von 0 bis 1 geteilt ist. Der Zähler sagt, wie viele Abschnitte du von der 0 aus gehst.\n\n$\\frac{3}{4}$: vier Abschnitte bis zur 1, drei davon gehen. Bei $\\frac{5}{4}$ landest du rechts von der 1."
+  },
+  {
+    "atom_id": "arithmetik__brueche_gleichnamig_machen",
+    "explanation": "Gleichnamig heißt: gleicher Nenner. Der Hauptnenner ist das kleinste gemeinsame Vielfache der Nenner – bei $\\frac{1}{4}$ und $\\frac{5}{6}$ ist das 12.\n\nDann erweiterst du jeden Bruch passend: $\\frac{1}{4} = \\frac{3}{12}$ (mal 3) und $\\frac{5}{6} = \\frac{10}{12}$ (mal 2)."
+  },
+  {
+    "atom_id": "arithmetik__brueche_vergleichen_ordnen",
+    "explanation": "Gleicher Nenner: Der größere Zähler gewinnt. Gleicher Zähler: Der kleinere Nenner gewinnt, denn die Stücke sind größer ($\\frac{1}{3} > \\frac{1}{5}$).\n\nSonst hilft der Vergleich mit $\\frac{1}{2}$ oder gleichnamig machen: $\\frac{2}{3} = \\frac{8}{12}$ und $\\frac{3}{4} = \\frac{9}{12}$, also $\\frac{2}{3} < \\frac{3}{4}$."
+  },
+  {
+    "atom_id": "arithmetik__dezimal_division_dezimalzahl",
+    "explanation": "Mache den Divisor zur ganzen Zahl: Verschiebe in beiden Zahlen das Komma gleich weit nach rechts. $1{,}5 : 0{,}3 = 15 : 3 = 5$.\n\nDas Ergebnis bleibt gleich, weil du beide Zahlen mit 10 (oder 100) multiplizierst. Wie oft passt 0,3 in 1,5? Fünfmal."
+  },
+  {
+    "atom_id": "arithmetik__dezimal_division_natuerliche_zahl",
+    "explanation": "Teile wie bei natürlichen Zahlen. Sobald du das Komma überschreitest, setzt du auch im Ergebnis ein Komma. $7{,}2 : 3$: $7 : 3 = 2$ Rest 1, dann $12 : 3 = 4$ → 2,4.\n\nProbe: $2{,}4 \\cdot 3 = 7{,}2$."
+  },
+  {
+    "atom_id": "arithmetik__dezimal_mal_dezimal",
+    "explanation": "Rechne ohne Komma und zähle dann die Nachkommastellen beider Faktoren zusammen. $0{,}3 \\cdot 0{,}4$: $3 \\cdot 4 = 12$, zusammen zwei Nachkommastellen → 0,12.\n\nZehntel mal Zehntel ergibt Hundertstel – deshalb wird das Ergebnis kleiner."
+  },
+  {
+    "atom_id": "arithmetik__dezimal_mal_natuerliche_zahl",
+    "explanation": "Rechne zuerst ohne Komma und setze es danach: $2{,}3 \\cdot 4$ → $23 \\cdot 4 = 92$. Eine Nachkommastelle im Faktor, also eine im Ergebnis: 9,2.\n\nEin Überschlag ($2 \\cdot 4 = 8$) zeigt, ob das Komma richtig sitzt."
+  },
+  {
+    "atom_id": "arithmetik__dezimalzahl_zu_bruch",
+    "explanation": "Lies die Dezimalzahl als Zehntel, Hundertstel oder Tausendstel – je nach Anzahl der Nachkommastellen: $0{,}6 = \\frac{6}{10}$, $0{,}35 = \\frac{35}{100}$.\n\nDann vollständig kürzen: $\\frac{6}{10} = \\frac{3}{5}$ und $\\frac{35}{100} = \\frac{7}{20}$."
+  },
+  {
+    "atom_id": "arithmetik__dezimalzahlen_addieren_subtrahieren",
+    "explanation": "Schreibe Komma unter Komma und rechne dann wie mit natürlichen Zahlen. $3{,}7 + 1{,}5$: 7 Zehntel + 5 Zehntel = 12 Zehntel, also 2 Zehntel und 1 Ganzes mehr → 5,2.\n\nFehlende Stellen füllst du mit Nullen: $4 - 1{,}3 = 4{,}0 - 1{,}3 = 2{,}7$."
+  },
+  {
+    "atom_id": "arithmetik__dezimalzahlen_stellenwert",
+    "explanation": "Rechts vom Komma geht die Stellentafel weiter: Zehntel, Hundertstel, Tausendstel. In 3,47 steht die 4 für 4 Zehntel und die 7 für 7 Hundertstel.\n\nFehlt eine Stelle, zählt sie als 0: $12{,}3 = 12{,}30$."
+  },
+  {
+    "atom_id": "arithmetik__dezimalzahlen_vergleichen_ordnen_runden",
+    "explanation": "Vergleiche Stelle für Stelle von links. $0{,}5 > 0{,}45$, denn $0{,}50$ hat 5 Zehntel, $0{,}45$ nur 4 – die längere Zahl ist nicht automatisch größer.\n\nBeim Runden entscheidet die Ziffer rechts neben der Rundungsstelle: 0–4 abrunden, 5–9 aufrunden. $3{,}47 \\approx 3{,}5$."
+  },
+  {
+    "atom_id": "arithmetik__division_durch_bruch",
+    "explanation": "Durch einen Bruch teilst du, indem du mit seinem Kehrwert multiplizierst: $\\frac{3}{4} : \\frac{2}{5} = \\frac{3}{4} \\cdot \\frac{5}{2} = \\frac{15}{8}$.\n\nNur der zweite Bruch wird umgedreht. Anschaulich: $2 : \\frac{1}{2} = 4$, denn ein halbes passt viermal in 2."
+  },
+  {
+    "atom_id": "arithmetik__division_grundverstaendnis",
+    "explanation": "Teilen ist die Umkehrung des Malnehmens. $24 : 6$ fragt: Wie oft passt die 6 in die 24? Viermal, denn $4 \\cdot 6 = 24$.\n\nDas gilt beim Verteilen (24 Äpfel auf 6 Körbe) genauso wie beim Aufteilen (immer 6 Äpfel in einen Korb)."
+  },
+  {
+    "atom_id": "arithmetik__division_mit_rest",
+    "explanation": "Geht eine Division nicht auf, bleibt ein Rest. $17 : 5$: Die 5 passt dreimal hinein ($3 \\cdot 5 = 15$), 2 bleiben übrig – also 3 Rest 2.\n\nDer Rest ist immer kleiner als die Zahl, durch die du teilst."
+  },
+  {
+    "atom_id": "arithmetik__einmaleins_ableiten",
+    "explanation": "Schwere Aufgaben leitest du aus leichten ab. $6 \\cdot 7$: Du weißt $5 \\cdot 7 = 35$, eine 7 dazu ergibt 42.\n\n$9 \\cdot 7$: Von $10 \\cdot 7 = 70$ eine 7 abziehen – 63. $4 \\cdot 7$: $2 \\cdot 7$ verdoppeln."
+  },
+  {
+    "atom_id": "arithmetik__einmaleins_automatisierung",
+    "explanation": "Die Einmaleins-Aufgaben sollst du ohne Rechnen wissen. Hängt eine fest, hilft eine Nachbaraufgabe: $7 \\cdot 8$ ist $5 \\cdot 8 = 40$ plus $2 \\cdot 8 = 16$, also 56.\n\nTauschaufgaben haben dasselbe Ergebnis: $3 \\cdot 8 = 8 \\cdot 3$."
+  },
+  {
+    "atom_id": "arithmetik__einmaleins_kernaufgaben",
+    "explanation": "Die Kernaufgaben sind die leichten Reihen: mal 1 (Zahl bleibt), mal 2 (verdoppeln), mal 10 (eine Null anhängen), mal 5 (die Hälfte von mal 10). Beispiel: $5 \\cdot 8$ ist die Hälfte von 80, also 40.\n\nQuadratzahlen wie $6 \\cdot 6 = 36$ lernst du am besten auswendig."
+  },
+  {
+    "atom_id": "arithmetik__erweitern",
+    "explanation": "Beim Erweitern multiplizierst du Zähler und Nenner mit derselben Zahl. Der Wert bleibt gleich, nur die Einteilung wird feiner: $\\frac{2}{3} = \\frac{2 \\cdot 4}{3 \\cdot 4} = \\frac{8}{12}$.\n\nZwei Drittel einer Pizza sind genauso viel wie acht Zwölftel."
+  },
+  {
+    "atom_id": "arithmetik__gemischte_zahlen_add_sub",
+    "explanation": "Rechne Ganze und Bruchteile getrennt: $2\\frac{3}{4} + 1\\frac{3}{4}$ → Ganze: 3, Bruchteile: $\\frac{6}{4} = 1\\frac{2}{4}$. Zusammen $4\\frac{1}{2}$.\n\nBeim Subtrahieren ist es oft einfacher, beide Zahlen erst in unechte Brüche umzuwandeln."
+  },
+  {
+    "atom_id": "arithmetik__gemischte_zahlen_unechte_brueche",
+    "explanation": "Unechter Bruch → gemischte Zahl: Teile den Zähler durch den Nenner. $\\frac{11}{4}$: $11 : 4 = 2$ Rest 3, also $2\\frac{3}{4}$.\n\nZurück: Ganze mal Nenner plus Zähler. $2\\frac{3}{4}$: $2 \\cdot 4 + 3 = 11$, also $\\frac{11}{4}$."
+  },
+  {
+    "atom_id": "arithmetik__ggt_kgv",
+    "explanation": "Der ggT ist die größte Zahl, durch die beide Zahlen teilbar sind: ggT(12, 18) = 6.\n\nDas kgV ist die kleinste Zahl, die in beiden Einmaleins-Reihen vorkommt: kgV(4, 6) = 12. Gehe dafür die Vielfachen der größeren Zahl durch (6, 12 …) und prüfe, ob die kleinere sie teilt."
+  },
+  {
+    "atom_id": "arithmetik__groessen_geld",
+    "explanation": "1 Euro sind 100 Cent. 3 € und 45 Cent sind 345 Cent oder 3,45 € – das Komma trennt Euro und Cent.\n\nRückgeld rechnest du am besten in Cent: Von 1000 ct (10 €) gehen 640 ct weg, es bleiben 360 ct."
+  },
+  {
+    "atom_id": "arithmetik__groessen_laengen",
+    "explanation": "Merke dir die Umrechnungszahlen: 1 km = 1000 m, 1 m = 100 cm, 1 cm = 10 mm.\n\n3 m 25 cm sind $300 + 25 = 325$ cm. In die kleinere Einheit wird die Zahl größer."
+  },
+  {
+    "atom_id": "arithmetik__groessen_masse_volumen",
+    "explanation": "Hier ist die Umrechnungszahl 1000: 1 t = 1000 kg, 1 kg = 1000 g, 1 l = 1000 ml.\n\n2 kg 350 g sind $2000 + 350 = 2350$ g. Umgekehrt: 4000 g = 4 kg."
+  },
+  {
+    "atom_id": "arithmetik__groessen_zeit",
+    "explanation": "Bei der Zeit ist die Umrechnungszahl 60: 1 h = 60 min, 1 min = 60 s. 2 h 15 min sind $120 + 15 = 135$ min.\n\nZeitspannen rechnest du in zwei Schritten: von 9:40 bis 10:00 sind es 20 min, bis 10:25 noch 25 min – zusammen 45 min."
+  },
+  {
+    "atom_id": "arithmetik__grundwert_berechnen",
+    "explanation": "Gesucht ist das Ganze. Rechne zurück auf 1 % und dann auf 100 %: 12 sind 15 % → 1 % sind $12 : 15 = 0{,}8$ → 100 % sind 80.\n\nDas Ergebnis muss größer sein als der Prozentwert, solange der Prozentsatz unter 100 % liegt."
+  },
+  {
+    "atom_id": "arithmetik__halbschriftliche_division",
+    "explanation": "Zerlege die Zahl in Teile, die sich leicht teilen lassen. $84 : 4$: $80 : 4 = 20$ und $4 : 4 = 1$, zusammen 21.\n\nBei $72 : 4$ passt $40 + 32$ besser: $10 + 8 = 18$. Suche also Vielfache des Teilers."
+  },
+  {
+    "atom_id": "arithmetik__halbschriftliche_multiplikation",
+    "explanation": "Zerlege die große Zahl in Zehner und Einer und multipliziere beide Teile. $4 \\cdot 27$: $4 \\cdot 20 = 80$ und $4 \\cdot 7 = 28$, zusammen 108.\n\nBei dreistelligen Zahlen kommt der Hunderter als dritter Teil dazu."
+  },
+  {
+    "atom_id": "arithmetik__halbschriftliches_rechnen",
+    "explanation": "Rechne in bequemen Schritten und notiere Zwischenergebnisse. $360 + 67$: erst $360 + 60 = 420$, dann $420 + 7 = 427$.\n\n$483 - 170$: erst die Hunderter ($483 - 100 = 383$), dann die Zehner ($383 - 70 = 313$)."
+  },
+  {
+    "atom_id": "arithmetik__kommaverschiebung",
+    "explanation": "Mal 10, 100, 1000 verschiebt das Komma um 1, 2, 3 Stellen nach rechts: $3{,}4 \\cdot 100 = 340$. Leere Stellen füllst du mit 0.\n\nGeteilt verschiebt es nach links: $52{,}3 : 10 = 5{,}23$. Die Zahl der Nullen sagt dir, um wie viele Stellen."
+  },
+  {
+    "atom_id": "arithmetik__kuerzen",
+    "explanation": "Beim Kürzen teilst du Zähler und Nenner durch dieselbe Zahl. Der Wert bleibt gleich: $\\frac{12}{18} = \\frac{12 : 6}{18 : 6} = \\frac{2}{3}$.\n\nVollständig gekürzt ist der Bruch, wenn Zähler und Nenner keinen gemeinsamen Teiler mehr haben. Am schnellsten geht es mit dem ggT."
+  },
+  {
+    "atom_id": "arithmetik__massstab",
+    "explanation": "1 : 500 heißt: 1 cm im Plan sind 500 cm in Wirklichkeit. Vom Plan zur Wirklichkeit multiplizierst du, zurück teilst du.\n\n4 cm im Plan → $4 \\cdot 500 = 2000$ cm = 20 m. Rechne am Ende in eine passende Einheit um (100 cm = 1 m, 100 000 cm = 1 km)."
+  },
+  {
+    "atom_id": "arithmetik__multiplikationsverstaendnis",
+    "explanation": "Malnehmen ist wiederholtes Addieren derselben Zahl. $3 \\cdot 4$ heißt: dreimal die 4, also $4 + 4 + 4 = 12$.\n\nIm Bild sind das 3 Reihen mit je 4 Feldern."
+  },
+  {
+    "atom_id": "arithmetik__muster_zahlenfolgen_grundschule",
+    "explanation": "Finde die Regel: Was passiert von einer Zahl zur nächsten? Bei 3, 7, 11, 15 kommen immer 4 dazu. Bei 2, 4, 8, 16 wird immer verdoppelt.\n\nIn der Zahlenmauer ist jeder Stein die Summe der beiden Steine darunter."
+  },
+  {
+    "atom_id": "arithmetik__natuerliche_zahlen_darstellen_ordnen",
+    "explanation": "Vergleiche zuerst die Anzahl der Stellen: Mehr Stellen bedeutet größere Zahl. Bei gleich vielen Stellen vergleichst du von links, bis sich eine Ziffer unterscheidet.\n\n4 512 und 4 389: Tausender gleich, bei den Hundertern ist 5 größer als 3 – also $4512 > 4389$."
+  },
+  {
+    "atom_id": "arithmetik__negative_zahlen_zahlengerade",
+    "explanation": "Links von der 0 liegen die negativen Zahlen. Je weiter rechts eine Zahl liegt, desto größer ist sie: $-4 < -1 < 0 < 3$.\n\nAchtung: $-4$ ist kleiner als $-1$, obwohl 4 größer als 1 ist. Denk ans Thermometer – −4 °C ist kälter als −1 °C."
+  },
+  {
+    "atom_id": "arithmetik__periodische_dezimalzahlen",
+    "explanation": "Kürze den Bruch und schau auf den Nenner: Hat er nur die Primfaktoren 2 und 5 (wie 4, 8, 20, 25), bricht die Dezimalzahl ab. Sonst wird sie periodisch.\n\n$\\frac{1}{3} = 0{,}333…$: Beim Dividieren bleibt immer wieder derselbe Rest, deshalb wiederholt sich die 3 endlos."
+  },
+  {
+    "atom_id": "arithmetik__potenzieren_natuerliche_zahlen",
+    "explanation": "Eine Potenz ist eine Kurzschreibweise für wiederholtes Malnehmen: $2^3 = 2 \\cdot 2 \\cdot 2 = 8$. Die Hochzahl sagt, wie oft die Basis als Faktor steht.\n\nTypischer Fehler: $5^2$ ist nicht $5 \\cdot 2$, sondern $5 \\cdot 5 = 25$. Bei $10^4$ zählt die Hochzahl die Nullen: 10 000."
+  },
+  {
+    "atom_id": "arithmetik__primzahlen_primfaktorzerlegung",
+    "explanation": "Eine Primzahl hat genau zwei Teiler: 1 und sich selbst (2, 3, 5, 7, 11 …). Die 1 ist keine Primzahl.\n\nJede andere Zahl lässt sich in Primfaktoren zerlegen: $72 = 2 \\cdot 2 \\cdot 2 \\cdot 3 \\cdot 3 = 2^3 \\cdot 3^2$. Teile dazu immer wieder durch die kleinste passende Primzahl."
+  },
+  {
+    "atom_id": "arithmetik__prozent_grundbegriffe",
+    "explanation": "Der Grundwert ist das Ganze (100 %). Der Prozentwert ist ein Teil davon als Größe, z. B. in Euro oder als Anzahl. Der Prozentsatz ist derselbe Teil als Prozentangabe.\n\nVon 200 Schülern kommen 50 mit dem Rad, das sind 25 %: Grundwert 200, Prozentwert 50, Prozentsatz 25 %."
+  },
+  {
+    "atom_id": "arithmetik__prozentsatz_berechnen",
+    "explanation": "Gesucht ist, welcher Anteil der Teil vom Ganzen ist: Prozentwert durch Grundwert. 12 von 80: $\\frac{12}{80} = 0{,}15 = 15\\,\\%$.\n\nImmer durch das Ganze teilen – nicht umgekehrt."
+  },
+  {
+    "atom_id": "arithmetik__prozentschreibweise",
+    "explanation": "Prozent heißt „Hundertstel\": $25\\,\\% = \\frac{25}{100} = 0{,}25$. Vom Bruch kommst du durch Erweitern auf den Nenner 100 zur Prozentzahl: $\\frac{1}{5} = \\frac{20}{100} = 20\\,\\%$.\n\nZwischen Dezimalzahl und Prozent wandert das Komma um zwei Stellen: $0{,}07 = 7\\,\\%$."
+  },
+  {
+    "atom_id": "arithmetik__prozentwert_berechnen",
+    "explanation": "Gesucht ist der Teil. Rechne über 1 %: Teile den Grundwert durch 100 und multipliziere mit dem Prozentsatz. 15 % von 80: 1 % sind 0,8, also $15 \\cdot 0{,}8 = 12$.\n\nBequeme Prozentsätze gehen im Kopf: 50 % ist die Hälfte, 25 % ein Viertel, 10 % ein Zehntel."
+  },
+  {
+    "atom_id": "arithmetik__rationale_addition_gleiche_vorzeichen",
+    "explanation": "Haben beide Zahlen dasselbe Vorzeichen, addierst du die Beträge und behältst das Vorzeichen: $(-3) + (-5) = -8$.\n\nStell dir Schulden vor: 3 € Schulden und 5 € Schulden sind 8 € Schulden."
+  },
+  {
+    "atom_id": "arithmetik__rationale_addition_ungleiche_vorzeichen",
+    "explanation": "Bei verschiedenen Vorzeichen ziehst du den kleineren Betrag vom größeren ab. Das Ergebnis bekommt das Vorzeichen der Zahl mit dem größeren Betrag: $(-7) + 4 = -3$.\n\nBild dazu: 7 € Schulden und 4 € Guthaben – es bleiben 3 € Schulden."
+  },
+  {
+    "atom_id": "arithmetik__rechengesetze_rechenvorteile",
+    "explanation": "Beim Addieren und Multiplizieren darfst du vertauschen ($3 + 5 = 5 + 3$) und Klammern beliebig setzen. Nutze das: $17 + 80 + 20$ rechnest du als $17 + 100$.\n\nEine Klammer wird verteilt: $4 \\cdot (5 + 3) = 4 \\cdot 5 + 4 \\cdot 3$."
+  },
+  {
+    "atom_id": "arithmetik__roemische_zahlen",
+    "explanation": "Die Zeichen: I = 1, V = 5, X = 10, L = 50, C = 100, D = 500, M = 1000. Sie werden von groß nach klein geschrieben und addiert: $XVII = 10 + 5 + 2 = 17$.\n\nSteht ein kleineres Zeichen vor einem größeren, wird es abgezogen: IV = 4, IX = 9, XL = 40, XC = 90."
+  },
+  {
+    "atom_id": "arithmetik__runden_natuerliche_zahlen",
+    "explanation": "Schau auf die Ziffer rechts neben der Rundungsstelle: Bei 0 bis 4 rundest du ab, bei 5 bis 9 auf. Alle Stellen dahinter werden 0.\n\n347 auf Zehner: Die 7 sagt aufrunden → 350. Auf Hunderter: Die 4 sagt abrunden → 300."
+  },
+  {
+    "atom_id": "arithmetik__sachaufgaben_grundschule",
+    "explanation": "Lies genau: Was ist gegeben, was ist gesucht? Dann entscheide dich für die Rechenart – „zusammen\" und „dazu\" bedeuten Plus, „übrig\" und „zurück\" Minus, „je\" und „jeder\" Mal, „verteilen\" Geteilt.\n\nManche Aufgaben brauchen zwei Schritte: 3 Karten zu je 8 € kosten 24 €; von 50 € bleiben 26 €."
+  },
+  {
+    "atom_id": "arithmetik__schriftliche_addition",
+    "explanation": "Schreibe die Zahlen stellengerecht untereinander und addiere von rechts: erst Einer, dann Zehner, dann Hunderter.\n\nWird eine Summe 10 oder größer, schreibst du nur die Einerziffer hin und überträgst die 1 in die nächste Spalte. Bei $358 + 264$: $8 + 4 = 12$ → schreibe 2, übertrage 1."
+  },
+  {
+    "atom_id": "arithmetik__schriftliche_division",
+    "explanation": "Teile Stelle für Stelle von links. $738 : 3$: 7 : 3 = 2 Rest 1; hole die 3 herunter → 13 : 3 = 4 Rest 1; hole die 8 herunter → 18 : 3 = 6. Ergebnis 246.\n\nMache am Ende die Probe: $246 \\cdot 3 = 738$."
+  },
+  {
+    "atom_id": "arithmetik__schriftliche_multiplikation",
+    "explanation": "Multipliziere die erste Zahl mit jeder Ziffer der zweiten und addiere die Teilergebnisse. $27 \\cdot 6$: $6 \\cdot 7 = 42$ (schreibe 2, merke 4), $6 \\cdot 2 = 12$ plus 4 = 16 → 162.\n\nBei zweistelligem Faktor rückt die zweite Zeile eine Stelle ein, weil du dort mit Zehnern rechnest."
+  },
+  {
+    "atom_id": "arithmetik__schriftliche_subtraktion",
+    "explanation": "Schreibe stellengerecht untereinander und subtrahiere von rechts. Ist die obere Ziffer zu klein, tauschst du einen Zehner in 10 Einer um (oder einen Hunderter in 10 Zehner).\n\nBei $532 - 178$: $2 - 8$ geht nicht, also $12 - 8 = 4$ und ein Zehner weniger. Probe: Ergebnis + 178 muss 532 ergeben."
+  },
+  {
+    "atom_id": "arithmetik__stellenwert_bis_100",
+    "explanation": "Eine zweistellige Zahl besteht aus Zehnern (links) und Einern (rechts). 47 hat 4 Zehner und 7 Einer: $47 = 40 + 7$.\n\nAchtung: 47 und 74 haben dieselben Ziffern, sind aber verschiedene Zahlen – die Stelle entscheidet."
+  },
+  {
+    "atom_id": "arithmetik__stellenwert_bis_1000",
+    "explanation": "Jede Ziffer hat einen Stellenwert: Hunderter, Zehner, Einer. $452 = 4 \\cdot 100 + 5 \\cdot 10 + 2$, also 4 Hunderter, 5 Zehner, 2 Einer.\n\nEine 0 hält die Stelle frei: 407 hat 0 Zehner."
+  },
+  {
+    "atom_id": "arithmetik__stellenwert_bis_1000000",
+    "explanation": "Lies die Stellen von rechts nach links: Einer, Zehner, Hunderter, dann Tausender, Zehntausender, Hunderttausender. In 794 201 steht die 9 an der Zehntausender-Stelle.\n\nDie Lücke nach drei Stellen hilft beim Lesen: 794 Tausend 201."
+  },
+  {
+    "atom_id": "arithmetik__subtraktion_als_addition_gegenzahl",
+    "explanation": "Eine Zahl abziehen ist dasselbe wie ihre Gegenzahl addieren: $5 - (-3) = 5 + 3 = 8$ und $2 - 6 = 2 + (-6) = -4$.\n\nMerke: „Minus Minus\" wird zu Plus. Schulden wegnehmen macht reicher."
+  },
+  {
+    "atom_id": "arithmetik__teilbarkeitsregeln",
+    "explanation": "Durch 2, 5 und 10 entscheidet die letzte Ziffer: gerade → durch 2; 0 oder 5 → durch 5; 0 → durch 10.\n\nDurch 3 und 9 entscheidet die Quersumme: 351 hat $3 + 5 + 1 = 9$. 9 ist durch 3 und durch 9 teilbar – 351 also auch."
+  },
+  {
+    "atom_id": "arithmetik__teiler_vielfache",
+    "explanation": "Eine Zahl ist Teiler, wenn die Division ohne Rest aufgeht: 4 ist Teiler von 12, denn $12 : 4 = 3$. Vielfache sind die Zahlen der Einmaleins-Reihe: 8, 16, 24 … sind Vielfache von 8.\n\nTeiler findest du paarweise: $12 = 1 \\cdot 12 = 2 \\cdot 6 = 3 \\cdot 4$ – also 6 Teiler."
+  },
+  {
+    "atom_id": "arithmetik__ueberschlagsrechnung",
+    "explanation": "Beim Überschlag rundest du die Zahlen zuerst und rechnest dann im Kopf. $48 + 33 \\approx 50 + 30 = 80$.\n\nSo merkst du schnell, ob ein Ergebnis stimmen kann. Bei $6 \\cdot 47$ reicht $6 \\cdot 50 = 300$."
+  },
+  {
+    "atom_id": "arithmetik__verbindung_rechenarten_rationale",
+    "explanation": "Auch mit negativen Zahlen gilt: Klammer zuerst, dann Punkt vor Strich. $-3 + 2 \\cdot (-4)$: erst $2 \\cdot (-4) = -8$, dann $-3 + (-8) = -11$.\n\nRechne Schritt für Schritt und notiere Zwischenergebnisse – die Vorzeichen sind die Fehlerquelle."
+  },
+  {
+    "atom_id": "arithmetik__verdoppeln_halbieren",
+    "explanation": "Verdoppeln heißt: die Zahl zweimal nehmen. Das Doppelte von 7 ist $7 + 7 = 14$.\n\nHalbieren ist die Umkehrung: in zwei gleiche Teile teilen. Die Hälfte von 14 ist 7. Bei größeren Zahlen hilft Zerlegen: 34 → die Hälfte von 30 und die Hälfte von 4, also $15 + 2 = 17$."
+  },
+  {
+    "atom_id": "arithmetik__verhaeltnisse",
+    "explanation": "Ein Verhältnis vergleicht zwei Größen und lässt sich wie ein Bruch kürzen: $12 : 18 = 2 : 3$ (beide durch 6).\n\nAufteilen im Verhältnis $2 : 3$: Es gibt $2 + 3 = 5$ Teile. Von 40 € ist ein Teil 8 €, also bekommt der eine 16 €, der andere 24 €."
+  },
+  {
+    "atom_id": "arithmetik__vermehrter_verminderter_grundwert",
+    "explanation": "Erhöhung um 20 %: Der neue Wert sind 120 % des alten, also mal 1,2. Senkung um 20 %: 80 %, also mal 0,8. Aus 50 € werden 60 € bzw. 40 €.\n\nRückwärts teilst du durch den Faktor: 60 € nach 20 % Erhöhung → $60 : 1{,}2 = 50$ €. Nicht einfach 20 % vom neuen Wert abziehen!"
+  },
+  {
+    "atom_id": "arithmetik__vorrangregeln",
+    "explanation": "Klammern zuerst, dann Punktrechnung (· und :), zuletzt Strichrechnung (+ und −). $4 + 3 \\cdot 5$ ist $4 + 15 = 19$ – nicht 35.\n\nMit Klammer ändert sich die Reihenfolge: $(4 + 3) \\cdot 5 = 7 \\cdot 5 = 35$."
+  },
+  {
+    "atom_id": "arithmetik__vorzeichen_klammerregeln",
+    "explanation": "Ein Minus vor der Klammer dreht jedes Vorzeichen in der Klammer um: $-(7 - 3) = -7 + 3 = -4$.\n\nEbenso $10 - (7 - 3) = 10 - 7 + 3 = 6$. Ein Plus vor der Klammer ändert nichts."
+  },
+  {
+    "atom_id": "arithmetik__vorzeichenregeln_mult_div",
+    "explanation": "Rechne zuerst ohne Vorzeichen, dann bestimme das Vorzeichen: gleiche Vorzeichen → Plus, verschiedene → Minus.\n\n$(-4) \\cdot (-3) = 12$, $(-4) \\cdot 3 = -12$, $(-12) : (-3) = 4$. Die Regel gilt für Mal und Geteilt gleichermaßen."
+  },
+  {
+    "atom_id": "arithmetik__zaehlen_zahlwortreihe",
+    "explanation": "Schau, wie groß der Schritt von einer Zahl zur nächsten ist und ob es vorwärts oder rückwärts geht. Bei 10, 15, 20 sind es immer 5 mehr – also geht es mit 25 weiter.\n\nRückwärts genauso: 40, 30, 20 – jedes Mal 10 weniger."
+  },
+  {
+    "atom_id": "arithmetik__zahlen_bis_10",
+    "explanation": "Die Zahlen stehen in einer festen Reihe: 0, 1, 2, 3 … 10. Nach einer Zahl kommt immer eine mehr, vor ihr eine weniger: nach 6 kommt 7, vor 6 kommt 5.\n\nWer beim Zählen später drankommt, ist größer: 8 ist größer als 5."
+  },
+  {
+    "atom_id": "arithmetik__zahlverstaendnis_bis_20",
+    "explanation": "Die Zahlen von 11 bis 20 bestehen aus einem Zehner und einigen Einern: 14 ist 10 und 4. Nach 14 kommt 15.\n\nBeim Vergleichen zählt, wer in der Zahlenreihe weiter hinten steht: 17 ist größer als 12. Und jede Zahl lässt sich zerlegen: $9 = 4 + 5$."
+  },
+  {
+    "atom_id": "arithmetik__zahlzerlegung_bis_10",
+    "explanation": "Jede Zahl lässt sich in zwei Teile zerlegen. Stell dir 7 Plättchen vor: Legst du 3 nach links, bleiben 4 rechts – $7 = 3 + 4$.\n\nFehlt ein Teil, frage dich: Wie viele fehlen von 3 bis 7?"
+  },
+  {
+    "atom_id": "arithmetik__zehnereinmaleins",
+    "explanation": "Rechne mit dem kleinen Einmaleins und denke an die Zehner. $4 \\cdot 30$ sind 4 mal 3 Zehner = 12 Zehner = 120.\n\nBeim Teilen genauso: $240 : 6$ sind 24 Zehner : 6 = 4 Zehner = 40. Bei $40 \\cdot 30$ kommen zwei Nullen dazu: 1200."
+  },
+  {
+    "atom_id": "arithmetik__zehnerpotenzen_normdarstellung",
+    "explanation": "Sehr große und kleine Zahlen schreibt man als Zahl zwischen 1 und 10 mal Zehnerpotenz: $34\\,000 = 3{,}4 \\cdot 10^4$.\n\nDer Exponent sagt, um wie viele Stellen das Komma wandert: positiv nach rechts, negativ nach links. $5 \\cdot 10^{-3} = 0{,}005$."
+  },
+  {
+    "atom_id": "arithmetik__zehnerueberschreitung_bis_20",
+    "explanation": "Rechne in zwei Schritten über die 10. $8 + 5$: erst bis zur 10 (das sind 2), dann die übrigen 3 dazu – 13.\n\n$13 - 5$: erst zurück zur 10 (das sind 3), dann noch 2 weg – 8."
+  },
+  {
+    "atom_id": "arithmetik__zinsrechnung",
+    "explanation": "Zinsen sind ein Prozentwert: Kapital mal Zinssatz. 500 € zu 3 % bringen in einem Jahr $500 \\cdot 0{,}03 = 15$ €, in zwei Jahren 30 €. Endkapital = Kapital + Zinsen.\n\nBeim Zinseszins werden die Zinsen mitverzinst: jedes Jahr mal 1,03, also $500 \\cdot 1{,}03 \\cdot 1{,}03$."
+  },
+  {
+    "atom_id": "geometrie__berechnungen_pyramide_kegel",
+    "explanation": "Oft fehlt eine Länge, die du erst mit dem Satz des Pythagoras bestimmen musst. In der quadratischen Pyramide bilden Höhe $h$, halbe Grundkante $\\frac{a}{2}$ und Seitenhöhe $h_s$ ein rechtwinkliges Dreieck: $h_s^2 = h^2 + \\left(\\frac{a}{2}\\right)^2$.\n\nBeim Kegel genauso mit $r$, $h$ und der Mantellinie $s$. Erst die Hilfsgröße, dann die Flächenformel."
+  },
+  {
+    "atom_id": "geometrie__besondere_linien_dreieck",
+    "explanation": "Vier Linienarten, vier Schnittpunkte: Mittelsenkrechten → Umkreismittelpunkt, Winkelhalbierenden → Inkreismittelpunkt, Seitenhalbierenden → Schwerpunkt, Höhen → Höhenschnittpunkt.\n\nDer Schwerpunkt teilt jede Seitenhalbierende im Verhältnis 2 : 1 – von der Ecke aus liegt er bei zwei Dritteln."
+  },
+  {
+    "atom_id": "geometrie__dreieck_konstruieren",
+    "explanation": "Ein Dreieck gibt es nur, wenn die zwei kürzeren Seiten zusammen länger sind als die längste (Dreiecksungleichung).\n\n3 cm, 4 cm, 6 cm geht: $3 + 4 > 6$. Mit 3 cm, 4 cm, 8 cm geht es nicht – die kurzen Seiten erreichen einander nicht."
+  },
+  {
+    "atom_id": "geometrie__dreiecksarten",
+    "explanation": "Nach Seiten: gleichseitig (drei gleich lange Seiten), gleichschenklig (zwei gleich lange), unregelmäßig (alle verschieden).\n\nNach Winkeln entscheidet der größte Winkel: unter 90° spitzwinklig, genau 90° rechtwinklig, über 90° stumpfwinklig. Im gleichschenkligen Dreieck sind die beiden Basiswinkel gleich groß."
+  },
+  {
+    "atom_id": "geometrie__ebene_figuren_grundschule",
+    "explanation": "Zähle die Ecken: keine Ecke → Kreis, 3 → Dreieck, 4 → Viereck, 5 → Fünfeck.\n\nBei Vierecken schaust du genauer hin: Vier rechte Winkel machen ein Rechteck; sind dazu alle Seiten gleich lang, ist es ein Quadrat."
+  },
+  {
+    "atom_id": "geometrie__flaeche_dreieck",
+    "explanation": "Grundseite mal Höhe, dann halbieren: $A = \\frac{g \\cdot h}{2}$. Für $g = 8$ cm und $h = 5$ cm: $40 : 2 = 20$ cm².\n\nDas Dreieck ist genau die Hälfte eines Parallelogramms mit gleicher Grundseite und Höhe – vergiss das Halbieren nicht."
+  },
+  {
+    "atom_id": "geometrie__flaeche_parallelogramm",
+    "explanation": "Grundseite mal Höhe: $A = g \\cdot h$. Die Höhe steht senkrecht auf der Grundseite – nimm nicht die schräge Seite!\n\nWarum das stimmt: Schneidest du links ein Dreieck ab und setzt es rechts an, entsteht ein Rechteck mit gleicher Fläche."
+  },
+  {
+    "atom_id": "geometrie__flaeche_trapez_zusammengesetzt",
+    "explanation": "Trapez: Mittelwert der beiden parallelen Seiten mal Höhe, $A = \\frac{a + c}{2} \\cdot h$. Für 10 cm, 6 cm und Höhe 4 cm: $8 \\cdot 4 = 32$ cm².\n\nZusammengesetzte Figuren zerlegst du in Rechtecke (oder Dreiecke), berechnest jede Teilfläche und addierst."
+  },
+  {
+    "atom_id": "geometrie__flaechen_volumeneinheiten_umrechnen",
+    "explanation": "Bei Flächen ist die Umrechnungszahl 100, bei Volumen 1000 – nicht 10 wie bei Längen. Ein Quadrat mit 1 dm Seitenlänge fasst $10 \\cdot 10 = 100$ cm², ein Würfel mit 1 dm Kante $10 \\cdot 10 \\cdot 10 = 1000$ cm³.\n\nAlso: 3 dm² = 300 cm² und 2500 cm³ = 2,5 dm³."
+  },
+  {
+    "atom_id": "geometrie__flaecheninhalt_einheitsquadrate",
+    "explanation": "Der Flächeninhalt sagt, wie viele Kästchen in eine Figur passen. Beim Rechteck musst du nicht einzeln zählen: Reihen mal Kästchen pro Reihe, z. B. $4 \\cdot 6 = 24$.\n\nDer Umfang ist etwas anderes: die Länge des Randes, einmal außen herum."
+  },
+  {
+    "atom_id": "geometrie__hoehen_erkennen",
+    "explanation": "Die Höhe steht immer senkrecht auf der Grundseite – sie ist der kürzeste Abstand zur gegenüberliegenden Ecke (oder Seite).\n\nDie schräge Seite ist keine Höhe! Im Bild erkennst du die Höhe am rechten Winkel, meist ist sie gestrichelt."
+  },
+  {
+    "atom_id": "geometrie__hoehensatz_kathetensatz",
+    "explanation": "Die Höhe teilt die Hypotenuse $c$ in die Abschnitte $p$ und $q$. Höhensatz: $h^2 = p \\cdot q$. Kathetensatz: Das Quadrat einer Kathete ist ihr anliegender Abschnitt mal die ganze Hypotenuse $c = p + q$.\n\nFür $p = 4$ und $q = 9$: $h^2 = 36$, also $h = 6$."
+  },
+  {
+    "atom_id": "geometrie__innenwinkelsatz_dreieck",
+    "explanation": "In jedem Dreieck ergeben die drei Innenwinkel zusammen 180°. Kennst du zwei, berechnest du den dritten: $180° - 65° - 40° = 75°$.\n\nReißt du die drei Ecken eines Papierdreiecks ab und legst sie aneinander, entsteht eine gerade Linie."
+  },
+  {
+    "atom_id": "geometrie__kegel_volumen_oberflaeche",
+    "explanation": "Ein Kegel füllt ein Drittel des Zylinders mit gleichem Radius und gleicher Höhe: $V = \\frac{1}{3} \\cdot \\pi \\cdot r^2 \\cdot h$.\n\nDie Mantellinie $s$ bildet mit $r$ und $h$ ein rechtwinkliges Dreieck: $s^2 = r^2 + h^2$. Die Mantelfläche ist $M = \\pi \\cdot r \\cdot s$."
+  },
+  {
+    "atom_id": "geometrie__koerper_und_netze_grundschule",
+    "explanation": "Körper erkennst du an ihren Flächen: Der Würfel hat 6 gleiche Quadrate, der Quader 6 Rechtecke, die Kugel ist überall rund. Der Zylinder hat zwei Kreise, der Kegel einen Kreis und eine Spitze, die Pyramide eine eckige Grundfläche und eine Spitze.\n\nWürfel und Quader haben 8 Ecken, 12 Kanten und 6 Flächen."
+  },
+  {
+    "atom_id": "geometrie__kongruenzsaetze",
+    "explanation": "Ein Dreieck ist eindeutig festgelegt durch: drei Seiten (SSS), zwei Seiten und den eingeschlossenen Winkel (SWS), eine Seite und die beiden anliegenden Winkel (WSW) oder zwei Seiten und den Winkel gegenüber der längeren Seite (SsW).\n\nDrei Winkel reichen nicht – sie legen nur die Form fest, nicht die Größe."
+  },
+  {
+    "atom_id": "geometrie__koordinatensystem",
+    "explanation": "Ein Punkt hat zwei Koordinaten: $P(x | y)$. Erst gehst du waagerecht (x), dann senkrecht (y). $P(3 | 2)$: 3 nach rechts, 2 nach oben.\n\nNegative Werte zeigen in die Gegenrichtung: negatives x nach links, negatives y nach unten."
+  },
+  {
+    "atom_id": "geometrie__kosinussatz",
+    "explanation": "Der Kosinussatz ist der Pythagoras für beliebige Dreiecke: $a^2 = b^2 + c^2 - 2bc \\cdot \\cos \\alpha$. Du nutzt ihn bei zwei Seiten und dem eingeschlossenen Winkel.\n\nSind alle drei Seiten gegeben, stellst du nach dem Winkel um: $\\cos \\alpha = \\frac{b^2 + c^2 - a^2}{2bc}$."
+  },
+  {
+    "atom_id": "geometrie__kreis_grundbegriffe",
+    "explanation": "Alle Punkte der Kreislinie sind vom Mittelpunkt gleich weit entfernt – diese Strecke heißt Radius $r$. Der Durchmesser $d$ geht quer durch den Mittelpunkt und ist doppelt so lang: $d = 2 \\cdot r$.\n\nEine Sehne verbindet zwei beliebige Punkte der Kreislinie. Der Durchmesser ist die längste Sehne."
+  },
+  {
+    "atom_id": "geometrie__kreisbogen_kreissektor",
+    "explanation": "Ein Sektor ist ein „Tortenstück\" – der Anteil $\\frac{\\alpha}{360°}$ vom ganzen Kreis. Bei 90° ist das ein Viertel.\n\nDenselben Anteil nimmst du vom Umfang (Bogenlänge $b = \\frac{\\alpha}{360°} \\cdot 2\\pi r$) oder von der Fläche ($A = \\frac{\\alpha}{360°} \\cdot \\pi r^2$)."
+  },
+  {
+    "atom_id": "geometrie__kreisflaeche",
+    "explanation": "$A = \\pi \\cdot r^2$: erst den Radius quadrieren, dann mit $\\pi$ multiplizieren. Für $r = 3$ cm: $3{,}14 \\cdot 9 = 28{,}26$ cm².\n\nIst der Durchmesser gegeben, halbiere ihn zuerst. Nicht mit dem Umfang ($2 \\pi r$) verwechseln – Fläche hat das Quadrat."
+  },
+  {
+    "atom_id": "geometrie__kreissaetze",
+    "explanation": "Satz des Thales: Liegt C auf dem Kreis über dem Durchmesser AB, ist der Winkel bei C immer 90°.\n\nPeripheriewinkel über derselben Sehne sind gleich groß; der Mittelpunktswinkel ist doppelt so groß. Im Sehnenviereck ergänzen sich gegenüberliegende Winkel zu 180°."
+  },
+  {
+    "atom_id": "geometrie__kreisumfang",
+    "explanation": "Der Umfang ist immer etwa 3,14-mal so lang wie der Durchmesser: $u = \\pi \\cdot d = 2 \\cdot \\pi \\cdot r$.\n\nIst der Radius gegeben, verdopple ihn zuerst. Für $r = 5$ cm: $u = 3{,}14 \\cdot 10 = 31{,}4$ cm. Rückwärts: $d = u : \\pi$."
+  },
+  {
+    "atom_id": "geometrie__kugel_volumen_oberflaeche",
+    "explanation": "Volumen: $V = \\frac{4}{3} \\cdot \\pi \\cdot r^3$ – der Radius wird dreimal mit sich selbst multipliziert. Oberfläche: $O = 4 \\cdot \\pi \\cdot r^2$, also viermal die Fläche des größten Kreises.\n\nFür $r = 3$ cm: $V = \\frac{4}{3} \\cdot 3{,}14 \\cdot 27 \\approx 113{,}04$ cm³."
+  },
+  {
+    "atom_id": "geometrie__laengeneinheiten_umrechnen",
+    "explanation": "Umrechnungszahlen: 1 km = 1000 m, 1 m = 100 cm, 1 cm = 10 mm. In die kleinere Einheit multiplizierst du, in die größere teilst du.\n\n2,5 m sind $2{,}5 \\cdot 100 = 250$ cm; 340 cm sind 3,4 m. Kleinere Einheit → größere Zahl."
+  },
+  {
+    "atom_id": "geometrie__lagebeziehungen_lineare_figuren",
+    "explanation": "Parallele Linien haben überall denselben Abstand und treffen sich nie – wie Eisenbahnschienen.\n\nSenkrechte Linien bilden einen rechten Winkel – wie die Ecke eines Blattes Papier. Mit dem Geodreieck kannst du beides prüfen."
+  },
+  {
+    "atom_id": "geometrie__neben_scheitelwinkel",
+    "explanation": "Schneiden sich zwei Geraden, entstehen vier Winkel. Gegenüberliegende heißen Scheitelwinkel und sind gleich groß.\n\nNebeneinanderliegende heißen Nebenwinkel und ergeben zusammen 180°: Ist einer 70° groß, hat sein Nebenwinkel 110°."
+  },
+  {
+    "atom_id": "geometrie__prismen",
+    "explanation": "Ein Prisma hat überall denselben Querschnitt. Sein Volumen ist Grundfläche mal Höhe: $V = G \\cdot h$.\n\nIst die Grundfläche ein Dreieck, berechnest du zuerst $G = \\frac{g \\cdot h_g}{2}$ und multiplizierst dann mit der Länge des Prismas."
+  },
+  {
+    "atom_id": "geometrie__pyramiden",
+    "explanation": "Eine Pyramide füllt genau ein Drittel des Prismas mit gleicher Grundfläche und Höhe: $V = \\frac{1}{3} \\cdot G \\cdot h$.\n\nBei quadratischer Grundfläche ist $G = a^2$. Für $a = 6$ cm und $h = 5$ cm: $\\frac{1}{3} \\cdot 36 \\cdot 5 = 60$ cm³."
+  },
+  {
+    "atom_id": "geometrie__pythagoras_hypotenuse",
+    "explanation": "Im rechtwinkligen Dreieck gilt $a^2 + b^2 = c^2$. Die Hypotenuse $c$ liegt dem rechten Winkel gegenüber und ist die längste Seite.\n\nFür die Katheten 3 cm und 4 cm: $c^2 = 9 + 16 = 25$, also $c = 5$ cm. Vergiss am Ende das Wurzelziehen nicht."
+  },
+  {
+    "atom_id": "geometrie__pythagoras_kathete",
+    "explanation": "Ist die Hypotenuse $c$ gegeben und eine Kathete gesucht, stellst du um: $a^2 = c^2 - b^2$. Hier wird subtrahiert!\n\nFür $c = 13$ cm und $b = 5$ cm: $a^2 = 169 - 25 = 144$, also $a = 12$ cm. Die Kathete muss kürzer sein als die Hypotenuse."
+  },
+  {
+    "atom_id": "geometrie__pythagoras_umkehrung",
+    "explanation": "Mit dem Satz des Pythagoras kannst du prüfen, ob ein Dreieck rechtwinklig ist: Quadriere die beiden kürzeren Seiten und addiere. Kommt das Quadrat der längsten Seite heraus, ist es rechtwinklig.\n\n6, 8, 10: $36 + 64 = 100 = 10^2$ ✓. Bei 5, 6, 8: $25 + 36 = 61 \\neq 64$ – nicht rechtwinklig."
+  },
+  {
+    "atom_id": "geometrie__quader_volumen_oberflaeche",
+    "explanation": "Volumen: Länge mal Breite mal Höhe, $V = a \\cdot b \\cdot c$ – so viele Einheitswürfel passen hinein.\n\nOberfläche: Der Quader hat 6 Rechtecke, je zwei gleiche: $O = 2 \\cdot (ab + ac + bc)$. Für 4, 3 und 2 cm: $V = 24$ cm³, $O = 2 \\cdot (12 + 8 + 6) = 52$ cm²."
+  },
+  {
+    "atom_id": "geometrie__rechteck_flaeche_umfang",
+    "explanation": "Flächeninhalt: Länge mal Breite, $A = a \\cdot b$ – so viele Einheitsquadrate passen hinein. Umfang: alle vier Seiten zusammen, $u = 2 \\cdot (a + b)$.\n\nFür 6 cm und 4 cm: $A = 24$ cm², $u = 20$ cm. Fehlt eine Seite, teilst du: $b = A : a$."
+  },
+  {
+    "atom_id": "geometrie__senkrecht_parallel",
+    "explanation": "Parallel: gleiche Richtung, überall gleicher Abstand, kein Schnittpunkt. Senkrecht: Die Geraden schneiden sich im rechten Winkel.\n\nZum Schlussfolgern hilft eine Skizze: Ist a parallel zu b und c senkrecht zu a, dann ist c auch senkrecht zu b. Abstände misst man immer senkrecht."
+  },
+  {
+    "atom_id": "geometrie__sin_cos_tan_definition",
+    "explanation": "Im rechtwinkligen Dreieck, vom Winkel α aus gesehen: Die Gegenkathete liegt α gegenüber, die Ankathete liegt an α, die Hypotenuse liegt dem rechten Winkel gegenüber.\n\n$\\sin \\alpha = \\frac{\\text{Gegenkathete}}{\\text{Hypotenuse}}$, $\\cos \\alpha = \\frac{\\text{Ankathete}}{\\text{Hypotenuse}}$, $\\tan \\alpha = \\frac{\\text{Gegenkathete}}{\\text{Ankathete}}$."
+  },
+  {
+    "atom_id": "geometrie__sinussatz",
+    "explanation": "In jedem Dreieck ist das Verhältnis Seite zu Sinus des gegenüberliegenden Winkels gleich: $\\frac{a}{\\sin \\alpha} = \\frac{b}{\\sin \\beta} = \\frac{c}{\\sin \\gamma}$.\n\nDu brauchst ein vollständiges Paar (Seite und Gegenwinkel). Fehlt ein Winkel, hilft die Winkelsumme 180°. Dann umstellen: $b = \\frac{a \\cdot \\sin \\beta}{\\sin \\alpha}$."
+  },
+  {
+    "atom_id": "geometrie__strahlensaetze",
+    "explanation": "Schneiden zwei Parallelen zwei Strahlen mit gemeinsamem Startpunkt, entstehen zwei ähnliche Dreiecke – eines ist die Vergrößerung des anderen.\n\nAlle einander entsprechenden Strecken stehen im selben Verhältnis: Ist eine Strecke im großen Dreieck dreimal so lang wie im kleinen, gilt das für alle."
+  },
+  {
+    "atom_id": "geometrie__stufen_wechselwinkel",
+    "explanation": "Schneidet eine Gerade zwei Parallelen, entstehen an beiden Kreuzungen die gleichen Winkel. Stufenwinkel liegen an derselben Stelle (wie verschoben), Wechselwinkel liegen innen auf verschiedenen Seiten (wie in einem Z).\n\nBeide Arten sind gleich groß – aber nur, wenn die Geraden wirklich parallel sind."
+  },
+  {
+    "atom_id": "geometrie__symmetrie_grundschule",
+    "explanation": "Eine Figur ist achsensymmetrisch, wenn du sie so falten kannst, dass beide Hälften genau aufeinanderliegen. Die Faltlinie heißt Symmetrieachse.\n\nEin Quadrat hat 4 solche Achsen, ein Rechteck nur 2 – die Diagonalen des Rechtecks sind keine Spiegelachsen."
+  },
+  {
+    "atom_id": "geometrie__trigonometrie_seiten_berechnen",
+    "explanation": "Schau, welche Seite gegeben und welche gesucht ist, und wähle die passende Funktion: Gegenkathete und Hypotenuse → sin, Ankathete und Hypotenuse → cos, beide Katheten → tan.\n\nDann nach der gesuchten Seite umstellen: Aus $\\sin 30° = \\frac{a}{10}$ wird $a = 10 \\cdot \\sin 30° = 5$. Taschenrechner auf Grad (DEG) stellen."
+  },
+  {
+    "atom_id": "geometrie__trigonometrie_winkel_berechnen",
+    "explanation": "Sind zwei Seiten bekannt, bilde das passende Verhältnis und nutze die Umkehrfunktion: $\\sin \\alpha = \\frac{3}{5} = 0{,}6$ → $\\alpha = \\sin^{-1}(0{,}6) \\approx 36{,}9°$.\n\nWelche Funktion passt, hängt von den gegebenen Seiten ab: Gegenkathete/Hypotenuse → sin, Ankathete/Hypotenuse → cos, Gegenkathete/Ankathete → tan."
+  },
+  {
+    "atom_id": "geometrie__vierecke_systematisieren",
+    "explanation": "Im „Haus der Vierecke\" erbt jede Figur die Eigenschaften der allgemeineren: Jedes Quadrat ist auch ein Rechteck und eine Raute, jedes Rechteck ein Parallelogramm, jedes Parallelogramm ein Trapez.\n\nUmgekehrt gilt das nicht: Ein Rechteck ist nur dann ein Quadrat, wenn alle Seiten gleich lang sind."
+  },
+  {
+    "atom_id": "geometrie__winkel_zeichnen_messen",
+    "explanation": "Winkel werden nach ihrer Größe benannt: spitz (unter 90°), recht (genau 90°), stumpf (zwischen 90° und 180°), gestreckt (genau 180°), überstumpf (über 180°).\n\nVergleiche mit der Ecke eines Blattes: Ist der Winkel enger, ist er spitz; ist er weiter, stumpf."
+  },
+  {
+    "atom_id": "geometrie__zentrische_streckung_aehnlichkeit",
+    "explanation": "Bei einer zentrischen Streckung wird jede Länge mit dem Streckfaktor $k$ multipliziert: Bildlänge = Originallänge · k. Die Winkel bleiben gleich.\n\n$k > 1$ vergrößert, $0 < k < 1$ verkleinert. Den Faktor findest du als Bild durch Original: aus 4 cm werden 10 cm → $k = 2{,}5$."
+  },
+  {
+    "atom_id": "geometrie__zylinder_volumen_oberflaeche",
+    "explanation": "Volumen: Grundfläche (Kreis) mal Höhe, $V = \\pi \\cdot r^2 \\cdot h$.\n\nOberfläche: zwei Kreise plus Mantel. Abgerollt ist der Mantel ein Rechteck mit den Seiten Umfang und Höhe: $O = 2 \\pi r^2 + 2 \\pi r \\cdot h$."
+  },
+  {
+    "atom_id": "linalg__erweiterte_koeffizientenmatrix",
+    "explanation": "In der erweiterten Koeffizientenmatrix stehen nur die Zahlen des Gleichungssystems: links die Koeffizienten der Variablen, rechts vom Strich die Ergebnisse. Fehlt eine Variable, steht dort 0.\n\nErlaubt ist: Zeilen vertauschen, eine Zeile mit einer Zahl (≠ 0) multiplizieren und ein Vielfaches einer Zeile zu einer anderen addieren."
+  },
+  {
+    "atom_id": "linalg__gauss_verfahren",
+    "explanation": "Ziel ist die Stufenform: Unter der Diagonale sollen Nullen stehen. Erzeuge sie Spalte für Spalte durch Zeilenumformungen, dann löst du von unten nach oben auf.\n\nEntsteht eine Zeile $0 = 0$, gibt es unendlich viele Lösungen; bei $0 = 5$ gibt es keine. Mache am Ende die Probe in allen Gleichungen."
+  },
+  {
+    "atom_id": "logik__mengen_zahlbereiche",
+    "explanation": "Die Zahlbereiche stecken ineinander: natürliche Zahlen $\\mathbb{N}$ (1, 2, 3 …) ⊂ ganze Zahlen $\\mathbb{Z}$ (auch 0 und negative) ⊂ rationale Zahlen $\\mathbb{Q}$ (alle Brüche und Kommazahlen, die abbrechen oder periodisch sind).\n\n$-3$ ist ganz und rational, aber nicht natürlich. $\\frac{1}{2}$ ist nur rational."
+  },
+  {
+    "atom_id": "logik__saetze_und_beweise",
+    "explanation": "Eine Definition legt fest, was ein Wort bedeutet („… heißt …\"). Ein Satz ist eine Behauptung, die bewiesen werden muss.\n\nEine „für alle\"-Behauptung widerlegst du mit einem einzigen Gegenbeispiel. Und: Die Umkehrung eines Satzes gilt nicht automatisch – jedes Quadrat ist ein Rechteck, aber nicht jedes Rechteck ein Quadrat."
+  },
+  {
+    "atom_id": "stochastik__baumdiagramm_pfadmultiplikation",
+    "explanation": "Ein Baumdiagramm zeigt mehrstufige Versuche: Jede Stufe verzweigt sich, an den Ästen stehen die Wahrscheinlichkeiten. An jeder Verzweigung ergeben sie zusammen 1.\n\nEntlang eines Pfades wird multipliziert: Zweimal Kopf beim Münzwurf hat die Wahrscheinlichkeit $\\frac{1}{2} \\cdot \\frac{1}{2} = \\frac{1}{4}$."
+  },
+  {
+    "atom_id": "stochastik__bedingte_wahrscheinlichkeit_begriff",
+    "explanation": "$P(B \\mid A)$ ist die Wahrscheinlichkeit von B, wenn A schon eingetreten ist. Du schaust dann nur noch auf die Fälle mit A: $P(B \\mid A) = \\frac{P(A \\cap B)}{P(A)}$.\n\nVon 100 Schülern sind 40 im Sportverein, 10 davon spielen ein Instrument: Unter den Sportlern ist der Anteil $\\frac{10}{40} = 25\\,\\%$ – nicht $\\frac{10}{100}$."
+  },
+  {
+    "atom_id": "stochastik__bernoulli_kette",
+    "explanation": "Ein Bernoulli-Versuch hat nur zwei Ausgänge: Treffer (Wahrscheinlichkeit p) oder Niete ($1 - p$).\n\nWiederholst du ihn n-mal unabhängig mit immer gleichem p, entsteht eine Bernoulli-Kette. Zehnmal würfeln und Sechsen zählen: $n = 10$, $p = \\frac{1}{6}$. Ziehen ohne Zurücklegen ist keine Bernoulli-Kette, weil sich p ändert."
+  },
+  {
+    "atom_id": "stochastik__binomial_erwartungswert_sigma",
+    "explanation": "Bei der Binomialverteilung ist der Erwartungswert $\\mu = n \\cdot p$: Bei 60 Würfen erwartest du $60 \\cdot \\frac{1}{6} = 10$ Sechsen.\n\nDie Standardabweichung ist $\\sigma = \\sqrt{n \\cdot p \\cdot (1 - p)}$. Sie sagt, wie weit die Trefferzahl typischerweise von $\\mu$ abweicht."
+  },
+  {
+    "atom_id": "stochastik__binomialkoeffizient",
+    "explanation": "$\\binom{n}{k}$ („n über k\") zählt, auf wie viele Arten man k Dinge aus n auswählen kann, wenn die Reihenfolge egal ist.\n\n$\\binom{5}{2} = \\frac{5 \\cdot 4}{2 \\cdot 1} = 10$: Aus 5 Personen lassen sich 10 verschiedene Zweierteams bilden. Durch $2 \\cdot 1$ wird geteilt, weil Anna–Ben und Ben–Anna dasselbe Team sind."
+  },
+  {
+    "atom_id": "stochastik__binomialverteilung_formel",
+    "explanation": "Die Wahrscheinlichkeit für genau k Treffer in n Versuchen: $P(X = k) = \\binom{n}{k} \\cdot p^k \\cdot (1 - p)^{n - k}$.\n\n$p^k$ steht für die k Treffer, $(1 - p)^{n - k}$ für die Nieten, und $\\binom{n}{k}$ zählt, an welchen Stellen die Treffer liegen können. Genau 2 Sechsen bei 3 Würfen: $3 \\cdot \\left(\\frac{1}{6}\\right)^2 \\cdot \\frac{5}{6}$."
+  },
+  {
+    "atom_id": "stochastik__boxplot",
+    "explanation": "Ein Boxplot zeigt fünf Kennwerte: Minimum, unteres Quartil, Median, oberes Quartil, Maximum. Die Box reicht vom unteren zum oberen Quartil und enthält die mittlere Hälfte der Daten; der Strich in der Box ist der Median.\n\nEine lange Box oder lange Antennen bedeuten große Streuung – nicht viele Werte."
+  },
+  {
+    "atom_id": "stochastik__daten_erheben_darstellen_grundschule",
+    "explanation": "Beim Zählen hilft die Strichliste: Jeder Strich steht für eine Antwort, der fünfte wird quer gesetzt – so zählst du in Fünferbündeln.\n\nIm Säulen- oder Balkendiagramm zeigt die Länge, wie oft etwas vorkommt. Lies den Wert an der Achse ab: Die höchste Säule gehört zur häufigsten Antwort."
+  },
+  {
+    "atom_id": "stochastik__diagramme_lesen_erstellen",
+    "explanation": "Säulendiagramme vergleichen Anzahlen, Liniendiagramme zeigen eine Entwicklung über die Zeit, Kreisdiagramme zeigen Anteile am Ganzen.\n\nLies immer zuerst Achsenbeschriftung und Einteilung. Im Kreisdiagramm entspricht 1 % genau 3,6°: 25 % sind ein Viertelkreis, also 90°."
+  },
+  {
+    "atom_id": "stochastik__ereignis_ergebnismenge",
+    "explanation": "Die Ergebnismenge enthält alle möglichen Ergebnisse eines Zufallsversuchs – beim Würfeln $\\{1, 2, 3, 4, 5, 6\\}$. Ein Ereignis ist ein Teil davon, z. B. „gerade Zahl\" = $\\{2, 4, 6\\}$.\n\nDas Gegenereignis enthält alle übrigen Ergebnisse: „ungerade Zahl\" = $\\{1, 3, 5\\}$."
+  },
+  {
+    "atom_id": "stochastik__erwartungswert",
+    "explanation": "Der Erwartungswert ist der Durchschnitt, der sich auf lange Sicht einstellt: Jeden Wert mit seiner Wahrscheinlichkeit multiplizieren und alles addieren.\n\nLos mit 10 € Gewinn (Wahrscheinlichkeit 0,1), sonst nichts: $E = 10 \\cdot 0{,}1 + 0 \\cdot 0{,}9 = 1$ €. Kostet das Los 1 €, ist das Spiel fair."
+  },
+  {
+    "atom_id": "stochastik__gegenereignis",
+    "explanation": "Ein Ereignis und sein Gegenereignis ergeben zusammen 100 %: $P(\\text{nicht } A) = 1 - P(A)$.\n\nDas spart Arbeit bei „mindestens einmal\": Statt viele Fälle zu addieren, rechnest du 1 minus „keinmal\". Mindestens eine Sechs bei zwei Würfen: $1 - \\frac{5}{6} \\cdot \\frac{5}{6} = \\frac{11}{36}$."
+  },
+  {
+    "atom_id": "stochastik__haeufigkeiten",
+    "explanation": "Die absolute Häufigkeit ist die Anzahl: 12 von 30 Kindern spielen Fußball. Die relative Häufigkeit ist der Anteil: $\\frac{12}{30} = 0{,}4 = 40\\,\\%$.\n\nMit relativen Häufigkeiten kannst du Gruppen verschiedener Größe fair vergleichen. Alle relativen Häufigkeiten zusammen ergeben 1 (100 %)."
+  },
+  {
+    "atom_id": "stochastik__hypothesentest",
+    "explanation": "Du prüfst eine Vermutung (Nullhypothese) mit einer Stichprobe. Vorher legst du fest, bei welchen Ergebnissen du sie ablehnst – so, dass das bei wahrer Hypothese höchstens mit der Wahrscheinlichkeit des Signifikanzniveaus (z. B. 5 %) passiert.\n\nFehler 1. Art: eine wahre Hypothese ablehnen. Fehler 2. Art: eine falsche Hypothese beibehalten."
+  },
+  {
+    "atom_id": "stochastik__kumulierte_binomialverteilung",
+    "explanation": "„Höchstens k Treffer\" bedeutet $P(X \\leq k)$: alle Wahrscheinlichkeiten von 0 bis k addiert. Das liefert der Taschenrechner als kumulierte Binomialverteilung.\n\n„Mindestens k\" rechnest du über das Gegenteil: $P(X \\geq k) = 1 - P(X \\leq k - 1)$. Achte genau auf die Grenze – „mindestens 3\" ist das Gegenteil von „höchstens 2\"."
+  },
+  {
+    "atom_id": "stochastik__laplace_formel",
+    "explanation": "Sind alle Ergebnisse gleich wahrscheinlich, gilt: $P = \\frac{\\text{günstige Ergebnisse}}{\\text{mögliche Ergebnisse}}$.\n\nBeim Würfeln ist die Wahrscheinlichkeit für eine Zahl größer als 4: $\\frac{2}{6} = \\frac{1}{3}$. Prüfe vorher, ob wirklich alles gleich wahrscheinlich ist – bei einem Glücksrad mit ungleichen Feldern gilt die Formel nicht."
+  },
+  {
+    "atom_id": "stochastik__median",
+    "explanation": "Ordne die Werte der Größe nach – der Median steht in der Mitte. Bei 3, 5, 8, 9, 20 ist das die 8.\n\nBei gerader Anzahl nimmst du den Mittelwert der beiden mittleren Werte: bei 3, 5, 8, 9 ist der Median 6,5. Anders als der Durchschnitt wird der Median von Ausreißern kaum beeinflusst."
+  },
+  {
+    "atom_id": "stochastik__pfadadditionsregel",
+    "explanation": "Gehören mehrere Pfade zu einem Ereignis, addierst du ihre Pfadwahrscheinlichkeiten.\n\n„Genau einmal Kopf bei zwei Würfen\" hat die Pfade Kopf–Zahl und Zahl–Kopf: $\\frac{1}{4} + \\frac{1}{4} = \\frac{1}{2}$. Entlang eines Pfades multiplizieren, zwischen Pfaden addieren."
+  },
+  {
+    "atom_id": "stochastik__quartile",
+    "explanation": "Quartile teilen die geordnete Datenreihe in vier gleich große Teile. Der Median halbiert die Daten; das untere Quartil ist der Median der unteren Hälfte, das obere der Median der oberen Hälfte.\n\nDer Quartilsabstand (oberes minus unteres Quartil) zeigt, wie breit die mittlere Hälfte der Daten streut."
+  },
+  {
+    "atom_id": "stochastik__relative_haeufigkeit_schaetzwert",
+    "explanation": "Bei wenigen Versuchen schwankt die relative Häufigkeit stark. Je öfter du den Versuch wiederholst, desto mehr pendelt sie sich bei einem festen Wert ein – der Wahrscheinlichkeit.\n\nFällt eine Reißzwecke bei 1000 Würfen 620-mal auf den Kopf, schätzt du: $P \\approx 0{,}62$."
+  },
+  {
+    "atom_id": "stochastik__satz_von_bayes",
+    "explanation": "Oft kennst du $P(B \\mid A)$, gesucht ist aber $P(A \\mid B)$ – das ist nicht dasselbe! Zeichne den Baum und rechne: Wahrscheinlichkeit des passenden Pfades geteilt durch die Summe aller Pfade, die zu B führen.\n\nDeshalb bedeutet ein positiver Test bei einer seltenen Krankheit oft trotzdem nur eine kleine Krankheitswahrscheinlichkeit."
+  },
+  {
+    "atom_id": "stochastik__schaetzen_konfidenzintervall",
+    "explanation": "Aus einer Stichprobe schätzt du eine unbekannte Wahrscheinlichkeit: 120 Treffer bei 400 Versuchen ergeben $h = 0{,}3$.\n\nDas Konfidenzintervall gibt an, welche Werte von p zu diesem Ergebnis passen – ungefähr $h \\pm 1{,}96 \\cdot \\sqrt{\\frac{h(1 - h)}{n}}$ für 95 % Sicherheit. Größere Stichproben machen das Intervall schmaler."
+  },
+  {
+    "atom_id": "stochastik__sigma_regeln",
+    "explanation": "Bei einer Binomialverteilung liegen die Ergebnisse meist nahe am Erwartungswert: mit etwa 68 % im Bereich $\\mu \\pm \\sigma$, mit etwa 95,5 % in $\\mu \\pm 2\\sigma$ und mit etwa 99,7 % in $\\mu \\pm 3\\sigma$.\n\nFür $\\mu = 50$ und $\\sigma = 5$ liegen also rund 95 % der Ergebnisse zwischen 40 und 60. Die Regeln gelten gut, wenn $\\sigma > 3$ ist."
+  },
+  {
+    "atom_id": "stochastik__stochastische_unabhaengigkeit",
+    "explanation": "Zwei Ereignisse sind unabhängig, wenn das Eintreten des einen die Wahrscheinlichkeit des anderen nicht ändert. Prüfe: $P(A \\cap B) = P(A) \\cdot P(B)$.\n\nZwei Würfelwürfe sind unabhängig. Nicht verwechseln mit unvereinbar: Ereignisse, die nie gleichzeitig eintreten, sind gerade nicht unabhängig."
+  },
+  {
+    "atom_id": "stochastik__streumasse",
+    "explanation": "Streumaße sagen, wie weit die Daten auseinanderliegen. Die Spannweite ist größter minus kleinster Wert: bei 4, 7, 9, 15 ist sie 11.\n\nDie mittlere Abweichung ist der Durchschnitt der Abstände aller Werte zum Mittelwert. Zwei Datenreihen können denselben Mittelwert, aber ganz verschiedene Streuung haben."
+  },
+  {
+    "atom_id": "stochastik__varianz_standardabweichung",
+    "explanation": "Die Varianz misst, wie stark die Werte um den Erwartungswert streuen: Abstand jedes Wertes zum Erwartungswert quadrieren, mit seiner Wahrscheinlichkeit multiplizieren, alles addieren.\n\nDie Standardabweichung $\\sigma$ ist die Wurzel daraus – sie hat dieselbe Einheit wie die Werte. Großes $\\sigma$ bedeutet: Die Ergebnisse schwanken stark."
+  },
+  {
+    "atom_id": "stochastik__vierfeldertafel",
+    "explanation": "Eine Vierfeldertafel ordnet zwei Merkmale mit je zwei Ausprägungen. Innen stehen die vier Kombinationen, am Rand die Summen der Zeilen und Spalten, unten rechts die Gesamtzahl.\n\nFehlende Felder ergänzt du durch Addieren und Subtrahieren: Jede Zeile und jede Spalte muss zu ihrer Randsumme passen."
+  },
+  {
+    "atom_id": "stochastik__zaehlprinzip_permutationen",
+    "explanation": "Zählprinzip: Bei mehreren Entscheidungen nacheinander multiplizierst du die Anzahl der Möglichkeiten. 3 Vorspeisen und 4 Hauptgerichte ergeben $3 \\cdot 4 = 12$ Menüs.\n\nSollen n Dinge angeordnet werden, gibt es $n!$ Möglichkeiten: 4 Bücher lassen sich auf $4! = 4 \\cdot 3 \\cdot 2 \\cdot 1 = 24$ Arten nebeneinanderstellen."
+  },
+  {
+    "atom_id": "stochastik__ziehen_mit_ohne_zuruecklegen",
+    "explanation": "Mit Zurücklegen bleiben die Wahrscheinlichkeiten in jeder Stufe gleich. Ohne Zurücklegen ändern sie sich, weil eine Kugel fehlt.\n\nUrne mit 3 roten und 2 blauen Kugeln, zweimal Rot ohne Zurücklegen: $\\frac{3}{5} \\cdot \\frac{2}{4} = \\frac{3}{10}$ – beim zweiten Zug sind nur noch 2 von 4 Kugeln rot."
+  },
+  {
+    "atom_id": "stochastik__zufall_kombinatorik_grundschule",
+    "explanation": "Sicher ist, was immer eintritt (mit einem Würfel eine Zahl von 1 bis 6 würfeln). Unmöglich ist, was nie eintritt (eine 7). Alles dazwischen ist möglich – manches wahrscheinlicher als anderes.\n\nMöglichkeiten zählst du geordnet: 3 T-Shirts und 2 Hosen ergeben $3 \\cdot 2 = 6$ Kombinationen."
+  },
+  {
+    "atom_id": "stochastik__zufallsgroesse_verteilung",
+    "explanation": "Eine Zufallsgröße ordnet jedem Ergebnis eine Zahl zu, z. B. den Gewinn in Euro. Die Wahrscheinlichkeitsverteilung listet auf, mit welcher Wahrscheinlichkeit jeder Wert auftritt.\n\nBeim Münzwurf mit „Anzahl Kopf bei zwei Würfen\": $P(0) = \\frac{1}{4}$, $P(1) = \\frac{1}{2}$, $P(2) = \\frac{1}{4}$. Die Summe ist immer 1."
+  }
+]

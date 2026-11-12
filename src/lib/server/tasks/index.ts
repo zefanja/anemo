@@ -66,6 +66,7 @@ export async function getTaskForAtom(atomId: string, excludePrompts: string[] = 
 			answerType: imported.answerType as GeneratedTask['answerType'],
 			correctAnswer: imported.correctAnswer,
 			hint: imported.hint ?? undefined,
+			why: imported.why ?? undefined,
 			difficulty: imported.difficulty ?? undefined,
 			tolerance: imported.tolerance ?? undefined
 		};
@@ -91,6 +92,7 @@ export async function getTaskForAtom(atomId: string, excludePrompts: string[] = 
 			answerType: generated.answerType,
 			correctAnswer: generated.correctAnswer,
 			hint: generated.hint ?? null,
+			why: generated.why ?? null,
 			difficulty: generated.difficulty ?? null,
 			tolerance: generated.tolerance ?? null,
 			generatorId: atomId

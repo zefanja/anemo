@@ -204,6 +204,8 @@ export const tasks = pgTable(
 		correctAnswer: text('correct_answer'),
 		distractors: jsonb('distractors').$type<string[]>(),
 		hint: text('hint'),
+		// short rationale for this concrete task, shown behind the "Warum?" button after answering
+		why: text('why'),
 		difficulty: real('difficulty'),
 		// accepted absolute deviation for numeric answers (null = exact match)
 		tolerance: real('tolerance'),
