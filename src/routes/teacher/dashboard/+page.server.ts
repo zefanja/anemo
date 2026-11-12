@@ -8,22 +8,26 @@ export const load: PageServerLoad = async ({ locals }) => {
 	}
 	const { teacherId } = locals.session;
 
-	const [classes, rawAttempts] = await Promise.all([
-		db.query.classes.findMany({
-			where: (c, { eq }) => eq(c.teacherId, teacherId),
-			with: { students: { columns: { id: true, displayName: true } } }
-		}),
-		db.query.attempts.findMany({
-			orderBy: (a, { desc }) => [desc(a.answeredAt)],
-			limit: 1000,
-			with: {
-				student: { columns: { id: true, displayName: true, classId: true } },
-				atom: { columns: { label: true } }
-			}
-		})
-	]);
+	const classes = await db.query.classes.findMany({
+		where: (c, { eq }) => eq(c.teacherId, teacherId),
+		with: { students: { columns: { id: true, displayName: true } } }
+	});
 
 	const studentIds = classes.flatMap((c) => c.students.map((s) => s.id));
+
+	// Only attempts of this teacher's own students
+	const rawAttempts =
+		studentIds.length > 0
+			? await db.query.attempts.findMany({
+					where: (a, { inArray }) => inArray(a.studentId, studentIds),
+					orderBy: (a, { desc }) => [desc(a.answeredAt)],
+					limit: 2000,
+					with: {
+						student: { columns: { id: true, displayName: true, classId: true } },
+						atom: { columns: { label: true } }
+					}
+				})
+			: [];
 
 	const [masteredStatuses, totalAtomCount, gamiStates, atomStatuses] = await Promise.all([
 		studentIds.length > 0
@@ -71,8 +75,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 				masteredCount: masteredByStudent.get(s.id) ?? 0
 			}))
 		)
-		.sort((a, b) => b.xp - a.xp)
-		.slice(0, 10);
+		.sort((a, b) => b.xp - a.xp);
 
 	// Build student info lookup
 	const studentInfoMap = new Map<string, { displayName: string; classId: string; className: string }>();
@@ -203,7 +206,15 @@ export const load: PageServerLoad = async ({ locals }) => {
 		entry.total++;
 		if (a.isCorrect) entry.correct++;
 	}
-	const recentActivity = Array.from(activityMap.values()).slice(0, 15);
+	// Full list (ordered by last activity); the page filters by class and truncates
+	const recentActivity = Array.from(activityMap.values());
+
+	const classStats = classes.map((c) => {
+		const ids = new Set(c.students.map((s) => s.id));
+		let mastered = 0;
+		for (const [sid, n] of masteredByStudent) if (ids.has(sid)) mastered += n;
+		return { classId: c.id, studentCount: c.students.length, masteredCount: mastered };
+	});
 
 	return {
 		stats: {
@@ -212,6 +223,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 			masteredCount: masteredStatuses.length,
 			totalAtoms: totalAtomCount.length
 		},
+		classStats,
 		classes: classes.map((c) => ({ id: c.id, name: c.name, studentCount: c.students.length })),
 		recentActivity,
 		leaderboard,
