@@ -296,7 +296,10 @@
 		const update = () => {
 			// covered by the docked pad / sticky footer, or simply below the fold
 			const cover = padDockEl?.getBoundingClientRect().top ?? scroller.getBoundingClientRect().bottom;
-			moreBelow = card.getBoundingClientRect().bottom - cover > 24;
+			// bottom of the actual content (ignore the card's own padding)
+			let contentBottom = -Infinity;
+			for (const child of card.children) contentBottom = Math.max(contentBottom, child.getBoundingClientRect().bottom);
+			moreBelow = contentBottom - cover > 12;
 		};
 		update();
 		scroller.addEventListener('scroll', update, { passive: true });
@@ -1560,8 +1563,9 @@
 	.task-footer .btn-3d { width: 100%; }
 	.pad-dock { position: sticky; bottom: 0; margin-top: auto; z-index: 2; }
 	.more-below {
-		position: absolute; left: 50%; bottom: calc(100% + 0.5rem); translate: -50% 0;
-		width: 3rem; height: 3rem; border-radius: 999px; border: 0; cursor: pointer;
+		/* at the right edge, so it does not cover the (centred) answer field */
+		position: absolute; right: 0.75rem; bottom: calc(100% - 1.1rem); z-index: 1;
+		width: 2.75rem; height: 2.75rem; border-radius: 999px; border: 0; cursor: pointer;
 		display: flex; align-items: center; justify-content: center;
 		background: var(--c-primary); color: #fff; box-shadow: 0 4px 12px rgba(10, 40, 90, 0.25);
 		animation: more-blink 1.4s ease-in-out infinite;
