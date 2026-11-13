@@ -39,6 +39,8 @@ SVG-REGELN (zwingend einhalten):
     #1f2937  dunkel    (Achsen, Rahmen, Hauptstriche)
     #ffffff  weiß      (Hintergrund / leere Fläche)
 • stroke-width: 2 für Rahmen/Achsen, 1.5 für Hauptlinien, 1 für Hilfslinien
+• Rechte Winkel wie in deutschen Schulbüchern markieren: Viertelkreisbogen im Winkel
+  mit einem Punkt darin (<path> + kleiner <circle>), KEIN kleines Quadrat
 • Keine Filter, keine Schatten, keine Animationen, kein JavaScript, keine externen Referenzen
 
 TEXT IM SVG:

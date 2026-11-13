@@ -447,12 +447,17 @@ function svgPoly(points: Pt[], opts: { fill?: string; stroke?: string; width?: n
 }
 
 // Right-angle marker at point P, using two reference points that indicate the two edge directions.
+// Right-angle mark as used in German schools: a quarter arc with a dot inside (not a square).
 function rightAngleMarker(P: Pt, ref1: Pt, ref2: Pt, size = 10): string {
-	const d1 = vScale(vUnit(vSub(ref1, P)), size);
-	const d2 = vScale(vUnit(vSub(ref2, P)), size);
-	const p1 = vAdd(P, d1), p2 = vAdd(P, d2), p3 = vAdd(p1, d2);
-	const pts = [p1, p3, p2].map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
-	return `<polyline points="${pts}" fill="none" stroke="#374151" stroke-width="1.5"/>`;
+	const r = size * 1.5;
+	const u1 = vUnit(vSub(ref1, P)), u2 = vUnit(vSub(ref2, P));
+	const a = vAdd(P, vScale(u1, r)), b = vAdd(P, vScale(u2, r));
+	// sweep flag: arc runs from ref1's ray to ref2's ray the short way (screen coords, y down)
+	const sweep = u1[0] * u2[1] - u1[1] * u2[0] > 0 ? 1 : 0;
+	const dot = vAdd(P, vScale(vUnit(vAdd(u1, u2)), r * 0.5));
+	return `<path d="M ${a[0].toFixed(1)} ${a[1].toFixed(1)} A ${r} ${r} 0 0 ${sweep} ${b[0].toFixed(1)} ${b[1].toFixed(1)}" `
+		+ `fill="none" stroke="#374151" stroke-width="1.5"/>`
+		+ `<circle cx="${dot[0].toFixed(1)}" cy="${dot[1].toFixed(1)}" r="1.8" fill="#374151"/>`;
 }
 
 // Angle arc + label at vertex P, opening between the directions toward ref1 and ref2.
