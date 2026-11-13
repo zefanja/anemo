@@ -15,6 +15,8 @@
 	import Icon from '$lib/components/student/Icon.svelte';
 	import Ato from '$lib/components/Ato.svelte';
 	import NumPad from '$lib/components/student/NumPad.svelte';
+	import EquationSteps from '$lib/components/student/EquationSteps.svelte';
+	import { findStepEquation } from '$lib/equation.js';
 	import LevelUpOverlay from '$lib/components/student/LevelUpOverlay.svelte';
 	import { pressKey, numpadInputs, setPadMode, type PadKey } from '$lib/numpad.js';
 	import { ui } from '$lib/stores/ui.svelte.js';
@@ -251,7 +253,17 @@
 		!isNumberLine &&
 		!writtenArith // has its own digit pad
 	);
-	const showPad = $derived(padEligible && padPreferred && !showFeedback);
+	// ── Step-by-step mode for linear equations ──
+	const stepEq = $derived(
+		currentTask && !currentTask.choices && ['integer', 'number', 'fraction'].includes(currentTask.answerType) &&
+		!isFractionPart && !isMixedPart && !isNumberLine && !writtenArith && !isZahlenmauer && !isPqSteps
+			? findStepEquation(currentTask.prompt)
+			: null
+	);
+	/** Task the step mode was opened for – switching tasks closes it automatically. */
+	let stepTaskId = $state<string | null>(null);
+	const stepMode = $derived(!!stepEq && !!currentTask && stepTaskId === currentTask.taskId);
+	const showPad = $derived(padEligible && padPreferred && !showFeedback && !stepMode);
 	/** Plain single answer field (not fraction / Zahlenmauer / written calculation) */
 	const simpleNumberField = $derived(
 		!!currentTask && (currentTask.answerType === 'integer' || currentTask.answerType === 'number') &&
@@ -919,7 +931,18 @@
 					{/if}
 
 					<div class="answer-area">
-						{#if isPqSteps && pqCurrentStep}
+						{#if stepMode && stepEq}
+							{#key currentTask.taskId}
+								<EquationSteps
+									equation={stepEq.eq}
+									tex={stepEq.tex}
+									answerType={currentTask.answerType}
+									disabled={locked}
+									onanswer={(v) => { answer = v; submitAnswer(); }}
+									onclose={() => (stepTaskId = null)}
+								/>
+							{/key}
+						{:else if isPqSteps && pqCurrentStep}
 							<div class="pq-steps">
 								<div class="pq-progress">Schritt {pqStepIndex + 1} / {(currentTask.inputData!.subSteps as PqSubStep[]).length}</div>
 								{#if pqCurrentStep.context}
@@ -1046,6 +1069,12 @@
 						{/if}
 					</div>
 
+					{#if stepEq && !stepMode && !showFeedback}
+						<button class="step-entry" onclick={() => (stepTaskId = currentTask!.taskId)}>
+							<Icon name="pencil" size={16} /> Schritt für Schritt lösen
+						</button>
+					{/if}
+
 					{#if currentTask.explanation && !showFeedback}
 						<button
 							class="tip-btn"
@@ -1070,11 +1099,11 @@
 					<p class="submit-error" role="alert">Das hat nicht geklappt. Bitte versuch es noch einmal.</p>
 				{/if}
 
-				{#if !showPad && padEligible && !showFeedback}
+				{#if !showPad && padEligible && !showFeedback && !stepMode}
 					<button class="pad-switch" onclick={() => setPadPreferred(true)}>Zahlen-Tastenfeld anzeigen</button>
 				{/if}
 
-				{#if !showPad && !showFeedback && !currentTask.choices && currentTask.answerType !== 'boolean' && currentTask.answerType !== 'comparison' && !writtenArith && !isZahlenmauer && !isPqSteps}
+				{#if !showPad && !showFeedback && !currentTask.choices && currentTask.answerType !== 'boolean' && currentTask.answerType !== 'comparison' && !writtenArith && !isZahlenmauer && !isPqSteps && !stepMode}
 					<div class="task-footer">
 						{#if moreBelow}
 							<button class="more-below" onclick={scrollDown} aria-label="Nach unten scrollen – da kommt noch mehr">
@@ -1525,6 +1554,12 @@
 		border-radius: 999px; padding: 0.4rem 1rem; font: 800 0.95rem var(--font); cursor: pointer;
 	}
 	.tip-btn:hover, .tip-btn.active { border-color: var(--c-sky); background: var(--c-primary-light); }
+	.step-entry {
+		align-self: center; display: inline-flex; align-items: center; gap: 0.4rem; min-height: 2.75rem;
+		background: var(--c-orange-light); border: 2px solid var(--c-orange); color: var(--c-orange-text);
+		border-radius: 999px; padding: 0.4rem 1rem; font: 900 0.95rem var(--font); cursor: pointer;
+	}
+	.step-entry:hover { background: #ffe4cc; }
 
 	/* "Warum?" – rationale for the task just answered */
 	.why-btn {
