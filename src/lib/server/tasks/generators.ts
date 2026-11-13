@@ -469,7 +469,18 @@ function angleArc(P: Pt, ref1: Pt, ref2: Pt, label: string, radius = 22): string
 	const sx = P[0] + radius * Math.cos(start), sy = P[1] + radius * Math.sin(start);
 	const ex = P[0] + radius * Math.cos(end), ey = P[1] + radius * Math.sin(end);
 	const mid = start + delta / 2;
-	const lx = P[0] + (radius + 14) * Math.cos(mid), ly = P[1] + (radius + 14) * Math.sin(mid);
+	// Along the bisector, far enough that the label's box fits between the two rays – for acute
+	// angles the default distance would put the text on top of the legs.
+	const w = textWidth(label, 12), h = 12;
+	const half = Math.max(Math.abs(delta) / 2, 0.05);
+	let d = radius + 14;
+	for (const a of [start, end]) {
+		const n: Pt = [-Math.sin(a), Math.cos(a)]; // normal of the ray
+		const ext = Math.abs(n[0]) * w / 2 + Math.abs(n[1]) * h / 2;
+		d = Math.max(d, (ext + 3) / Math.sin(half));
+	}
+	d = Math.min(d, 110);
+	const lx = P[0] + d * Math.cos(mid), ly = P[1] + d * Math.sin(mid) + 4;
 	let s = `<path d="M ${sx.toFixed(1)} ${sy.toFixed(1)} A ${radius} ${radius} 0 ${large} ${sweep} ${ex.toFixed(1)} ${ey.toFixed(1)}" `
 		+ `fill="none" stroke="#4f46e5" stroke-width="1.5"/>`;
 	s += svgLabel([lx, ly], label, { size: 12, color: '#4f46e5' });
