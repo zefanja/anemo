@@ -203,6 +203,8 @@
 			} else if (!currentTask.choices && currentTask.answerType !== 'boolean' && currentTask.answerType !== 'comparison' && !isPqSteps) {
 				answerInput?.focus();
 			}
+			// The docked number pad covers the bottom of the screen – scroll the field above it
+			if (showPad) requestAnimationFrame(() => revealAboveDock(document.activeElement));
 		}
 	});
 
@@ -256,13 +258,74 @@
 		!isFractionPart && !isMixedPart && !writtenArith && !isZahlenmauer
 	);
 
+	let padDockEl = $state<HTMLElement | null>(null);
+
+	/** Scroll the nearest scroll container so `el` sits fully visible above the docked number pad. */
+	function revealAboveDock(el: Element | null) {
+		if (!(el instanceof HTMLElement) || !padDockEl) return;
+		const scroller = scrollerOf(el);
+		if (!scroller) return;
+		const margin = 16;
+		const r = el.getBoundingClientRect();
+		const visibleTop = scroller.getBoundingClientRect().top + margin;
+		const visibleBottom = padDockEl.getBoundingClientRect().top - margin;
+		if (r.bottom > visibleBottom) {
+			// prefer showing the whole field; never push its top out of view
+			scroller.scrollBy({ top: Math.min(r.bottom - visibleBottom, r.top - visibleTop), behavior: 'smooth' });
+		} else if (r.top < visibleTop) {
+			scroller.scrollBy({ top: r.top - visibleTop, behavior: 'smooth' });
+		}
+	}
+
+	function scrollerOf(el: Element | null): HTMLElement | null {
+		let node = el?.parentElement ?? null;
+		while (node && !/(auto|scroll)/.test(getComputedStyle(node).overflowY)) node = node.parentElement;
+		return node;
+	}
+
+	// ── "More below" hint: blinking arrow while task content is hidden under the pad / footer ──
+	let moreBelow = $state(false);
+	$effect(() => {
+		const card = cardEl;
+		if (!card || view !== 'task' || showFeedback) {
+			moreBelow = false;
+			return;
+		}
+		const scroller = scrollerOf(card);
+		if (!scroller) return;
+		const update = () => {
+			// covered by the docked pad / sticky footer, or simply below the fold
+			const cover = padDockEl?.getBoundingClientRect().top ?? scroller.getBoundingClientRect().bottom;
+			moreBelow = card.getBoundingClientRect().bottom - cover > 24;
+		};
+		update();
+		scroller.addEventListener('scroll', update, { passive: true });
+		const ro = new ResizeObserver(update);
+		ro.observe(card);
+		ro.observe(scroller);
+		if (padDockEl) ro.observe(padDockEl);
+		return () => {
+			scroller.removeEventListener('scroll', update);
+			ro.disconnect();
+		};
+	});
+
+	function scrollDown() {
+		const scroller = scrollerOf(cardEl);
+		scroller?.scrollBy({ top: scroller.clientHeight * 0.6, behavior: 'smooth' });
+	}
+
 	function onPad(key: PadKey) {
 		if (!cardEl || locked) return;
 		pressKey(cardEl, key, lastFocusedInput);
+		if (lastFocusedInput) revealAboveDock(lastFocusedInput);
 	}
 
 	function trackFocus(e: FocusEvent) {
-		if (e.target instanceof HTMLInputElement) lastFocusedInput = e.target;
+		if (e.target instanceof HTMLInputElement) {
+			lastFocusedInput = e.target;
+			if (showPad) revealAboveDock(e.target);
+		}
 	}
 
 	function setPadPreferred(on: boolean) {
@@ -1010,6 +1073,11 @@
 
 				{#if !showPad && !showFeedback && !currentTask.choices && currentTask.answerType !== 'boolean' && currentTask.answerType !== 'comparison' && !writtenArith && !isZahlenmauer && !isPqSteps}
 					<div class="task-footer">
+						{#if moreBelow}
+							<button class="more-below" onclick={scrollDown} aria-label="Nach unten scrollen – da kommt noch mehr">
+								<svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" /></svg>
+							</button>
+						{/if}
 						<button class="btn-3d" onclick={submitAnswer} disabled={isSubmitting || !String(answer).trim()}>
 							{isSubmitting ? 'Wird geprüft…' : 'Prüfen'}
 						</button>
@@ -1019,7 +1087,12 @@
 		</div>
 
 		{#if showPad && currentTask && !isLoading}
-			<div class="pad-dock">
+			<div class="pad-dock" bind:this={padDockEl}>
+				{#if moreBelow}
+					<button class="more-below" onclick={scrollDown} aria-label="Nach unten scrollen – da kommt noch mehr">
+						<svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" /></svg>
+					</button>
+				{/if}
 				<NumPad
 					onpress={onPad}
 					canSubmit={!!String(answer).trim() && !locked}
@@ -1486,6 +1559,18 @@
 	.task-footer { margin-top: auto; position: sticky; bottom: 0; padding-top: 0.5rem; background: linear-gradient(transparent, var(--c-ground) 30%); }
 	.task-footer .btn-3d { width: 100%; }
 	.pad-dock { position: sticky; bottom: 0; margin-top: auto; z-index: 2; }
+	.more-below {
+		position: absolute; left: 50%; bottom: calc(100% + 0.5rem); translate: -50% 0;
+		width: 3rem; height: 3rem; border-radius: 999px; border: 0; cursor: pointer;
+		display: flex; align-items: center; justify-content: center;
+		background: var(--c-primary); color: #fff; box-shadow: 0 4px 12px rgba(10, 40, 90, 0.25);
+		animation: more-blink 1.4s ease-in-out infinite;
+	}
+	@keyframes more-blink {
+		0%, 100% { opacity: 1; transform: translateY(0); }
+		50% { opacity: 0.35; transform: translateY(4px); }
+	}
+	@media (prefers-reduced-motion: reduce) { .more-below { animation: none; } }
 	.pad-switch {
 		align-self: center; background: none; border: 0; min-height: 2.75rem; padding: 0 0.75rem;
 		font: 800 0.875rem var(--font); color: var(--c-primary); cursor: pointer; text-decoration: underline;
