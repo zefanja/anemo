@@ -12,7 +12,7 @@ import * as schema from '../src/lib/server/db/schema.js';
 import { eq } from 'drizzle-orm';
 import { config } from 'dotenv';
 import bcrypt from 'bcryptjs';
-import { randomBytes } from 'node:crypto';
+import { randomBytes, createHmac } from 'node:crypto';
 import { execSync } from 'node:child_process';
 
 config({ path: '.env' });
@@ -30,6 +30,7 @@ function generateCode(): string {
 }
 
 async function seed() {
+	if (!process.env.SESSION_SECRET) throw new Error('SESSION_SECRET is required (student codes are hashed with it)');
 	const client = postgres(process.env.DATABASE_URL!);
 	const db = drizzle(client, { schema });
 
@@ -110,7 +111,8 @@ async function seed() {
 		}
 
 		const code = generateCode();
-		const codeHash = await bcrypt.hash(code, 10);
+		// must match src/lib/server/auth/codes.ts (HMAC-SHA256 keyed with SESSION_SECRET)
+		const codeHash = createHmac('sha256', process.env.SESSION_SECRET!).update(code).digest('hex');
 		await db.insert(schema.students).values({
 			id: makeId(),
 			classId: cls.id,
