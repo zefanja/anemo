@@ -17,7 +17,9 @@
 	}
 
 	function initials(name: string): string {
-		const parts = name.trim().split(/\s+/);
+		let parts = name.trim().split(/\s+/);
+		// single-word names like "LustigerKoala" → "LK"
+		if (parts.length === 1) parts = parts[0].split(/(?=[A-ZÄÖÜ])/);
 		return ((parts[0]?.[0] ?? '') + (parts[1]?.[0] ?? '')).toUpperCase() || '?';
 	}
 

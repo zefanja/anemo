@@ -252,7 +252,7 @@
 	.t-main {
 		padding: 2rem 2.5rem 3rem;
 		width: 100%;
-		max-width: 1240px;
+		max-width: 1480px;
 		min-width: 0;
 	}
 
