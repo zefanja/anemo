@@ -12,11 +12,13 @@
 		return `vor ${Math.floor(diff / 86400)} Tagen`;
 	}
 
-	function rankIcon(i: number): string {
-		if (i === 0) return '🥇';
-		if (i === 1) return '🥈';
-		if (i === 2) return '🥉';
-		return `${i + 1}.`;
+	function rankClass(i: number): string {
+		return i < 3 ? `rank r${i + 1}` : 'rank';
+	}
+
+	function initials(name: string): string {
+		const parts = name.trim().split(/\s+/);
+		return ((parts[0]?.[0] ?? '') + (parts[1]?.[0] ?? '')).toUpperCase() || '?';
 	}
 
 	function pct(v: number): string {
@@ -128,194 +130,141 @@
 		).slice(0, ACTIVITY_N)
 	);
 
+	// Students who earned XP today count as "active today"
+	const scopedStudents = $derived(
+		selectedClassId === null ? data.leaderboard : data.leaderboard.filter((e) => e.classId === selectedClassId)
+	);
+	const activeToday = $derived(scopedStudents.filter((e) => e.periodXp.day > 0).length);
+	const weekXp = $derived(scopedStudents.reduce((sum, e) => sum + e.periodXp.week, 0));
+	const avgMastered = $derived(
+		currentStats.studentCount > 0 ? Math.round(currentStats.masteredCount / currentStats.studentCount) : 0
+	);
+	function classActivity(classId: string) {
+		const list = data.leaderboard.filter((e) => e.classId === classId);
+		const active = list.filter((e) => e.periodXp.day > 0).length;
+		return { active, pct: list.length > 0 ? Math.round((active / list.length) * 100) : 0 };
+	}
+
 	const showClassColumn = $derived(selectedClassId === null && data.classAtomStats.length > 1);
 </script>
 
 <svelte:head><title>Anemo – Dashboard</title></svelte:head>
 
-<div class="page">
-	<h1 class="page-title">Dashboard</h1>
+{#snippet atomCard(title: string, badge: string, badgeClass: string, list: typeof bestAtoms, kind: 'best' | 'worst')}
+	<section class="card">
+		<div class="card-header">
+			<h2>{title}</h2>
+			<span class="badge {badgeClass}">{badge}</span>
+		</div>
+		{#if list.length === 0}
+			<p class="empty-note">Keine Daten für diese Klasse.</p>
+		{:else}
+			<ul class="atom-list">
+				{#each list as a}
+					{@const key = a.atomId + '-' + kind}
+					{@const isExpanded = expandedAtomId === key}
+					<li class="atom-row">
+						<button class="atom-btn" onclick={() => toggleAtom(key)} aria-expanded={isExpanded}>
+							<span class="atom-meta">
+								<span class="atom-label">{a.label}</span>
+								<span class="atom-domain">{a.domain}</span>
+							</span>
+							<span class="atom-bar-wrap">
+								<span class="track"><span class:orange={kind === 'worst'} style="width:{pct(a.masteryRate)}"></span></span>
+								<span class="atom-pct">{pct(a.masteryRate)}</span>
+								<span class="atom-frac">{a.masteredCount}/{a.studentCount}</span>
+								<span class="atom-chevron" class:open={isExpanded} aria-hidden="true">›</span>
+							</span>
+						</button>
+						{#if isExpanded}
+							<ul class="student-detail-list">
+								{#each a.students as s}
+									<li class="student-detail-row">
+										<a href="/teacher/classes/{s.classId}/students/{s.studentId}" class="student-detail-name">{s.displayName}</a>
+										{#if showClassColumn}
+											<span class="student-detail-class">{s.className}</span>
+										{/if}
+										<span class="track thin sd-track"><span class:orange={kind === 'worst'} style="width:{pct(s.mastery)}"></span></span>
+										<span class="student-detail-pct">{pct(s.mastery)}</span>
+										<span class="mastered-badge" aria-label={s.isMastered ? 'gemeistert' : undefined}>{s.isMastered ? '✓' : ''}</span>
+									</li>
+								{/each}
+							</ul>
+						{/if}
+					</li>
+				{/each}
+			</ul>
+		{/if}
+	</section>
+{/snippet}
 
-	<!-- Class filter tabs -->
+<div class="page">
+	<div class="page-header">
+		<div>
+			<span class="page-sub">{new Date().toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' })}</span>
+			<h1 class="page-title">Dashboard</h1>
+		</div>
+		{#if data.classes.length > 1}
+			<div class="seg desktop-only" role="tablist" aria-label="Klassenfilter">
+				<button role="tab" aria-selected={selectedClassId === null} class:active={selectedClassId === null} onclick={() => toggleClass(null)}>Alle Klassen</button>
+				{#each data.classes as cls}
+					<button role="tab" aria-selected={selectedClassId === cls.id} class:active={selectedClassId === cls.id} onclick={() => toggleClass(cls.id)}>{cls.name}</button>
+				{/each}
+			</div>
+		{/if}
+	</div>
+
 	{#if data.classes.length > 1}
-		<div class="class-tabs">
-			<button
-				class="class-tab"
-				class:active={selectedClassId === null}
-				onclick={() => toggleClass(null)}
-			>
-				Alle Klassen
-			</button>
+		<div class="chips scroll mobile-only" role="tablist" aria-label="Klassenfilter">
+			<button class="chip-btn" role="tab" aria-selected={selectedClassId === null} class:active={selectedClassId === null} onclick={() => toggleClass(null)}>Alle Klassen</button>
 			{#each data.classes as cls}
-				<button
-					class="class-tab"
-					class:active={selectedClassId === cls.id}
-					onclick={() => toggleClass(cls.id)}
-				>
-					{cls.name}
-				</button>
+				<button class="chip-btn" role="tab" aria-selected={selectedClassId === cls.id} class:active={selectedClassId === cls.id} onclick={() => toggleClass(cls.id)}>{cls.name}</button>
 			{/each}
 		</div>
 	{/if}
 
-	<!-- Stat cards -->
 	<div class="stat-grid">
 		<div class="stat-card">
-			<div class="stat-num">{data.stats.classCount}</div>
-			<div class="stat-lbl">Klassen</div>
+			<span class="stat-lbl">Schüler:innen</span>
+			<span class="stat-num">{currentStats.studentCount}</span>
+			<span class="stat-sub" class:pos={activeToday > 0}>{activeToday} heute aktiv</span>
 		</div>
 		<div class="stat-card">
-			<div class="stat-num">{currentStats.studentCount}</div>
-			<div class="stat-lbl">Schüler</div>
+			<span class="stat-lbl">Gemeisterte Atome</span>
+			<span class="stat-num">{currentStats.masteredCount.toLocaleString('de-DE')}</span>
+			<span class="stat-sub">Ø {avgMastered} pro Schüler:in</span>
 		</div>
 		<div class="stat-card">
-			<div class="stat-num">{currentStats.masteredCount}</div>
-			<div class="stat-lbl">Gemeisterte Atome</div>
+			<span class="stat-lbl">XP diese Woche</span>
+			<span class="stat-num">{weekXp.toLocaleString('de-DE')}</span>
+			<span class="stat-sub">{selectedClass ? `Klasse ${selectedClass.name}` : 'alle Klassen'}</span>
 		</div>
 		<div class="stat-card">
-			<div class="stat-num">{data.stats.totalAtoms}</div>
-			<div class="stat-lbl">Atome gesamt</div>
+			<span class="stat-lbl">Atome gesamt</span>
+			<span class="stat-num">{data.stats.totalAtoms}</span>
+			<span class="stat-sub">{data.stats.classCount} {data.stats.classCount === 1 ? 'Klasse' : 'Klassen'}</span>
 		</div>
 	</div>
 
-	<!-- Atom stats -->
 	{#if data.atomStats.length > 0}
-		<div class="two-col">
-			<section class="card">
-				<div class="card-header">
-					<h2>Gut gemeistert</h2>
-					<span class="badge badge-green">Top {bestAtoms.length}</span>
-				</div>
-				{#if bestAtoms.length === 0}
-					<p class="empty-note">Keine Daten für diese Klasse.</p>
-				{:else}
-					<ul class="atom-list">
-						{#each bestAtoms as a}
-							{@const isExpanded = expandedAtomId === a.atomId + '-best'}
-							<li class="atom-row">
-								<button class="atom-btn" onclick={() => toggleAtom(a.atomId + '-best')}>
-									<div class="atom-meta">
-										<span class="atom-label">{a.label}</span>
-										<span class="atom-domain">{a.domain}</span>
-									</div>
-									<div class="atom-bar-wrap">
-										<div class="atom-bar">
-											<div class="atom-bar-fill fill-green" style="width:{pct(a.masteryRate)}"></div>
-										</div>
-										<span class="atom-pct">{pct(a.masteryRate)}</span>
-										<span class="atom-frac">({a.masteredCount}/{a.studentCount})</span>
-										<span class="atom-chevron" class:open={isExpanded}>›</span>
-									</div>
-								</button>
-								{#if isExpanded}
-									<ul class="student-detail-list">
-										{#each a.students as s}
-											<li class="student-detail-row">
-												<a
-													href="/teacher/classes/{s.classId}/students/{s.studentId}"
-													class="student-detail-name"
-												>
-													{s.displayName}
-												</a>
-												{#if showClassColumn}
-													<span class="student-detail-class">{s.className}</span>
-												{/if}
-												<div class="student-detail-bar-wrap">
-													<div class="student-detail-bar">
-														<div class="student-detail-fill fill-green" style="width:{pct(s.mastery)}"></div>
-													</div>
-													<span class="student-detail-pct">{pct(s.mastery)}</span>
-												</div>
-												{#if s.isMastered}
-													<span class="mastered-badge">✓</span>
-												{/if}
-											</li>
-										{/each}
-									</ul>
-								{/if}
-							</li>
-						{/each}
-					</ul>
-				{/if}
-			</section>
-
-			<section class="card">
-				<div class="card-header">
-					<h2>Schwierige Atome</h2>
-					<span class="badge badge-red">Flop {worstAtoms.length}</span>
-				</div>
-				{#if worstAtoms.length === 0}
-					<p class="empty-note">Keine Daten für diese Klasse.</p>
-				{:else}
-					<ul class="atom-list">
-						{#each worstAtoms as a}
-							{@const isExpanded = expandedAtomId === a.atomId + '-worst'}
-							<li class="atom-row">
-								<button class="atom-btn" onclick={() => toggleAtom(a.atomId + '-worst')}>
-									<div class="atom-meta">
-										<span class="atom-label">{a.label}</span>
-										<span class="atom-domain">{a.domain}</span>
-									</div>
-									<div class="atom-bar-wrap">
-										<div class="atom-bar">
-											<div class="atom-bar-fill fill-red" style="width:{pct(a.masteryRate)}"></div>
-										</div>
-										<span class="atom-pct">{pct(a.masteryRate)}</span>
-										<span class="atom-frac">({a.masteredCount}/{a.studentCount})</span>
-										<span class="atom-chevron" class:open={isExpanded}>›</span>
-									</div>
-								</button>
-								{#if isExpanded}
-									<ul class="student-detail-list">
-										{#each a.students as s}
-											<li class="student-detail-row">
-												<a
-													href="/teacher/classes/{s.classId}/students/{s.studentId}"
-													class="student-detail-name"
-												>
-													{s.displayName}
-												</a>
-												{#if showClassColumn}
-													<span class="student-detail-class">{s.className}</span>
-												{/if}
-												<div class="student-detail-bar-wrap">
-													<div class="student-detail-bar">
-														<div class="student-detail-fill fill-red" style="width:{pct(s.mastery)}"></div>
-													</div>
-													<span class="student-detail-pct">{pct(s.mastery)}</span>
-												</div>
-												{#if s.isMastered}
-													<span class="mastered-badge">✓</span>
-												{/if}
-											</li>
-										{/each}
-									</ul>
-								{/if}
-							</li>
-						{/each}
-					</ul>
-				{/if}
-			</section>
+		<div class="grid-2">
+			{@render atomCard('Schwierige Atome', 'Brauchen Hilfe', 'badge-orange', worstAtoms, 'worst')}
+			{@render atomCard('Gut gemeistert', `Top ${bestAtoms.length}`, 'badge-blue', bestAtoms, 'best')}
 		</div>
 	{/if}
 
-	<!-- School-wide leaderboard -->
 	{#if hasStudents}
 		<section class="card">
-			<div class="card-header lb-card-header">
-				<h2>Leaderboard – {selectedClass ? selectedClass.name : 'Schule gesamt'}</h2>
-				<div class="period-tabs" role="tablist" aria-label="Zeitraum">
+			<div class="card-header">
+				<div class="lb-title">
+					<h2>Rangliste · {selectedClass ? selectedClass.name : 'Schule gesamt'}</h2>
+					{#if sortedLeaderboard.length > 0}
+						<span class="card-sub desktop-only">Top {sortedLeaderboard.length} · Spalten anklicken zum Sortieren</span>
+					{/if}
+				</div>
+				<div class="seg stretch" role="tablist" aria-label="Zeitraum">
 					{#each LB_PERIODS as p}
-						<button
-							type="button"
-							role="tab"
-							aria-selected={lbPeriod === p.key}
-							class="period-tab"
-							class:active={lbPeriod === p.key}
-							onclick={() => (lbPeriod = p.key)}
-						>
-							{p.label}
-						</button>
+						<button type="button" role="tab" aria-selected={lbPeriod === p.key} class:active={lbPeriod === p.key} onclick={() => (lbPeriod = p.key)}>{p.label}</button>
 					{/each}
 				</div>
 			</div>
@@ -324,73 +273,53 @@
 					{lbPeriod === 'day' ? 'Heute' : lbPeriod === 'week' ? 'Diese Woche' : 'Diesen Monat'} hat noch niemand XP gesammelt.
 				</p>
 			{:else}
-			<p class="lb-hint">Top {sortedLeaderboard.length} · Spalten anklicken zum Sortieren</p>
-			<div class="lb-table-wrap">
-				<table class="lb-table">
-					<thead>
-						<tr>
-							<th class="lb-rank">#</th>
-							<th>
-								<button class="sort-btn" class:sorted={sortKey === 'displayName'} onclick={() => toggleSort('displayName')}>
-									Name <span class="sort-icon" class:active={sortKey === 'displayName'}>{sortIcon('displayName')}</span>
-								</button>
-							</th>
-							<th>
-								<button class="sort-btn" class:sorted={sortKey === 'className'} onclick={() => toggleSort('className')}>
-									Klasse <span class="sort-icon" class:active={sortKey === 'className'}>{sortIcon('className')}</span>
-								</button>
-							</th>
-							<th class="lb-num">
-								<button class="sort-btn sort-btn-right" class:sorted={sortKey === 'level'} onclick={() => toggleSort('level')}>
-									<span class="sort-icon" class:active={sortKey === 'level'}>{sortIcon('level')}</span> Level
-								</button>
-							</th>
-							<th class="lb-num">
-								<button class="sort-btn sort-btn-right" class:sorted={sortKey === 'xp'} onclick={() => toggleSort('xp')}>
-									<span class="sort-icon" class:active={sortKey === 'xp'}>{sortIcon('xp')}</span> {lbPeriodInfo.xpLabel}
-								</button>
-							</th>
-							<th class="lb-num">
-								<button class="sort-btn sort-btn-right" class:sorted={sortKey === 'masteredCount'} onclick={() => toggleSort('masteredCount')}>
-									<span class="sort-icon" class:active={sortKey === 'masteredCount'}>{sortIcon('masteredCount')}</span> Gemeistert
-								</button>
-							</th>
-							<th class="lb-num">
-								<button class="sort-btn sort-btn-right" class:sorted={sortKey === 'streakDays'} onclick={() => toggleSort('streakDays')}>
-									<span class="sort-icon" class:active={sortKey === 'streakDays'}>{sortIcon('streakDays')}</span> Streak
-								</button>
-							</th>
-						</tr>
-					</thead>
-					<tbody>
-						{#each sortedLeaderboard as entry, i}
-							<tr class:lb-top3={i < 3}>
-								<td class="lb-rank">{rankIcon(i)}</td>
-								<td class="lb-name">
-									<a href="/teacher/classes/{entry.classId}/students/{entry.id}" class="student-link">
-										{entry.displayName}
-									</a>
-								</td>
-								<td class="lb-class">
-									<a href="/teacher/classes/{entry.classId}" class="class-link">
-										{entry.className}
-									</a>
-								</td>
-								<td class="lb-num">Lv.{entry.level}</td>
-								<td class="lb-num lb-xp">{lbPeriod === 'all' ? '' : '+'}{entry.xp.toLocaleString('de-DE')}</td>
-								<td class="lb-num">{entry.masteredCount}</td>
-								<td class="lb-num">🔥 {entry.streakDays}</td>
+				<div class="table-wrap desktop-only">
+					<table class="t-table">
+						<thead>
+							<tr>
+								<th style="width:3rem">#</th>
+								<th><button class="sort-btn" class:sorted={sortKey === 'displayName'} onclick={() => toggleSort('displayName')}>Name <span class="sort-icon" class:active={sortKey === 'displayName'}>{sortIcon('displayName')}</span></button></th>
+								<th><button class="sort-btn" class:sorted={sortKey === 'className'} onclick={() => toggleSort('className')}>Klasse <span class="sort-icon" class:active={sortKey === 'className'}>{sortIcon('className')}</span></button></th>
+								<th class="num"><button class="sort-btn" class:sorted={sortKey === 'level'} onclick={() => toggleSort('level')}><span class="sort-icon" class:active={sortKey === 'level'}>{sortIcon('level')}</span> Level</button></th>
+								<th class="num"><button class="sort-btn" class:sorted={sortKey === 'xp'} onclick={() => toggleSort('xp')}><span class="sort-icon" class:active={sortKey === 'xp'}>{sortIcon('xp')}</span> {lbPeriodInfo.xpLabel}</button></th>
+								<th class="num"><button class="sort-btn" class:sorted={sortKey === 'masteredCount'} onclick={() => toggleSort('masteredCount')}><span class="sort-icon" class:active={sortKey === 'masteredCount'}>{sortIcon('masteredCount')}</span> Gemeistert</button></th>
+								<th class="num"><button class="sort-btn" class:sorted={sortKey === 'streakDays'} onclick={() => toggleSort('streakDays')}><span class="sort-icon" class:active={sortKey === 'streakDays'}>{sortIcon('streakDays')}</span> Streak</button></th>
 							</tr>
-						{/each}
-					</tbody>
-				</table>
-			</div>
+						</thead>
+						<tbody>
+							{#each sortedLeaderboard as entry, i}
+								<tr>
+									<td><span class={rankClass(i)}>{i + 1}</span></td>
+									<td><a href="/teacher/classes/{entry.classId}/students/{entry.id}">{entry.displayName}</a></td>
+									<td><a href="/teacher/classes/{entry.classId}" class="badge">{entry.className}</a></td>
+									<td class="num">Lv. {entry.level}</td>
+									<td class="num xp">{lbPeriod === 'all' ? '' : '+'}{entry.xp.toLocaleString('de-DE')}</td>
+									<td class="num">{entry.masteredCount}</td>
+									<td class="num streak">{entry.streakDays > 0 ? `${entry.streakDays} ${entry.streakDays === 1 ? 'Tag' : 'Tage'}` : '–'}</td>
+								</tr>
+							{/each}
+						</tbody>
+					</table>
+				</div>
+				<ul class="m-list">
+					{#each sortedLeaderboard as entry, i}
+						<li>
+							<a href="/teacher/classes/{entry.classId}/students/{entry.id}" class="m-row">
+								<span class={rankClass(i)}>{i + 1}</span>
+								<span class="m-main">
+									<span class="m-title">{entry.displayName}</span>
+									<span class="m-meta"><span>{entry.className}</span><span>Lv. {entry.level}</span><span>{entry.masteredCount} gemeistert</span>{#if entry.streakDays > 0}<span class="streak">{entry.streakDays} {entry.streakDays === 1 ? 'Tag' : 'Tage'} Streak</span>{/if}</span>
+								</span>
+								<span class="xp">{lbPeriod === 'all' ? '' : '+'}{entry.xp.toLocaleString('de-DE')}</span>
+							</a>
+						</li>
+					{/each}
+				</ul>
 			{/if}
 		</section>
 	{/if}
 
-	<div class="two-col">
-		<!-- Classes quick-links -->
+	<div class="grid-2">
 		<section class="card">
 			<div class="card-header">
 				<h2>Klassen</h2>
@@ -402,10 +331,15 @@
 			{:else}
 				<ul class="class-list">
 					{#each data.classes as c}
+						{@const act = classActivity(c.id)}
 						<li>
 							<a href="/teacher/classes/{c.id}" class="class-item">
 								<span class="class-name">{c.name}</span>
-								<span class="class-count">{c.studentCount} Schüler</span>
+								<span class="class-body">
+									<span class="class-count">{c.studentCount} Schüler:innen · {act.active} heute aktiv</span>
+									<span class="track thin"><span style="width:{act.pct}%"></span></span>
+								</span>
+								<span class="m-chev" aria-hidden="true">›</span>
 							</a>
 						</li>
 					{/each}
@@ -413,32 +347,26 @@
 			{/if}
 		</section>
 
-		<!-- Recent activity -->
 		<section class="card">
 			<div class="card-header">
-				<h2>Letzte Aktivitäten{selectedClass ? ` – ${selectedClass.name}` : ''}</h2>
+				<h2>Letzte Aktivität{selectedClass ? ` · ${selectedClass.name}` : ''}</h2>
 			</div>
 			{#if currentActivity.length === 0}
 				<p class="empty-note">Noch keine Versuche vorhanden.</p>
 			{:else}
 				<ul class="activity-list">
 					{#each currentActivity as a}
+						{@const rate = a.total > 0 ? a.correct / a.total : 0}
 						<li class="activity-item">
-							<div class="activity-score-wrap">
-								<span class="activity-score" title="{a.correct}/{a.total} richtig">
-									{a.correct}/{a.total}
-								</span>
-								<div class="activity-bar">
-									<div class="activity-bar-fill" style="width:{a.total > 0 ? Math.round(a.correct/a.total*100) : 0}%"></div>
-								</div>
-							</div>
+							<span class="avatar" class:good={rate >= 0.7} class:weak={rate < 0.5} aria-hidden="true">{initials(a.studentName)}</span>
 							<span class="activity-body">
-								<a href="/teacher/classes/{a.classId}/students/{a.studentId}" class="activity-link">
-									<strong>{a.studentName}</strong>
-								</a>
+								<a href="/teacher/classes/{a.classId}/students/{a.studentId}" class="activity-link">{a.studentName}</a>
 								<span class="activity-atom">zuletzt: {a.lastAtomLabel}</span>
 							</span>
-							<span class="activity-time">{timeAgo(a.lastAnsweredAt)}</span>
+							<span class="activity-side">
+								<span class="activity-score" title="{a.correct} von {a.total} richtig">{a.correct}/{a.total} richtig</span>
+								<span class="activity-time">{timeAgo(a.lastAnsweredAt)}</span>
+							</span>
 						</li>
 					{/each}
 				</ul>
@@ -448,341 +376,81 @@
 </div>
 
 <style>
-	.page { display: flex; flex-direction: column; gap: 1.5rem; }
-	.page-title { font-size: 1.5rem; font-weight: 700; margin: 0; }
-
-	.stat-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-		gap: 1rem;
-	}
-	.stat-card {
-		background: #fff;
-		border-radius: 0.75rem;
-		padding: 1.25rem;
-		box-shadow: 0 1px 4px rgba(0,0,0,.07);
-		text-align: center;
-	}
-	.stat-num { font-size: 2rem; font-weight: 800; color: #16a34a; }
-	.stat-lbl { font-size: 0.8rem; color: #6b7280; margin-top: 0.25rem; }
-
-	.two-col {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: 1rem;
-	}
-	@media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
-
-	.card {
-		background: #fff;
-		border-radius: 0.75rem;
-		padding: 1.25rem;
-		box-shadow: 0 1px 4px rgba(0,0,0,.07);
-	}
-	.card-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 1rem;
-	}
-	.card-header h2 { font-size: 1rem; font-weight: 700; margin: 0; }
-	.link-more { font-size: 0.8rem; color: #16a34a; text-decoration: none; }
-	.empty-note { font-size: 0.875rem; color: #9ca3af; margin-bottom: 0.75rem; }
-
-	.badge {
-		font-size: 0.7rem;
-		font-weight: 700;
-		padding: 0.2rem 0.5rem;
-		border-radius: 9999px;
-	}
-	.badge-green { background: #dcfce7; color: #16a34a; }
-	.badge-red { background: #fee2e2; color: #dc2626; }
-
-	/* Class filter tabs */
-	.class-tabs {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.4rem;
-	}
-	.class-tab {
-		padding: 0.35rem 0.85rem;
-		border-radius: 9999px;
-		border: 1.5px solid #e5e7eb;
-		background: #f9fafb;
-		color: #374151;
-		font-size: 0.8rem;
-		font-weight: 600;
-		cursor: pointer;
-		transition: all 0.15s;
-	}
-	.class-tab:hover { border-color: #16a34a; color: #16a34a; background: #f0fdf4; }
-	.class-tab.active { background: #16a34a; color: #fff; border-color: #16a34a; }
-
-	.class-list { list-style: none; display: flex; flex-direction: column; gap: 0.35rem; }
-	.class-item {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		padding: 0.6rem 0.75rem;
-		border-radius: 0.5rem;
-		text-decoration: none;
-		color: inherit;
-		background: #f9fafb;
-		transition: background .15s;
-	}
-	.class-item:hover { background: #f0fdf4; }
-	.class-name { font-weight: 600; font-size: 0.9rem; }
-	.class-count { font-size: 0.75rem; color: #6b7280; }
-
-	.activity-list { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
-	.activity-item {
-		display: flex;
-		align-items: center;
-		gap: 0.6rem;
-		font-size: 0.85rem;
-	}
-	.activity-score-wrap {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 0.15rem;
-		flex-shrink: 0;
-		width: 3rem;
-	}
-	.activity-score {
-		font-size: 0.7rem;
-		font-weight: 700;
-		color: #374151;
-		white-space: nowrap;
-	}
-	.activity-bar {
-		width: 100%;
-		height: 4px;
-		background: #f3f4f6;
-		border-radius: 9999px;
-		overflow: hidden;
-	}
-	.activity-bar-fill {
-		height: 100%;
-		background: #16a34a;
-		border-radius: 9999px;
-	}
-	.activity-body {
-		flex: 1;
-		color: #374151;
-		display: flex;
-		flex-direction: column;
-		gap: 0.1rem;
-		min-width: 0;
-	}
-	.activity-link { color: inherit; text-decoration: none; }
-	.activity-link:hover { color: #16a34a; text-decoration: underline; }
-	.activity-atom {
-		font-size: 0.72rem;
-		color: #9ca3af;
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
-	}
-	.activity-time { font-size: 0.75rem; color: #9ca3af; white-space: nowrap; }
+	.stat-sub.pos { color: var(--c-success-dark); }
 
 	/* Atom stats */
-	.atom-list { list-style: none; display: flex; flex-direction: column; gap: 0.4rem; }
-	.atom-row { display: flex; flex-direction: column; }
-
+	.atom-list { list-style: none; display: flex; flex-direction: column; }
+	.atom-row { display: flex; flex-direction: column; border-bottom: 1px solid var(--c-track); }
+	.atom-row:last-child { border-bottom: 0; }
 	.atom-btn {
-		display: flex;
-		flex-direction: column;
-		gap: 0.2rem;
-		background: none;
-		border: none;
-		cursor: pointer;
-		text-align: left;
-		padding: 0.4rem 0.5rem;
-		border-radius: 0.4rem;
-		transition: background 0.12s;
-		width: 100%;
+		display: flex; flex-direction: column; gap: 0.35rem; width: 100%;
+		background: none; border: 0; cursor: pointer; text-align: left;
+		padding: 0.6rem 0.4rem; border-radius: 10px; font: inherit; color: inherit;
 	}
-	.atom-btn:hover { background: #f9fafb; }
-
-	.atom-meta { display: flex; justify-content: space-between; align-items: baseline; }
-	.atom-label { font-size: 0.85rem; font-weight: 600; color: #111827; }
-	.atom-domain { font-size: 0.7rem; color: #9ca3af; }
-	.atom-bar-wrap {
-		display: flex;
-		align-items: center;
-		gap: 0.4rem;
-	}
-	.atom-bar {
-		flex: 1;
-		height: 6px;
-		background: #f3f4f6;
-		border-radius: 9999px;
-		overflow: hidden;
-	}
-	.atom-bar-fill {
-		height: 100%;
-		border-radius: 9999px;
-		transition: width 0.3s ease;
-	}
-	.fill-green { background: #16a34a; }
-	.fill-red { background: #dc2626; }
-	.atom-pct { font-size: 0.75rem; font-weight: 700; color: #374151; white-space: nowrap; min-width: 2.5rem; text-align: right; }
-	.atom-frac { font-size: 0.7rem; color: #9ca3af; white-space: nowrap; }
-	.atom-chevron {
-		font-size: 1rem;
-		color: #9ca3af;
-		display: inline-block;
-		transition: transform 0.2s;
-		line-height: 1;
-	}
+	.atom-btn:hover { background: #f8fbfe; }
+	.atom-meta { display: flex; justify-content: space-between; align-items: baseline; gap: 0.75rem; }
+	.atom-label { font-size: 0.95rem; font-weight: 800; color: var(--c-navy); }
+	.atom-domain { font-size: 0.75rem; font-weight: 800; color: var(--c-ink-2); white-space: nowrap; }
+	.atom-bar-wrap { display: flex; align-items: center; gap: 0.6rem; }
+	.atom-pct { font-size: 0.875rem; font-weight: 900; min-width: 2.6rem; text-align: right; }
+	.atom-frac { font-size: 0.8rem; font-weight: 700; color: var(--c-ink-2); min-width: 2.8rem; }
+	.atom-chevron { font-size: 1.15rem; font-weight: 900; color: var(--c-ink-2); transition: transform 0.2s; line-height: 1; }
 	.atom-chevron.open { transform: rotate(90deg); }
 
-	/* Student detail list */
 	.student-detail-list {
-		list-style: none;
-		display: flex;
-		flex-direction: column;
-		gap: 0.25rem;
-		background: #f9fafb;
-		border-radius: 0.4rem;
-		padding: 0.5rem 0.6rem;
-		margin: 0 0.1rem 0.2rem;
+		list-style: none; display: flex; flex-direction: column;
+		background: var(--c-ground); border-radius: 14px; padding: 0.35rem 0.75rem; margin: 0 0 0.6rem;
 	}
-	.student-detail-row {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		font-size: 0.78rem;
-	}
+	.student-detail-row { display: flex; align-items: center; gap: 0.6rem; font-size: 0.875rem; min-height: 2.25rem; }
 	.student-detail-name {
-		min-width: 7rem;
-		font-weight: 600;
-		color: #111827;
-		text-decoration: none;
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
+		flex: 1 1 8rem; min-width: 0; font-weight: 800; color: var(--c-navy); text-decoration: none;
+		white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 	}
-	.student-detail-name:hover { color: #16a34a; text-decoration: underline; }
-	.student-detail-class {
-		font-size: 0.7rem;
-		color: #9ca3af;
-		white-space: nowrap;
-		min-width: 4rem;
-	}
-	.student-detail-bar-wrap {
-		flex: 1;
-		display: flex;
-		align-items: center;
-		gap: 0.3rem;
-		min-width: 0;
-	}
-	.student-detail-bar {
-		flex: 1;
-		height: 4px;
-		background: #e5e7eb;
-		border-radius: 9999px;
-		overflow: hidden;
-	}
-	.student-detail-fill {
-		height: 100%;
-		border-radius: 9999px;
-	}
-	.student-detail-pct {
-		font-size: 0.7rem;
-		color: #6b7280;
-		white-space: nowrap;
-		min-width: 2rem;
-		text-align: right;
-	}
-	.mastered-badge {
-		font-size: 0.7rem;
-		color: #16a34a;
-		font-weight: 700;
-	}
+	.student-detail-name:hover { color: var(--c-primary); }
+	.student-detail-class { font-size: 0.75rem; font-weight: 800; color: var(--c-ink-2); min-width: 2rem; }
+	.sd-track { max-width: 7rem; }
+	.student-detail-pct { font-size: 0.8rem; font-weight: 800; min-width: 2.4rem; text-align: right; }
+	.mastered-badge { width: 1rem; color: var(--c-success); font-weight: 900; }
 
 	/* Leaderboard */
-	.lb-card-header { flex-wrap: wrap; gap: 0.5rem; }
-	.lb-hint { font-size: 0.75rem; color: #9ca3af; margin: -0.5rem 0 0.5rem; }
-	.period-tabs {
-		display: inline-flex;
-		gap: 0.2rem;
-		background: #f3f4f6;
-		border-radius: 9999px;
-		padding: 0.2rem;
-	}
-	.period-tab {
-		padding: 0.25rem 0.75rem;
-		border: none;
-		border-radius: 9999px;
-		background: none;
-		color: #6b7280;
-		font-size: 0.78rem;
-		font-weight: 600;
-		cursor: pointer;
-		transition: background 0.15s, color 0.15s;
-	}
-	.period-tab:hover { color: #16a34a; }
-	.period-tab.active { background: #fff; color: #16a34a; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
-	.lb-table-wrap { overflow-x: auto; }
-	.lb-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
-	.lb-table th {
-		padding: 0;
-		text-align: left;
-		font-size: 0.75rem;
-		color: #6b7280;
-		font-weight: 600;
-		border-bottom: 2px solid #e5e7eb;
-		background: #f9fafb;
-		white-space: nowrap;
-	}
-	.lb-table th:first-child { padding: 0.5rem 0.25rem; }
-	.lb-table td { padding: 0.6rem 0.75rem; border-bottom: 1px solid #f3f4f6; }
-	.lb-table tr:last-child td { border-bottom: none; }
-	.lb-top3 td { background: #fafff7; }
-	.lb-rank { text-align: center; width: 2.5rem; font-weight: 700; }
-	.lb-num { text-align: right; white-space: nowrap; }
-	.lb-xp { font-weight: 700; color: #16a34a; }
-	.lb-name { font-weight: 600; }
-	.lb-class { color: #6b7280; font-size: 0.8rem; }
-	.student-link { color: inherit; text-decoration: none; }
-	.student-link:hover { color: #16a34a; text-decoration: underline; }
-	.class-link { color: #6b7280; text-decoration: none; }
-	.class-link:hover { color: #16a34a; }
+	.lb-title { display: flex; flex-direction: column; gap: 0.1rem; }
+	.xp { font-weight: 900; color: var(--c-primary-dark); white-space: nowrap; }
+	.streak { color: var(--c-orange-text); font-weight: 900; }
+	.t-table .badge { text-decoration: none; }
 
-	.sort-btn {
-		background: none;
-		border: none;
-		cursor: pointer;
-		font-size: 0.75rem;
-		color: #6b7280;
-		font-weight: 600;
-		padding: 0.5rem 0.75rem;
-		display: flex;
-		align-items: center;
-		gap: 0.35rem;
-		white-space: nowrap;
-		width: 100%;
-		transition: background 0.1s, color 0.1s;
-		border-radius: 0;
+	/* Classes */
+	.class-list { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
+	.class-item {
+		display: flex; align-items: center; gap: 0.875rem; padding: 0.6rem 0.75rem;
+		border: 2px solid var(--c-line); border-radius: 14px; text-decoration: none; color: var(--c-navy);
+		transition: border-color 0.15s;
 	}
-	.sort-btn:hover {
-		background: #f0fdf4;
-		color: #15803d;
+	.class-item:hover { border-color: var(--c-primary); }
+	.class-name {
+		min-width: 2.75rem; height: 2.75rem; padding: 0 0.5rem; flex: none; border-radius: 14px;
+		background: var(--c-primary-light); color: var(--c-primary-dark);
+		display: flex; align-items: center; justify-content: center; font-weight: 900;
 	}
-	.sort-btn-right { justify-content: flex-end; }
-	.sort-btn.sorted {
-		color: #15803d;
-		background: #f0fdf4;
-	}
-	.sort-icon {
-		font-size: 0.7rem;
-		opacity: 0.35;
-		flex-shrink: 0;
-	}
-	.sort-icon.active {
-		opacity: 1;
-		color: #16a34a;
+	.class-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0.35rem; }
+	.class-count { font-size: 0.9rem; font-weight: 800; }
+	.class-body .track { flex: none; }
+
+	/* Activity */
+	.activity-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+	.activity-item { display: flex; align-items: center; gap: 0.75rem; }
+	.avatar { background: var(--c-primary-light); color: var(--c-primary-dark); }
+	.avatar.good { background: var(--c-success-light); color: var(--c-success-dark); }
+	.avatar.weak { background: var(--c-orange-light); color: var(--c-orange-text); }
+	.activity-body { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+	.activity-link { font-weight: 800; color: var(--c-navy); text-decoration: none; }
+	.activity-link:hover { color: var(--c-primary); }
+	.activity-atom { font-size: 0.8rem; font-weight: 700; color: var(--c-ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+	.activity-side { display: flex; flex-direction: column; align-items: flex-end; gap: 0.05rem; flex: none; }
+	.activity-score { font-size: 0.8rem; font-weight: 900; color: var(--c-navy); white-space: nowrap; }
+	.activity-time { font-size: 0.75rem; font-weight: 800; color: var(--c-ink-2); white-space: nowrap; }
+
+	@media (max-width: 899px) {
+		.atom-frac { display: none; }
+		.atom-meta { flex-direction: column; gap: 0.1rem; }
 	}
 </style>

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
+	import TIcon from '$lib/components/teacher/TIcon.svelte';
 	import type { FsrsStateLabel } from './+page.server';
 
 	let { data }: { data: PageData } = $props();
@@ -8,14 +9,15 @@
 		return `${Math.round(v * 100)}%`;
 	}
 
-	const FSRS_OPTIONS: { key: FsrsStateLabel; label: string; color: string }[] = [
-		{ key: 'none', label: 'Kein FSRS', color: '#9ca3af' },
-		{ key: 'new', label: 'Neu', color: '#3b82f6' },
-		{ key: 'learning', label: 'Lernen', color: '#f59e0b' },
-		{ key: 'review', label: 'Wiederholung', color: '#16a34a' },
-		{ key: 'relearning', label: 'Neu lernen', color: '#dc2626' }
+	const FSRS_OPTIONS: { key: FsrsStateLabel; label: string; color: string; text: string }[] = [
+		{ key: 'none', label: 'Kein FSRS', color: '#cbd5e1', text: '#4a5b78' },
+		{ key: 'new', label: 'Neu', color: '#7dd3fc', text: '#0a4f99' },
+		{ key: 'learning', label: 'Lernen', color: '#fcd34d', text: '#92400e' },
+		{ key: 'review', label: 'Wiederholung', color: '#16a34a', text: '#166534' },
+		{ key: 'relearning', label: 'Neu lernen', color: '#f97316', text: '#c2410c' }
 	];
 	const FSRS_COLOR = new Map(FSRS_OPTIONS.map((o) => [o.key, o.color]));
+	const FSRS_TEXT = new Map(FSRS_OPTIONS.map((o) => [o.key, o.text]));
 	const FSRS_LABEL = new Map(FSRS_OPTIONS.map((o) => [o.key, o.label]));
 
 	// ── Filters ──────────────────────────────────────────────────────────────
@@ -176,47 +178,70 @@
 
 <svelte:head><title>Anemo – Atom-Insights</title></svelte:head>
 
+{#snippet studentList(a: (typeof sortedAtomStats)[number])}
+	<ul class="student-detail-list">
+		{#each a.students as s}
+			<li class="student-detail-row">
+				<a href="/teacher/classes/{s.classId}/students/{s.studentId}" class="student-detail-name">{s.displayName}</a>
+				{#if showClassColumn}
+					<span class="student-detail-class">{s.className}</span>
+				{/if}
+				<span class="sd-bar">
+					<span class="track thin"><span class:green={s.isMastered} class:orange={!s.isMastered && s.mastery < 0.5} style="width:{pct(s.mastery)}"></span></span>
+					<span class="student-detail-pct">{pct(s.mastery)}</span>
+				</span>
+				<span class="sd-badges">
+					{#if s.firstTryCorrect === true}
+						<span class="badge badge-green">✓ Erstversuch</span>
+					{:else if s.firstTryCorrect === false}
+						<span class="badge badge-orange">✗ Erstversuch</span>
+					{/if}
+					<span class="badge fsrs-badge" style="--dot:{FSRS_COLOR.get(s.fsrsState as FsrsStateLabel)};color:{FSRS_TEXT.get(s.fsrsState as FsrsStateLabel)}">
+						{FSRS_LABEL.get(s.fsrsState as FsrsStateLabel)}
+					</span>
+					{#if s.isMastered}<span class="badge badge-green">gemeistert</span>{/if}
+				</span>
+			</li>
+		{/each}
+	</ul>
+{/snippet}
+
+{#snippet fsrsBar(a: (typeof sortedAtomStats)[number])}
+	<div class="fsrs-bar" role="img" aria-label={'FSRS: ' + fsrsSegments(a).map((s) => `${s.label} ${s.count}`).join(', ')} title={fsrsSegments(a).map((s) => `${s.label}: ${s.count}`).join(' · ')}>
+		{#each fsrsSegments(a) as seg}
+			<span class="fsrs-seg" style="width:{seg.widthPct}%;background:{seg.color}"></span>
+		{/each}
+	</div>
+{/snippet}
+
 <div class="page">
-	<h1 class="page-title">Atom-Insights</h1>
-	<p class="page-sub">
-		Filtere nach Mastery, FSRS-Status und Klasse, um zu sehen, welche Atome direkt sitzen und wo
-		Schüler oft beim ersten Versuch scheitern.
-	</p>
+	<div class="page-header">
+		<div>
+			<h1 class="page-title">Atom-Insights</h1>
+			<p class="page-sub intro">
+				Welche Atome sitzen direkt – und wo scheitern Schüler:innen oft beim ersten Versuch?
+			</p>
+		</div>
+	</div>
 
 	<!-- Filters -->
 	<section class="card filter-card">
 		<div class="filter-row">
-			<span class="filter-label">Klasse</span>
-			<div class="chip-row">
-				<button
-					class="chip"
-					class:active={selectedClassId === null}
-					onclick={() => toggleClass(null)}
-				>
-					Alle Klassen
-				</button>
+			<span class="filter-label" id="lbl-class">Klasse</span>
+			<div class="chips scroll" role="group" aria-labelledby="lbl-class">
+				<button class="chip-btn" class:active={selectedClassId === null} aria-pressed={selectedClassId === null} onclick={() => toggleClass(null)}>Alle Klassen</button>
 				{#each data.classes as c}
-					<button
-						class="chip"
-						class:active={selectedClassId === c.id}
-						onclick={() => toggleClass(c.id)}
-					>
-						{c.name}
-					</button>
+					<button class="chip-btn" class:active={selectedClassId === c.id} aria-pressed={selectedClassId === c.id} onclick={() => toggleClass(c.id)}>{c.name}</button>
 				{/each}
 			</div>
 		</div>
 
 		<div class="filter-row">
-			<span class="filter-label">FSRS-Status</span>
-			<div class="chip-row">
+			<span class="filter-label" id="lbl-fsrs">FSRS-Status</span>
+			<div class="chips scroll" role="group" aria-labelledby="lbl-fsrs">
 				{#each FSRS_OPTIONS as o}
-					<button
-						class="chip chip-dot"
-						class:active={activeFsrsStates.has(o.key)}
-						onclick={() => toggleFsrsState(o.key)}
-					>
-						<span class="chip-swatch" style="background:{o.color}"></span>
+					<button class="chip-btn fsrs-chip" class:on={activeFsrsStates.has(o.key)} aria-pressed={activeFsrsStates.has(o.key)} onclick={() => toggleFsrsState(o.key)}>
+						<span class="dot" style="background:{o.color}"></span>
 						{o.label}
 					</button>
 				{/each}
@@ -227,22 +252,20 @@
 			<span class="filter-label">Mastery</span>
 			<div class="range-wrap">
 				<label class="range-field">
-					<span>Min {masteryMin}%</span>
+					<span>Min <b>{masteryMin} %</b></span>
 					<input type="range" min="0" max="100" bind:value={masteryMin} />
 				</label>
 				<label class="range-field">
-					<span>Max {masteryMax}%</span>
+					<span>Max <b>{masteryMax} %</b></span>
 					<input type="range" min="0" max="100" bind:value={masteryMax} />
 				</label>
 			</div>
 		</div>
 
 		<div class="filter-footer">
-			<span class="filter-count">
-				{sortedAtomStats.length} Atome · {filteredRows.length} Schüler-Atom-Ergebnisse
-			</span>
+			<span class="filter-count">{sortedAtomStats.length} Atome · {filteredRows.length} Schüler-Atom-Ergebnisse</span>
 			{#if filtersActive}
-				<button class="reset-btn" onclick={resetFilters}>Filter zurücksetzen</button>
+				<button class="btn btn-ghost btn-sm" onclick={resetFilters}><TIcon name="refresh" size={16} />Filter zurücksetzen</button>
 			{/if}
 		</div>
 	</section>
@@ -252,324 +275,141 @@
 		{#if sortedAtomStats.length === 0}
 			<p class="empty-note">Keine Atome für diese Filterkombination.</p>
 		{:else}
-			<div class="tbl-wrap">
-				<table class="tbl">
+			<div class="table-wrap desktop-only">
+				<table class="t-table">
 					<thead>
 						<tr>
-							<th></th>
-							<th>
-								<button
-									class="sort-btn"
-									class:sorted={sortKey === 'domain'}
-									onclick={() => toggleSort('domain')}
-								>
-									Domäne <span class="sort-icon" class:active={sortKey === 'domain'}
-										>{sortIcon('domain')}</span
-									>
-								</button>
-							</th>
-							<th>
-								<button
-									class="sort-btn"
-									class:sorted={sortKey === 'atomLabel'}
-									onclick={() => toggleSort('atomLabel')}
-								>
-									Atom <span class="sort-icon" class:active={sortKey === 'atomLabel'}
-										>{sortIcon('atomLabel')}</span
-									>
-								</button>
-							</th>
-							<th class="tbl-num">
-								<button
-									class="sort-btn sort-btn-right"
-									class:sorted={sortKey === 'studentCount'}
-									onclick={() => toggleSort('studentCount')}
-								>
-									<span class="sort-icon" class:active={sortKey === 'studentCount'}
-										>{sortIcon('studentCount')}</span
-									> Schüler
-								</button>
-							</th>
-							<th class="tbl-num">
-								<button
-									class="sort-btn sort-btn-right"
-									class:sorted={sortKey === 'avgMastery'}
-									onclick={() => toggleSort('avgMastery')}
-								>
-									<span class="sort-icon" class:active={sortKey === 'avgMastery'}
-										>{sortIcon('avgMastery')}</span
-									> Ø Mastery
-								</button>
-							</th>
-							<th class="tbl-num">
-								<button
-									class="sort-btn sort-btn-right"
-									class:sorted={sortKey === 'masteryRate'}
-									onclick={() => toggleSort('masteryRate')}
-								>
-									<span class="sort-icon" class:active={sortKey === 'masteryRate'}
-										>{sortIcon('masteryRate')}</span
-									> Gemeistert
-								</button>
-							</th>
-							<th class="tbl-num">
-								<button
-									class="sort-btn sort-btn-right"
-									class:sorted={sortKey === 'firstTryRate'}
-									onclick={() => toggleSort('firstTryRate')}
-								>
-									<span class="sort-icon" class:active={sortKey === 'firstTryRate'}
-										>{sortIcon('firstTryRate')}</span
-									> Erstversuch richtig
-								</button>
-							</th>
+							<th style="width:2rem"><span class="sr-only">Details</span></th>
+							<th><button class="sort-btn" class:sorted={sortKey === 'domain'} onclick={() => toggleSort('domain')}>Domäne <span class="sort-icon" class:active={sortKey === 'domain'}>{sortIcon('domain')}</span></button></th>
+							<th><button class="sort-btn" class:sorted={sortKey === 'atomLabel'} onclick={() => toggleSort('atomLabel')}>Atom <span class="sort-icon" class:active={sortKey === 'atomLabel'}>{sortIcon('atomLabel')}</span></button></th>
+							<th class="num"><button class="sort-btn" class:sorted={sortKey === 'studentCount'} onclick={() => toggleSort('studentCount')}><span class="sort-icon" class:active={sortKey === 'studentCount'}>{sortIcon('studentCount')}</span> Schüler</button></th>
+							<th class="num"><button class="sort-btn" class:sorted={sortKey === 'avgMastery'} onclick={() => toggleSort('avgMastery')}><span class="sort-icon" class:active={sortKey === 'avgMastery'}>{sortIcon('avgMastery')}</span> Ø Mastery</button></th>
+							<th class="num"><button class="sort-btn" class:sorted={sortKey === 'masteryRate'} onclick={() => toggleSort('masteryRate')}><span class="sort-icon" class:active={sortKey === 'masteryRate'}>{sortIcon('masteryRate')}</span> Gemeistert</button></th>
+							<th class="num"><button class="sort-btn" class:sorted={sortKey === 'firstTryRate'} onclick={() => toggleSort('firstTryRate')}><span class="sort-icon" class:active={sortKey === 'firstTryRate'}>{sortIcon('firstTryRate')}</span> Erstversuch richtig</button></th>
 							<th>FSRS-Verteilung</th>
 						</tr>
 					</thead>
 					<tbody>
 						{#each sortedAtomStats as a}
 							{@const isExpanded = expandedAtomId === a.atomId}
-							<tr class="tbl-row" onclick={() => toggleAtom(a.atomId)}>
-								<td class="tbl-chevron"><span class:open={isExpanded}>›</span></td>
+							<tr class="tbl-row" class:expanded={isExpanded} onclick={() => toggleAtom(a.atomId)}>
+								<td>
+									<button class="chev-btn" class:open={isExpanded} aria-expanded={isExpanded} aria-label="Schüler:innen für {a.atomLabel}" onclick={(e) => { e.stopPropagation(); toggleAtom(a.atomId); }}>›</button>
+								</td>
 								<td class="tbl-domain">{a.domain}</td>
 								<td class="tbl-label">{a.atomLabel}</td>
-								<td class="tbl-num">{a.studentCount}</td>
-								<td class="tbl-num">{pct(a.avgMastery)}</td>
-								<td class="tbl-num">
-									{pct(a.masteryRate)}
-									<span class="tbl-frac">({a.masteredCount}/{a.studentCount})</span>
-								</td>
-								<td class="tbl-num">
+								<td class="num">{a.studentCount}</td>
+								<td class="num">{pct(a.avgMastery)}</td>
+								<td class="num">{pct(a.masteryRate)} <span class="tbl-frac">({a.masteredCount}/{a.studentCount})</span></td>
+								<td class="num">
 									{#if a.firstTryRate === null}
-										<span class="no-data">–</span>
+										<span class="tbl-frac">–</span>
 									{:else}
-										<span
-											class="first-try-pct"
-											class:first-try-bad={a.firstTryRate < 0.5}
-											class:first-try-good={a.firstTryRate >= 0.8}
-										>
-											{pct(a.firstTryRate)}
-										</span>
+										<span class="badge" class:badge-orange={a.firstTryRate < 0.5} class:badge-green={a.firstTryRate >= 0.8} class:badge-blue={a.firstTryRate >= 0.5 && a.firstTryRate < 0.8}>{pct(a.firstTryRate)}</span>
 										<span class="tbl-frac">({a.firstTryCorrectCount}/{a.firstTryTotal})</span>
 									{/if}
 								</td>
-								<td class="tbl-fsrs">
-									<div class="fsrs-bar" title={fsrsSegments(a).map((s) => `${s.label}: ${s.count}`).join(' · ')}>
-										{#each fsrsSegments(a) as seg}
-											<div class="fsrs-seg" style="width:{seg.widthPct}%;background:{seg.color}"></div>
-										{/each}
-									</div>
-								</td>
+								<td class="tbl-fsrs">{@render fsrsBar(a)}</td>
 							</tr>
 							{#if isExpanded}
 								<tr class="detail-row">
-									<td colspan="8">
-										<ul class="student-detail-list">
-											{#each a.students as s}
-												<li class="student-detail-row">
-													<a
-														href="/teacher/classes/{s.classId}/students/{s.studentId}"
-														class="student-detail-name"
-													>
-														{s.displayName}
-													</a>
-													{#if showClassColumn}
-														<span class="student-detail-class">{s.className}</span>
-													{/if}
-													<div class="student-detail-bar-wrap">
-														<div class="student-detail-bar">
-															<div
-																class="student-detail-fill"
-																class:fill-green={s.isMastered}
-																class:fill-red={!s.isMastered}
-																style="width:{pct(s.mastery)}"
-															></div>
-														</div>
-														<span class="student-detail-pct">{pct(s.mastery)}</span>
-													</div>
-													<span
-														class="first-try-badge"
-														class:ft-yes={s.firstTryCorrect === true}
-														class:ft-no={s.firstTryCorrect === false}
-													>
-														{#if s.firstTryCorrect === true}✓ Erstversuch{:else if s.firstTryCorrect === false}✗ Erstversuch{:else}–{/if}
-													</span>
-													<span
-														class="fsrs-badge"
-														style="background:{FSRS_COLOR.get(s.fsrsState as FsrsStateLabel)}20;color:{FSRS_COLOR.get(s.fsrsState as FsrsStateLabel)}"
-													>
-														{FSRS_LABEL.get(s.fsrsState as FsrsStateLabel)}
-													</span>
-													{#if s.isMastered}
-														<span class="mastered-badge">✓ gemeistert</span>
-													{/if}
-												</li>
-											{/each}
-										</ul>
-									</td>
+									<td colspan="8">{@render studentList(a)}</td>
 								</tr>
 							{/if}
 						{/each}
 					</tbody>
 				</table>
 			</div>
+
+			<!-- Mobile -->
+			<div class="mobile-only m-sort">
+				<label for="m-sort" class="hint">Sortieren nach</label>
+				<select id="m-sort" value={sortKey} onchange={(e) => { const k = (e.target as HTMLSelectElement).value as typeof sortKey; sortKey = k; sortDir = k === 'atomLabel' || k === 'domain' ? 'asc' : k === 'firstTryRate' ? 'asc' : 'desc'; }}>
+					<option value="firstTryRate">Erstversuch richtig</option>
+					<option value="avgMastery">Ø Mastery</option>
+					<option value="masteryRate">Gemeistert</option>
+					<option value="studentCount">Schüler</option>
+					<option value="atomLabel">Atom</option>
+					<option value="domain">Domäne</option>
+				</select>
+				<button class="icon-btn" aria-label={sortDir === 'asc' ? 'Aufsteigend – umkehren' : 'Absteigend – umkehren'} onclick={() => (sortDir = sortDir === 'asc' ? 'desc' : 'asc')}>{sortDir === 'asc' ? '▲' : '▼'}</button>
+			</div>
+			<ul class="m-list">
+				{#each sortedAtomStats as a}
+					{@const isExpanded = expandedAtomId === a.atomId}
+					<li class="m-atom" class:expanded={isExpanded}>
+						<button class="m-atom-btn" aria-expanded={isExpanded} onclick={() => toggleAtom(a.atomId)}>
+							<span class="m-atom-top">
+								<span class="m-atom-label">{a.atomLabel}</span>
+								{#if a.firstTryRate !== null}
+									<span class="badge" class:badge-orange={a.firstTryRate < 0.5} class:badge-green={a.firstTryRate >= 0.8} class:badge-blue={a.firstTryRate >= 0.5 && a.firstTryRate < 0.8}>{pct(a.firstTryRate)} 1. Versuch</span>
+								{/if}
+							</span>
+							<span class="m-meta"><span>{a.domain}</span><span>{a.studentCount} Schüler</span><span>Ø {pct(a.avgMastery)}</span><span>{a.masteredCount} gemeistert</span></span>
+							{@render fsrsBar(a)}
+						</button>
+						{#if isExpanded}{@render studentList(a)}{/if}
+					</li>
+				{/each}
+			</ul>
 		{/if}
 	</section>
 </div>
 
 <style>
-	.page { display: flex; flex-direction: column; gap: 1.5rem; }
-	.page-title { font-size: 1.5rem; font-weight: 700; margin: 0; }
-	.page-sub { font-size: 0.875rem; color: #6b7280; margin: -1rem 0 0; }
+	.intro { max-width: 42rem; font-weight: 700; }
 
-	.card {
-		background: #fff;
-		border-radius: 0.75rem;
-		padding: 1.25rem;
-		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
-	}
-	.empty-note { font-size: 0.875rem; color: #9ca3af; margin: 0; }
+	.filter-card { display: flex; flex-direction: column; gap: 0.875rem; }
+	.filter-row { display: grid; grid-template-columns: 8rem minmax(0, 1fr); gap: 0.75rem; align-items: center; }
+	.filter-label { font-size: 0.75rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.08em; color: var(--c-ink-2); }
+	.fsrs-chip { color: var(--c-ink-2); }
+	.fsrs-chip.on { border-color: var(--c-navy); color: var(--c-navy); background: #fff; }
+	.fsrs-chip:not(.on) .dot { opacity: 0.35; }
+	.fsrs-chip:not(.on) { text-decoration: line-through; }
+	.range-wrap { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+	.range-field { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.85rem; font-weight: 700; color: var(--c-ink-2); min-width: 12rem; flex: 1 1 12rem; max-width: 20rem; }
+	.range-field b { color: var(--c-navy); }
+	.range-field input { accent-color: var(--c-primary); width: 100%; min-height: 1.75rem; }
+	.filter-footer { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; flex-wrap: wrap; border-top: 1px solid var(--c-track); padding-top: 0.75rem; }
+	.filter-count { font-size: 0.85rem; font-weight: 800; color: var(--c-ink-2); }
 
-	/* Filters */
-	.filter-card { display: flex; flex-direction: column; gap: 1rem; }
-	.filter-row { display: flex; flex-direction: column; gap: 0.5rem; }
-	.filter-label { font-size: 0.75rem; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 0.04em; }
-
-	.chip-row { display: flex; flex-wrap: wrap; gap: 0.4rem; }
-	.chip {
-		padding: 0.35rem 0.85rem;
-		border-radius: 9999px;
-		border: 1.5px solid #e5e7eb;
-		background: #f9fafb;
-		color: #374151;
-		font-size: 0.8rem;
-		font-weight: 600;
-		cursor: pointer;
-		transition: all 0.15s;
-	}
-	.chip:hover { border-color: #16a34a; color: #16a34a; background: #f0fdf4; }
-	.chip.active { background: #16a34a; color: #fff; border-color: #16a34a; }
-	.chip-dot { display: inline-flex; align-items: center; gap: 0.4rem; }
-	.chip-dot.active .chip-swatch { outline: 2px solid #fff; }
-	.chip-swatch { width: 0.6rem; height: 0.6rem; border-radius: 9999px; flex-shrink: 0; }
-
-	.range-wrap { display: flex; flex-wrap: wrap; gap: 1.5rem; }
-	.range-field { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.8rem; color: #374151; font-weight: 600; min-width: 180px; }
-	.range-field input[type='range'] { accent-color: #16a34a; }
-
-	.filter-footer {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		border-top: 1px solid #f3f4f6;
-		padding-top: 0.75rem;
-	}
-	.filter-count { font-size: 0.78rem; color: #9ca3af; }
-	.reset-btn {
-		background: none;
-		border: none;
-		color: #16a34a;
-		font-size: 0.8rem;
-		font-weight: 600;
-		cursor: pointer;
-		padding: 0.2rem 0.4rem;
-	}
-	.reset-btn:hover { text-decoration: underline; }
-
-	/* Table */
-	.tbl-wrap { overflow-x: auto; }
-	.tbl { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
-	.tbl th {
-		padding: 0;
-		text-align: left;
-		font-size: 0.72rem;
-		color: #6b7280;
-		font-weight: 600;
-		border-bottom: 2px solid #e5e7eb;
-		background: #f9fafb;
-		white-space: nowrap;
-	}
-	.tbl td { padding: 0.6rem 0.6rem; border-bottom: 1px solid #f3f4f6; vertical-align: middle; }
 	.tbl-row { cursor: pointer; }
-	.tbl-row:hover { background: #f9fafb; }
-	.tbl-chevron { width: 1.25rem; color: #9ca3af; }
-	.tbl-chevron span { display: inline-block; transition: transform 0.2s; }
-	.tbl-chevron span.open { transform: rotate(90deg); }
-	.tbl-domain { color: #9ca3af; font-size: 0.75rem; white-space: nowrap; }
-	.tbl-label { font-weight: 600; color: #111827; }
-	.tbl-num { text-align: right; white-space: nowrap; }
-	.tbl-frac { font-size: 0.7rem; color: #9ca3af; margin-left: 0.2rem; }
-	.tbl-fsrs { min-width: 120px; }
-	.no-data { color: #d1d5db; }
+	.tbl-row.expanded td { background: var(--c-ground); }
+	.chev-btn { width: 1.9rem; height: 1.9rem; border: 0; background: none; border-radius: 8px; cursor: pointer; font: 900 1.2rem var(--font); color: var(--c-ink-2); transition: transform 0.15s; }
+	.chev-btn:hover { background: var(--c-track); }
+	.chev-btn.open { transform: rotate(90deg); color: var(--c-primary); }
+	.tbl-domain { font-size: 0.8rem; color: var(--c-ink-2) !important; white-space: nowrap; }
+	.tbl-label { font-weight: 800; min-width: 12rem; }
+	.tbl-frac { font-size: 0.78rem; font-weight: 700; color: var(--c-ink-2); }
+	.tbl-fsrs { min-width: 9rem; }
+	.fsrs-bar { display: flex; height: 10px; border-radius: 999px; overflow: hidden; background: var(--c-track); gap: 2px; }
+	.fsrs-seg { display: block; height: 100%; }
+	.detail-row td { background: var(--c-ground) !important; padding-top: 0 !important; }
 
-	.first-try-pct { font-weight: 700; }
-	.first-try-bad { color: #dc2626; }
-	.first-try-good { color: #16a34a; }
+	.student-detail-list { list-style: none; display: flex; flex-direction: column; background: #fff; border: 1px solid var(--c-line); border-radius: 14px; padding: 0.35rem 0.875rem; }
+	.student-detail-row { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; padding: 0.45rem 0; border-bottom: 1px solid var(--c-track); font-size: 0.875rem; }
+	.student-detail-row:last-child { border-bottom: 0; }
+	.student-detail-name { flex: 1 1 9rem; min-width: 0; font-weight: 800; color: var(--c-navy); text-decoration: none; }
+	.student-detail-name:hover { color: var(--c-primary); }
+	.student-detail-class { font-size: 0.75rem; font-weight: 800; color: var(--c-ink-2); }
+	.sd-bar { display: flex; align-items: center; gap: 0.5rem; flex: 0 1 10rem; }
+	.student-detail-pct { font-size: 0.8rem; font-weight: 900; min-width: 2.4rem; text-align: right; }
+	.sd-badges { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+	.fsrs-badge { background: #fff; border: 1px solid var(--c-line); }
+	.fsrs-badge::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--dot); }
 
-	.fsrs-bar {
-		display: flex;
-		height: 8px;
-		width: 100%;
-		min-width: 90px;
-		border-radius: 9999px;
-		overflow: hidden;
-		background: #f3f4f6;
+	.m-sort { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+	.m-sort select { flex: 1; }
+	.m-atom { border-bottom: 1px solid var(--c-track); }
+	.m-atom:last-child { border-bottom: 0; }
+	.m-atom.expanded { padding-bottom: 0.75rem; }
+	.m-atom-btn { width: 100%; display: flex; flex-direction: column; gap: 0.4rem; padding: 0.75rem 0; border: 0; background: none; text-align: left; font: inherit; color: inherit; cursor: pointer; }
+	.m-atom-top { display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem; }
+	.m-atom-label { font-weight: 800; }
+
+	@media (max-width: 899px) {
+		.filter-row { grid-template-columns: minmax(0, 1fr); gap: 0.4rem; }
+		.range-field { max-width: none; }
+		.student-detail-list { padding: 0.25rem 0.65rem; }
 	}
-	.fsrs-seg { height: 100%; }
-
-	.sort-btn {
-		background: none;
-		border: none;
-		cursor: pointer;
-		font-size: 0.72rem;
-		color: #6b7280;
-		font-weight: 600;
-		padding: 0.5rem 0.6rem;
-		display: flex;
-		align-items: center;
-		gap: 0.3rem;
-		white-space: nowrap;
-		width: 100%;
-	}
-	.sort-btn:hover { background: #f0fdf4; color: #15803d; }
-	.sort-btn-right { justify-content: flex-end; }
-	.sort-btn.sorted { color: #15803d; background: #f0fdf4; }
-	.sort-icon { font-size: 0.65rem; opacity: 0.35; flex-shrink: 0; }
-	.sort-icon.active { opacity: 1; color: #16a34a; }
-
-	/* Detail rows */
-	.detail-row td { padding: 0; border-bottom: 1px solid #f3f4f6; }
-	.student-detail-list {
-		list-style: none;
-		display: flex;
-		flex-direction: column;
-		gap: 0.3rem;
-		background: #f9fafb;
-		padding: 0.75rem 1rem;
-		margin: 0;
-	}
-	.student-detail-row { display: flex; align-items: center; gap: 0.6rem; font-size: 0.8rem; flex-wrap: wrap; }
-	.student-detail-name { min-width: 7rem; font-weight: 600; color: #111827; text-decoration: none; }
-	.student-detail-name:hover { color: #16a34a; text-decoration: underline; }
-	.student-detail-class { font-size: 0.7rem; color: #9ca3af; min-width: 4rem; }
-	.student-detail-bar-wrap { display: flex; align-items: center; gap: 0.3rem; width: 140px; }
-	.student-detail-bar { flex: 1; height: 4px; background: #e5e7eb; border-radius: 9999px; overflow: hidden; }
-	.student-detail-fill { height: 100%; border-radius: 9999px; }
-	.fill-green { background: #16a34a; }
-	.fill-red { background: #dc2626; }
-	.student-detail-pct { font-size: 0.7rem; color: #6b7280; min-width: 2rem; text-align: right; }
-
-	.first-try-badge { font-size: 0.7rem; font-weight: 700; color: #9ca3af; white-space: nowrap; }
-	.ft-yes { color: #16a34a; }
-	.ft-no { color: #dc2626; }
-
-	.fsrs-badge {
-		font-size: 0.68rem;
-		font-weight: 700;
-		padding: 0.15rem 0.5rem;
-		border-radius: 9999px;
-		white-space: nowrap;
-	}
-
-	.mastered-badge { font-size: 0.7rem; color: #16a34a; font-weight: 700; white-space: nowrap; }
 </style>

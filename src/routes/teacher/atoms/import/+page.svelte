@@ -46,28 +46,25 @@
 <svelte:head><title>Anemo – Erklärungen importieren</title></svelte:head>
 
 <div class="page">
-	<h1 class="page-title">Erklärungen importieren</h1>
+	<div class="page-header"><div><h1 class="page-title">Erklärungen importieren</h1><span class="page-sub">Erklärtexte pro Atom als JSON hinzufügen</span></div></div>
 
 	{#if form?.success}
-		<div class="alert alert-success">
-			✅ Import erfolgreich: <strong>{form.updated}</strong> Erklärungen aktualisiert,
+		<div class="alert alert-success" role="status">
+			Import erfolgreich: <strong>{form.updated}</strong> Erklärungen aktualisiert,
 			{form.skipped} übersprungen.
 		</div>
 	{/if}
 
 	{#if form?.importError}
-		<div class="alert alert-error">{form.importError}</div>
+		<div class="alert alert-error" role="alert">{form.importError}</div>
 	{/if}
 
-	<div class="two-col">
+	<div class="import-grid">
 		<div class="main-col">
 			<div class="card">
 				<h2>JSON eingeben oder hochladen</h2>
 
 				<div class="file-row">
-					<label class="btn btn-outline file-label" for="fileInput">
-						📂 JSON-Datei öffnen
-					</label>
 					<input
 						id="fileInput"
 						type="file"
@@ -75,6 +72,7 @@
 						class="hidden-file"
 						onchange={loadFile}
 					/>
+					<label class="btn btn-outline file-label" for="fileInput">JSON-Datei öffnen</label>
 				</div>
 
 				<form method="POST" action="?/import" use:enhance>
@@ -89,7 +87,7 @@
 					></textarea>
 
 					{#if parseError}
-						<div class="parse-error">{parseError}</div>
+						<div class="parse-error" role="alert">{parseError}</div>
 					{/if}
 
 					{#if preview}
@@ -138,77 +136,13 @@
 				<pre class="example-pre">{EXAMPLE}</pre>
 
 				<p class="idempotent-note">
-					ℹ️ Bestehende Erklärungen werden überschrieben (last-write-wins).
+					Bestehende Erklärungen werden überschrieben (last-write-wins).
 				</p>
 
 				<p class="idempotent-note" style="margin-top:.5rem">
-					💡 Erklärungen mit dem Script <code>scripts/generate-explanations.ts</code> per Claude API generieren lassen.
+					Erklärungen mit dem Script <code>scripts/generate-explanations.ts</code> per Claude API generieren lassen.
 				</p>
 			</div>
 		</div>
 	</div>
 </div>
-
-<style>
-	.page { display: flex; flex-direction: column; gap: 1.25rem; }
-	.page-title { font-size: 1.5rem; font-weight: 700; margin: 0; }
-
-	.alert { padding: 0.75rem 1rem; border-radius: 0.5rem; font-size: 0.875rem; font-weight: 500; }
-	.alert-error { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
-	.alert-success { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
-
-	.two-col { display: grid; grid-template-columns: 1fr 360px; gap: 1.25rem; align-items: start; }
-	@media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
-
-	.card { background: #fff; border-radius: 0.75rem; padding: 1.25rem; box-shadow: 0 1px 4px rgba(0,0,0,.07); }
-	.card h2 { font-size: 1rem; font-weight: 700; margin: 0 0 1rem; }
-
-	.file-row { margin-bottom: 0.75rem; }
-	.file-label { cursor: pointer; display: inline-flex; }
-	.hidden-file { display: none; }
-
-	.json-area {
-		width: 100%;
-		padding: 0.75rem;
-		font-family: 'Courier New', monospace;
-		font-size: 0.8rem;
-		border: 1.5px solid #d1d5db;
-		border-radius: 0.5rem;
-		resize: vertical;
-		outline: none;
-		line-height: 1.5;
-	}
-	.json-area:focus { border-color: #16a34a; }
-
-	.parse-error { font-size: 0.8rem; color: #dc2626; margin-top: 0.25rem; }
-
-	.preview-box {
-		background: #f0fdf4;
-		border: 1px solid #bbf7d0;
-		border-radius: 0.5rem;
-		padding: 0.75rem;
-		font-size: 0.8rem;
-		margin-top: 0.5rem;
-	}
-	.preview-box pre { margin: 0.35rem 0 0; font-size: 0.75rem; overflow-x: auto; }
-
-	.form-actions { display: flex; gap: 0.5rem; margin-top: 0.875rem; }
-
-	.format-card p { font-size: 0.85rem; color: #4b5563; margin-bottom: 0.5rem; }
-	.field-list { list-style: none; display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 1rem; padding: 0; }
-	.field-list li { font-size: 0.8rem; display: flex; align-items: baseline; gap: 0.35rem; flex-wrap: wrap; }
-	.field-list code { font-family: monospace; background: #f3f4f6; padding: 0.1rem 0.35rem; border-radius: 0.25rem; font-size: 0.8rem; }
-	.req { font-size: 0.65rem; font-weight: 700; color: #dc2626; text-transform: uppercase; }
-	.hint-label { font-size: 0.75rem; font-weight: 600; color: #374151; margin-bottom: 0.25rem !important; }
-	.example-pre {
-		background: #f9fafb;
-		border: 1px solid #e5e7eb;
-		border-radius: 0.375rem;
-		padding: 0.6rem;
-		font-size: 0.7rem;
-		overflow-x: auto;
-		margin-bottom: 0.75rem;
-		line-height: 1.4;
-	}
-	.idempotent-note { font-size: 0.78rem; color: #6b7280; background: #f9fafb; border-radius: 0.375rem; padding: 0.5rem 0.75rem; }
-</style>

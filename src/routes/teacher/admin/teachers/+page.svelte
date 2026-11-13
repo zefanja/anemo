@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import TIcon from '$lib/components/teacher/TIcon.svelte';
 	import type { ActionData, PageData } from './$types';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
@@ -13,84 +14,75 @@
 
 <svelte:head><title>Anemo – Lehrerverwaltung</title></svelte:head>
 
+{#snippet actions(t: (typeof data.teachers)[number])}
+	{#if t.id !== data.currentTeacherId}
+		<form method="POST" action="?/toggleAdmin" use:enhance>
+			<input type="hidden" name="teacherId" value={t.id} />
+			<button type="submit" class="btn btn-outline btn-sm" title={t.isAdmin ? 'Admin-Rechte entziehen' : 'Admin-Rechte vergeben'}>
+				{t.isAdmin ? 'Zur Lehrkraft' : 'Zum Admin'}
+			</button>
+		</form>
+		<form method="POST" action="?/delete" use:enhance
+			onsubmit={(e) => { if (!confirm(`${t.name ?? t.email} wirklich löschen?`)) e.preventDefault(); }}>
+			<input type="hidden" name="teacherId" value={t.id} />
+			<button type="submit" class="icon-btn danger" aria-label="{t.name ?? t.email} löschen" title="Löschen"><TIcon name="trash" size={18} /></button>
+		</form>
+	{:else}
+		<span class="badge badge-blue">Du</span>
+	{/if}
+{/snippet}
+
 <div class="page">
 	<div class="page-header">
-		<h1>Lehrerverwaltung</h1>
-		<button class="btn-primary" onclick={() => (showForm = !showForm)}>
-			{showForm ? 'Abbrechen' : '+ Lehrkraft anlegen'}
+		<div>
+			<h1 class="page-title">Lehrerverwaltung</h1>
+			<span class="page-sub">{data.teachers.length} Lehrkräfte · {data.teachers.filter((t) => t.isAdmin).length} Admins</span>
+		</div>
+		<button class="btn btn-primary" onclick={() => (showForm = !showForm)} aria-expanded={showForm}>
+			<TIcon name={showForm ? 'close' : 'plus'} size={18} />
+			{showForm ? 'Abbrechen' : 'Lehrkraft anlegen'}
 		</button>
 	</div>
 
 	{#if form?.createSuccess}
-		<div class="alert alert-success">Lehrkraft wurde erfolgreich angelegt.</div>
+		<div class="alert alert-success" role="status">Lehrkraft wurde erfolgreich angelegt.</div>
 	{/if}
 	{#if form?.deleteSuccess}
-		<div class="alert alert-success">Lehrkraft wurde gelöscht.</div>
+		<div class="alert alert-success" role="status">Lehrkraft wurde gelöscht.</div>
 	{/if}
 	{#if form?.deleteError}
-		<div class="alert alert-error">{form.deleteError}</div>
+		<div class="alert alert-error" role="alert">{form.deleteError}</div>
 	{/if}
 
 	{#if showForm}
-		<div class="form-card">
+		<div class="card">
 			<h2>Neue Lehrkraft anlegen</h2>
-			<form method="POST" action="?/create" use:enhance={() => {
+			<form method="POST" action="?/create" class="create-form" use:enhance={() => {
 				return ({ result, update }) => {
 					if (result.type === 'success') showForm = false;
 					update();
 				};
 			}}>
-				<div class="field-row">
+				<div class="grid-2 fields">
 					<div class="field">
 						<label for="name">Name</label>
-						<input
-							id="name"
-							name="name"
-							type="text"
-							required
-							placeholder="Max Mustermann"
-							value={form?.createName ?? ''}
-							class:input-error={form?.createErrors?.name}
-						/>
-						{#if form?.createErrors?.name}
-							<span class="field-error">{form.createErrors.name}</span>
-						{/if}
+						<input id="name" name="name" type="text" required placeholder="Max Mustermann" value={form?.createName ?? ''} class:input-error={form?.createErrors?.name} />
+						{#if form?.createErrors?.name}<span class="field-error">{form.createErrors.name}</span>{/if}
 					</div>
 					<div class="field">
 						<label for="create-email">E-Mail</label>
-						<input
-							id="create-email"
-							name="email"
-							type="email"
-							required
-							placeholder="lehrer@schule.de"
-							value={form?.createEmail ?? ''}
-							class:input-error={form?.createErrors?.email}
-						/>
-						{#if form?.createErrors?.email}
-							<span class="field-error">{form.createErrors.email}</span>
-						{/if}
+						<input id="create-email" name="email" type="email" required placeholder="lehrer@schule.de" value={form?.createEmail ?? ''} class:input-error={form?.createErrors?.email} />
+						{#if form?.createErrors?.email}<span class="field-error">{form.createErrors.email}</span>{/if}
 					</div>
 				</div>
 
-				<div class="field">
+				<div class="field pw-field">
 					<label for="create-password">Temporäres Passwort</label>
 					<div class="pw-wrap">
-						<input
-							id="create-password"
-							name="password"
-							type={showPw ? 'text' : 'password'}
-							required
-							placeholder="Mindestens 8 Zeichen"
-							class:input-error={form?.createErrors?.password}
-						/>
-						<button type="button" class="pw-toggle" onclick={() => (showPw = !showPw)}>
-							{showPw ? 'Verbergen' : 'Zeigen'}
-						</button>
+						<input id="create-password" name="password" type={showPw ? 'text' : 'password'} required placeholder="Mindestens 8 Zeichen" autocomplete="new-password" class:input-error={form?.createErrors?.password} />
+						<button type="button" class="pw-toggle" onclick={() => (showPw = !showPw)} aria-pressed={showPw}>{showPw ? 'Verbergen' : 'Zeigen'}</button>
 					</div>
-					{#if form?.createErrors?.password}
-						<span class="field-error">{form.createErrors.password}</span>
-					{/if}
+					{#if form?.createErrors?.password}<span class="field-error">{form.createErrors.password}</span>{/if}
 				</div>
 
 				<label class="checkbox-label">
@@ -99,213 +91,70 @@
 				</label>
 
 				<div class="form-actions">
-					<button type="button" class="btn-secondary" onclick={() => (showForm = false)}>
-						Abbrechen
-					</button>
-					<button type="submit" class="btn-primary">Anlegen</button>
+					<button type="submit" class="btn btn-primary">Anlegen</button>
+					<button type="button" class="btn btn-outline" onclick={() => (showForm = false)}>Abbrechen</button>
 				</div>
 			</form>
 		</div>
 	{/if}
 
-	<div class="table-card">
-		<table>
-			<thead>
-				<tr>
-					<th>Name</th>
-					<th>E-Mail</th>
-					<th>Rolle</th>
-					<th>Seit</th>
-					<th>Aktionen</th>
-				</tr>
-			</thead>
-			<tbody>
-				{#each data.teachers as t}
-					<tr class:self={t.id === data.currentTeacherId}>
-						<td class="td-name">{t.name ?? '–'}</td>
-						<td class="td-email">{t.email}</td>
-						<td>
-							<span class="badge" class:badge-admin={t.isAdmin} class:badge-teacher={!t.isAdmin}>
-								{t.isAdmin ? 'Admin' : 'Lehrkraft'}
-							</span>
-						</td>
-						<td class="td-date">{formatDate(t.createdAt)}</td>
-						<td class="td-actions">
-							{#if t.id !== data.currentTeacherId}
-								<form method="POST" action="?/toggleAdmin" use:enhance style="display:inline">
-									<input type="hidden" name="teacherId" value={t.id} />
-									<button type="submit" class="btn-action" title={t.isAdmin ? 'Admin-Rechte entziehen' : 'Admin-Rechte vergeben'}>
-										{t.isAdmin ? '↓ Lehrkraft' : '↑ Admin'}
-									</button>
-								</form>
-								<form method="POST" action="?/delete" use:enhance style="display:inline"
-									onsubmit={(e) => { if (!confirm(`${t.name ?? t.email} wirklich löschen?`)) e.preventDefault(); }}>
-									<input type="hidden" name="teacherId" value={t.id} />
-									<button type="submit" class="btn-action btn-danger">Löschen</button>
-								</form>
-							{:else}
-								<span class="self-label">Du</span>
-							{/if}
-						</td>
-					</tr>
-				{/each}
-			</tbody>
-		</table>
-	</div>
+	<section class="card">
+		<div class="table-wrap desktop-only">
+			<table class="t-table">
+				<thead>
+					<tr><th>Name</th><th>E-Mail</th><th>Rolle</th><th>Seit</th><th><span class="sr-only">Aktionen</span></th></tr>
+				</thead>
+				<tbody>
+					{#each data.teachers as t}
+						<tr>
+							<td class="td-name">{t.name ?? '–'}</td>
+							<td class="td-email">{t.email}</td>
+							<td><span class="badge" class:badge-gold={t.isAdmin} class:badge-blue={!t.isAdmin}>{t.isAdmin ? 'Admin' : 'Lehrkraft'}</span></td>
+							<td class="td-date">{formatDate(t.createdAt)}</td>
+							<td><div class="actions">{@render actions(t)}</div></td>
+						</tr>
+					{/each}
+				</tbody>
+			</table>
+		</div>
+		<ul class="m-list">
+			{#each data.teachers as t}
+				<li class="m-row teacher-row">
+					<span class="m-main">
+						<span class="m-title">{t.name ?? t.email}</span>
+						<span class="m-meta"><span>{t.email}</span><span>seit {formatDate(t.createdAt)}</span></span>
+						<span class="m-badges"><span class="badge" class:badge-gold={t.isAdmin} class:badge-blue={!t.isAdmin}>{t.isAdmin ? 'Admin' : 'Lehrkraft'}</span></span>
+					</span>
+					<div class="actions">{@render actions(t)}</div>
+				</li>
+			{/each}
+		</ul>
+	</section>
 </div>
 
 <style>
-	.page { display: flex; flex-direction: column; gap: 1.5rem; }
-
-	.page-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-	}
-	h1 { font-size: 1.5rem; font-weight: 700; margin: 0; }
-
-	.alert {
-		padding: 0.75rem 1rem;
-		border-radius: 0.625rem;
-		font-size: 0.875rem;
-	}
-	.alert-success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
-	.alert-error { background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; }
-
-	.form-card {
-		background: white;
-		border-radius: 0.75rem;
-		padding: 1.25rem;
-		box-shadow: 0 1px 4px rgba(0,0,0,.07);
-	}
-	h2 { font-size: 1rem; font-weight: 700; margin: 0 0 1rem; }
-
-	.field-row {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: 1rem;
-	}
-	@media (max-width: 600px) { .field-row { grid-template-columns: 1fr; } }
-
-	.field { display: flex; flex-direction: column; gap: 0.375rem; margin-bottom: 0.875rem; }
-	label { font-size: 0.875rem; font-weight: 600; color: #374151; }
-
-	input[type='text'],
-	input[type='email'],
-	input[type='password'] {
-		padding: 0.625rem 0.875rem;
-		border: 1.5px solid #d1d5db;
-		border-radius: 0.5rem;
-		font-size: 0.9rem;
-		color: #111827;
-		width: 100%;
-		box-sizing: border-box;
-	}
-	input:focus { outline: none; border-color: #16a34a; }
-	input.input-error { border-color: #dc2626; }
-	.field-error { font-size: 0.8rem; color: #dc2626; }
-
+	.card h2 { margin-bottom: 1rem; }
+	.create-form { display: flex; flex-direction: column; gap: 1rem; }
+	.pw-field { max-width: 24rem; }
 	.pw-wrap { position: relative; }
-	.pw-wrap input { padding-right: 5rem; }
+	.pw-wrap input { padding-right: 6rem; }
 	.pw-toggle {
-		position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%);
-		background: none; border: none; color: #6b7280; font-size: 0.8rem; cursor: pointer;
+		position: absolute; right: 0.35rem; top: 50%; transform: translateY(-50%);
+		min-height: 2.25rem; padding: 0 0.75rem; border: 0; border-radius: 10px;
+		background: var(--c-track); color: var(--c-navy-2); font: 800 0.85rem var(--font); cursor: pointer;
 	}
-
-	.checkbox-label {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		font-size: 0.875rem;
-		font-weight: 500;
-		color: #374151;
-		margin-bottom: 1rem;
-		cursor: pointer;
+	.input-error { border-color: #dc2626 !important; }
+	.field-error { font-size: 0.8rem; font-weight: 800; color: #b91c1c; }
+	.checkbox-label { display: flex; align-items: center; gap: 0.6rem; font-weight: 800; cursor: pointer; min-height: 2.25rem; }
+	.td-name { font-weight: 900 !important; }
+	.td-email { color: var(--c-ink-2) !important; }
+	.td-date { white-space: nowrap; color: var(--c-ink-2) !important; }
+	.actions { display: flex; align-items: center; justify-content: flex-end; gap: 0.35rem; }
+	.actions form { display: flex; }
+	.teacher-row { align-items: flex-start; }
+	.m-badges { margin-top: 0.2rem; }
+	@media (max-width: 899px) {
+		.pw-field { max-width: none; }
+		.teacher-row .actions { flex-direction: column; align-items: flex-end; }
 	}
-	.checkbox-label input[type='checkbox'] { width: auto; }
-
-	.form-actions { display: flex; gap: 0.75rem; justify-content: flex-end; }
-
-	.btn-primary {
-		padding: 0.625rem 1.25rem;
-		background: #16a34a;
-		color: white;
-		border: none;
-		border-radius: 0.5rem;
-		font-size: 0.9rem;
-		font-weight: 600;
-		cursor: pointer;
-		transition: background 0.15s;
-	}
-	.btn-primary:hover { background: #15803d; }
-	.btn-secondary {
-		padding: 0.625rem 1.25rem;
-		background: #f3f4f6;
-		color: #374151;
-		border: none;
-		border-radius: 0.5rem;
-		font-size: 0.9rem;
-		font-weight: 600;
-		cursor: pointer;
-	}
-	.btn-secondary:hover { background: #e5e7eb; }
-
-	.table-card {
-		background: white;
-		border-radius: 0.75rem;
-		box-shadow: 0 1px 4px rgba(0,0,0,.07);
-		overflow: hidden;
-	}
-	table { width: 100%; border-collapse: collapse; }
-	thead { background: #f9fafb; }
-	th {
-		text-align: left;
-		padding: 0.75rem 1rem;
-		font-size: 0.75rem;
-		font-weight: 700;
-		color: #6b7280;
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
-		border-bottom: 1px solid #e5e7eb;
-	}
-	td {
-		padding: 0.875rem 1rem;
-		font-size: 0.875rem;
-		color: #374151;
-		border-bottom: 1px solid #f3f4f6;
-		vertical-align: middle;
-	}
-	tr:last-child td { border-bottom: none; }
-	tr.self { background: #f0fdf4; }
-
-	.td-name { font-weight: 600; }
-	.td-email { color: #6b7280; }
-	.td-date { color: #9ca3af; white-space: nowrap; }
-
-	.badge {
-		display: inline-block;
-		padding: 0.2rem 0.5rem;
-		border-radius: 0.375rem;
-		font-size: 0.75rem;
-		font-weight: 600;
-	}
-	.badge-admin { background: #fef3c7; color: #92400e; }
-	.badge-teacher { background: #eff6ff; color: #1e40af; }
-
-	.td-actions { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
-	.btn-action {
-		padding: 0.3rem 0.625rem;
-		background: #f3f4f6;
-		color: #374151;
-		border: 1px solid #e5e7eb;
-		border-radius: 0.375rem;
-		font-size: 0.75rem;
-		font-weight: 600;
-		cursor: pointer;
-		white-space: nowrap;
-	}
-	.btn-action:hover { background: #e5e7eb; }
-	.btn-danger { color: #dc2626; border-color: #fecaca; background: #fef2f2; }
-	.btn-danger:hover { background: #fee2e2; }
-	.self-label { font-size: 0.75rem; color: #9ca3af; }
 </style>
