@@ -11,6 +11,8 @@
 	import Icon from '$lib/components/student/Icon.svelte';
 	import Ato from '$lib/components/Ato.svelte';
 	import NumPad from '$lib/components/student/NumPad.svelte';
+	import EquationSteps from '$lib/components/student/EquationSteps.svelte';
+	import { findStepEquation } from '$lib/equation.js';
 	import { pressKey, numpadInputs, setPadMode, type PadKey } from '$lib/numpad.js';
 	import type { PlacementState } from '$lib/server/learning/placement.js';
 
@@ -87,6 +89,17 @@
 	const isMixedPart = $derived(current?.inputData?.type === 'mixed_part');
 	const locked = $derived(isSubmitting || phase !== 'question');
 
+	// ── Step-by-step mode for linear equations ──
+	const stepEq = $derived(
+		current && !current.choices && ['integer', 'number', 'fraction'].includes(current.answerType) &&
+		!isFractionPart && !isMixedPart && !isNumberLine && !writtenArith
+			? findStepEquation(current.prompt)
+			: null
+	);
+	/** Task the step mode was opened for – switching tasks closes it automatically. */
+	let stepTaskId = $state<string | null>(null);
+	const stepMode = $derived(!!stepEq && !!current && stepTaskId === current.taskId);
+
 	// ── Progress / stars ──
 	const tested = $derived(pState?.totalTested ?? 0);
 	const questionNo = $derived(Math.min(tested + 1, maxAtoms));
@@ -110,7 +123,7 @@
 		!isNumberLine &&
 		!writtenArith
 	);
-	const showPad = $derived(padEligible && padPreferred && phase === 'question');
+	const showPad = $derived(padEligible && padPreferred && phase === 'question' && !stepMode);
 	const simpleNumberField = $derived(
 		!!current && (current.answerType === 'integer' || current.answerType === 'number') && !isFractionPart && !isMixedPart
 	);
@@ -424,7 +437,18 @@
 				{/if}
 				<MathText text={current.prompt} class="task-prompt" />
 				<div class="answer-area">
-					{#if current.choices}
+					{#if stepMode && stepEq}
+						{#key current.taskId}
+							<EquationSteps
+								equation={stepEq.eq}
+								tex={stepEq.tex}
+								answerType={current.answerType}
+								disabled={locked}
+								onanswer={(v) => { answer = v; submitAnswer(); }}
+								onclose={() => (stepTaskId = null)}
+							/>
+						{/key}
+					{:else if current.choices}
 						<div class="choice-buttons choice-buttons-multi">
 							{#each current.choices as choice}
 								<button class="choice-btn" onclick={() => selectAnswer(choice)} disabled={locked}><MathText text={choice} /></button>
@@ -507,6 +531,11 @@
 						/>
 					{/if}
 				</div>
+				{#if stepEq && !stepMode && phase === 'question'}
+					<button class="step-entry" onclick={() => (stepTaskId = current!.taskId)}>
+						<Icon name="pencil" size={16} /> Schritt für Schritt lösen
+					</button>
+				{/if}
 			</div>
 
 			{#if phase === 'feedback'}
@@ -526,11 +555,11 @@
 				</button>
 			{/if}
 
-			{#if !showPad && padEligible && phase === 'question'}
+			{#if !showPad && padEligible && phase === 'question' && !stepMode}
 				<button class="pad-switch" onclick={() => setPadPreferred(true)}>Zahlen-Tastenfeld anzeigen</button>
 			{/if}
 
-			{#if !showPad && phase === 'question' && !current.choices && current.answerType !== 'boolean' && current.answerType !== 'comparison' && !writtenArith}
+			{#if !showPad && phase === 'question' && !current.choices && current.answerType !== 'boolean' && current.answerType !== 'comparison' && !writtenArith && !stepMode}
 				<button class="btn-3d q-submit" onclick={() => submitAnswer()} disabled={isSubmitting || !String(answer).trim()}>
 					{isSubmitting ? 'Einen Moment…' : 'Weiter'}
 				</button>
@@ -672,6 +701,12 @@
 		font: 800 0.875rem var(--font); color: var(--c-primary); cursor: pointer; text-decoration: underline;
 	}
 	.q-submit { width: 100%; }
+	.step-entry {
+		align-self: center; display: inline-flex; align-items: center; gap: 0.4rem; min-height: 2.5rem;
+		background: var(--c-orange-light); border: 2px solid var(--c-orange); color: var(--c-orange-text);
+		border-radius: 999px; padding: 0.35rem 1rem; font: 900 0.9rem var(--font); cursor: pointer;
+	}
+	.step-entry:hover { background: #ffe4cc; }
 	.pad-dock { position: sticky; bottom: 0; margin-top: auto; z-index: 2; }
 
 	/* answer inputs (shared look with the practice page) */
