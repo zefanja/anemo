@@ -77,10 +77,10 @@
 <div class="activity-charts">
 	<div class="charts-header">
 		<h3 class="card-title">Aktivität</h3>
-		<div class="range-toggle">
-			<button class="range-btn" class:active={range === 7} onclick={() => (range = 7)}>7 Tage</button>
-			<button class="range-btn" class:active={range === 30} onclick={() => (range = 30)}>30 Tage</button>
-			<button class="range-btn" class:active={range === 90} onclick={() => (range = 90)}>90 Tage</button>
+		<div class="seg" role="group" aria-label="Zeitraum">
+			<button class:active={range === 7} aria-pressed={range === 7} onclick={() => (range = 7)}>7 Tage</button>
+			<button class:active={range === 30} aria-pressed={range === 30} onclick={() => (range = 30)}>30 Tage</button>
+			<button class:active={range === 90} aria-pressed={range === 90} onclick={() => (range = 90)}>90 Tage</button>
 		</div>
 	</div>
 
@@ -175,7 +175,7 @@
 			<p class="chart-empty">Noch nicht genug Daten für einen Verlauf.</p>
 		{:else}
 			<svg class="line-chart" viewBox="0 0 100 40" preserveAspectRatio="none">
-				<path d={masteryPath} fill="none" stroke="#16a34a" stroke-width="1" vector-effect="non-scaling-stroke" />
+				<path d={masteryPath} fill="none" stroke="var(--c-primary)" stroke-width="1" vector-effect="non-scaling-stroke" />
 			</svg>
 			<div class="line-labels">
 				<span>{shortDate(visibleMastery[0].date)}</span>
@@ -190,49 +190,37 @@
 <style>
 	.activity-charts {
 		background: #fff;
-		border-radius: 0.75rem;
-		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
-		padding: 1rem 1.25rem 1.25rem;
-		display: flex;
-		flex-direction: column;
-		gap: 1rem;
+		border-radius: var(--t-card-radius, 20px);
+		box-shadow: var(--shadow-sm);
+		padding: 1.25rem 1.375rem;
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 1rem 1.5rem;
 	}
+	.charts-header, .summary-row { grid-column: 1 / -1; }
 	.charts-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
-	.card-title { font-size: 0.95rem; font-weight: 700; margin: 0; color: #111827; }
-	.range-toggle { display: flex; gap: 0.3rem; }
-	.range-btn {
-		padding: 0.3rem 0.65rem;
-		border: 1.5px solid #e5e7eb;
-		border-radius: 0.4rem;
-		background: #fff;
-		font-size: 0.75rem;
-		font-weight: 600;
-		color: #6b7280;
-		cursor: pointer;
-	}
-	.range-btn:hover { border-color: #d1d5db; background: #f9fafb; }
-	.range-btn.active { background: #f0fdf4; border-color: #16a34a; color: #15803d; }
+	.card-title { font-size: 1.05rem; font-weight: 900; margin: 0; color: var(--c-navy); }
 
-	.summary-row { display: flex; gap: 1.5rem; flex-wrap: wrap; }
-	.summary-item { display: flex; flex-direction: column; gap: 0.1rem; }
-	.summary-value { font-size: 1.1rem; font-weight: 800; color: #111827; }
-	.summary-label { font-size: 0.68rem; color: #9ca3af; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; }
+	.summary-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; }
+	.summary-item { display: flex; flex-direction: column; background: var(--c-ground); border-radius: 14px; padding: 0.6rem 0.875rem; }
+	.summary-value { font-size: 1.3rem; font-weight: 900; color: var(--c-navy); }
+	.summary-label { font-size: 0.78rem; color: var(--c-ink-2); font-weight: 800; }
 
-	.chart-block { display: flex; flex-direction: column; gap: 0.4rem; }
-	.chart-title { font-size: 0.78rem; font-weight: 700; color: #374151; }
-	.chart-empty { font-size: 0.8rem; color: #9ca3af; margin: 0.25rem 0; }
+	.chart-block { display: flex; flex-direction: column; gap: 0.4rem; min-width: 0; }
+	.chart-title { font-size: 0.85rem; font-weight: 900; color: var(--c-navy); }
+	.chart-empty { font-size: 0.85rem; font-weight: 700; color: var(--c-ink-2); margin: 0.25rem 0; }
 
 	.legend-row { display: flex; gap: 0.75rem; }
-	.legend-item { display: flex; align-items: center; gap: 0.3rem; font-size: 0.72rem; color: #6b7280; font-weight: 600; }
-	.legend-dot { width: 8px; height: 8px; border-radius: 2px; display: inline-block; }
-	.dot-correct { background: #16a34a; }
-	.dot-wrong { background: #dc2626; }
+	.legend-item { display: flex; align-items: center; gap: 0.3rem; font-size: 0.75rem; color: var(--c-ink-2); font-weight: 800; }
+	.legend-dot { width: 9px; height: 9px; border-radius: 3px; display: inline-block; }
+	.dot-correct { background: var(--c-primary); }
+	.dot-wrong { background: var(--c-orange); }
 
 	.bar-chart {
 		display: flex;
 		align-items: flex-end;
 		gap: 2px;
-		height: 90px;
+		height: 96px;
 		overflow-x: auto;
 		padding-top: 1.25rem; /* room for tooltip */
 	}
@@ -249,20 +237,21 @@
 	.bar-track {
 		width: 100%;
 		max-width: 16px;
-		height: 66px;
+		height: 70px;
 		display: flex;
 		flex-direction: column-reverse;
-		border-radius: 3px;
+		border-radius: 4px;
 		overflow: hidden;
-		background: #f3f4f6;
+		background: var(--c-track);
 	}
 	.bar-fill { width: 100%; transition: height 0.2s; }
-	.minutes-fill { background: #16a34a; border-radius: 3px 3px 0 0; }
-	.tasks-correct { background: #16a34a; }
-	.tasks-wrong { background: #dc2626; }
+	.minutes-fill { background: var(--c-sky); border-radius: 4px 4px 0 0; }
+	.tasks-correct { background: var(--c-primary); }
+	.tasks-wrong { background: var(--c-orange); }
 	.bar-label {
 		font-size: 0.6rem;
-		color: #9ca3af;
+		font-weight: 700;
+		color: var(--c-ink-2);
 		margin-top: 0.2rem;
 		white-space: nowrap;
 		writing-mode: vertical-rl;
@@ -272,12 +261,12 @@
 	.bar-tooltip {
 		position: absolute;
 		top: -0.1rem;
-		background: #111827;
+		background: var(--c-navy);
 		color: #fff;
-		font-size: 0.65rem;
-		font-weight: 600;
-		padding: 0.15rem 0.4rem;
-		border-radius: 0.3rem;
+		font-size: 0.7rem;
+		font-weight: 800;
+		padding: 0.15rem 0.45rem;
+		border-radius: 0.4rem;
 		white-space: nowrap;
 		z-index: 2;
 		pointer-events: none;
@@ -286,7 +275,16 @@
 	.bar-tooltip.align-start { left: 0; }
 	.bar-tooltip.align-end { right: 0; }
 
-	.line-chart { width: 100%; height: 90px; }
-	.line-labels { display: flex; justify-content: space-between; font-size: 0.68rem; color: #9ca3af; }
-	.line-labels-end { text-align: right; font-weight: 600; color: #15803d; }
+	.line-chart { width: 100%; height: 96px; }
+	.line-labels { display: flex; justify-content: space-between; font-size: 0.72rem; font-weight: 700; color: var(--c-ink-2); }
+	.line-labels-end { text-align: right; font-weight: 900; color: var(--c-primary-dark); }
+
+	@media (max-width: 1100px) {
+		.activity-charts { grid-template-columns: minmax(0, 1fr); }
+	}
+	@media (max-width: 899px) {
+		.activity-charts { padding: 1rem; }
+		.summary-value { font-size: 1.1rem; }
+		.summary-item { padding: 0.5rem 0.65rem; }
+	}
 </style>

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import TIcon from '$lib/components/teacher/TIcon.svelte';
 	import type { ActionData, PageData } from './$types';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
@@ -13,47 +14,53 @@
 
 <div class="page">
 	<div class="page-header">
-		<h1 class="page-title">Klassen</h1>
-		<button class="btn btn-primary" onclick={() => (showForm = !showForm)}>
-			{showForm ? 'Abbrechen' : '+ Neue Klasse'}
+		<div>
+			<h1 class="page-title">Klassen</h1>
+			<span class="page-sub">{data.classes.length} {data.classes.length === 1 ? 'Klasse' : 'Klassen'} · {data.classes.reduce((n, c) => n + c.studentCount, 0)} Schüler:innen</span>
+		</div>
+		<button class="btn btn-primary" onclick={() => (showForm = !showForm)} aria-expanded={showForm}>
+			<TIcon name={showForm ? 'close' : 'plus'} size={18} />
+			{showForm ? 'Abbrechen' : 'Neue Klasse'}
 		</button>
 	</div>
 
 	{#if form?.error}
-		<div class="alert alert-error">{form.error}</div>
+		<div class="alert alert-error" role="alert">{form.error}</div>
 	{/if}
 	{#if form?.success && form.created}
-		<div class="alert alert-success">Klasse „{form.created}" wurde angelegt.</div>
+		<div class="alert alert-success" role="status">Klasse „{form.created}" wurde angelegt.</div>
 	{/if}
 	{#if form?.success && form.deleted}
-		<div class="alert alert-success">Klasse „{form.deleted}" wurde gelöscht.</div>
+		<div class="alert alert-success" role="status">Klasse „{form.deleted}" wurde gelöscht.</div>
 	{/if}
 
 	{#if showForm}
-		<div class="card form-card">
+		<div class="card">
 			<h2>Neue Klasse</h2>
-			<form method="POST" action="?/createClass" use:enhance={() => {
-				return ({ update }) => {
-					update();
-					showForm = false;
-					newName = '';
-				};
-			}}>
+			<form
+				method="POST"
+				action="?/createClass"
+				class="form-row new-form"
+				use:enhance={() => {
+					return ({ update }) => {
+						update();
+						showForm = false;
+						newName = '';
+					};
+				}}
+			>
 				<div class="field">
 					<label for="name">Klassenname</label>
-					<input id="name" name="name" type="text" bind:value={newName} placeholder="z.B. 5a" required />
+					<input id="name" name="name" type="text" bind:value={newName} placeholder="z. B. 5a" required />
 				</div>
-				<div class="form-actions">
-					<button type="submit" class="btn btn-primary">Anlegen</button>
-					<button type="button" class="btn btn-outline" onclick={() => (showForm = false)}>Abbrechen</button>
-				</div>
+				<button type="submit" class="btn btn-primary">Anlegen</button>
 			</form>
 		</div>
 	{/if}
 
 	{#if data.classes.length === 0}
-		<div class="empty-state">
-			<div class="empty-icon">📚</div>
+		<div class="card empty-state">
+			<span class="empty-icon"><TIcon name="users" size={32} /></span>
 			<p>Noch keine Klassen vorhanden.</p>
 			<button class="btn btn-primary" onclick={() => (showForm = true)}>Erste Klasse anlegen</button>
 		</div>
@@ -61,30 +68,30 @@
 		<div class="class-grid">
 			{#each data.classes as cls}
 				<div class="class-card">
-					<div class="class-card-main">
-						<a href="/teacher/classes/{cls.id}" class="class-link">
-							<div class="class-card-name">{cls.name}</div>
-							<div class="class-card-meta">{cls.studentCount} Schüler</div>
-						</a>
-					</div>
+					<a href="/teacher/classes/{cls.id}" class="class-link">
+						<span class="class-mark">{cls.name}</span>
+						<span class="class-text">
+							<span class="class-card-name">Klasse {cls.name}</span>
+							<span class="class-card-meta">{cls.studentCount} Schüler:innen</span>
+						</span>
+						<span class="m-chev" aria-hidden="true">›</span>
+					</a>
 					<div class="class-card-actions">
-						<a href="/teacher/classes/{cls.id}" class="btn btn-outline btn-sm">Verwalten</a>
 						{#if confirmDelete === cls.id}
 							<form method="POST" action="?/deleteClass" use:enhance>
 								<input type="hidden" name="classId" value={cls.id} />
 								<button type="submit" class="btn btn-danger btn-sm">Löschen bestätigen</button>
 							</form>
-							<button class="btn btn-outline btn-sm" onclick={() => (confirmDelete = null)}>
-								Abbrechen
-							</button>
+							<button class="btn btn-outline btn-sm" onclick={() => (confirmDelete = null)}>Abbrechen</button>
 						{:else}
+							<a href="/teacher/classes/{cls.id}" class="btn btn-outline btn-sm">Verwalten</a>
 							<button
-								class="btn btn-ghost btn-sm"
+								class="btn btn-ghost btn-sm del"
 								onclick={() => (confirmDelete = cls.id)}
 								disabled={cls.studentCount > 0}
 								title={cls.studentCount > 0 ? 'Erst alle Schüler entfernen' : 'Klasse löschen'}
 							>
-								Löschen
+								<TIcon name="trash" size={16} />Löschen
 							</button>
 						{/if}
 					</div>
@@ -95,74 +102,37 @@
 </div>
 
 <style>
-	.page { display: flex; flex-direction: column; gap: 1.25rem; }
-	.page-header { display: flex; justify-content: space-between; align-items: center; }
-	.page-title { font-size: 1.5rem; font-weight: 700; margin: 0; }
+	.card h2 { margin-bottom: 0.75rem; }
+	.new-form .field { max-width: 22rem; }
 
-	.alert {
-		padding: 0.75rem 1rem;
-		border-radius: 0.5rem;
-		font-size: 0.875rem;
-		font-weight: 500;
+	.empty-state { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; text-align: center; padding: 2.5rem 1rem; }
+	.empty-state p { font-weight: 800; color: var(--c-ink-2); }
+	.empty-icon {
+		width: 4rem; height: 4rem; border-radius: 50%; background: var(--c-primary-light); color: var(--c-primary-dark);
+		display: flex; align-items: center; justify-content: center;
 	}
-	.alert-error { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
-	.alert-success { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
 
-	.card { background: #fff; border-radius: 0.75rem; padding: 1.25rem; box-shadow: 0 1px 4px rgba(0,0,0,.07); }
-	.form-card h2 { font-size: 1rem; font-weight: 700; margin: 0 0 1rem; }
-
-	.field { display: flex; flex-direction: column; gap: 0.375rem; margin-bottom: 1rem; }
-	label { font-size: 0.875rem; font-weight: 600; color: #374151; }
-	input[type='text'] {
-		padding: 0.625rem 0.875rem;
-		border: 1.5px solid #d1d5db;
-		border-radius: 0.5rem;
-		font-size: 0.95rem;
-		width: 100%;
-		outline: none;
-		transition: border-color .15s;
-	}
-	input[type='text']:focus { border-color: #16a34a; }
-
-	.form-actions { display: flex; gap: 0.5rem; }
-
-	.empty-state {
-		text-align: center;
-		padding: 3rem 1rem;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 0.75rem;
-		color: #6b7280;
-	}
-	.empty-icon { font-size: 2.5rem; }
-
-	.class-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-		gap: 0.875rem;
-	}
+	.class-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); gap: 1rem; }
 	.class-card {
-		background: #fff;
-		border-radius: 0.75rem;
-		padding: 1rem 1.25rem;
-		box-shadow: 0 1px 4px rgba(0,0,0,.07);
-		display: flex;
-		flex-direction: column;
-		gap: 0.75rem;
+		background: #fff; border-radius: var(--t-card-radius); box-shadow: var(--shadow-sm);
+		display: flex; flex-direction: column; overflow: hidden;
 	}
-	.class-link { text-decoration: none; color: inherit; }
-	.class-card-name { font-size: 1.1rem; font-weight: 700; }
-	.class-card-meta { font-size: 0.8rem; color: #6b7280; margin-top: 0.2rem; }
-	.class-card-actions { display: flex; gap: 0.4rem; flex-wrap: wrap; }
-
-	.btn-sm { padding: 0.35rem 0.7rem; font-size: 0.8rem; }
-	.btn-danger { background: #dc2626; color: #fff; border: none; border-radius: 0.375rem; }
-	.btn-danger:hover { background: #b91c1c; }
-	.btn-ghost {
-		background: none; border: none; color: #9ca3af;
-		font-size: 0.8rem; padding: 0.35rem 0.5rem; border-radius: 0.375rem;
+	.class-link { display: flex; align-items: center; gap: 0.875rem; padding: 1rem 1.1rem; text-decoration: none; color: var(--c-navy); }
+	.class-link:hover { background: #f8fbfe; }
+	.class-mark {
+		min-width: 3rem; height: 3rem; padding: 0 0.5rem; flex: none; border-radius: 14px;
+		background: var(--c-primary-light); color: var(--c-primary-dark);
+		display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.05rem;
 	}
-	.btn-ghost:hover:not(:disabled) { color: #dc2626; background: #fef2f2; }
-	.btn-ghost:disabled { opacity: 0.4; cursor: not-allowed; }
+	.class-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+	.class-card-name { font-weight: 900; font-size: 1.05rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.class-card-meta { font-size: 0.85rem; font-weight: 800; color: var(--c-ink-2); }
+	.class-card-actions {
+		display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;
+		padding: 0.6rem 1.1rem; border-top: 1px solid var(--c-track);
+	}
+	.del { margin-left: auto; color: #b91c1c; }
+	.del:hover:not(:disabled) { background: var(--c-error-light); }
+	.del:disabled { color: var(--c-ink-2); }
+	@media (max-width: 899px) { .class-grid { grid-template-columns: minmax(0, 1fr); gap: 0.75rem; } }
 </style>
