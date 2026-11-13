@@ -133,7 +133,9 @@
 		return i < 3 ? `rank r${i + 1}` : 'rank';
 	}
 	function initials(name: string): string {
-		const parts = name.trim().split(/\s+/);
+		let parts = name.trim().split(/\s+/);
+		// single-word names like "LustigerKoala" → "LK"
+		if (parts.length === 1) parts = parts[0].split(/(?=[A-ZÄÖÜ])/);
 		return ((parts[0]?.[0] ?? '') + (parts[1]?.[0] ?? '')).toUpperCase() || '?';
 	}
 	const AVATAR_BG = ['#7dd3fc', '#bae6fd', '#fde68a', '#bbf7d0', '#fed7aa'];
@@ -157,7 +159,7 @@
 		if (!d) return 'badge-orange';
 		const diff = Date.now() - new Date(d).getTime();
 		if (diff > WEEK_MS) return 'badge-orange';
-		if (diff < 86400000 && new Date(d).toDateString() === new Date().toDateString()) return 'badge-green';
+		if (Math.floor(diff / 86400000) === 0) return 'badge-green'; // same rule as relativeDate(): "heute"
 		return '';
 	}
 
@@ -535,7 +537,7 @@ ${cards.map((c) => `<div class="card">
 
 				<!-- Desktop table -->
 				<div class="table-wrap desktop-only">
-					<table class="t-table">
+					<table class="t-table students-table">
 						<thead>
 							<tr>
 								<th><button class="sort-btn" class:sorted={studentSortKey==='displayName'} onclick={() => toggleStudentSort('displayName')}>Name <span class="sort-icon" class:active={studentSortKey==='displayName'}>{studentSortIcon('displayName')}</span></button></th>
@@ -545,7 +547,7 @@ ${cards.map((c) => `<div class="card">
 								<th><button class="sort-btn" class:sorted={studentSortKey==='masteredCount'} onclick={() => toggleStudentSort('masteredCount')}>Gemeistert <span class="sort-icon" class:active={studentSortKey==='masteredCount'}>{studentSortIcon('masteredCount')}</span></button></th>
 								<th class="num"><button class="sort-btn" class:sorted={studentSortKey==='todayMinutes'} onclick={() => toggleStudentSort('todayMinutes')}>Heute <span class="sort-icon" class:active={studentSortKey==='todayMinutes'}>{studentSortIcon('todayMinutes')}</span></button></th>
 								<th class="num"><button class="sort-btn" class:sorted={studentSortKey==='weekMinutes'} onclick={() => toggleStudentSort('weekMinutes')}>Woche <span class="sort-icon" class:active={studentSortKey==='weekMinutes'}>{studentSortIcon('weekMinutes')}</span></button></th>
-								<th><button class="sort-btn" class:sorted={studentSortKey==='lastActiveAt'} onclick={() => toggleStudentSort('lastActiveAt')}>Zuletzt aktiv <span class="sort-icon" class:active={studentSortKey==='lastActiveAt'}>{studentSortIcon('lastActiveAt')}</span></button></th>
+								<th><button class="sort-btn" class:sorted={studentSortKey==='lastActiveAt'} onclick={() => toggleStudentSort('lastActiveAt')}>Zuletzt <span class="sort-icon" class:active={studentSortKey==='lastActiveAt'}>{studentSortIcon('lastActiveAt')}</span></button></th>
 								<th><span class="sr-only">Aktionen</span></th>
 							</tr>
 						</thead>
@@ -590,11 +592,11 @@ ${cards.map((c) => `<div class="card">
 										<span class="track"><span style="width:{data.totalAtoms > 0 ? Math.round(s.masteredCount / data.totalAtoms * 100) : 0}%"></span></span>
 										<span class="mc">{s.masteredCount}</span>
 									</div></td>
-									<td class="num" class:muted={s.todayTasks === 0}>
-										{#if s.todayTasks > 0}{s.todayMinutes > 0 ? fmtMinutes(s.todayMinutes) : '< 1 Min.'} <span class="muted">({s.todayTasks})</span>{:else}–{/if}
+									<td class="num time-cell" class:muted={s.todayTasks === 0}>
+										{#if s.todayTasks > 0}{s.todayMinutes > 0 ? fmtMinutes(s.todayMinutes) : '< 1 Min.'}<span class="tasks">{s.todayTasks} {s.todayTasks === 1 ? 'Aufgabe' : 'Aufgaben'}</span>{:else}–{/if}
 									</td>
-									<td class="num" class:muted={s.weekTasks === 0}>
-										{#if s.weekTasks > 0}{s.weekMinutes > 0 ? fmtMinutes(s.weekMinutes) : '< 1 Min.'} <span class="muted">({s.weekTasks})</span>{:else}–{/if}
+									<td class="num time-cell" class:muted={s.weekTasks === 0}>
+										{#if s.weekTasks > 0}{s.weekMinutes > 0 ? fmtMinutes(s.weekMinutes) : '< 1 Min.'}<span class="tasks">{s.weekTasks} {s.weekTasks === 1 ? 'Aufgabe' : 'Aufgaben'}</span>{:else}–{/if}
 									</td>
 									<td><span class="badge {lastActiveClass(s.lastActiveAt)}">{relativeDate(s.lastActiveAt)}</span></td>
 									<td class="actions-cell"><div class="actions">
@@ -948,13 +950,18 @@ ${cards.map((c) => `<div class="card">
 	.empty-icon { width: 3.75rem; height: 3.75rem; border-radius: 50%; background: var(--c-primary-light); color: var(--c-primary-dark); display: flex; align-items: center; justify-content: center; }
 
 	/* Students table */
-	.name-cell { min-width: 12rem; }
+	.students-table th, .students-table td { padding-left: 0.5rem; padding-right: 0.5rem; }
+	.students-table th:first-child, .students-table td:first-child { padding-left: 0.25rem; }
+	.name-cell { white-space: nowrap; }
 	.student-link { display: inline-flex; align-items: center; gap: 0.6rem; }
 	.avatar { width: 2rem; height: 2rem; font-size: 0.75rem; }
 	.rename-input { min-height: 2.25rem !important; padding: 0.3rem 0.6rem !important; max-width: 12rem; }
-	.mastered-cell { min-width: 10rem; }
-	.mastered { display: flex; align-items: center; gap: 0.5rem; }
-	.mc { width: 2rem; text-align: right; font-size: 0.875rem; }
+	.mastered-cell { min-width: 7rem; }
+	.mastered { display: flex; align-items: center; gap: 0.4rem; }
+	.mc { min-width: 1.75rem; text-align: right; font-size: 0.875rem; }
+	.time-cell { line-height: 1.25; }
+	.tasks { display: block; font-size: 0.72rem; font-weight: 700; color: var(--c-ink-2); }
+	.students-table .icon-btn { width: 2.25rem; height: 2.25rem; }
 	.muted { color: var(--c-ink-2); font-weight: 700; }
 	.streak { color: var(--c-orange-text); font-weight: 900; }
 	.xp { font-weight: 900; color: var(--c-primary-dark); white-space: nowrap; }
