@@ -426,10 +426,17 @@ function svgLineSeg(a: Pt, b: Pt, opts: { color?: string; width?: number; dash?:
 		+ `stroke="${color}" stroke-width="${width}" stroke-linecap="round"${dash ? ' stroke-dasharray="4,3"' : ''}/>`;
 }
 
-function svgLabel(p: Pt, str: string, opts: { size?: number; color?: string; bold?: boolean } = {}): string {
-	const { size = 13, color = '#374151', bold = true } = opts;
-	return `<text x="${p[0].toFixed(1)}" y="${p[1].toFixed(1)}" text-anchor="middle" font-size="${size}" `
-		+ `${bold ? 'font-weight="bold"' : ''} fill="${color}" font-family="system-ui,-apple-system,sans-serif">${str}</text>`;
+/** Rough width of a bold label in px (system-ui), good enough to keep labels clear of lines. */
+function textWidth(str: string, size = 13): number {
+	return [...str].reduce((w, c) => w + (c === ' ' ? 0.3 : /[0-9]/.test(c) ? 0.6 : /[mw]/.test(c) ? 0.9 : 0.58), 0) * size;
+}
+
+function svgLabel(p: Pt, str: string, opts: { size?: number; color?: string; bold?: boolean; anchor?: 'start' | 'middle' | 'end' } = {}): string {
+	const { size = 13, color = '#374151', bold = true, anchor = 'middle' } = opts;
+	return `<text x="${p[0].toFixed(1)}" y="${p[1].toFixed(1)}" text-anchor="${anchor}" font-size="${size}" `
+		+ `${bold ? 'font-weight="bold"' : ''} fill="${color}" font-family="system-ui,-apple-system,sans-serif" `
+		// white halo behind the glyphs: a line crossing the label never makes it unreadable
+		+ `stroke="#fff" stroke-width="3" stroke-linejoin="round" paint-order="stroke">${str}</text>`;
 }
 
 function svgPoly(points: Pt[], opts: { fill?: string; stroke?: string; width?: number; dash?: boolean } = {}): string {
@@ -479,18 +486,21 @@ function svgPolyDiagram(
 		angleLabels?: { at: number; text: string; useArc?: boolean }[];
 		rightAngleVertices?: number[];
 		extraSegments?: { from: Pt; to: Pt; dash?: boolean; color?: string }[];
-		extraPoints?: { at: Pt; label: string }[];
+		// pos: where the label goes relative to the point (default above); 'right' for labels on a
+		// vertical height line, so the dashed line does not run through the text
+		extraPoints?: { at: Pt; label: string; pos?: 'above' | 'below' | 'right' }[];
 		rightAngleFeet?: { at: Pt; ref1: Pt; ref2: Pt }[];
 		fill?: string;
 	} = {}
 ): string {
-	const W = 300, H = 230, pad = 40;
+	// wider side margins: labels next to vertical edges extend sideways
+	const W = 300, H = 230, padX = 62, padY = 40;
 	const all: Pt[] = [...points, ...(opts.extraSegments?.flatMap(s => [s.from, s.to]) ?? [])];
 	const xs = all.map(p => p[0]), ys = all.map(p => p[1]);
 	const minX = Math.min(...xs), maxX = Math.max(...xs);
 	const minY = Math.min(...ys), maxY = Math.max(...ys);
 	const spanX = Math.max(maxX - minX, 0.01), spanY = Math.max(maxY - minY, 0.01);
-	const scale = Math.min((W - 2 * pad) / spanX, (H - 2 * pad) / spanY);
+	const scale = Math.min((W - 2 * padX) / spanX, (H - 2 * padY) / spanY);
 	const ccx = (minX + maxX) / 2, ccy = (minY + maxY) / 2;
 	const tx = (p: Pt): Pt => [W / 2 + (p[0] - ccx) * scale, H / 2 - (p[1] - ccy) * scale];
 
@@ -498,10 +508,11 @@ function svgPolyDiagram(
 	const centroid: Pt = [tp.reduce((s, p) => s + p[0], 0) / tp.length, tp.reduce((s, p) => s + p[1], 0) / tp.length];
 
 	let s = svgOpen(W, H);
+	s += svgPoly(tp, { fill: opts.fill });
+	// on top of the filled polygon, otherwise e.g. a dashed height inside the shape is hidden
 	for (const seg of opts.extraSegments ?? []) {
 		s += svgLineSeg(tx(seg.from), tx(seg.to), { color: seg.color ?? '#9ca3af', width: 1.5, dash: seg.dash });
 	}
-	s += svgPoly(tp, { fill: opts.fill });
 
 	for (const v of opts.rightAngleVertices ?? []) {
 		const prev = tp[(v - 1 + tp.length) % tp.length], next = tp[(v + 1) % tp.length];
@@ -511,13 +522,31 @@ function svgPolyDiagram(
 		s += rightAngleMarker(tx(f.at), tx(f.ref1), tx(f.ref2), 9);
 	}
 
+	// orientation of the polygon (screen coordinates) – used to find each edge's outward normal,
+	// which also works for concave shapes (L-shapes) where "away from the centroid" points inwards
+	let area2 = 0;
+	for (let i = 0; i < tp.length; i++) {
+		const a = tp[i], b = tp[(i + 1) % tp.length];
+		area2 += a[0] * b[1] - b[0] * a[1];
+	}
 	for (const el of opts.edgeLabels ?? []) {
 		const P = tp[el.from], Q = tp[el.to];
 		const mid: Pt = [(P[0] + Q[0]) / 2, (P[1] + Q[1]) / 2];
-		let dir = vUnit(vSub(mid, centroid));
-		if (Math.hypot(dir[0], dir[1]) < 0.01) dir = [0, -1];
-		const lp: Pt = [mid[0] + dir[0] * 14, mid[1] + dir[1] * 14 + 4];
-		s += svgLabel(lp, el.text);
+		const e = vUnit(vSub(Q, P));
+		let n: Pt = area2 >= 0 ? [e[1], -e[0]] : [-e[1], e[0]];
+		const forward = el.to === (el.from + 1) % tp.length;
+		const backward = el.from === (el.to + 1) % tp.length;
+		if (backward) n = [-n[0], -n[1]]; // edge given against the polygon's winding
+		// edges that are not polygon sides (e.g. a diagonal): fall back to "away from the centroid"
+		if (!forward && !backward) {
+			n = vUnit(vSub(mid, centroid));
+			if (Math.hypot(n[0], n[1]) < 0.01) n = [0, -1];
+		}
+		// Push the label's box (not just its centre) off the edge: the distance needed depends on
+		// the text width when the label sits beside the edge and on its height when above/below.
+		const w = textWidth(el.text, 13), h = 13;
+		const d = 6 + Math.abs(n[0]) * w / 2 + Math.abs(n[1]) * h / 2;
+		s += svgLabel([mid[0] + n[0] * d, mid[1] + n[1] * d + 4.5], el.text);
 	}
 	for (const al of opts.angleLabels ?? []) {
 		const P = tp[al.at];
@@ -532,7 +561,8 @@ function svgPolyDiagram(
 	for (const ep of opts.extraPoints ?? []) {
 		const p = tx(ep.at);
 		s += `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="2.5" fill="#374151"/>`;
-		s += svgLabel([p[0], p[1] - 9], ep.label, { size: 11, color: '#6b7280', bold: false });
+		const lp: Pt = ep.pos === 'right' ? [p[0] + 6, p[1] + 4] : ep.pos === 'below' ? [p[0], p[1] + 16] : [p[0], p[1] - 9];
+		s += svgLabel(lp, ep.label, { size: 11, color: '#6b7280', bold: false, anchor: ep.pos === 'right' ? 'start' : 'middle' });
 	}
 	s += '</svg>';
 	return s;
@@ -604,7 +634,7 @@ function svgQuad(
 		? [{ at: opts.heightTo, ref1: opts.heightFrom, ref2: pts[1] }]
 		: [];
 	const extraPoints = opts.heightLabel && opts.heightFrom && opts.heightTo
-		? [{ at: [(opts.heightFrom[0] + opts.heightTo[0]) / 2, (opts.heightFrom[1] + opts.heightTo[1]) / 2] as Pt, label: opts.heightLabel }]
+		? [{ at: [(opts.heightFrom[0] + opts.heightTo[0]) / 2, (opts.heightFrom[1] + opts.heightTo[1]) / 2] as Pt, label: opts.heightLabel, pos: 'right' as const }]
 		: [];
 	return svgPolyDiagram(pts, { edgeLabels, extraSegments, rightAngleFeet, rightAngleVertices: opts.rightAngleVertices, extraPoints });
 }
@@ -3307,7 +3337,7 @@ reg('geometrie__flaeche_dreieck', (stage = 0) => {
 		edgeLabels: [{ from: 0, to: 1, text: `${g} cm` }],
 		extraSegments: [{ from: C, to: [footX, 0], dash: true }],
 		rightAngleFeet: [{ at: [footX, 0], ref1: C, ref2: B }],
-		extraPoints: [{ at: [footX, h / 2], label: hideH ? '?' : `${h} cm` }]
+		extraPoints: [{ at: [footX, h / 2], label: hideH ? '?' : `${h} cm`, pos: 'right' }]
 	});
 	if (type === 0) {
 		return { atomId: 'geometrie__flaeche_dreieck', prompt: `Berechne den Flächeninhalt des Dreiecks.`, answerType: 'number', correctAnswer: dec(area), svg: diagram(false), hint: `A = (g · h) : 2 = (${g} · ${h}) : 2`, why: `Das Dreieck ist die Hälfte eines Parallelogramms mit gleicher Grundseite und Höhe: (${g} · ${h}) : 2 = ${dec(area)} cm².`, difficulty: 0.4 };
@@ -3326,7 +3356,7 @@ reg('geometrie__flaeche_trapez_zusammengesetzt', (stage = 0) => {
 			edgeLabels: [{ from: 0, to: 1, text: `${aB} cm` }, { from: 2, to: 3, text: `${c} cm` }],
 			extraSegments: [{ from: D, to: [off, 0], dash: true }],
 			rightAngleFeet: [{ at: [off, 0], ref1: D, ref2: B }],
-			extraPoints: [{ at: [off, h / 2], label: `${h} cm` }]
+			extraPoints: [{ at: [off, h / 2], label: `${h} cm`, pos: 'right' }]
 		});
 		return { atomId: 'geometrie__flaeche_trapez_zusammengesetzt', prompt: `Berechne den Flächeninhalt des Trapezes.`, answerType: 'number', correctAnswer: dec(area), svg, hint: `A = (a + c) : 2 · h = (${aB} + ${c}) : 2 · ${h}`, why: `Mittelwert der parallelen Seiten mal Höhe: (${aB} + ${c}) : 2 = ${dec((aB + c) / 2)}, mal ${h} = ${dec(area)} cm².`, difficulty: 0.5 };
 	}
@@ -3581,9 +3611,9 @@ reg('geometrie__hoehensatz_kathetensatz', (stage = 0) => {
 		const svg = svgPolyDiagram([A, B, C], {
 			...common,
 			extraPoints: [
-				{ at: [p / 2, 0], label: `p = ${p} cm` },
-				{ at: [p + q / 2, 0], label: `q = ${q} cm` },
-				{ at: [p, h / 2], label: '?' }
+				{ at: [p / 2, 0], label: `p = ${p} cm`, pos: 'below' },
+				{ at: [p + q / 2, 0], label: `q = ${q} cm`, pos: 'below' },
+				{ at: [p, h / 2], label: '?', pos: 'right' }
 			]
 		});
 		return { atomId: 'geometrie__hoehensatz_kathetensatz', prompt: `Berechne die Höhe h mithilfe des Höhensatzes (runde auf zwei Nachkommastellen).`, answerType: 'number', correctAnswer: dec(round(h, 2)), tolerance: 0.01, svg, hint: `Höhensatz: h² = p · q = ${p} · ${q}`, why: `h² = p · q = ${p} · ${q} = ${p * q}, also h = √${p * q} ${Number.isInteger(h) ? '=' : '≈'} ${dec(round(h, 2))} cm.`, difficulty: 0.6 };
@@ -3596,8 +3626,8 @@ reg('geometrie__hoehensatz_kathetensatz', (stage = 0) => {
 			{ from: 2, to: 0, text: hideA ? `b ≈ ${dec(round(b, 2))} cm` : '?' }
 		],
 		extraPoints: [
-			{ at: [p / 2, 0], label: `p = ${p} cm` },
-			{ at: [p + q / 2, 0], label: `q = ${q} cm` }
+			{ at: [p / 2, 0], label: `p = ${p} cm`, pos: 'below' },
+			{ at: [p + q / 2, 0], label: `q = ${q} cm`, pos: 'below' }
 		]
 	});
 	return {
@@ -4766,7 +4796,7 @@ reg('geometrie__hoehen_erkennen', (stage = 0) => {
 			edgeLabels: [{ from: 0, to: 1, text: `${g} cm` }, { from: 2, to: 0, text: `${s} cm` }],
 			extraSegments: [{ from: C, to: [slant, 0], dash: true }],
 			rightAngleFeet: [{ at: [slant, 0], ref1: C, ref2: B }],
-			extraPoints: [{ at: [slant, h / 2], label: `${h} cm` }]
+			extraPoints: [{ at: [slant, h / 2], label: `${h} cm`, pos: 'right' }]
 		});
 		return { atomId, prompt: `Welche Länge (in cm) ist die Höhe des Dreiecks zur Grundseite ${g} cm?`, answerType: 'number', correctAnswer: String(h), svg, hint: 'Die Höhe verläuft von der gegenüberliegenden Ecke senkrecht zur Grundseite.', why: `Die Höhe ist die gestrichelte Strecke von der Ecke senkrecht zur Grundseite: ${h} cm. Die schräge Seite (${s} cm) ist länger und keine Höhe.`, difficulty: 0.45 };
 	}
