@@ -203,6 +203,8 @@
 			} else if (!currentTask.choices && currentTask.answerType !== 'boolean' && currentTask.answerType !== 'comparison' && !isPqSteps) {
 				answerInput?.focus();
 			}
+			// The docked number pad covers the bottom of the screen – scroll the field above it
+			if (showPad) requestAnimationFrame(() => revealAboveDock(document.activeElement));
 		}
 	});
 
@@ -256,13 +258,37 @@
 		!isFractionPart && !isMixedPart && !writtenArith && !isZahlenmauer
 	);
 
+	let padDockEl = $state<HTMLElement | null>(null);
+
+	/** Scroll the nearest scroll container so `el` sits fully visible above the docked number pad. */
+	function revealAboveDock(el: Element | null) {
+		if (!(el instanceof HTMLElement) || !padDockEl) return;
+		let scroller: HTMLElement | null = el.parentElement;
+		while (scroller && !/(auto|scroll)/.test(getComputedStyle(scroller).overflowY)) scroller = scroller.parentElement;
+		if (!scroller) return;
+		const margin = 16;
+		const r = el.getBoundingClientRect();
+		const visibleTop = scroller.getBoundingClientRect().top + margin;
+		const visibleBottom = padDockEl.getBoundingClientRect().top - margin;
+		if (r.bottom > visibleBottom) {
+			// prefer showing the whole field; never push its top out of view
+			scroller.scrollBy({ top: Math.min(r.bottom - visibleBottom, r.top - visibleTop), behavior: 'smooth' });
+		} else if (r.top < visibleTop) {
+			scroller.scrollBy({ top: r.top - visibleTop, behavior: 'smooth' });
+		}
+	}
+
 	function onPad(key: PadKey) {
 		if (!cardEl || locked) return;
 		pressKey(cardEl, key, lastFocusedInput);
+		if (lastFocusedInput) revealAboveDock(lastFocusedInput);
 	}
 
 	function trackFocus(e: FocusEvent) {
-		if (e.target instanceof HTMLInputElement) lastFocusedInput = e.target;
+		if (e.target instanceof HTMLInputElement) {
+			lastFocusedInput = e.target;
+			if (showPad) revealAboveDock(e.target);
+		}
 	}
 
 	function setPadPreferred(on: boolean) {
@@ -1019,7 +1045,7 @@
 		</div>
 
 		{#if showPad && currentTask && !isLoading}
-			<div class="pad-dock">
+			<div class="pad-dock" bind:this={padDockEl}>
 				<NumPad
 					onpress={onPad}
 					canSubmit={!!String(answer).trim() && !locked}
