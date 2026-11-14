@@ -108,11 +108,6 @@
 	onMount(() => {
 		greet = greeting();
 		coarsePointer = window.matchMedia?.('(pointer: coarse)').matches ?? false;
-		try {
-			padPreferred = localStorage.getItem('anemo-numpad') !== 'off';
-		} catch {
-			// storage unavailable → keep default
-		}
 		return () => {
 			ui.focusMode = false;
 		};
@@ -239,7 +234,8 @@
 	}
 
 	// ── On-screen number pad ──
-	let padPreferred = $state(true);
+	// The on-screen pad is always used – the device keyboard is never offered
+	const padPreferred = true;
 	let coarsePointer = $state(false);
 	let cardEl = $state<HTMLElement | null>(null);
 	let lastFocusedInput: HTMLInputElement | null = null;
@@ -341,16 +337,6 @@
 			lastFocusedInput = e.target;
 			if (showPad) revealAboveDock(e.target);
 		}
-	}
-
-	function setPadPreferred(on: boolean) {
-		padPreferred = on;
-		try {
-			localStorage.setItem('anemo-numpad', on ? 'on' : 'off');
-		} catch {
-			// ignore
-		}
-		if (!on) setTimeout(() => (lastFocusedInput ?? answerInput)?.focus(), 0);
 	}
 
 	// ── Derived display values ──
@@ -1099,10 +1085,6 @@
 					<p class="submit-error" role="alert">Das hat nicht geklappt. Bitte versuch es noch einmal.</p>
 				{/if}
 
-				{#if !showPad && padEligible && !showFeedback && !stepMode}
-					<button class="pad-switch" onclick={() => setPadPreferred(true)}>Zahlen-Tastenfeld anzeigen</button>
-				{/if}
-
 				{#if !showPad && !showFeedback && !currentTask.choices && currentTask.answerType !== 'boolean' && currentTask.answerType !== 'comparison' && !writtenArith && !isZahlenmauer && !isPqSteps && !stepMode}
 					<div class="task-footer">
 						{#if moreBelow}
@@ -1131,7 +1113,6 @@
 					submitting={isSubmitting}
 					showMinus={simpleNumberField}
 					showComma={simpleNumberField && currentTask.answerType === 'number'}
-					onkeyboard={() => setPadPreferred(false)}
 				/>
 			</div>
 		{/if}
@@ -1610,10 +1591,6 @@
 		50% { opacity: 0.35; transform: translateY(4px); }
 	}
 	@media (prefers-reduced-motion: reduce) { .more-below { animation: none; } }
-	.pad-switch {
-		align-self: center; background: none; border: 0; min-height: 2.75rem; padding: 0 0.75rem;
-		font: 800 0.875rem var(--font); color: var(--c-primary); cursor: pointer; text-decoration: underline;
-	}
 
 	/* Feedback sheet */
 	.sheet {

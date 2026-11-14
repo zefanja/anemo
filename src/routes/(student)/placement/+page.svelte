@@ -110,7 +110,8 @@
 	);
 
 	// ── Number pad ──
-	let padPreferred = $state(true);
+	// The on-screen pad is always used – the device keyboard is never offered
+	const padPreferred = true;
 	let coarsePointer = $state(false);
 	let cardEl = $state<HTMLElement | null>(null);
 	let lastFocusedInput: HTMLInputElement | null = null;
@@ -130,22 +131,7 @@
 
 	onMount(() => {
 		coarsePointer = window.matchMedia?.('(pointer: coarse)').matches ?? false;
-		try {
-			padPreferred = localStorage.getItem('anemo-numpad') !== 'off';
-		} catch {
-			// ignore
-		}
 	});
-
-	function setPadPreferred(on: boolean) {
-		padPreferred = on;
-		try {
-			localStorage.setItem('anemo-numpad', on ? 'on' : 'off');
-		} catch {
-			// ignore
-		}
-		if (!on) setTimeout(() => (lastFocusedInput ?? answerInput)?.focus(), 0);
-	}
 
 	function onPad(key: PadKey) {
 		if (!cardEl || locked) return;
@@ -555,10 +541,6 @@
 				</button>
 			{/if}
 
-			{#if !showPad && padEligible && phase === 'question' && !stepMode}
-				<button class="pad-switch" onclick={() => setPadPreferred(true)}>Zahlen-Tastenfeld anzeigen</button>
-			{/if}
-
 			{#if !showPad && phase === 'question' && !current.choices && current.answerType !== 'boolean' && current.answerType !== 'comparison' && !writtenArith && !stepMode}
 				<button class="btn-3d q-submit" onclick={() => submitAnswer()} disabled={isSubmitting || !String(answer).trim()}>
 					{isSubmitting ? 'Einen Moment…' : 'Weiter'}
@@ -577,7 +559,6 @@
 					submitLabel="Weiter"
 					showMinus={simpleNumberField}
 					showComma={simpleNumberField && current.answerType === 'number'}
-					onkeyboard={() => setPadPreferred(false)}
 				/>
 			</div>
 		{/if}
@@ -696,10 +677,6 @@
 	}
 	.dont-know:hover:not(:disabled) { border-color: var(--c-sky); color: var(--c-primary-dark); }
 	.dont-know:disabled { opacity: 0.5; }
-	.pad-switch {
-		align-self: center; background: none; border: 0; min-height: 2.75rem; padding: 0 0.75rem;
-		font: 800 0.875rem var(--font); color: var(--c-primary); cursor: pointer; text-decoration: underline;
-	}
 	.q-submit { width: 100%; }
 	.step-entry {
 		align-self: center; display: inline-flex; align-items: center; gap: 0.4rem; min-height: 2.5rem;

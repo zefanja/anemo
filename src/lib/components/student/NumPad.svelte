@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { PadKey } from '$lib/numpad.js';
-	import Icon from './Icon.svelte';
 
 	let {
 		onpress,
@@ -8,8 +7,7 @@
 		submitting = false,
 		showComma = false,
 		showMinus = false,
-		submitLabel = 'Prüfen',
-		onkeyboard
+		submitLabel = 'Prüfen'
 	}: {
 		onpress: (key: PadKey) => void;
 		canSubmit?: boolean;
@@ -17,8 +15,6 @@
 		showComma?: boolean;
 		showMinus?: boolean;
 		submitLabel?: string;
-		/** Switch to the device's own keyboard instead of the pad. */
-		onkeyboard?: () => void;
 	} = $props();
 
 	const DIGITS: PadKey[] = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'];
@@ -49,11 +45,6 @@
 			{submitting ? 'Einen Moment…' : submitLabel}
 		</button>
 	</div>
-	{#if onkeyboard}
-		<button type="button" onpointerdown={keepFocus} onmousedown={keepFocus} class="kbd-switch" onclick={onkeyboard}>
-			<Icon name="pencil" size={14} /> Geräte-Tastatur verwenden
-		</button>
-	{/if}
 </div>
 
 <style>
@@ -93,20 +84,6 @@
 	.key-icon { width: 4rem; height: 3.5rem; flex: none; color: var(--c-ink-2); }
 	.key-small { width: 3.25rem; height: 3.5rem; flex: none; }
 	.submit { flex: 1; }
-	.kbd-switch {
-		align-self: center;
-		display: inline-flex;
-		align-items: center;
-		gap: 0.35rem;
-		background: none;
-		border: 0;
-		min-height: 2rem;
-		padding: 0 0.5rem;
-		font: 700 0.8rem var(--font);
-		color: var(--c-ink-2);
-		cursor: pointer;
-	}
-	.kbd-switch:hover { color: var(--c-primary); text-decoration: underline; }
 	@media (min-width: 700px) {
 		.numpad { max-width: 520px; margin: 0 auto; width: 100%; border: 1px solid var(--c-line); border-radius: 20px 20px 0 0; }
 	}
