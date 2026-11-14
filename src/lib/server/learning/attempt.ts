@@ -54,11 +54,15 @@ export async function processAttempt(
 
 	let mastery = 0;
 	let justMastered = false;
+	let correctAttempts = 0;
+	let totalAttempts = 0;
 
 	if (atom?.level === 'atom') {
 		const result = await updateMastery(studentId, atomId, correct, atom.masteryRequired);
 		mastery = result.mastery;
 		justMastered = result.justMastered;
+		correctAttempts = result.correctAttempts;
+		totalAttempts = result.totalAttempts;
 	}
 
 	// 2. FSRS scheduling
@@ -66,7 +70,9 @@ export async function processAttempt(
 		const rating = correct ? 3 : 1; // Good or Again
 		await scheduleFsrsReview(studentId, atomId, rating as 1 | 3);
 	} else if (justMastered) {
-		await initFsrsForAtom(studentId, atomId);
+		// The mastery run counts as the first review: the first repetition comes days
+		// later (sooner after a bumpy run), never right after the atom was completed.
+		await initFsrsForAtom(studentId, atomId, correctAttempts, totalAttempts);
 	}
 
 	// 3. Record attempt in DB

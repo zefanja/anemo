@@ -3,6 +3,7 @@ import { db } from '../db/index.js';
 import { tasks } from '../db/schema.js';
 import { eq, sql } from 'drizzle-orm';
 import type { GeneratedTask } from './generators.js';
+import { stageForTask, type FsrsState } from '../learning/fsrs.js';
 
 export type { GeneratedTask };
 export type TaskWithId = GeneratedTask & { id: string };
@@ -23,9 +24,10 @@ export async function getTaskForCluster(
 	const atomId = subAtomIds[Math.floor(Math.random() * subAtomIds.length)];
 	const status = await db.query.studentAtomStatus.findFirst({
 		where: (s, { and, eq }) => and(eq(s.studentId, studentId), eq(s.atomId, atomId)),
-		columns: { stage: true }
+		columns: { stage: true, isMastered: true, fsrsState: true }
 	});
-	return getTaskForAtom(atomId, excludePrompts, status?.stage ?? 0);
+	const stage = stageForTask(status?.stage ?? 0, status?.isMastered ?? false, status?.fsrsState as FsrsState | null);
+	return getTaskForAtom(atomId, excludePrompts, stage);
 }
 
 /**

@@ -44,7 +44,7 @@ export async function updateMastery(
 	atomId: string,
 	isCorrect: boolean,
 	masteryRequired: number
-): Promise<{ mastery: number; justMastered: boolean; stage: number }> {
+): Promise<{ mastery: number; justMastered: boolean; stage: number; totalAttempts: number; correctAttempts: number }> {
 	const existing = await db.query.studentAtomStatus.findFirst({
 		where: (s, { and, eq }) => and(eq(s.studentId, studentId), eq(s.atomId, atomId))
 	});
@@ -95,7 +95,7 @@ export async function updateMastery(
 		});
 	}
 
-	return { mastery, justMastered, stage };
+	return { mastery, justMastered, stage, totalAttempts: newTotal, correctAttempts: newCorrect };
 }
 
 // Cluster mastery = minimum mastery of all required sub-atoms.

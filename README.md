@@ -103,6 +103,8 @@ Alle Einstellungen über Umgebungsvariablen (`.env`):
 | `SESSION_MAX_REVIEW` | – | `10` | Max. FSRS-Wiederholungen pro Sitzung |
 | `REVIEW_UNLOCK_DAILY` | – | `50` | Themen trotz offener Wiederholungen frei nach N Wiederholungen am Tag (`0` = aus) |
 | `REVIEW_UNLOCK_PERCENT` | – | `80` | … oder nach P % des Tages-Rückstands (`0` = aus) |
+| `REVIEW_MIN_DELAY_HOURS` | – | `20` | Frühestens so viele Stunden nach dem letzten Üben eines Atoms kommt eine Wiederholung |
+| `STAGE_STREAK_TARGET` | – | `4` | Richtige Antworten in Folge, bis die nächste (schwierigere) Aufgabenstufe beginnt |
 | `DAILY_XP_GOAL` | – | `50` | Tagesziel in XP (Ring auf der Schüler-Startseite) |
 
 ```dotenv
@@ -186,6 +188,12 @@ Der Frontier enthält Atome, die noch nicht gemeistert sind und deren alle `requ
 1. **Pflicht:** Fällige FSRS-Wiederholungen in Runden zu max. `SESSION_MAX_REVIEW`. Die Startseite zeigt die Runde und den gesamten Rückstand.
    Themen werden schon vorher frei, sobald der Schüler heute `REVIEW_UNLOCK_DAILY` Wiederholungen gemacht **oder** `REVIEW_UNLOCK_PERCENT` % des Tages-Rückstands (heute erledigt + noch fällig) geschafft hat. Beides ist pro Klasse einstellbar. Restliche Wiederholungen bleiben freiwillig verfügbar.
 2. **Frei:** Unbegrenzte Übung mit Frontier-Atomen nach Wahl des Schülers
+
+### Wiederholungen & Schwierigkeit
+
+- **Erste Wiederholung:** Die Übungsphase bis zur Mastery zählt als erste FSRS-Wiederholung (Bewertung *Good* bei ≥ 80 % richtig, sonst *Hard*). Die erste Wiederholung kommt dadurch nach ca. 2–3 Tagen, nie direkt nach dem Abschluss eines Atoms. FSRS läuft ohne Kurzzeit-Lernschritte; jedes Intervall ist mindestens ein Tag.
+- **Fälligkeit:** Eine Wiederholung ist ab Beginn ihres Fälligkeitstags (UTC) verfügbar, frühestens aber `REVIEW_MIN_DELAY_HOURS` nach dem letzten Üben des Atoms.
+- **Aufgabenstufen:** Generatoren liefern eine Expanding Sequence (Stufe 0 = leicht, z. B. glatte Zahlen). Beim Lernen steigt die Stufe nach `STAGE_STREAK_TARGET` richtigen Antworten in Folge, ein Fehler geht eine Stufe zurück. Nach der Mastery bestimmt die FSRS-Stabilität einen Bonus: < 7 Tage +0, 7–20 Tage +1, ≥ 21 Tage +2 Stufen.
 
 
 ### Motivation & Gamification (Schüler-App)
@@ -273,7 +281,7 @@ npm run test:watch
 | `mastery.test.ts` | `computeMastery` – Dämpfung, Schwellen, Edge-Cases |
 | `answer.test.ts` | `checkAnswer` – alle Antworttypen inkl. Bruchreduktion |
 | `codes.test.ts` | Code-Generierung (Alphabet, Länge) + Hash/Verify-Round-Trip |
-| `fsrs.test.ts` | ts-fsrs API – Scheduling, Stabilität, Again vs. Good |
+| `fsrs.test.ts` | ts-fsrs API, erste Wiederholung nach Mastery, Fälligkeit, Stufenbonus |
 | `graph-cycle.test.ts` | DFS-Zyklenkennung – DAG, Zyklen, Diamant, Edge-Cases |
 | `rate-limit.test.ts` | Rate-Limiting – Sperre, Ablauf, DB-Aufrufe (gemockt) |
 
