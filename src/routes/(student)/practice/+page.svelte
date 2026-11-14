@@ -1734,14 +1734,17 @@
 		gap: 0.75rem;
 		justify-content: center;
 	}
+	/* Answer choices: every button is at least as wide as its longest word and the buttons wrap to
+	   the next row when they do not fit – words are not split in the middle. Only a single word that
+	   is wider than the whole row gets hyphenated (lang="de"). */
 	.choice-buttons-multi {
-		display: grid;
-		grid-template-columns: repeat(2, 1fr);
+		flex-wrap: wrap;
 	}
-
-		.choice-buttons-multi {
-			grid-template-columns: repeat(4, 1fr);
-		}
+	.choice-buttons-multi .choice-btn {
+		flex: 1 1 auto;
+		min-width: 4rem;
+		max-width: 100%;
+	}
 
 	.choice-btn {
 		min-width: 0;
@@ -1755,7 +1758,8 @@
 		cursor: pointer;
 		transition: border-color .15s, background .15s, box-shadow .15s;
 		white-space: normal;
-		word-break: break-word;
+		overflow-wrap: break-word;
+		hyphens: auto;
 		line-height: 1.4;
 	}
 	.choice-btn:hover:not(:disabled) {
