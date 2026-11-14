@@ -272,6 +272,12 @@ function romanWhy(roman: string, n: number): string {
 }
 
 // Fully reduced fraction n/d < 1 with a terminating decimal expansion.
+// Inserts an irrelevant sentence (überflüssige Angabe) right before the question of a word problem.
+function withExtraInfo(text: string, extra: string): string {
+	const q = text.lastIndexOf('. ', text.lastIndexOf('?'));
+	return q < 0 ? `${extra} ${text}` : `${text.slice(0, q + 1)} ${extra}${text.slice(q + 1)}`;
+}
+
 function terminatingFraction(dens: number[]): [number, number] {
 	const d = pick(dens);
 	let n = rand(1, d - 1);
@@ -526,7 +532,8 @@ function svgPolyDiagram(
 		extraSegments?: { from: Pt; to: Pt; dash?: boolean; color?: string }[];
 		// pos: where the label goes relative to the point (default above); 'right' for labels on a
 		// vertical height line, so the dashed line does not run through the text
-		extraPoints?: { at: Pt; label: string; pos?: 'above' | 'below' | 'right' }[];
+		// dir (math space): put the label beside the point in this direction instead (used for slanted heights)
+		extraPoints?: { at: Pt; label: string; pos?: 'above' | 'below' | 'right'; dir?: Pt }[];
 		rightAngleFeet?: { at: Pt; ref1: Pt; ref2: Pt }[];
 		fill?: string;
 	} = {}
@@ -599,6 +606,13 @@ function svgPolyDiagram(
 	for (const ep of opts.extraPoints ?? []) {
 		const p = tx(ep.at);
 		s += `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="2.5" fill="#374151"/>`;
+		if (ep.dir) {
+			const sd = vUnit([ep.dir[0], -ep.dir[1]]);
+			const anchor = sd[0] > 0.35 ? 'start' : sd[0] < -0.35 ? 'end' : 'middle';
+			const lp: Pt = [p[0] + sd[0] * 7, p[1] + sd[1] * 9 + 4];
+			s += svgLabel(lp, ep.label, { size: 11, color: '#6b7280', bold: false, anchor });
+			continue;
+		}
 		const lp: Pt = ep.pos === 'right' ? [p[0] + 6, p[1] + 4] : ep.pos === 'below' ? [p[0], p[1] + 16] : [p[0], p[1] - 9];
 		s += svgLabel(lp, ep.label, { size: 11, color: '#6b7280', bold: false, anchor: ep.pos === 'right' ? 'start' : 'middle' });
 	}
@@ -610,7 +624,11 @@ function svgPolyDiagram(
 // This keeps the right-angle marker and altitude constructions trivially axis-aligned.
 function svgRightTriangle(
 	legA: number, legB: number,
-	opts: { labelA?: string; labelB?: string; labelC?: string; angleLabel?: string; angleAt?: 'A' | 'B' } = {}
+	opts: {
+		labelA?: string; labelB?: string; labelC?: string; angleLabel?: string; angleAt?: 'A' | 'B';
+		// distractors: label of the other acute angle; altitude from the right angle onto the hypotenuse
+		otherAngleLabel?: string; otherAngleArc?: boolean; heightLabel?: string;
+	} = {}
 ): string {
 	const A: Pt = [0, 0], B: Pt = [legA, 0], C: Pt = [0, legB];
 	const edgeLabels = [
@@ -618,10 +636,12 @@ function svgRightTriangle(
 		...(opts.labelB ? [{ from: 0, to: 2, text: opts.labelB }] : []),
 		...(opts.labelC ? [{ from: 1, to: 2, text: opts.labelC }] : [])
 	];
-	const angleLabels = opts.angleLabel
-		? [{ at: opts.angleAt === 'A' ? 2 : 1, text: opts.angleLabel, useArc: true }]
-		: [];
-	return svgPolyDiagram([A, B, C], { edgeLabels, angleLabels, rightAngleVertices: [0] });
+	const angleLabels = [
+		...(opts.angleLabel ? [{ at: opts.angleAt === 'A' ? 2 : 1, text: opts.angleLabel, useArc: true }] : []),
+		...(opts.otherAngleLabel ? [{ at: opts.angleAt === 'A' ? 1 : 2, text: opts.otherAngleLabel, useArc: opts.otherAngleArc ?? true }] : [])
+	];
+	const extras = opts.heightLabel ? altitudeParts(A, B, C, opts.heightLabel, 0.4) : {};
+	return svgPolyDiagram([A, B, C], { edgeLabels, angleLabels, rightAngleVertices: [0], ...extras });
 }
 
 // General triangle from three side lengths (SSS layout, hypotenuse-style base placement).
@@ -677,6 +697,96 @@ function svgQuad(
 	return svgPolyDiagram(pts, { edgeLabels, extraSegments, rightAngleFeet, rightAngleVertices: opts.rightAngleVertices, extraPoints });
 }
 
+// Foot of the perpendicular from P onto the line through A and B (t = position along AB, 0..1 on the side).
+function footOnLine(P: Pt, A: Pt, B: Pt): { foot: Pt; t: number } {
+	const d = vSub(B, A);
+	const t = ((P[0] - A[0]) * d[0] + (P[1] - A[1]) * d[1]) / (d[0] * d[0] + d[1] * d[1]);
+	return { foot: [A[0] + t * d[0], A[1] + t * d[1]], t };
+}
+
+type DiagramExtras = {
+	extraSegments: { from: Pt; to: Pt; dash?: boolean; color?: string }[];
+	rightAngleFeet: { at: Pt; ref1: Pt; ref2: Pt }[];
+	extraPoints: { at: Pt; label: string; pos?: 'above' | 'below' | 'right'; dir?: Pt }[];
+};
+
+// Dashed altitude from P onto side AB, with right-angle mark and optional label. When the foot lies
+// outside the side (obtuse corner / slanted parallelogram side), the side is extended (light dashes).
+function altitudeParts(P: Pt, A: Pt, B: Pt, label?: string, k = 0.22): DiagramExtras {
+	const { foot, t } = footOnLine(P, A, B);
+	const extraSegments: DiagramExtras['extraSegments'] = [{ from: P, to: foot, dash: true }];
+	if (t < 0) extraSegments.push({ from: A, to: foot, dash: true, color: '#d1d5db' });
+	if (t > 1) extraSegments.push({ from: B, to: foot, dash: true, color: '#d1d5db' });
+	const far = Math.hypot(foot[0] - A[0], foot[1] - A[1]) > Math.hypot(foot[0] - B[0], foot[1] - B[1]) ? A : B;
+	// Label close to the foot (several heights meet near the orthocentre). Slanted heights get the
+	// label beside the dashed line, on the side away from the right-angle mark.
+	const near = far === A ? B : A;
+	const at: Pt = [foot[0] + k * (P[0] - foot[0]), foot[1] + k * (P[1] - foot[1])];
+	const vertical = Math.abs(P[0] - foot[0]) > 4 * Math.abs(P[1] - foot[1]) ? false : Math.abs(P[1] - foot[1]) > 4 * Math.abs(P[0] - foot[0]);
+	return {
+		extraSegments,
+		rightAngleFeet: [{ at: foot, ref1: P, ref2: far }],
+		extraPoints: label ? [vertical ? { at: [foot[0] + 0.4 * (P[0] - foot[0]), foot[1] + 0.4 * (P[1] - foot[1])], label, pos: 'right' } : { at, label, dir: vUnit(vSub(near, foot)) }] : []
+	};
+}
+
+function mergeExtras(...parts: DiagramExtras[]): DiagramExtras {
+	return {
+		extraSegments: parts.flatMap(p => p.extraSegments),
+		rightAngleFeet: parts.flatMap(p => p.rightAngleFeet),
+		extraPoints: parts.flatMap(p => p.extraPoints)
+	};
+}
+
+// Parallelogram ABCD (A bottom-left, base AB = g, left side AD = s) with up to two altitudes:
+// h onto the base (from D) and h_s onto the side AD (from B, foot possibly on the extension).
+function svgParallelogramHeights(
+	slant: number, h: number, g: number,
+	labels: { g?: string; s?: string; h?: string; hs?: string; drawH?: boolean; drawHs?: boolean }
+): string {
+	const A: Pt = [0, 0], B: Pt = [g, 0], C: Pt = [g + slant, h], D: Pt = [slant, h];
+	const parts: DiagramExtras[] = [];
+	if (labels.drawH ?? true) parts.push(altitudeParts(D, A, B, labels.h));
+	if (labels.drawHs ?? true) parts.push(altitudeParts(B, A, D, labels.hs));
+	const edgeLabels = [
+		...(labels.g ? [{ from: 0, to: 1, text: labels.g }] : []),
+		...(labels.s ? [{ from: 3, to: 0, text: labels.s }] : [])
+	];
+	return svgPolyDiagram([A, B, C, D], { edgeLabels, ...mergeExtras(...parts) });
+}
+
+// Triangle A(0|0), B(p+q|0), C(p|h): base c = AB, b = CA, a = BC. Draws the altitudes given in
+// `heights` (key = side the altitude belongs to, value = label; '' draws it without a label).
+function svgTriangleHeights(
+	p: number, q: number, h: number,
+	sides: { a?: string; b?: string; c?: string },
+	heights: { a?: string; b?: string; c?: string }
+): string {
+	const A: Pt = [0, 0], B: Pt = [p + q, 0], C: Pt = [p, h];
+	const alts: [Pt, Pt, Pt, string | undefined][] = [];
+	if (heights.c !== undefined) alts.push([C, A, B, heights.c || undefined]);
+	if (heights.a !== undefined) alts.push([A, B, C, heights.a || undefined]);
+	if (heights.b !== undefined) alts.push([B, C, A, heights.b || undefined]);
+	// Several heights meet near the orthocentre: choose each label's position along its height so
+	// that the labels are as far apart as possible (label points measured in the figure's units).
+	const ks = [0.18, 0.38, 0.6];
+	let best: number[] = alts.map(() => 0.22), bestScore = -1;
+	const combos = alts.reduce<number[][]>((acc) => acc.flatMap(c => ks.map(k => [...c, k])), [[]]);
+	for (const combo of combos) {
+		const pts = alts.map(([P, X, Y], i) => { const { foot } = footOnLine(P, X, Y); return [foot[0] + combo[i] * (P[0] - foot[0]), foot[1] + combo[i] * (P[1] - foot[1])]; });
+		let score = Infinity;
+		for (let i = 0; i < pts.length; i++) for (let j = i + 1; j < pts.length; j++) score = Math.min(score, Math.hypot(0.45 * (pts[i][0] - pts[j][0]), pts[i][1] - pts[j][1])); // labels are wide: horizontal distance counts less
+		if (score > bestScore) { bestScore = score; best = combo; }
+	}
+	const parts: DiagramExtras[] = alts.map(([P, X, Y, label], i) => altitudeParts(P, X, Y, label, best[i]));
+	const edgeLabels = [
+		...(sides.c ? [{ from: 0, to: 1, text: sides.c }] : []),
+		...(sides.a ? [{ from: 1, to: 2, text: sides.a }] : []),
+		...(sides.b ? [{ from: 2, to: 0, text: sides.b }] : [])
+	];
+	return svgPolyDiagram([A, B, C], { edgeLabels, ...mergeExtras(...parts) });
+}
+
 function svgCircleDiagram(r: number, opts: { label?: string; showDiameter?: boolean } = {}): string {
 	const W = 260, H = 220, pad = 30;
 	const scale = Math.min(W - 2 * pad, H - 2 * pad) / (2 * r);
@@ -717,7 +827,7 @@ function svgUnitGrid(cols: number, rows: number, hlCols: number, hlRows: number)
 }
 
 // Oblique-projection cuboid (Schrägbild): front face w×h, depth d drawn at ~30° offset.
-function svgCuboid(w: number, h: number, d: number, labels: { w?: string; h?: string; d?: string } = {}): string {
+function svgCuboid(w: number, h: number, d: number, labels: { w?: string; h?: string; d?: string; diag?: string } = {}): string {
 	const W = 300, H = 230, pad = 36;
 	const dx = 0.5, dy = -0.32; // oblique offset direction (unit-ish)
 	const spanX = w + Math.abs(d * dx), spanY = h + Math.abs(d * dy);
@@ -741,6 +851,10 @@ function svgCuboid(w: number, h: number, d: number, labels: { w?: string; h?: st
 	if (labels.w) s += svgLabel([(A[0] + B[0]) / 2, oy + 16], labels.w);
 	if (labels.h) s += svgLabel([A[0] - 18, (A[1] + D[1]) / 2 + 4], labels.h);
 	if (labels.d) s += svgLabel([(B[0] + B3[0]) / 2 + 10, (B[1] + B3[1]) / 2 - 4], labels.d, { color: '#6b7280' });
+	if (labels.diag) {
+		s += svgLineSeg(A, Cc, { color: '#9ca3af', dash: true });
+		s += svgLabel([A[0] + (Cc[0] - A[0]) * 0.62 + 4, A[1] + (Cc[1] - A[1]) * 0.62 + 14], labels.diag, { size: 11, color: '#6b7280', bold: false, anchor: 'start' });
+	}
 	s += '</svg>';
 	return s;
 }
@@ -823,7 +937,7 @@ function svgPrism(base: number, triHeight: number, depth: number, labels: { g?: 
 }
 
 // Square pyramid (Schrägbild): oblique base square + apex.
-function svgPyramid(a: number, h: number, labels: { a?: string; h?: string } = {}): string {
+function svgPyramid(a: number, h: number, labels: { a?: string; h?: string; hs?: string } = {}): string {
 	const W = 280, H = 250, pad = 34;
 	const dx = 0.5, dy = -0.28;
 	const scale = Math.min((W - 2 * pad) / (a + a * dx), (H - 2 * pad) / (h + a * Math.abs(dy) + 10));
@@ -843,7 +957,16 @@ function svgPyramid(a: number, h: number, labels: { a?: string; h?: string } = {
 	s += svgLineSeg(centerBase, apex, { color: '#9ca3af', dash: true });
 	s += svgLineSeg(FL, FR, { color: '#4f46e5', width: 2 });
 	if (labels.a) s += svgLabel([(FL[0] + FR[0]) / 2, baseY + 16], labels.a);
-	if (labels.h) s += svgLabel([centerBase[0] + 16, (centerBase[1] + apex[1]) / 2], labels.h, { color: '#6b7280' });
+	// with h_s drawn as well, h goes lower and left-aligned so the two dashed lines and labels stay apart
+	if (labels.h) s += labels.hs
+		? svgLabel([centerBase[0] + 6, centerBase[1] + (apex[1] - centerBase[1]) * 0.3], labels.h, { color: '#6b7280', anchor: 'start' })
+		: svgLabel([centerBase[0] + 16, (centerBase[1] + apex[1]) / 2], labels.h, { color: '#6b7280' });
+	if (labels.hs) {
+		const mFront: Pt = [(FL[0] + FR[0]) / 2, baseY];
+		s += svgLineSeg(apex, mFront, { color: '#9ca3af', dash: true });
+		const at: Pt = [apex[0] + (mFront[0] - apex[0]) * 0.45 - 10, apex[1] + (mFront[1] - apex[1]) * 0.45];
+		s += svgLabel(at, labels.hs, { color: '#6b7280', anchor: 'end' });
+	}
 	s += '</svg>';
 	return s;
 }
@@ -1610,20 +1733,23 @@ reg('arithmetik__muster_zahlenfolgen_grundschule', (stage = 0) => {
 
 reg('arithmetik__sachaufgaben_grundschule', (stage = 0) => {
 	const templates = [
-		() => { const n = rand(2, 8), p = rand(1, 5); const total = n * p; return { q: `Ein Buch kostet ${p} €. ${n} Kinder kaufen je ein Buch. Wie viel kostet das insgesamt?`, a: total, w: `${n} Bücher zu je ${p} €: ${n} · ${p} = ${total} €.` }; },
-		() => { const total = rand(10, 50), per = rand(2, 8); const left = total % per; return { q: `${total} Bonbons werden auf ${per} Kinder verteilt. Wie viele Bonbons bleiben übrig?`, a: left, w: left === 0 ? `${total} : ${per} = ${total / per} – es geht genau auf, nichts bleibt übrig.` : `${total} : ${per} = ${Math.floor(total / per)} Rest ${left}. Der Rest bleibt übrig.` }; },
-		() => { const start = rand(20, 100), spend = rand(5, start - 5); return { q: `Anna hat ${start} €. Sie gibt ${spend} € aus. Wie viel hat sie noch?`, a: start - spend, w: `Ausgeben heißt abziehen: ${start} − ${spend} = ${start - spend} €.` }; },
-		() => { const l = rand(2, 9), w = rand(2, 6); return { q: `Ein Rechteck ist ${l} cm lang und ${w} cm breit. Wie groß ist der Umfang?`, a: 2 * (l + w), w: `Der Umfang ist einmal außen herum: ${l} + ${w} + ${l} + ${w} = ${2 * (l + w)} cm.` }; },
-		() => { const have = rand(12, 60), get = rand(5, 30); return { q: `Tim hat ${have} Sticker. Zum Geburtstag bekommt er ${get} dazu. Wie viele Sticker hat er jetzt?`, a: have + get, w: `Dazubekommen heißt addieren: ${have} + ${get} = ${have + get}.` }; },
-		() => { const per = pick([6, 10]), boxes = rand(2, 9), extra = rand(1, per - 1); return { q: `${boxes * per + extra} Eier werden in Kartons zu je ${per} Stück verpackt. Wie viele Kartons werden ganz voll?`, a: boxes, w: `${boxes} · ${per} = ${boxes * per} Eier füllen ${boxes} Kartons. Die restlichen ${extra} reichen nicht für einen weiteren.` }; },
-		() => { const rows = rand(3, 9), seats = rand(4, 9), free = rand(1, 10); return { q: `In einem Saal stehen ${rows} Reihen mit je ${seats} Stühlen. ${free} Stühle bleiben frei. Wie viele Stühle sind besetzt?`, a: rows * seats - free, w: `${rows} · ${seats} = ${rows * seats} Stühle insgesamt, minus ${free} freie: ${rows * seats - free}.` }; },
-		() => { const price = rand(2, 9), n = rand(2, 5), paid = pick([20, 50]); return { q: `${n} Eintrittskarten kosten je ${price} €. Bezahlt wird mit einem ${paid}-€-Schein. Wie viel Euro gibt es zurück?`, a: paid - n * price, w: `Die Karten kosten ${n} · ${price} = ${n * price} €. Rückgeld: ${paid} − ${n * price} = ${paid - n * price} €.` }; },
-		() => { const days = rand(2, 6), pages = rand(8, 25); return { q: `Mia liest jeden Tag ${pages} Seiten. Wie viele Seiten hat sie nach ${days} Tagen gelesen?`, a: days * pages, w: `Jeden Tag gleich viele Seiten: ${days} · ${pages} = ${days * pages}.` }; }
+		() => { const n = rand(2, 8), p = rand(1, 5); const total = n * p; return { q: `Ein Buch kostet ${p} €. ${n} Kinder kaufen je ein Buch. Wie viel kostet das insgesamt?`, a: total, w: `${n} Bücher zu je ${p} €: ${n} · ${p} = ${total} €.`, d: `Die Klasse hat ${rand(20, 28)} Kinder.` }; },
+		() => { const total = rand(10, 50), per = rand(2, 8); const left = total % per; return { q: `${total} Bonbons werden auf ${per} Kinder verteilt. Wie viele Bonbons bleiben übrig?`, a: left, w: left === 0 ? `${total} : ${per} = ${total / per} – es geht genau auf, nichts bleibt übrig.` : `${total} : ${per} = ${Math.floor(total / per)} Rest ${left}. Der Rest bleibt übrig.`, d: `Die Bonbons kosten zusammen ${rand(2, 5)} €.` }; },
+		() => { const start = rand(20, 100), spend = rand(5, start - 5); return { q: `Anna hat ${start} €. Sie gibt ${spend} € aus. Wie viel hat sie noch?`, a: start - spend, w: `Ausgeben heißt abziehen: ${start} − ${spend} = ${start - spend} €.`, d: `Ihr Bruder hat ${rand(10, 40)} €.` }; },
+		() => { const l = rand(2, 9), w = rand(2, 6); return { q: `Ein Rechteck ist ${l} cm lang und ${w} cm breit. Wie groß ist der Umfang?`, a: 2 * (l + w), w: `Der Umfang ist einmal außen herum: ${l} + ${w} + ${l} + ${w} = ${2 * (l + w)} cm.`, d: `Daneben liegt ein Quadrat mit ${rand(3, 8)} cm Seitenlänge.` }; },
+		() => { const have = rand(12, 60), get = rand(5, 30); return { q: `Tim hat ${have} Sticker. Zum Geburtstag bekommt er ${get} dazu. Wie viele Sticker hat er jetzt?`, a: have + get, w: `Dazubekommen heißt addieren: ${have} + ${get} = ${have + get}.`, d: `Seine Schwester hat ${rand(10, 50)} Sticker.` }; },
+		() => { const per = pick([6, 10]), boxes = rand(2, 9), extra = rand(1, per - 1); return { q: `${boxes * per + extra} Eier werden in Kartons zu je ${per} Stück verpackt. Wie viele Kartons werden ganz voll?`, a: boxes, w: `${boxes} · ${per} = ${boxes * per} Eier füllen ${boxes} Kartons. Die restlichen ${extra} reichen nicht für einen weiteren.`, d: `Ein Karton kostet ${rand(1, 3)} €.` }; },
+		() => { const rows = rand(3, 9), seats = rand(4, 9), free = rand(1, 10); return { q: `In einem Saal stehen ${rows} Reihen mit je ${seats} Stühlen. ${free} Stühle bleiben frei. Wie viele Stühle sind besetzt?`, a: rows * seats - free, w: `${rows} · ${seats} = ${rows * seats} Stühle insgesamt, minus ${free} freie: ${rows * seats - free}.`, d: `Der Saal hat ${rand(2, 6)} Fenster.` }; },
+		() => { const price = rand(2, 9), n = rand(2, 5), paid = pick([20, 50]); return { q: `${n} Eintrittskarten kosten je ${price} €. Bezahlt wird mit einem ${paid}-€-Schein. Wie viel Euro gibt es zurück?`, a: paid - n * price, w: `Die Karten kosten ${n} · ${price} = ${n * price} €. Rückgeld: ${paid} − ${n * price} = ${paid - n * price} €.`, d: `Die Vorstellung dauert ${rand(60, 120)} Minuten.` }; },
+		() => { const days = rand(2, 6), pages = rand(8, 25); return { q: `Mia liest jeden Tag ${pages} Seiten. Wie viele Seiten hat sie nach ${days} Tagen gelesen?`, a: days * pages, w: `Jeden Tag gleich viele Seiten: ${days} · ${pages} = ${days * pages}.`, d: `Das Buch hat ${rand(120, 300)} Seiten.` }; }
 	];
 	// Expanding sequence: einschrittig ± → einschrittig · (und Umfang) → zweischrittig / mit Rest.
 	const groups = [[2, 4], [0, 8, 3], [1, 5, 6, 7]];
 	const t = templates[pick(groups[stageVariant(stage, groups.length)])]();
-	return { atomId: 'arithmetik__sachaufgaben_grundschule', prompt: t.q, answerType: 'integer', correctAnswer: String(t.a), why: t.w, difficulty: 0.4 };
+	// From stage 3 an überflüssige Angabe is inserted before the question: read carefully, not every
+	// number in the text is needed.
+	const prompt = stage >= 3 ? withExtraInfo(t.q, t.d) : t.q;
+	return { atomId: 'arithmetik__sachaufgaben_grundschule', prompt, answerType: 'integer', correctAnswer: String(t.a), why: stage >= 3 ? `${t.w} (Die Angabe „${t.d}“ wird nicht gebraucht.)` : t.w, difficulty: stage >= 3 ? 0.5 : 0.4 };
 });
 
 // ── 9. Teilbarkeit ────────────────────────────────────────────────────────────
@@ -2912,14 +3038,15 @@ reg('algebra__proportionale_zuordnung', (stage = 0) => {
 	const n2 = lvl === 0 ? n1 * rand(2, 3) : lvl === 1 ? rand(n1 + 1, 10) : rand(n1 + 3, 20);
 	const c1 = rate * n1;
 	const ctx = pick([
-		{ q: `${n1} Hefte kosten ${c1} €. Wie viel Euro kosten ${n2} Hefte?`, per: 'Preis pro Heft', unit: '€' },
-		{ q: `In ${n1} Stunden legt eine Wandergruppe ${c1} km zurück. Wie viele Kilometer schafft sie bei gleichem Tempo in ${n2} Stunden?`, per: 'Strecke pro Stunde', unit: 'km' },
-		{ q: `${n1} gleiche Kisten wiegen zusammen ${c1} kg. Wie viel Kilogramm wiegen ${n2} Kisten?`, per: 'Masse pro Kiste', unit: 'kg' },
-		{ q: `${n1} gleiche Kanister fassen zusammen ${c1} l. Wie viele Liter fassen ${n2} Kanister?`, per: 'Inhalt pro Kanister', unit: 'l' }
+		{ q: `${n1} Hefte kosten ${c1} €. Wie viel Euro kosten ${n2} Hefte?`, per: 'Preis pro Heft', unit: '€', d: `Jedes Heft hat ${rand(16, 48)} Seiten.` },
+		{ q: `In ${n1} Stunden legt eine Wandergruppe ${c1} km zurück. Wie viele Kilometer schafft sie bei gleichem Tempo in ${n2} Stunden?`, per: 'Strecke pro Stunde', unit: 'km', d: `Die Gruppe besteht aus ${rand(8, 15)} Personen.` },
+		{ q: `${n1} gleiche Kisten wiegen zusammen ${c1} kg. Wie viel Kilogramm wiegen ${n2} Kisten?`, per: 'Masse pro Kiste', unit: 'kg', d: `Jede Kiste ist ${rand(30, 60)} cm hoch.` },
+		{ q: `${n1} gleiche Kanister fassen zusammen ${c1} l. Wie viele Liter fassen ${n2} Kanister?`, per: 'Inhalt pro Kanister', unit: 'l', d: `Ein leerer Kanister wiegt ${rand(1, 3)} kg.` }
 	]);
 	return {
 		atomId: 'algebra__proportionale_zuordnung',
-		prompt: ctx.q,
+		// from stage 3 with an überflüssige Angabe
+		prompt: stage >= 3 ? withExtraInfo(ctx.q, ctx.d) : ctx.q,
 		answerType: 'integer',
 		correctAnswer: String(rate * n2),
 		inputData: {
@@ -2954,15 +3081,16 @@ reg('algebra__antiproportionale_zuordnung', (stage = 0) => {
 	const k = x * y;
 	const newY = k / newX;
 	const context = pick([
-		{ t: 'Arbeiter', u: 'Tage' },
-		{ t: 'Maschinen', u: 'Stunden' },
-		{ t: 'Pumpen', u: 'Stunden' },
-		{ t: 'Lkw', u: 'Tage' },
-		{ t: 'Erntehelfer', u: 'Tage' }
+		{ t: 'Arbeiter', u: 'Tage', d: `Jeder Arbeiter verdient ${rand(12, 20)} € pro Stunde.` },
+		{ t: 'Maschinen', u: 'Stunden', d: `Jede Maschine wiegt ${rand(2, 9)} t.` },
+		{ t: 'Pumpen', u: 'Stunden', d: `Das Becken ist ${rand(2, 4)} m tief.` },
+		{ t: 'Lkw', u: 'Tage', d: `Jeder Lkw hat ${pick([4, 6, 8])} Räder.` },
+		{ t: 'Erntehelfer', u: 'Tage', d: `Das Feld ist ${rand(2, 9)} ha groß.` }
 	]);
 	return {
 		atomId,
-		prompt: `${x} ${context.t} brauchen ${y} ${context.u}. Wie lange brauchen ${newX} ${context.t}?`,
+		// from stage 3 with an überflüssige Angabe
+		prompt: `${x} ${context.t} brauchen ${y} ${context.u}.${stage >= 3 ? ` ${context.d}` : ''} Wie lange brauchen ${newX} ${context.t}?`,
 		answerType: 'integer',
 		correctAnswer: String(newY),
 		inputData: {
@@ -3563,46 +3691,112 @@ reg('algebra__quadratische_gleichung_diskriminante', (stage = 0) => {
 
 // ── 25. Geometrie: Flächen, Umfang, Einheiten ─────────────────────────────────
 
+// Parallelograms with two whole-number altitudes: [slant, h, s, g] where (slant, h, s) is a
+// Pythagorean triple (s = slanted side) and g a multiple of s/gcd, so h_s = g · h / s is whole too.
+const PARA_TWO_HEIGHTS: [number, number, number, number][] = [
+	[3, 4, 5, 10], [3, 4, 5, 15], [6, 8, 10, 15], [6, 8, 10, 20], [8, 6, 10, 15], [8, 6, 10, 20], [9, 12, 15, 20], [12, 9, 15, 20]
+];
+
+// Scalene triangles glued from two Pythagorean triangles: C = (p | h), base g = p + q, so the sides
+// b = √(p² + h²) and a = √(q² + h²) are whole. `exact` is the side whose altitude is a terminating
+// one-decimal number (used as distractor in area tasks).
+const TRI_TWO_TRIPLES: { p: number; q: number; h: number; exact: 'a' | 'b' }[] = [
+	{ p: 6, q: 15, h: 8, exact: 'b' }, { p: 5, q: 9, h: 12, exact: 'a' }, { p: 5, q: 16, h: 12, exact: 'a' }, { p: 8, q: 20, h: 15, exact: 'a' }
+];
+
+// Sides and altitudes of a TRI_TWO_TRIPLES triangle, optionally mirrored (p ↔ q swaps a and b).
+function triFromTriples(t: (typeof TRI_TWO_TRIPLES)[number], mirror: boolean) {
+	const p = mirror ? t.q : t.p, q = mirror ? t.p : t.q;
+	const g = p + q, h = t.h;
+	const b = Math.round(Math.hypot(p, h)), a = Math.round(Math.hypot(q, h));
+	const exact: 'a' | 'b' = mirror ? (t.exact === 'a' ? 'b' : 'a') : t.exact;
+	return { p, q, g, h, a, b, ha: round(g * h / a, 1), hb: round(g * h / b, 1), exact };
+}
+
 reg('geometrie__flaecheninhalt_einheitsquadrate', (stage = 0) => {
 	const cols = rand(3, 8), rows = rand(2, 6);
-	const type = Math.min(stage, 1);
-	const svg = svgUnitGrid(cols, rows, cols, rows);
+	// From stage 2 the rectangle covers only part of a larger grid: only the marked squares count.
+	const type = stage >= 2 ? rand(0, 1) : Math.min(stage, 1);
+	const svg = stage >= 2 ? svgUnitGrid(cols + rand(2, 3), rows + rand(1, 2), cols, rows) : svgUnitGrid(cols, rows, cols, rows);
 	if (type === 0) {
-		return { atomId: 'geometrie__flaecheninhalt_einheitsquadrate', prompt: `Wie viele Einheitsquadrate bedeckt das Rechteck? (Flächeninhalt in Kästchen)`, answerType: 'integer', correctAnswer: String(cols * rows), svg, hint: `Zähle die Kästchen aus oder rechne ${cols} · ${rows}.`, why: `${rows} Reihen mit je ${cols} Kästchen: ${cols} · ${rows} = ${cols * rows}.`, difficulty: 0.3 };
+		return { atomId: 'geometrie__flaecheninhalt_einheitsquadrate', prompt: `Wie viele Einheitsquadrate bedeckt das ${stage >= 2 ? 'markierte ' : ''}Rechteck? (Flächeninhalt in Kästchen)`, answerType: 'integer', correctAnswer: String(cols * rows), svg, hint: `Zähle die Kästchen aus oder rechne ${cols} · ${rows}.`, why: `${rows} Reihen mit je ${cols} Kästchen: ${cols} · ${rows} = ${cols * rows}.`, difficulty: 0.3 };
 	}
-	return { atomId: 'geometrie__flaecheninhalt_einheitsquadrate', prompt: `Wie lang ist der Umfang des Rechtecks? (in Kästchenlängen)`, answerType: 'integer', correctAnswer: String(2 * (cols + rows)), svg, hint: `Zähle die Randstrecke: 2 · (${cols} + ${rows}).`, why: `Einmal außen herum: ${cols} + ${rows} + ${cols} + ${rows} = ${2 * (cols + rows)} Kästchenlängen.`, difficulty: 0.3 };
+	return { atomId: 'geometrie__flaecheninhalt_einheitsquadrate', prompt: `Wie lang ist der Umfang des ${stage >= 2 ? 'markierten ' : ''}Rechtecks? (in Kästchenlängen)`, answerType: 'integer', correctAnswer: String(2 * (cols + rows)), svg, hint: `Zähle die Randstrecke: 2 · (${cols} + ${rows}).`, why: `Einmal außen herum: ${cols} + ${rows} + ${cols} + ${rows} = ${2 * (cols + rows)} Kästchenlängen.`, difficulty: 0.3 };
 });
 
 reg('geometrie__rechteck_flaeche_umfang', (stage = 0) => {
-	const type = Math.min(stage, 2);
-	const w = rand(3, 15), h = rand(3, 15);
+	// Expanding sequence: Fläche → Umfang → fehlende Seite → alles gemischt mit eingezeichneter,
+	// beschrifteter Diagonale (Ablenkung: sie wird nicht gebraucht).
+	const withDiag = stage >= 3;
+	const type = withDiag ? rand(0, 2) : Math.min(stage, 2);
+	let w = rand(3, 15), h = rand(3, 15), dg = 0;
+	if (withDiag) { [w, h, dg] = pick([[4, 3, 5], [8, 6, 10], [12, 5, 13], [15, 8, 17], [12, 9, 15], [3, 4, 5], [6, 8, 10]]); }
 	const pts: [Pt, Pt, Pt, Pt] = [[0, 0], [w, 0], [w, h], [0, h]];
+	const rect = (right: string) => withDiag
+		? svgPolyDiagram(pts, { edgeLabels: [{ from: 0, to: 1, text: `${w} cm` }, { from: 1, to: 2, text: right }], rightAngleVertices: [0], extraSegments: [{ from: pts[0], to: pts[2], dash: true }], extraPoints: [{ at: [w * 0.3, h * 0.3], label: `${dg} cm`, dir: [0.6, -0.8] }] })
+		: svgQuad(pts, { baseLabel: `${w} cm`, rightLabel: right, rightAngleVertices: [0] });
 	if (type === 0) {
-		const svg = svgQuad(pts, { baseLabel: `${w} cm`, rightLabel: `${h} cm`, rightAngleVertices: [0] });
+		const svg = rect(`${h} cm`);
 		return { atomId: 'geometrie__rechteck_flaeche_umfang', prompt: `Berechne den Flächeninhalt des Rechtecks.`, answerType: 'number', correctAnswer: String(w * h), svg, hint: `A = a · b = ${w} cm · ${h} cm`, why: `Das Rechteck lässt sich mit ${h} Reihen zu je ${w} Zentimeterquadraten auslegen: ${w} · ${h} = ${w * h} cm².`, difficulty: 0.3 };
 	}
 	if (type === 1) {
-		const svg = svgQuad(pts, { baseLabel: `${w} cm`, rightLabel: `${h} cm`, rightAngleVertices: [0] });
+		const svg = rect(`${h} cm`);
 		return { atomId: 'geometrie__rechteck_flaeche_umfang', prompt: `Berechne den Umfang des Rechtecks.`, answerType: 'number', correctAnswer: String(2 * (w + h)), svg, hint: `U = 2 · (a + b)`, why: `Der Umfang ist die Summe aller vier Seiten: 2 · ${w} + 2 · ${h} = ${2 * (w + h)} cm.`, difficulty: 0.3 };
 	}
-	const svg = svgQuad(pts, { baseLabel: `${w} cm`, rightLabel: '?', rightAngleVertices: [0] });
+	const svg = rect('?');
 	return { atomId: 'geometrie__rechteck_flaeche_umfang', prompt: `Das Rechteck hat den Flächeninhalt ${w * h} cm² und eine Seite von ${w} cm. Wie lang ist die fehlende Seite?`, answerType: 'number', correctAnswer: String(h), svg, hint: `Seite = A : ${w} cm`, why: `A = a · b, also b = A : a = ${w * h} : ${w} = ${h} cm.`, difficulty: 0.45 };
 });
 
 reg('geometrie__flaeche_parallelogramm', (stage = 0) => {
-	const type = Math.min(stage, 1);
+	const atomId = 'geometrie__flaeche_parallelogramm';
+	// Expanding sequence: Fläche aus g und h → h aus A und g → Fläche mit beschrifteter schräger Seite
+	// (Ablenkung) → beide Höhen und beide Seiten eingezeichnet: richtige Paare von Seite und Höhe finden.
+	if (stage >= 2) {
+		const [slant, h, s, g] = pick(PARA_TWO_HEIGHTS);
+		const hs = g * h / s;
+		const A = g * h;
+		if (stage === 2) {
+			const svg = svgParallelogramHeights(slant, h, g, { g: `${g} cm`, s: `${s} cm`, h: `${h} cm`, drawHs: false });
+			return { atomId, prompt: `Berechne den Flächeninhalt des Parallelogramms.`, answerType: 'number', correctAnswer: String(A), svg, hint: 'A = Grundseite · zugehörige Höhe. Die schräge Seite ist keine Höhe.', why: `Grundseite mal Höhe: ${g} cm · ${h} cm = ${A} cm². Die schräge Seite (${s} cm) wird dafür nicht gebraucht.`, difficulty: 0.45 };
+		}
+		if (rand(0, 1) === 0) {
+			const svg = svgParallelogramHeights(slant, h, g, { g: `${g} cm`, s: `${s} cm`, h: `${h} cm`, hs: `${hs} cm` });
+			return { atomId, prompt: `Berechne den Flächeninhalt des Parallelogramms.`, answerType: 'number', correctAnswer: String(A), svg, hint: 'Nimm eine Seite und genau die Höhe, die auf ihr senkrecht steht.', why: `Passende Paare: ${g} cm · ${h} cm = ${A} cm² oder ${s} cm · ${hs} cm = ${A} cm². Falsch wäre z. B. ${g} cm · ${hs} cm – diese Höhe gehört zur anderen Seite.`, difficulty: 0.55 };
+		}
+		const svg = svgParallelogramHeights(slant, h, g, { g: `${g} cm`, s: `${s} cm`, hs: '?' });
+		return { atomId, prompt: `Das Parallelogramm hat den Flächeninhalt ${A} cm². Wie lang ist die Höhe zur Seite ${s} cm?`, answerType: 'number', correctAnswer: String(hs), svg, hint: `h = A : zugehörige Seite`, why: `Die gesuchte Höhe steht auf der Seite ${s} cm, also h = ${A} : ${s} = ${hs} cm. Die Grundseite ${g} cm gehört zur anderen Höhe.`, difficulty: 0.6 };
+	}
 	const g = rand(4, 14), h = rand(3, 10);
 	const slant = Math.round(g * 0.3) || 1;
 	const pts: [Pt, Pt, Pt, Pt] = [[0, 0], [g, 0], [g + slant, h], [slant, h]];
-	if (type === 0) {
+	if (stage === 0) {
 		const svg = svgQuad(pts, { baseLabel: `${g} cm`, heightFrom: [slant, h], heightTo: [slant, 0], heightLabel: `${h} cm` });
-		return { atomId: 'geometrie__flaeche_parallelogramm', prompt: `Berechne den Flächeninhalt des Parallelogramms.`, answerType: 'number', correctAnswer: String(g * h), svg, hint: `A = g · h = ${g} cm · ${h} cm`, why: `Schneidest du links ein Dreieck ab und setzt es rechts an, entsteht ein Rechteck: ${g} cm · ${h} cm = ${g * h} cm². Die schräge Seite spielt keine Rolle.`, difficulty: 0.4 };
+		return { atomId, prompt: `Berechne den Flächeninhalt des Parallelogramms.`, answerType: 'number', correctAnswer: String(g * h), svg, hint: `A = g · h = ${g} cm · ${h} cm`, why: `Schneidest du links ein Dreieck ab und setzt es rechts an, entsteht ein Rechteck: ${g} cm · ${h} cm = ${g * h} cm². Die schräge Seite spielt keine Rolle.`, difficulty: 0.4 };
 	}
 	const svg = svgQuad(pts, { baseLabel: `${g} cm`, heightFrom: [slant, h], heightTo: [slant, 0], heightLabel: '?' });
-	return { atomId: 'geometrie__flaeche_parallelogramm', prompt: `Das Parallelogramm hat den Flächeninhalt ${g * h} cm² und die Grundseite ${g} cm. Wie groß ist die Höhe h?`, answerType: 'number', correctAnswer: String(h), svg, hint: `h = A : g`, why: `A = g · h umgestellt: h = A : g = ${g * h} : ${g} = ${h} cm.`, difficulty: 0.5 };
+	return { atomId, prompt: `Das Parallelogramm hat den Flächeninhalt ${g * h} cm² und die Grundseite ${g} cm. Wie groß ist die Höhe h?`, answerType: 'number', correctAnswer: String(h), svg, hint: `h = A : g`, why: `A = g · h umgestellt: h = A : g = ${g * h} : ${g} = ${h} cm.`, difficulty: 0.5 };
 });
 
 reg('geometrie__flaeche_dreieck', (stage = 0) => {
+	// Expanding sequence: Fläche aus g und h → h aus A und g → alle Seiten beschriftet (Ablenkung) →
+	// zwei Höhen eingezeichnet: die zur Seite passende Höhe finden.
+	if (stage >= 2) {
+		const atomId = 'geometrie__flaeche_dreieck';
+		const t = triFromTriples(pick(TRI_TWO_TRIPLES), rand(0, 1) === 0);
+		const area = t.g * t.h / 2;
+		const sides = { a: `${t.a} cm`, b: `${t.b} cm`, c: `${t.g} cm` };
+		const other = t.exact, otherLen = other === 'a' ? t.a : t.b, otherH = other === 'a' ? t.ha : t.hb;
+		if (stage === 2) {
+			const svg = svgTriangleHeights(t.p, t.q, t.h, sides, { c: `${t.h} cm` });
+			return { atomId, prompt: `Berechne den Flächeninhalt des Dreiecks.`, answerType: 'number', correctAnswer: dec(area), svg, hint: 'A = (Grundseite · zugehörige Höhe) : 2. Nicht alle Angaben werden gebraucht.', why: `Die Höhe ${t.h} cm steht auf der Seite ${t.g} cm: (${t.g} · ${t.h}) : 2 = ${dec(area)} cm². Die Seiten ${t.a} cm und ${t.b} cm werden nicht gebraucht.`, difficulty: 0.5 };
+		}
+		const svg = svgTriangleHeights(t.p, t.q, t.h, sides, { c: `${t.h} cm`, [other]: `${dec(otherH)} cm` });
+		if (rand(0, 1) === 0) {
+			return { atomId, prompt: `Berechne den Flächeninhalt des Dreiecks.`, answerType: 'number', correctAnswer: dec(area), svg, hint: 'Nimm eine Seite und genau die Höhe, die auf ihr senkrecht steht.', why: `Passende Paare: (${t.g} · ${t.h}) : 2 = ${dec(area)} cm² oder (${otherLen} · ${dec(otherH)}) : 2 = ${dec(area)} cm². Eine Seite mit der Höhe einer anderen Seite zu multiplizieren ist falsch.`, difficulty: 0.6 };
+		}
+		const svgQ = svgTriangleHeights(t.p, t.q, t.h, sides, { c: '', [other]: '?' });
+		return { atomId, prompt: `Das Dreieck hat den Flächeninhalt ${dec(area)} cm². Wie lang ist die Höhe zur Seite ${otherLen} cm?`, answerType: 'number', correctAnswer: dec(otherH), tolerance: 0.05, svg: svgQ, hint: 'h = (2 · A) : zugehörige Seite', why: `Die gesuchte Höhe steht auf der Seite ${otherLen} cm: h = 2 · ${dec(area)} : ${otherLen} = ${dec(otherH)} cm.`, difficulty: 0.6 };
+	}
 	const type = Math.min(stage, 1);
 	const g = 2 * rand(2, 8), h = rand(3, 12);
 	const footX = Math.round(g * 0.4) || 1;
@@ -3621,19 +3815,26 @@ reg('geometrie__flaeche_dreieck', (stage = 0) => {
 });
 
 reg('geometrie__flaeche_trapez_zusammengesetzt', (stage = 0) => {
-	const type = Math.min(stage, 1);
+	// Expanding sequence: Trapez → zusammengesetzte Figur → beides gemischt, beim Trapez dann mit
+	// beschrifteten Schenkeln (Ablenkung: sie werden für den Flächeninhalt nicht gebraucht).
+	const type = stage >= 2 ? rand(0, 1) : Math.min(stage, 1);
 	if (type === 0) {
-		const aB = rand(8, 16), c = rand(4, aB - 3), h = rand(3, 9);
-		const off = (aB - c) / 2;
+		const withLegs = stage >= 2;
+		const [off0, h0, leg] = pick([[3, 4, 5], [4, 3, 5], [6, 8, 10], [8, 6, 10]]);
+		const c = withLegs ? rand(3, 8) : 0;
+		const aB = withLegs ? c + 2 * off0 : rand(8, 16);
+		const cc = withLegs ? c : rand(4, aB - 3), h = withLegs ? h0 : rand(3, 9);
+		const off = (aB - cc) / 2;
 		const A: Pt = [0, 0], B: Pt = [aB, 0], C: Pt = [aB - off, h], D: Pt = [off, h];
-		const area = (aB + c) / 2 * h;
+		const area = (aB + cc) / 2 * h;
 		const svg = svgPolyDiagram([A, B, C, D], {
-			edgeLabels: [{ from: 0, to: 1, text: `${aB} cm` }, { from: 2, to: 3, text: `${c} cm` }],
+			edgeLabels: [{ from: 0, to: 1, text: `${aB} cm` }, { from: 2, to: 3, text: `${cc} cm` },
+				...(withLegs ? [{ from: 1, to: 2, text: `${leg} cm` }, { from: 3, to: 0, text: `${leg} cm` }] : [])],
 			extraSegments: [{ from: D, to: [off, 0], dash: true }],
 			rightAngleFeet: [{ at: [off, 0], ref1: D, ref2: B }],
 			extraPoints: [{ at: [off, h / 2], label: `${h} cm`, pos: 'right' }]
 		});
-		return { atomId: 'geometrie__flaeche_trapez_zusammengesetzt', prompt: `Berechne den Flächeninhalt des Trapezes.`, answerType: 'number', correctAnswer: dec(area), svg, hint: `A = (a + c) : 2 · h = (${aB} + ${c}) : 2 · ${h}`, why: `Mittelwert der parallelen Seiten mal Höhe: (${aB} + ${c}) : 2 = ${dec((aB + c) / 2)}, mal ${h} = ${dec(area)} cm².`, difficulty: 0.5 };
+		return { atomId: 'geometrie__flaeche_trapez_zusammengesetzt', prompt: `Berechne den Flächeninhalt des Trapezes.`, answerType: 'number', correctAnswer: dec(area), svg, hint: `A = (a + c) : 2 · h = (${aB} + ${cc}) : 2 · ${h}`, why: `Mittelwert der parallelen Seiten mal Höhe: (${aB} + ${cc}) : 2 = ${dec((aB + cc) / 2)}, mal ${h} = ${dec(area)} cm².${withLegs ? ` Die schrägen Seiten (${leg} cm) werden nicht gebraucht.` : ''}`, difficulty: 0.5 };
 	}
 	const w1 = rand(4, 8), h1 = rand(6, 12), w2 = rand(2, 6), h2 = rand(2, h1 - 2);
 	const P0: Pt = [0, 0], P1: Pt = [w1 + w2, 0], P2: Pt = [w1 + w2, h2], P3: Pt = [w1, h2], P4: Pt = [w1, h1], P5: Pt = [0, h1];
@@ -3725,9 +3926,15 @@ reg('geometrie__flaechen_volumeneinheiten_umrechnen', (stage = 0) => {
 // ── 26. Geometrie: Körperberechnung ───────────────────────────────────────────
 
 reg('geometrie__quader_volumen_oberflaeche', (stage = 0) => {
-	const type = Math.min(stage, 1);
-	const l = rand(3, 10), w = rand(2, 8), h = rand(2, 8);
-	const svg = svgCuboid(l, h, w, { w: `${l} cm`, h: `${h} cm`, d: `${w} cm` });
+	// Expanding sequence: Volumen → Oberfläche → beides gemischt, mit beschrifteter Flächendiagonale
+	// (Ablenkung: wird nicht gebraucht).
+	const withDiag = stage >= 2;
+	const type = withDiag ? rand(0, 1) : Math.min(stage, 1);
+	let l = rand(3, 10), h = rand(2, 8);
+	const w = rand(2, 8);
+	let diag = 0;
+	if (withDiag) { const [x, y, z] = pick([[3, 4, 5], [6, 8, 10], [4, 3, 5], [8, 6, 10], [5, 12, 13]]); l = x; h = y; diag = z; }
+	const svg = svgCuboid(l, h, w, { w: `${l} cm`, h: `${h} cm`, d: `${w} cm`, ...(withDiag ? { diag: `${diag} cm` } : {}) });
 	if (type === 0) {
 		return { atomId: 'geometrie__quader_volumen_oberflaeche', prompt: `Berechne das Volumen des Quaders.`, answerType: 'number', correctAnswer: String(l * w * h), svg, hint: `V = l · b · h = ${l} · ${w} · ${h}`, why: `Volumen = Grundfläche · Höhe: ${l} · ${w} = ${l * w}, mal ${h} = ${l * w * h} cm³.`, difficulty: 0.45 };
 	}
@@ -3749,15 +3956,24 @@ reg('geometrie__prismen', (stage = 0) => {
 
 reg('geometrie__pyramiden', (stage = 0) => {
 	// Expanding sequence: Grundfläche bestimmen → Volumen berechnen.
-	const type = Math.min(stage, 1);
+	// From stage 2 the height of a side face h_s is labelled as well (distractor: the volume needs the
+	// body height h); then Grundfläche and Volumen are mixed.
+	const withHs = stage >= 2;
+	const type = withHs ? rand(0, 1) : Math.min(stage, 1);
 	// a or h divisible by 3 keeps the volume a whole number
-	const a = rand(3, 10), h = a % 3 === 0 ? rand(3, 12) : 3 * rand(1, 4);
-	const svg = svgPyramid(a, h, { a: `${a} cm`, h: `${h} cm` });
+	let a = rand(3, 10), h = a % 3 === 0 ? rand(3, 12) : 3 * rand(1, 4), hs = 0;
+	if (withHs) {
+		// half the base edge, h and h_s form a right triangle; a or h is a multiple of 3 (whole volume)
+		[a, h, hs] = pick([[8, 3, 5], [6, 4, 5], [12, 8, 10], [16, 6, 10], [10, 12, 13], [18, 12, 15], [24, 9, 15]]);
+	}
+	const svg = withHs
+		? svgPyramid(a, h, { a: `a = ${a} cm`, h: `h = ${h} cm`, hs: `hₛ = ${hs} cm` })
+		: svgPyramid(a, h, { a: `${a} cm`, h: `${h} cm` });
 	const G = a * a;
 	if (type === 0) {
 		return { atomId: 'geometrie__pyramiden', prompt: `Wie groß ist die Grundfläche G der quadratischen Pyramide?`, answerType: 'number', correctAnswer: String(G), svg, hint: `G = a² = ${a}²`, why: `Die Grundfläche ist ein Quadrat: ${a} · ${a} = ${G} cm².`, difficulty: 0.35 };
 	}
-	return { atomId: 'geometrie__pyramiden', prompt: `Berechne das Volumen der quadratischen Pyramide.`, answerType: 'number', correctAnswer: String(G * h / 3), svg, hint: `V = (1/3) · G · h = (1/3) · ${a}² · ${h}`, why: `Eine Pyramide füllt ein Drittel des Quaders mit gleicher Grundfläche und Höhe: ${G} · ${h} : 3 = ${G * h / 3} cm³.`, difficulty: 0.55 };
+	return { atomId: 'geometrie__pyramiden', prompt: `Berechne das Volumen der quadratischen Pyramide.`, answerType: 'number', correctAnswer: String(G * h / 3), svg, hint: `V = (1/3) · G · h = (1/3) · ${a}² · ${h}` + (withHs ? ' – h ist die Körperhöhe, nicht die Höhe der Seitenfläche.' : ''), why: `Eine Pyramide füllt ein Drittel des Quaders mit gleicher Grundfläche und Höhe: ${G} · ${h} : 3 = ${G * h / 3} cm³.`, difficulty: 0.55 };
 });
 
 reg('geometrie__zylinder_volumen_oberflaeche', (stage = 0) => {
@@ -3836,7 +4052,9 @@ reg('geometrie__pythagoras_hypotenuse', (stage = 0) => {
 		a = rand(4, 15); b = rand(4, 15);
 	}
 	const c = Math.sqrt(a * a + b * b);
-	const svg = svgRightTriangle(a, b, { labelA: `${a} cm`, labelB: `${b} cm`, labelC: '?' });
+	// From stage 2 the altitude onto the hypotenuse is drawn and labelled (distractor: it is not a side).
+	const hc = round(a * b / c, 1);
+	const svg = svgRightTriangle(a, b, { labelA: `${a} cm`, labelB: `${b} cm`, labelC: '?', ...(stage >= 2 && Math.min(a, b) / Math.max(a, b) > 0.4 ? { heightLabel: `${dec(hc)} cm` } : {}) });
 	return { atomId: 'geometrie__pythagoras_hypotenuse', prompt: `Berechne die Länge der Hypotenuse c${easy ? '' : ' (runde auf zwei Nachkommastellen)'}.`, answerType: 'number', correctAnswer: dec(round(c, 2)), tolerance: easy ? 0 : 0.01, svg, hint: `c = √(a² + b²) = √(${a}² + ${b}²)`, why: `c² = a² + b² = ${a * a} + ${b * b} = ${a * a + b * b}, also c = √${a * a + b * b} ${Number.isInteger(c) ? '=' : '≈'} ${dec(round(c, 2))} cm.`, difficulty: easy ? 0.45 : 0.55 };
 });
 
@@ -3846,10 +4064,12 @@ reg('geometrie__pythagoras_kathete', (stage = 0) => {
 	const [a, b, c] = pick(PYTHAG_TRIPLES.filter(t => t[2] <= maxC));
 	const hideA = rand(0, 1) === 0;
 	const known = hideA ? b : a, unknown = hideA ? a : b;
+	// From stage 3 the altitude onto the hypotenuse is drawn and labelled (distractor: it is not a side).
 	const svg = svgRightTriangle(a, b, {
 		labelA: hideA ? '?' : `${a} cm`,
 		labelB: hideA ? `${b} cm` : '?',
-		labelC: `${c} cm`
+		labelC: `${c} cm`,
+		...(stage >= 3 && Math.min(a, b) / Math.max(a, b) > 0.4 ? { heightLabel: `${dec(round(a * b / c, 1))} cm` } : {})
 	});
 	return { atomId: 'geometrie__pythagoras_kathete', prompt: `Berechne die Länge der fehlenden Kathete.`, answerType: 'number', correctAnswer: String(unknown), svg, hint: `Kathete = √(c² − ${known}²) = √(${c}² − ${known}²)`, why: `Die Hypotenuse ist die längste Seite – für eine Kathete wird subtrahiert: ${c}² − ${known}² = ${c * c} − ${known * known} = ${unknown * unknown}, √${unknown * unknown} = ${unknown} cm.`, difficulty: 0.55 };
 });
@@ -3929,12 +4149,15 @@ reg('geometrie__hoehensatz_kathetensatz', (stage = 0) => {
 // ── 28. Geometrie: Trigonometrie ──────────────────────────────────────────────
 
 reg('geometrie__sin_cos_tan_definition', (stage = 0) => {
-	const type = Math.min(stage, 1);
+	// Expanding sequence: Seiten benennen → Verhältnis aufstellen → beides gemischt, dann ist auch der
+	// andere spitze Winkel β markiert (Ablenkung: die Seiten werden immer vom Winkel α aus benannt).
+	const type = stage >= 2 ? rand(0, 1) : Math.min(stage, 1);
 	const [a, b, c] = pick(PYTHAG_TRIPLES);
 	const atB = rand(0, 1) === 0;
 	const svg = svgRightTriangle(a, b, {
 		labelA: `${a} cm`, labelB: `${b} cm`, labelC: `${c} cm`,
-		angleLabel: 'α', angleAt: atB ? 'B' : 'A'
+		angleLabel: 'α', angleAt: atB ? 'B' : 'A',
+		...(stage >= 2 ? { otherAngleLabel: 'β' } : {})
 	});
 	const gegen = atB ? b : a, anka = atB ? a : b;
 	if (type === 0) {
@@ -3982,7 +4205,9 @@ reg('geometrie__trigonometrie_seiten_berechnen', (stage = 0) => {
 	const labelFor = (kind: typeof given) => kind === given ? `${dec(round(val(kind), 1))} cm` : kind === ask ? '?' : '';
 	const svg = svgRightTriangle(legA, legB, {
 		labelA: labelFor('ankathete'), labelB: labelFor('gegenkathete'), labelC: labelFor('hypotenuse'),
-		angleLabel: `α = ${alphaDeg}°`, angleAt: 'B'
+		angleLabel: `α = ${alphaDeg}°`, angleAt: 'B',
+		// distractor from stage 3: β is marked too – Gegen-/Ankathete always refer to α
+		...(stage >= 3 ? { otherAngleLabel: `β = ${90 - alphaDeg}°`, otherAngleArc: false } : {})
 	});
 	const names = { ankathete: 'Ankathete', gegenkathete: 'Gegenkathete', hypotenuse: 'Hypotenuse' };
 	return {
@@ -4266,7 +4491,18 @@ reg('geometrie__koordinatensystem', (stage = 0) => {
 	const x = allowNeg ? rand(-6, 6) : rand(0, 6);
 	const y = allowNeg ? rand(-6, 6) : rand(0, 6);
 	const askX = rand(0, 1) === 0;
-	const svg = svgCoordPoints([{ x, y, label: 'P' }], range);
+	// From stage 2 further points are drawn, one of them with swapped coordinates (y | x) – a typical
+	// mix-up; the question is still about P.
+	const pts = [{ x, y, label: 'P' }];
+	if (stage >= 2) {
+		const used = new Set([`${x},${y}`]);
+		const add = (px: number, py: number, label: string) => { if (!used.has(`${px},${py}`)) { used.add(`${px},${py}`); pts.push({ x: px, y: py, label }); } };
+		add(y, x, 'Q');
+		let rx: number, ry: number;
+		do { rx = allowNeg ? rand(-6, 6) : rand(0, 6); ry = allowNeg ? rand(-6, 6) : rand(0, 6); } while (used.has(`${rx},${ry}`));
+		add(rx, ry, pts.length === 2 ? 'R' : 'Q');
+	}
+	const svg = svgCoordPoints(shuffled(pts), range);
 	return {
 		atomId: 'geometrie__koordinatensystem',
 		prompt: `Welche ${askX ? 'x' : 'y'}-Koordinate hat der Punkt P?`,
@@ -4509,13 +4745,14 @@ reg('geometrie__lagebeziehungen_lineare_figuren', (stage = 0) => {
 	const type = Math.min(stage, 1);
 	const baseAngles = [0, 30, 45, 60, 90, 120, 135, 150];
 	const deg1 = pick(baseAngles);
-	const askParallel = type === 0;
+	const askParallel = stage >= 2 ? rand(0, 1) === 0 : type === 0;
 	const yes = rand(0, 1) === 0;
 	let deg2: number;
 	if (askParallel) {
-		deg2 = yes ? deg1 : (deg1 + pick([30, 45, 60, 90, 120])) % 180;
+		// from stage 2 the „nein“ cases are near misses (12° off), so one has to look closely
+		deg2 = yes ? deg1 : (deg1 + (stage >= 2 ? pick([12, 168]) : pick([30, 45, 60, 90, 120]))) % 180;
 	} else {
-		deg2 = yes ? (deg1 + 90) % 180 : (deg1 + pick([30, 45, 60, 120, 150])) % 180;
+		deg2 = yes ? (deg1 + 90) % 180 : (deg1 + (stage >= 2 ? pick([78, 102]) : pick([30, 45, 60, 120, 150]))) % 180;
 	}
 	const svg = svgTwoSegments(deg1, deg2);
 	return {
@@ -5031,13 +5268,14 @@ reg('algebra__steigung_aus_zwei_punkten', (stage = 0) => {
 
 reg('geometrie__senkrecht_parallel', (stage = 0) => {
 	const atomId = 'geometrie__senkrecht_parallel';
-	// Expanding sequence: Lage erkennen → Schlussfolgern → Abstand.
-	const type = Math.min(stage, 2);
+	// Expanding sequence: Lage erkennen → Schlussfolgern → Abstand → gemischt; beim Erkennen dann mit
+	// knappen Fällen (fast parallel / fast senkrecht), bei denen man genau hinschauen muss.
+	const type = stage >= 3 ? rand(0, 2) : Math.min(stage, 2);
 	const choices = ['parallel', 'senkrecht', 'weder noch'];
 	if (type === 0) {
 		const deg1 = pick([0, 20, 45, 70, 110, 150]);
 		const kind = rand(0, 2);
-		const deg2 = kind === 0 ? deg1 : kind === 1 ? deg1 + 90 : deg1 + pick([30, 50, 130]);
+		const deg2 = kind === 0 ? deg1 : kind === 1 ? deg1 + 90 : deg1 + (stage >= 3 ? pick([12, 78, 102, 168]) : pick([30, 50, 130]));
 		return { atomId, prompt: 'Wie liegen die beiden Strecken zueinander (wenn man sie verlängert)?', answerType: 'text', correctAnswer: choices[kind], choices, svg: svgTwoSegments(deg1, deg2), hint: 'Parallel: überall gleicher Abstand. Senkrecht: sie bilden einen rechten Winkel.', why: ['Die Strecken haben dieselbe Richtung – verlängert bleiben sie immer gleich weit auseinander → parallel.', 'Die Strecken bilden einen rechten Winkel → senkrecht.', 'Verlängert schneiden sie sich, aber nicht im rechten Winkel → weder noch.'][kind], difficulty: 0.25 };
 	}
 	if (type === 1) {
@@ -5091,22 +5329,31 @@ reg('geometrie__kreis_grundbegriffe', (stage = 0) => {
 
 reg('geometrie__dreiecksarten', (stage = 0) => {
 	const atomId = 'geometrie__dreiecksarten';
-	// Expanding sequence: Einteilung nach Seiten → nach Winkeln → Basiswinkel.
-	const type = Math.min(stage, 2);
+	// Expanding sequence: Einteilung nach Seiten → nach Winkeln → Basiswinkel → alles gemischt, dann
+	// ohne Muster in den Seitenlängen und oft nur mit zwei gegebenen Winkeln (der entscheidende dritte
+	// Winkel muss erst berechnet werden).
+	const type = stage >= 3 ? rand(0, 3) : Math.min(stage, 2);
+	const mixed = stage >= 3;
 	if (type === 0) {
 		const choices = ['gleichseitig', 'gleichschenklig', 'unregelmäßig'];
 		const kind = rand(0, 2);
 		const a = rand(4, 9);
-		const sides = kind === 0 ? [a, a, a] : kind === 1 ? shuffled([a, a, a - rand(1, 3)]) : [a, a + 1, a + 2];
+		const sides = kind === 0 ? [a, a, a] : kind === 1 ? shuffled([a, a, a - rand(1, 3)]) : mixed ? shuffled([a, a + rand(1, 2), a + rand(3, 4)]) : [a, a + 1, a + 2];
 		return { atomId, prompt: `Ein Dreieck hat die Seitenlängen ${sides[0]} cm, ${sides[1]} cm und ${sides[2]} cm. Welche Dreiecksart ist das?`, answerType: 'text', correctAnswer: choices[kind], choices, hint: 'Gleichschenklig: genau zwei gleich lange Seiten. Gleichseitig: alle drei gleich lang.', why: ['Alle drei Seiten sind gleich lang → gleichseitig.', 'Genau zwei Seiten sind gleich lang → gleichschenklig.', 'Alle drei Seiten sind verschieden lang → unregelmäßig.'][kind], difficulty: 0.3 };
 	}
-	if (type === 1) {
+	if (type === 1 || type === 3) {
 		const choices = ['spitzwinklig', 'rechtwinklig', 'stumpfwinklig'];
 		const kind = rand(0, 2);
 		// spitzwinklig: two angles in [50°, 80°] keep the third below 90° as well
 		const big = kind === 0 ? rand(50, 80) : kind === 1 ? 90 : rand(95, 140);
 		const second = kind === 0 ? rand(50, 80) : rand(20, 180 - big - 15);
 		const angles = shuffled([big, second, 180 - big - second]);
+		if (type === 3) {
+			// two angles given; the largest one is often the hidden third angle
+			const hide = rand(0, 2) > 0 ? angles.indexOf(Math.max(...angles)) : rand(0, 2);
+			const shown = angles.filter((_, i) => i !== hide);
+			return { atomId, prompt: `In einem Dreieck sind zwei Winkel ${shown[0]}° und ${shown[1]}° groß. Ist das Dreieck spitzwinklig, rechtwinklig oder stumpfwinklig?`, answerType: 'text', correctAnswer: choices[kind], choices, hint: 'Berechne zuerst den dritten Winkel (Winkelsumme 180°). Entscheidend ist der größte Winkel.', why: `Dritter Winkel: 180° − ${shown[0]}° − ${shown[1]}° = ${angles[hide]}°. Der größte Winkel ist ${Math.max(...angles)}°: ${['kleiner als 90° → spitzwinklig', 'genau 90° → rechtwinklig', 'größer als 90° → stumpfwinklig'][kind]}.`, difficulty: 0.45 };
+		}
 		return { atomId, prompt: `Ein Dreieck hat die Winkel ${angles[0]}°, ${angles[1]}° und ${angles[2]}°. Welche Dreiecksart ist das?`, answerType: 'text', correctAnswer: choices[kind], choices, hint: 'Entscheidend ist der größte Winkel.', why: `Der größte Winkel ist ${Math.max(...angles)}°: ${['kleiner als 90° → spitzwinklig', 'genau 90° → rechtwinklig', 'größer als 90° → stumpfwinklig'][kind]}.`, difficulty: 0.35 };
 	}
 	const alpha = rand(25, 80);
@@ -5115,9 +5362,29 @@ reg('geometrie__dreiecksarten', (stage = 0) => {
 
 reg('geometrie__hoehen_erkennen', (stage = 0) => {
 	const atomId = 'geometrie__hoehen_erkennen';
-	// Expanding sequence: Parallelogramm → Dreieck → Begriff.
-	const type = Math.min(stage, 2);
+	// Expanding sequence: Parallelogramm (eine Höhe) → Dreieck (eine Höhe) → Parallelogramm mit
+	// zwei eingezeichneten Höhen → Dreieck mit allen drei Höhen → Begriffe. In den Stufen mit mehreren
+	// Höhen muss man genau prüfen, welche Höhe auf welcher Seite senkrecht steht.
+	const variant = stageVariant(stage, 5);
+	const type = variant === 4 ? 2 : variant;
 	const [slant, h, s] = pick([[3, 4, 5], [6, 8, 10], [5, 12, 13]]);
+	if (variant === 2) {
+		const [sl, hh, ss, g] = pick(PARA_TWO_HEIGHTS);
+		const hs = g * hh / ss;
+		const toSide = rand(0, 1) === 0;
+		const svg = svgParallelogramHeights(sl, hh, g, { g: `${g} cm`, s: `${ss} cm`, h: `${hh} cm`, hs: `${hs} cm` });
+		const [side, ans, other, otherSide] = toSide ? [ss, hs, hh, g] : [g, hh, hs, ss];
+		return { atomId, prompt: `Im Parallelogramm sind zwei Höhen eingezeichnet. Wie lang ist die Höhe zur Seite ${side} cm?`, answerType: 'number', correctAnswer: String(ans), svg, hint: 'Suche die gestrichelte Strecke, die mit der gefragten Seite (oder ihrer Verlängerung) einen rechten Winkel bildet.', why: `Die Höhe zur Seite ${side} cm steht senkrecht auf dieser Seite: ${ans} cm. Die andere Höhe (${other} cm) steht senkrecht auf der Seite ${otherSide} cm.`, difficulty: 0.55 };
+	}
+	if (variant === 3) {
+		// acute triangles only: with an obtuse angle two heights lie outside and the sketch gets crowded
+		const t = triFromTriples(pick(TRI_TWO_TRIPLES.filter(x => x.p !== 6)), rand(0, 1) === 0);
+		const hl = { a: t.ha, b: t.hb, c: t.h };
+		const sl = { a: t.a, b: t.b, c: t.g };
+		const ask = pick(['a', 'b', 'c'] as const);
+		const svg = svgTriangleHeights(t.p, t.q, t.h, { a: `${t.a} cm`, b: `${t.b} cm`, c: `${t.g} cm` }, { a: `${dec(t.ha)} cm`, b: `${dec(t.hb)} cm`, c: `${t.h} cm` });
+		return { atomId, prompt: `Im Dreieck sind alle drei Höhen eingezeichnet. Wie lang ist die Höhe zur Seite ${sl[ask]} cm?`, answerType: 'number', correctAnswer: dec(hl[ask]), tolerance: 0.05, svg, hint: 'Jede Höhe beginnt in einer Ecke und steht senkrecht auf der gegenüberliegenden Seite (oder ihrer Verlängerung).', why: `Die Höhe zur Seite ${sl[ask]} cm kommt aus der gegenüberliegenden Ecke und bildet mit dieser Seite einen rechten Winkel: ${dec(hl[ask])} cm. Die beiden anderen Höhen gehören zu den anderen Seiten.`, difficulty: 0.6 };
+	}
 	if (type === 0) {
 		const g = slant + rand(4, 9);
 		const pts: [Pt, Pt, Pt, Pt] = [[0, 0], [g, 0], [g + slant, h], [slant, h]];
@@ -5149,18 +5416,20 @@ reg('geometrie__hoehen_erkennen', (stage = 0) => {
 
 reg('geometrie__kegel_volumen_oberflaeche', (stage = 0) => {
 	const atomId = 'geometrie__kegel_volumen_oberflaeche';
-	// Expanding sequence: Volumen → Mantellinie (Pythagoras) → Mantelfläche.
-	const type = Math.min(stage, 2);
+	// Expanding sequence: Volumen → Mantellinie (Pythagoras) → Mantelfläche → Volumen oder Mantelfläche
+	// mit allen drei Maßen r, h, s beschriftet (Ablenkung: h und s verwechseln).
+	const type = stage >= 3 ? pick([0, 2]) : Math.min(stage, 2);
+	const all = stage >= 3;
 	const [r, h, s] = pythagLegs();
 	if (type === 0) {
 		const V = round(3.14 * r * r * h / 3, 2);
-		return { atomId, prompt: `Berechne das Volumen des Kegels. (π ≈ 3,14)`, answerType: 'number', correctAnswer: dec(V), tolerance: piTol(V), svg: svgCone(r, h, { r: `r = ${r} cm`, h: `h = ${h} cm` }), hint: 'V = (1/3) · π · r² · h', why: `Ein Kegel füllt ein Drittel des Zylinders mit gleichem Radius und gleicher Höhe: 3,14 · ${r}² · ${h} : 3 ≈ ${dec(V)} cm³.`, difficulty: 0.55 };
+		return { atomId, prompt: `Berechne das Volumen des Kegels. (π ≈ 3,14)`, answerType: 'number', correctAnswer: dec(V), tolerance: piTol(V), svg: svgCone(r, h, { r: `r = ${r} cm`, h: `h = ${h} cm`, ...(all ? { s: `s = ${s} cm` } : {}) }), hint: 'V = (1/3) · π · r² · h' + (all ? ' – für das Volumen zählt die Höhe h, nicht die Mantellinie s.' : ''), why: `Ein Kegel füllt ein Drittel des Zylinders mit gleichem Radius und gleicher Höhe: 3,14 · ${r}² · ${h} : 3 ≈ ${dec(V)} cm³.`, difficulty: 0.55 };
 	}
 	if (type === 1) {
 		return { atomId, prompt: `Berechne die Länge der Mantellinie s des Kegels (in cm).`, answerType: 'number', correctAnswer: String(s), svg: svgCone(r, h, { r: `r = ${r} cm`, h: `h = ${h} cm`, s: 's = ?' }), hint: 's² = r² + h²', why: `Radius, Höhe und Mantellinie bilden ein rechtwinkliges Dreieck: s = √(${r}² + ${h}²) = √${r * r + h * h} = ${s} cm.`, difficulty: 0.55 };
 	}
 	const M = round(3.14 * r * s, 2);
-	return { atomId, prompt: `Berechne die Mantelfläche des Kegels. (π ≈ 3,14)`, answerType: 'number', correctAnswer: dec(M), tolerance: piTol(M), svg: svgCone(r, h, { r: `r = ${r} cm`, s: `s = ${s} cm` }), hint: 'M = π · r · s', why: `M = π · r · s = 3,14 · ${r} · ${s} = ${dec(M)} cm².`, difficulty: 0.6 };
+	return { atomId, prompt: `Berechne die Mantelfläche des Kegels. (π ≈ 3,14)`, answerType: 'number', correctAnswer: dec(M), tolerance: piTol(M), svg: svgCone(r, h, { r: `r = ${r} cm`, s: `s = ${s} cm`, ...(all ? { h: `h = ${h} cm` } : {}) }), hint: 'M = π · r · s', why: `M = π · r · s = 3,14 · ${r} · ${s} = ${dec(M)} cm².`, difficulty: 0.6 };
 });
 
 reg('geometrie__kreisbogen_kreissektor', (stage = 0) => {

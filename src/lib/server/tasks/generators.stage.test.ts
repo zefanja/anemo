@@ -316,3 +316,35 @@ describe('selected stage-0 simplifications', () => {
 		}
 	});
 });
+
+// Higher stages add distractors (extra heights, unused measures, überflüssige Angaben).
+describe('distractors in higher stages', () => {
+	const many = (atomId: string, stage: number, n = 60) => Array.from({ length: n }, () => generateTask(atomId, stage)!);
+	it('Höhen erkennen: several heights drawn, the asked one is labelled in the sketch', () => {
+		const ts = [...many('geometrie__hoehen_erkennen', 2), ...many('geometrie__hoehen_erkennen', 3)];
+		const multi = ts.filter((t) => /zwei Höhen|drei Höhen/.test(t.prompt));
+		expect(multi.length).toBeGreaterThan(0);
+		for (const t of multi) {
+			expect(t.svg).toContain(`${t.correctAnswer} cm`);
+			// at least two different height labels (grey labels) besides the side labels
+			expect((t.svg!.match(/ cm</g) ?? []).length).toBeGreaterThanOrEqual(4);
+		}
+	});
+	it('Parallelogramm/Dreieck: unused sides and second heights appear from stage 2/3', () => {
+		for (const t of many('geometrie__flaeche_dreieck', 2, 20)) expect((t.svg!.match(/ cm</g) ?? []).length).toBe(4);
+		for (const t of many('geometrie__flaeche_parallelogramm', 2, 20)) expect((t.svg!.match(/ cm</g) ?? []).length).toBe(3);
+		for (const t of many('geometrie__flaeche_parallelogramm', 3, 20)) expect(t.svg!.match(/stroke-dasharray/g)!.length).toBeGreaterThanOrEqual(2);
+	});
+	it('Pyramide: from stage 2 the side-face height is labelled as well', () => {
+		for (const t of many('geometrie__pyramiden', 2, 20)) expect(t.svg).toContain('hₛ');
+	});
+	it('Sachaufgaben: from stage 3 an überflüssige Angabe is named in the explanation', () => {
+		for (const t of many('arithmetik__sachaufgaben_grundschule', 3, 30)) {
+			expect(t.why).toContain('nicht gebraucht');
+			expect(t.prompt.trim().endsWith('?')).toBe(true);
+		}
+	});
+	it('Koordinatensystem: from stage 2 several points are drawn', () => {
+		for (const t of many('geometrie__koordinatensystem', 2, 20)) expect(t.svg).toContain('>Q<');
+	});
+});

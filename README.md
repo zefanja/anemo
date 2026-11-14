@@ -194,6 +194,7 @@ Der Frontier enthält Atome, die noch nicht gemeistert sind und deren alle `requ
 - **Erste Wiederholung:** Die Übungsphase bis zur Mastery zählt als erste FSRS-Wiederholung (Bewertung *Good* bei ≥ 80 % richtig, sonst *Hard*). Die erste Wiederholung kommt dadurch nach ca. 2–3 Tagen, nie direkt nach dem Abschluss eines Atoms. FSRS läuft ohne Kurzzeit-Lernschritte; jedes Intervall ist mindestens ein Tag.
 - **Fälligkeit:** Eine Wiederholung ist ab Beginn ihres Fälligkeitstags (UTC) verfügbar, frühestens aber `REVIEW_MIN_DELAY_HOURS` nach dem letzten Üben des Atoms.
 - **Aufgabenstufen:** Alle Generatoren liefern eine Expanding Sequence (Stufe 0 = leicht: glatte Zahlen, kleiner Zahlenraum, einfachste Variante; spätere Stufen schwerer, frühere Varianten bleiben teils in der Mischung). Beim Lernen steigt die Stufe nach `STAGE_STREAK_TARGET` richtigen Antworten in Folge, ein Fehler geht eine Stufe zurück. Nach der Mastery bestimmt die FSRS-Stabilität einen Bonus: < 7 Tage +0, 7–20 Tage +1, ≥ 21 Tage +2 Stufen.
+- **Ablenkungen:** In höheren Stufen enthalten Aufgaben zum Erkennen und Ablesen zusätzliche Angaben, die nicht gebraucht werden: mehrere eingezeichnete Höhen (Dreieck, Parallelogramm), beschriftete schräge Seiten, Diagonalen, Seitenhöhe der Pyramide, Mantellinie und Höhe beim Kegel, Höhe auf der Hypotenuse, zweiter spitzer Winkel, weitere Punkte im Koordinatensystem, knappe Fälle bei parallel/senkrecht und überflüssige Angaben in Sachaufgaben.
 
 
 ### Motivation & Gamification (Schüler-App)
