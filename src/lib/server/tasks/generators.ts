@@ -1326,22 +1326,40 @@ reg('arithmetik__stellenwert_bis_100', (stage = 0) => {
 	const tens = Math.floor(n / 10);
 	const ones = n % 10;
 	// Expanding sequence: erst nur Zehner erfragen, dann Zehner oder Einer gemischt.
+	// Lückenform statt „Wie viele Einer hat 47?“ – die Frage wäre mehrdeutig (7 an der Einerstelle oder 47 Einer insgesamt).
 	const q = stage === 0 ? 0 : rand(0, 1);
-	if (q === 0) return { atomId: 'arithmetik__stellenwert_bis_100', prompt: `Wie viele Zehner hat die Zahl ${n}?`, answerType: 'integer', correctAnswer: String(tens), why: `${n} = ${tens} Zehner + ${ones} Einer. Die Zehner stehen links.`, difficulty: 0.2 };
-	return { atomId: 'arithmetik__stellenwert_bis_100', prompt: `Wie viele Einer hat die Zahl ${n}?`, answerType: 'integer', correctAnswer: String(ones), why: `${n} = ${tens} Zehner + ${ones} Einer. Die Einer stehen ganz rechts.`, difficulty: 0.2 };
+	if (q === 0) return { atomId: 'arithmetik__stellenwert_bis_100', prompt: `${n} = ___ Zehner + ${ones} Einer`, answerType: 'integer', correctAnswer: String(tens), why: `${n} = ${tens * 10} + ${ones}, und ${tens * 10} sind ${tens} Zehner. Die Zehnerziffer steht links: ${tens}.`, difficulty: 0.2 };
+	return { atomId: 'arithmetik__stellenwert_bis_100', prompt: `${n} = ${tens} Zehner + ___ Einer`, answerType: 'integer', correctAnswer: String(ones), why: `${tens} Zehner sind ${tens * 10}. Bis ${n} fehlen noch ${ones} Einer. Die Einerziffer steht rechts: ${ones}.`, difficulty: 0.2 };
 });
 
 reg('arithmetik__stellenwert_bis_1000', (stage = 0) => {
-	// Expanding sequence: Hunderter, Ziffern ohne 0 → alle Stellen → auch Zahlen mit Nullen (z. B. 307).
-	const lvl = Math.min(stage, 2);
+	// Expanding sequence: Hunderterziffer, Ziffern ohne 0 → alle Stellen → auch Zahlen mit Nullen (z. B. 307)
+	// → zusätzlich Bündeln: 244 = ___ Zehner + 4 Einer (24).
+	// Faultless: „Wie viele Zehner hat 244?“ ist mehrdeutig (Ziffer 4 oder 24 Zehner insgesamt). Darum wird
+	// entweder klar nach der Ziffer an einer Stelle gefragt oder per Lückenform nach allen Zehnern.
+	const lvl = Math.min(stage, 3);
 	const n = lvl < 2 ? rand(1, 9) * 100 + rand(1, 9) * 10 + rand(1, 9) : rand(101, 999);
 	const hundreds = Math.floor(n / 100);
 	const tens = Math.floor((n % 100) / 10);
 	const ones = n % 10;
+	const table = `Stellenwerttafel: H ${hundreds} | Z ${tens} | E ${ones}.`;
+	if (lvl === 3 && rand(0, 1) === 0) {
+		const allTens = Math.floor(n / 10);
+		return {
+			atomId: 'arithmetik__stellenwert_bis_1000',
+			prompt: `${n} = ___ Zehner + ${ones} Einer`,
+			answerType: 'integer',
+			correctAnswer: String(allTens),
+			hint: '1 Hunderter = 10 Zehner',
+			why: `${n} = ${hundreds} Hunderter + ${tens} Zehner + ${ones} Einer. ${hundreds} Hunderter sind ${hundreds * 10} Zehner, dazu ${tens} Zehner: ${hundreds * 10} + ${tens} = ${allTens} Zehner.`,
+			difficulty: 0.35
+		};
+	}
 	const q = lvl === 0 ? 'H' : pick(['H', 'Z', 'E']);
 	const map: Record<string, [string, number]> = { H: ['Hunderter', hundreds], Z: ['Zehner', tens], E: ['Einer', ones] };
 	const [label, val] = map[q];
-	return { atomId: 'arithmetik__stellenwert_bis_1000', prompt: `Wie viele ${label} hat die Zahl ${n}?`, answerType: 'integer', correctAnswer: String(val), why: `${n} = ${hundreds} Hunderter + ${tens} Zehner + ${ones} Einer. Gefragt sind die ${label}: ${val}.`, difficulty: 0.25 };
+	const total = q === 'Z' ? ` (Insgesamt stecken in ${n} aber ${Math.floor(n / 10)} Zehner.)` : '';
+	return { atomId: 'arithmetik__stellenwert_bis_1000', prompt: `Welche Ziffer steht an der ${label}stelle der Zahl ${n}?`, answerType: 'integer', correctAnswer: String(val), why: `${table} An der ${label}stelle steht die ${val}.${total}`, difficulty: 0.25 };
 });
 
 reg('arithmetik__stellenwert_bis_1000000', (stage = 0) => {
@@ -2100,8 +2118,8 @@ reg('arithmetik__dezimalzahlen_stellenwert', (stage = 0) => {
 	const dec1 = lvl === 2 && rand(0, 1) === 0 ? 0 : rand(lvl === 0 ? 1 : 0, 9), dec2 = rand(lvl === 0 ? 1 : 0, 9);
 	const n = parseFloat(`${whole}.${dec1}${dec2}`);
 	const q = lvl === 0 ? 0 : rand(0, 1);
-	if (q === 0) return { atomId: 'arithmetik__dezimalzahlen_stellenwert', prompt: `Welche Ziffer steht an der Zehntelstelle von ${dec(n)}?`, answerType: 'integer', correctAnswer: String(dec1), why: `Direkt nach dem Komma stehen die Zehntel, danach die Hundertstel: ${dec(n)} hat ${dec1} Zehntel und ${dec2} Hundertstel.`, difficulty: 0.35 };
-	return { atomId: 'arithmetik__dezimalzahlen_stellenwert', prompt: `Welche Ziffer steht an der Hundertstelstelle von ${dec(n)}?`, answerType: 'integer', correctAnswer: String(dec2), why: `Direkt nach dem Komma stehen die Zehntel, danach die Hundertstel: ${dec(n)} hat ${dec1} Zehntel und ${dec2} Hundertstel${dec2 === 0 ? ' (eine fehlende Stelle zählt als 0)' : ''}.`, difficulty: 0.35 };
+	if (q === 0) return { atomId: 'arithmetik__dezimalzahlen_stellenwert', prompt: `Welche Ziffer steht an der Zehntelstelle von ${dec(n)}?`, answerType: 'integer', correctAnswer: String(dec1), why: `Direkt nach dem Komma kommt die Zehntelstelle, danach die Hundertstelstelle. In ${dec(n)} steht an der Zehntelstelle die ${dec1}, an der Hundertstelstelle die ${dec2}.`, difficulty: 0.35 };
+	return { atomId: 'arithmetik__dezimalzahlen_stellenwert', prompt: `Welche Ziffer steht an der Hundertstelstelle von ${dec(n)}?`, answerType: 'integer', correctAnswer: String(dec2), why: `Direkt nach dem Komma kommt die Zehntelstelle, danach die Hundertstelstelle. In ${dec(n)} steht an der Zehntelstelle die ${dec1}, an der Hundertstelstelle die ${dec2}${dec2 === 0 ? ' (eine fehlende Stelle zählt als 0)' : ''}.`, difficulty: 0.35 };
 });
 
 reg('arithmetik__dezimalzahlen_vergleichen_ordnen_runden', (stage = 0) => {
