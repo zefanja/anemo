@@ -696,12 +696,13 @@
 	}
 	.answer-input:focus { border-color: var(--c-sky); box-shadow: 0 0 0 3px var(--c-primary-light); }
 	.choice-buttons { display: flex; gap: 0.75rem; justify-content: center; }
-	.choice-buttons-multi { display: grid; grid-template-columns: repeat(2, 1fr); }
-	@media (min-width: 520px) { .choice-buttons-multi { grid-template-columns: repeat(4, 1fr); } }
+	/* choices wrap as whole buttons; words are only hyphenated if one alone is wider than the row */
+	.choice-buttons-multi { flex-wrap: wrap; }
+	.choice-buttons-multi .choice-btn { flex: 1 1 auto; min-width: 4rem; max-width: 100%; }
 	.choice-btn {
 		min-width: 0; padding: 0.75rem; font: 800 1rem var(--font); line-height: 1.4;
 		border: 2px solid var(--c-line); border-radius: 14px; background: #fff; color: var(--c-navy);
-		box-shadow: 0 3px 0 var(--c-line); cursor: pointer; white-space: normal; word-break: break-word;
+		box-shadow: 0 3px 0 var(--c-line); cursor: pointer; white-space: normal; overflow-wrap: break-word; hyphens: auto;
 	}
 	.choice-btn:hover:not(:disabled) { border-color: var(--c-primary); background: var(--c-primary-light); }
 	.choice-btn:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 1px 0 var(--c-line); }
