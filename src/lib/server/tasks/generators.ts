@@ -3234,9 +3234,9 @@ reg('algebra__potenzgesetz_potenz_einer_potenz', (stage = 0) => {
 });
 
 reg('algebra__potenzen_negative_exponenten', (stage = 0) => {
-	// Expanding sequence: Auswahl (Kehrwert erkennen) mit Basis 2/10 → Basis 2/3/5/10, Exponent bis 3, auch Eingabe → weitere Basen.
+	// Expanding sequence: Auswahl (Kehrwert erkennen), Exponent bis 2 → Exponent bis 3, auch Eingabe → weitere Basen.
 	const lvl = Math.min(stage, 2);
-	const base = pick([[2, 10], [2, 3, 5, 10], [2, 3, 4, 5, 6, 10]][lvl]);
+	const base = pick([[2, 3, 5, 10], [2, 3, 5, 10], [2, 3, 4, 5, 6, 10]][lvl]);
 	let exp = rand(1, [2, 3, 4][lvl]);
 	while (base ** exp > 10000) exp--;
 	const val = base ** exp;
@@ -3299,9 +3299,9 @@ reg('algebra__irrationale_reelle_zahlen', (stage = 0) => {
 
 reg('algebra__wurzelterme_umformen', (stage = 0) => {
 	// √(f²·rest) with a square-free rest → f·√rest
-	// Expanding sequence: √8, √12, √18, √27 … → Original-Zahlenraum bis 300 → Faktoren bis 10, bis 500.
+	// Expanding sequence: √8, √12, √18, √20 … bis 50 → Original-Zahlenraum bis 300 → Faktoren bis 10, bis 500.
 	const lvl = Math.min(stage, 2);
-	const [maxF, rests, maxN] = ([[3, [2, 3], 50], [7, [2, 3, 5, 6, 7, 10], 300], [10, [2, 3, 5, 6, 7, 10, 11], 500]] as const)[lvl];
+	const [maxF, rests, maxN] = ([[4, [2, 3, 5], 50], [7, [2, 3, 5, 6, 7, 10], 300], [10, [2, 3, 5, 6, 7, 10, 11], 500]] as const)[lvl];
 	let f = rand(2, maxF), rest: number = pick([...rests]);
 	while (f * f * rest > maxN) { f = rand(2, maxF); rest = pick([...rests]); }
 	const n = f * f * rest;

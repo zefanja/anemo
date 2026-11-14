@@ -26,6 +26,7 @@
 
 	type TaskDisplay = {
 		taskId: string;
+		key?: string;
 		atomId: string;
 		prompt: string;
 		answerType: 'integer' | 'number' | 'fraction' | 'text' | 'boolean' | 'comparison';
@@ -101,7 +102,8 @@
 	let isLoading = $state(false);
 	let isSubmitting = $state(false);
 	let submitError = $state(false);
-	let recentPrompts: string[] = [];
+	// keys of recently shown tasks (prompt + sketch), most recent last — sent as `ex` to avoid repeats
+	let recentKeys: string[] = [];
 
 	// ── Greeting (client time) ──
 	let greet = $state('Hallo');
@@ -448,14 +450,14 @@
 		tipIndex = (tipIndex + 1) % MASCOT_TIPS.length;
 		try {
 			const params = new URLSearchParams();
-			recentPrompts.slice(-5).forEach((p) => params.append('ex', p));
+			recentKeys.slice(-5).forEach((k) => params.append('ex', k));
 			const qs = params.toString();
 			const base = isDiscrimination ? `/api/task/cluster/${atomId}` : `/api/task/${atomId}`;
 			const res = await fetch(`${base}${qs ? '?' + qs : ''}`);
 			if (!res.ok) throw new Error();
 			const task = await res.json();
 			currentTask = task;
-			recentPrompts = [...recentPrompts, task.prompt].slice(-10);
+			recentKeys = [...recentKeys, task.key ?? task.prompt].slice(-10);
 		} catch {
 			// null task → error state
 		} finally {

@@ -45,6 +45,8 @@ export const GET: RequestHandler = async ({ params, locals, url }) => {
 	// Never expose the correct answer to the client
 	return json({
 		taskId: task.id,
+		// identity of the displayed task; the client sends recent keys back as `ex` to avoid repeats
+		key: task.key,
 		atomId: task.atomId,
 		prompt: task.prompt,
 		answerType: task.answerType,
