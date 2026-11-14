@@ -1,5 +1,6 @@
 import { json, error } from '@sveltejs/kit';
 import { getTaskForAtom } from '$lib/server/tasks/index.js';
+import { stageForTask, type FsrsState } from '$lib/server/learning/fsrs.js';
 import { db } from '$lib/server/db/index.js';
 import { studentAtomStatus } from '$lib/server/db/schema.js';
 import { and, eq } from 'drizzle-orm';
@@ -23,9 +24,14 @@ export const GET: RequestHandler = async ({ params, locals, url }) => {
 			eq(studentAtomStatus.studentId, locals.session.studentId),
 			eq(studentAtomStatus.atomId, params.atomId)
 		),
-		columns: { stage: true }
+		columns: { stage: true, isMastered: true, fsrsState: true }
 	});
-	const stage = statusRow?.stage ?? 0;
+	// Learning: DI expanding sequence. Mastered: harder variants once the memory is stable.
+	const stage = stageForTask(
+		statusRow?.stage ?? 0,
+		statusRow?.isMastered ?? false,
+		statusRow?.fsrsState as FsrsState | null
+	);
 
 	const excludePrompts = url.searchParams.getAll('ex');
 	const task = await getTaskForAtom(params.atomId, excludePrompts, stage);

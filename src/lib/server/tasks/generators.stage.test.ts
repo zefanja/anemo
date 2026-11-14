@@ -161,3 +161,190 @@ describe('algebra__lineare_gleichung_zweischritt stages', () => {
 		}
 	});
 });
+
+// Stage 0 must keep the arithmetic easy so the new concept is in focus.
+describe('geometrie__innenwinkelsatz_dreieck stages', () => {
+	const angles = (t: ReturnType<typeof generateTask>) =>
+		[...t!.hint!.matchAll(/(\d+)°/g)].map((m) => Number(m[1])).filter((n) => n !== 180);
+	it('stage 0 asks for γ with multiples of 10', () => {
+		for (const t of samples('geometrie__innenwinkelsatz_dreieck', 0)) {
+			expect(t.prompt).toContain('γ');
+			for (const a of [...angles(t), Number(t.correctAnswer)]) expect(a % 10).toBe(0);
+		}
+	});
+	it('stage 1 uses multiples of 5', () => {
+		for (const t of samples('geometrie__innenwinkelsatz_dreieck', 1)) {
+			for (const a of [...angles(t), Number(t.correctAnswer)]) expect(a % 5).toBe(0);
+		}
+	});
+	it('all stages give a valid triangle', () => {
+		for (const stage of [0, 1, 2, 5]) {
+			for (const t of samples('geometrie__innenwinkelsatz_dreieck', stage)) {
+				const [k1, k2] = angles(t);
+				expect(k1 + k2 + Number(t.correctAnswer)).toBe(180);
+				expect(Number(t.correctAnswer)).toBeGreaterThanOrEqual(30);
+			}
+		}
+	});
+});
+
+describe('geometrie__neben_scheitelwinkel stages', () => {
+	it('stage 0 uses multiples of 10', () => {
+		for (const t of samples('geometrie__neben_scheitelwinkel', 0)) {
+			expect(Number(t.correctAnswer) % 10).toBe(0);
+		}
+	});
+});
+
+describe('geometrie__kreissaetze stages', () => {
+	it('stage 0 is always Thales', () => {
+		for (const t of samples('geometrie__kreissaetze', 0)) expect(t.prompt).toContain('Thales');
+	});
+	it('stage 1 only mixes Thales and Peripheriewinkel', () => {
+		for (const t of samples('geometrie__kreissaetze', 1)) {
+			expect(t.prompt).toMatch(/Thales|Peripheriewinkelsatz/);
+		}
+	});
+});
+
+describe('geometrie__pythagoras_kathete stages', () => {
+	it('stage 0 only uses 3-4-5 and 6-8-10', () => {
+		for (const t of samples('geometrie__pythagoras_kathete', 0)) {
+			expect(['3', '4', '6', '8']).toContain(t.correctAnswer);
+		}
+	});
+});
+
+describe('percentages start with 10 %, 25 %, 50 %', () => {
+	it.each(['arithmetik__prozentwert_berechnen', 'arithmetik__grundwert_berechnen'])('%s', (atomId) => {
+		for (const t of samples(atomId, 0)) {
+			const p = Number(t.prompt.match(/(\d+)%/)![1]);
+			expect([10, 25, 50]).toContain(p);
+		}
+	});
+	it('arithmetik__prozentsatz_berechnen', () => {
+		for (const t of samples('arithmetik__prozentsatz_berechnen', 0)) {
+			expect(['10', '25', '50']).toContain(t.correctAnswer);
+		}
+	});
+});
+
+describe('fractions start easy', () => {
+	it('gleichnamig stage 0 is addition only', () => {
+		for (const t of samples('arithmetik__brueche_add_sub_gleichnamig', 0)) expect(t.prompt).toContain('+');
+	});
+	it('ungleichnamig stage 0 is addition with one denominator a multiple of the other', () => {
+		for (const t of samples('arithmetik__brueche_add_sub_ungleichnamig', 0)) {
+			expect(t.prompt).toContain('+');
+			const [d1, d2] = [...t.prompt.matchAll(/\\frac\{\d+\}\{(\d+)\}/g)].map((m) => Number(m[1]));
+			expect(d2 % d1 === 0 || d1 % d2 === 0).toBe(true);
+		}
+	});
+	it('kuerzen stage 0 reduces by 2', () => {
+		for (const t of samples('arithmetik__kuerzen', 0)) expect(t.hint).toContain('durch 2.');
+	});
+});
+
+describe('signed numbers start with small absolute values', () => {
+	it('vorzeichenregeln stage 0 is multiplication with factors up to 5', () => {
+		for (const t of samples('arithmetik__vorzeichenregeln_mult_div', 0)) {
+			expect(t.prompt).toContain('·');
+			expect(Math.abs(Number(t.correctAnswer))).toBeLessThanOrEqual(25);
+		}
+	});
+});
+
+// Every generator takes a stage now: each stage (and stages beyond the last one) must
+// produce well-formed, self-consistent tasks.
+import { registeredAtomIds } from '$lib/server/tasks/generators.js';
+import { checkAnswer } from '$lib/server/tasks/index.js';
+
+describe('all generators: every stage yields valid tasks', () => {
+	for (const atomId of registeredAtomIds) {
+		it(atomId, () => {
+			for (let stage = 0; stage <= 6; stage++) {
+				for (let i = 0; i < 30; i++) {
+					const t = generateTask(atomId, stage)!;
+					const label = `stage ${stage}: ${t.prompt}`;
+					expect(t.atomId, label).toBe(atomId);
+					expect(t.prompt, label).not.toMatch(/undefined|NaN|Infinity|\[object/);
+					expect(t.correctAnswer, label).not.toMatch(/^$|undefined|NaN|Infinity/);
+					if (t.answerType === 'integer') expect(Number.isInteger(Number(t.correctAnswer.replace(',', '.'))), label).toBe(true);
+					// exactly one button is accepted (labels may carry units, e.g. "-9 °C")
+					if (t.choices) expect(t.choices.filter((c) => checkAnswer(c, t.correctAnswer, t.answerType, t.tolerance)).length, label).toBe(1);
+					if (t.choices) expect(new Set(t.choices).size, label).toBe(t.choices.length);
+					expect(checkAnswer(t.correctAnswer, t.correctAnswer, t.answerType, t.tolerance), label).toBe(true);
+				}
+			}
+		});
+	}
+});
+
+describe('selected stage-0 simplifications', () => {
+	it('schriftliche Addition stage 0 has no carry, stage 1 always one', () => {
+		const carries = (a: number, b: number) => { for (; a || b; a = Math.floor(a / 10), b = Math.floor(b / 10)) if ((a % 10) + (b % 10) > 9) return true; return false; };
+		for (const stage of [0, 1]) {
+			for (const t of samples('arithmetik__schriftliche_addition', stage)) {
+				const [a, b] = t.prompt.split('=')[0].split('+').map((x) => Number(x.trim()));
+				expect(carries(a, b)).toBe(stage === 1);
+			}
+		}
+	});
+	it('Stufen-/Wechselwinkel stage 0 asks only for Stufenwinkel with multiples of 10', () => {
+		for (const t of samples('geometrie__stufen_wechselwinkel', 0)) {
+			expect(t.prompt).toContain('Stufenwinkel');
+			expect(Number(t.correctAnswer) % 10).toBe(0);
+		}
+	});
+	it('Trigonometrie stage 0 always gives the hypotenuse', () => {
+		for (const t of samples('geometrie__trigonometrie_seiten_berechnen', 0)) {
+			expect(t.prompt).toMatch(/Ankathete|Gegenkathete/);
+		}
+	});
+	it('Strahlensätze stage 0 only asks for an outer segment', () => {
+		for (const t of samples('geometrie__strahlensaetze', 0)) expect(t.prompt).toMatch(/\((c|d)\)/);
+	});
+	it('lineare Gleichung beidseitig stage 0 needs no division', () => {
+		for (const t of samples('algebra__lineare_gleichung_variablen_beidseitig', 0)) {
+			const steps = t.inputData!.steps as string[];
+			expect(steps[3]).not.toContain(':');
+		}
+	});
+	it('Einmaleins stage 0 keeps factors up to 5', () => {
+		for (const t of samples('arithmetik__einmaleins_automatisierung', 0)) {
+			expect(Number(t.correctAnswer)).toBeLessThanOrEqual(25);
+		}
+	});
+});
+
+// Higher stages add distractors (extra heights, unused measures, überflüssige Angaben).
+describe('distractors in higher stages', () => {
+	const many = (atomId: string, stage: number, n = 60) => Array.from({ length: n }, () => generateTask(atomId, stage)!);
+	it('Höhen erkennen: several heights drawn, the asked one is labelled in the sketch', () => {
+		const ts = [...many('geometrie__hoehen_erkennen', 2), ...many('geometrie__hoehen_erkennen', 3)];
+		const multi = ts.filter((t) => /zwei Höhen|drei Höhen/.test(t.prompt));
+		expect(multi.length).toBeGreaterThan(0);
+		for (const t of multi) {
+			expect(t.svg).toContain(`${t.correctAnswer} cm`);
+			// at least two different height labels (grey labels) besides the side labels
+			expect((t.svg!.match(/ cm</g) ?? []).length).toBeGreaterThanOrEqual(4);
+		}
+	});
+	it('Parallelogramm/Dreieck: unused sides and second heights appear from stage 2/3', () => {
+		for (const t of many('geometrie__flaeche_dreieck', 2, 20)) expect((t.svg!.match(/ cm</g) ?? []).length).toBe(4);
+		for (const t of many('geometrie__flaeche_parallelogramm', 2, 20)) expect((t.svg!.match(/ cm</g) ?? []).length).toBe(3);
+		for (const t of many('geometrie__flaeche_parallelogramm', 3, 20)) expect(t.svg!.match(/stroke-dasharray/g)!.length).toBeGreaterThanOrEqual(2);
+	});
+	it('Pyramide: from stage 2 the side-face height is labelled as well', () => {
+		for (const t of many('geometrie__pyramiden', 2, 20)) expect(t.svg).toContain('hₛ');
+	});
+	it('Sachaufgaben: from stage 3 an überflüssige Angabe is named in the explanation', () => {
+		for (const t of many('arithmetik__sachaufgaben_grundschule', 3, 30)) {
+			expect(t.why).toContain('nicht gebraucht');
+			expect(t.prompt.trim().endsWith('?')).toBe(true);
+		}
+	});
+	it('Koordinatensystem: from stage 2 several points are drawn', () => {
+		for (const t of many('geometrie__koordinatensystem', 2, 20)) expect(t.svg).toContain('>Q<');
+	});
+});
