@@ -773,11 +773,11 @@
   },
   {
     "atom_id": "arithmetik__stellenwert_bis_100",
-    "explanation": "Eine zweistellige Zahl besteht aus Zehnern (links) und Einern (rechts). 47 hat 4 Zehner und 7 Einer: $47 = 40 + 7$.\n\nAchtung: 47 und 74 haben dieselben Ziffern, sind aber verschiedene Zahlen – die Stelle entscheidet."
+    "explanation": "Eine zweistellige Zahl besteht aus Zehnern (links) und Einern (rechts). $47 = 40 + 7$, also 4 Zehner und 7 Einer.\n\nAchtung: 47 und 74 haben dieselben Ziffern, sind aber verschiedene Zahlen – die Stelle entscheidet."
   },
   {
     "atom_id": "arithmetik__stellenwert_bis_1000",
-    "explanation": "Jede Ziffer hat einen Stellenwert: Hunderter, Zehner, Einer. $452 = 4 \\cdot 100 + 5 \\cdot 10 + 2$, also 4 Hunderter, 5 Zehner, 2 Einer.\n\nEine 0 hält die Stelle frei: 407 hat 0 Zehner."
+    "explanation": "Jede Ziffer hat einen Stellenwert: Hunderter, Zehner, Einer. $452 = 4 \\cdot 100 + 5 \\cdot 10 + 2$, an der Zehnerstelle steht also die 5.\n\nAchtung: Die Zehnerziffer ist nicht die Anzahl aller Zehner. In 452 stecken 45 Zehner, denn 4 Hunderter sind 40 Zehner. Eine 0 hält die Stelle frei: In 407 steht an der Zehnerstelle eine 0."
   },
   {
     "atom_id": "arithmetik__stellenwert_bis_1000000",
