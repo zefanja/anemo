@@ -4,9 +4,22 @@ import { tasks } from '../db/schema.js';
 import { eq, sql } from 'drizzle-orm';
 import type { GeneratedTask } from './generators.js';
 import { stageForTask, type FsrsState } from '../learning/fsrs.js';
+import { createHash } from 'node:crypto';
 
 export type { GeneratedTask };
-export type TaskWithId = GeneratedTask & { id: string };
+export type TaskWithId = GeneratedTask & { id: string; key: string };
+
+/**
+ * Identity of a task as the student sees it, used to avoid showing the same task twice in a row.
+ * The prompt alone is not enough: many tasks have a fixed text and carry their numbers only in the
+ * sketch (e.g. "Berechne den fehlenden Winkel γ im Dreieck."). The key therefore hashes everything
+ * displayed (prompt, sketch, answer choices, input data) – never the correct answer, so the key the
+ * client receives reveals nothing about the solution.
+ */
+export function taskKey(task: Pick<GeneratedTask, 'prompt' | 'svg' | 'choices' | 'inputData'>): string {
+	const shown = JSON.stringify([task.svg ?? '', [...(task.choices ?? [])].sort(), task.inputData ?? null]);
+	return `${task.prompt}#${createHash('sha1').update(shown).digest('base64url').slice(0, 12)}`;
+}
 
 /**
  * Discrimination practice (DI mixed/interleaved review, see frontier.ts
@@ -36,7 +49,8 @@ export async function getTaskForCluster(
  * Procedural tasks are saved to DB so the attempt handler can look up the
  * correct answer by ID without re-generating a different task.
  *
- * excludePrompts: prompts recently shown to the student — avoided when possible.
+ * excludePrompts: keys (taskKey; the plain prompt for imported tasks) of tasks recently shown to
+ *   the student, most recent last — avoided when possible, the most recent one whenever possible.
  * stage: current difficulty stage within the atom's generator (DI expanding sequence, see mastery.ts computeStage).
  */
 export async function getTaskForAtom(atomId: string, excludePrompts: string[] = [], stage?: number): Promise<TaskWithId | null> {
@@ -63,6 +77,7 @@ export async function getTaskForAtom(atomId: string, excludePrompts: string[] = 
 	if (imported?.prompt && imported.correctAnswer) {
 		return {
 			id: imported.id,
+			key: imported.prompt,
 			atomId,
 			prompt: imported.prompt,
 			answerType: imported.answerType as GeneratedTask['answerType'],
@@ -74,16 +89,22 @@ export async function getTaskForAtom(atomId: string, excludePrompts: string[] = 
 		};
 	}
 
-	// Fall back to procedural generator — retry up to 5× to avoid recently seen prompts.
+	// Fall back to procedural generator. Early stages have few distinct tasks, so retry generously:
+	// take the first task that is not among the recent ones; if every candidate was shown recently,
+	// take the one shown longest ago (never the task just shown, unless it is the only one).
 	// Saves the chosen task to DB so the attempt handler can look up the correct answer by ID.
 	if (hasGenerator(atomId)) {
-		const excludeSet = new Set(excludePrompts);
+		const recentIndex = new Map(excludePrompts.map((k, i) => [k, i] as const)); // higher = more recent
 		let generated: GeneratedTask | null = null;
-		for (let attempt = 0; attempt < 5; attempt++) {
+		let generatedKey = '';
+		let oldest = Infinity;
+		for (let attempt = 0; attempt < 40; attempt++) {
 			const candidate = generateTask(atomId, stage);
 			if (!candidate) break;
-			if (!excludeSet.has(candidate.prompt)) { generated = candidate; break; }
-			if (!generated) generated = candidate; // keep as last-resort fallback
+			const key = taskKey(candidate);
+			const idx = recentIndex.get(key);
+			if (idx === undefined) { generated = candidate; generatedKey = key; break; }
+			if (idx < oldest) { oldest = idx; generated = candidate; generatedKey = key; }
 		}
 		if (!generated) return null;
 		const id = crypto.randomUUID();
@@ -99,7 +120,7 @@ export async function getTaskForAtom(atomId: string, excludePrompts: string[] = 
 			tolerance: generated.tolerance ?? null,
 			generatorId: atomId
 		});
-		return { ...generated, id };
+		return { ...generated, id, key: generatedKey };
 	}
 
 	return null;
