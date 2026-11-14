@@ -1147,9 +1147,11 @@ function reg(atomId: string, gen: Gen): void {
 
 // ── 1. Zahlverständnis / Zählen ───────────────────────────────────────────────
 
-reg('arithmetik__zaehlen_zahlwortreihe', () => {
-	const step = pick([1, 2, 5, 10]);
-	const dir = rand(0, 1) === 0 ? 1 : -1;
+reg('arithmetik__zaehlen_zahlwortreihe', (stage = 0) => {
+	// Expanding sequence: vorwärts in 1er-Schritten → vorwärts in 2er/5er/10er-Schritten → auch rückwärts.
+	const lvl = Math.min(stage, 2);
+	const step = lvl === 0 ? 1 : pick(lvl === 1 ? [2, 5, 10] : [1, 2, 5, 10]);
+	const dir = lvl < 2 || rand(0, 1) === 0 ? 1 : -1;
 	const start = dir === 1 ? rand(1, 10) * step : rand(5, 25) * step;
 	const terms = [0, 1, 2, 3].map(i => start + dir * i * step);
 	const missing = rand(0, 3);
@@ -1183,8 +1185,9 @@ reg('arithmetik__zahlverstaendnis_bis_20', (stage = 0) => {
 	}
 });
 
-reg('arithmetik__zahlzerlegung_bis_10', () => {
-	const total = rand(4, 10);
+reg('arithmetik__zahlzerlegung_bis_10', (stage = 0) => {
+	// Expanding sequence on the size of the number: bis 6 → 5–8 → 6–10.
+	const total = [rand(3, 6), rand(5, 8), rand(6, 10)][Math.min(stage, 2)];
 	const part = rand(1, total - 1);
 	return {
 		atomId: 'arithmetik__zahlzerlegung_bis_10',
@@ -1195,38 +1198,49 @@ reg('arithmetik__zahlzerlegung_bis_10', () => {
 	};
 });
 
-reg('arithmetik__stellenwert_bis_100', () => {
+reg('arithmetik__stellenwert_bis_100', (stage = 0) => {
 	const n = rand(11, 99);
 	const tens = Math.floor(n / 10);
 	const ones = n % 10;
-	const q = rand(0, 1);
+	// Expanding sequence: erst nur Zehner erfragen, dann Zehner oder Einer gemischt.
+	const q = stage === 0 ? 0 : rand(0, 1);
 	if (q === 0) return { atomId: 'arithmetik__stellenwert_bis_100', prompt: `Wie viele Zehner hat die Zahl ${n}?`, answerType: 'integer', correctAnswer: String(tens), why: `${n} = ${tens} Zehner + ${ones} Einer. Die Zehner stehen links.`, difficulty: 0.2 };
 	return { atomId: 'arithmetik__stellenwert_bis_100', prompt: `Wie viele Einer hat die Zahl ${n}?`, answerType: 'integer', correctAnswer: String(ones), why: `${n} = ${tens} Zehner + ${ones} Einer. Die Einer stehen ganz rechts.`, difficulty: 0.2 };
 });
 
-reg('arithmetik__stellenwert_bis_1000', () => {
-	const n = rand(101, 999);
+reg('arithmetik__stellenwert_bis_1000', (stage = 0) => {
+	// Expanding sequence: Hunderter, Ziffern ohne 0 → alle Stellen → auch Zahlen mit Nullen (z. B. 307).
+	const lvl = Math.min(stage, 2);
+	const n = lvl < 2 ? rand(1, 9) * 100 + rand(1, 9) * 10 + rand(1, 9) : rand(101, 999);
 	const hundreds = Math.floor(n / 100);
 	const tens = Math.floor((n % 100) / 10);
 	const ones = n % 10;
-	const q = pick(['H', 'Z', 'E']);
+	const q = lvl === 0 ? 'H' : pick(['H', 'Z', 'E']);
 	const map: Record<string, [string, number]> = { H: ['Hunderter', hundreds], Z: ['Zehner', tens], E: ['Einer', ones] };
 	const [label, val] = map[q];
 	return { atomId: 'arithmetik__stellenwert_bis_1000', prompt: `Wie viele ${label} hat die Zahl ${n}?`, answerType: 'integer', correctAnswer: String(val), why: `${n} = ${hundreds} Hunderter + ${tens} Zehner + ${ones} Einer. Gefragt sind die ${label}: ${val}.`, difficulty: 0.25 };
 });
 
-reg('arithmetik__stellenwert_bis_1000000', () => {
+reg('arithmetik__stellenwert_bis_1000000', (stage = 0) => {
 	const n = rand(100000, 999999);
 	const digits = String(n);
 	const places = ['Hunderttausender', 'Zehntausender', 'Tausender', 'Hunderter', 'Zehner', 'Einer'];
-	const idx = rand(0, 5);
+	// Expanding sequence: erst die vertrauten Stellen bis Tausender, dann alle sechs.
+	const idx = stage === 0 ? rand(2, 5) : rand(0, 5);
 	const digit = parseInt(digits[idx]);
 	return { atomId: 'arithmetik__stellenwert_bis_1000000', prompt: `Welche Ziffer steht an der ${places[idx]}-Stelle der Zahl ${digits.slice(0, 3)} ${digits.slice(3)}?`, answerType: 'integer', correctAnswer: String(digit), why: `Von rechts nach links: Einer, Zehner, Hunderter, Tausender, Zehntausender, Hunderttausender. An der ${places[idx]}-Stelle steht die ${digit}.`, difficulty: 0.3 };
 });
 
-reg('arithmetik__natuerliche_zahlen_darstellen_ordnen', () => {
+reg('arithmetik__natuerliche_zahlen_darstellen_ordnen', (stage = 0) => {
 	const set = new Set<number>();
-	while (set.size < 4) set.add(rand(10, 9999));
+	// Expanding sequence: verschieden viele Stellen → gleich viele Stellen → gleiche erste Ziffer.
+	const lvl = Math.min(stage, 2);
+	const first = rand(1, 9);
+	while (set.size < 4) {
+		if (lvl === 0) { const len = rand(2, 4); set.add(rand(10 ** (len - 1), 10 ** len - 1)); }
+		else if (lvl === 1) set.add(rand(1000, 9999));
+		else set.add(rand(first * 1000, first * 1000 + 999));
+	}
 	const nums = [...set];
 	const smallest = rand(0, 1) === 0;
 	const answer = smallest ? Math.min(...nums) : Math.max(...nums);
@@ -1275,8 +1289,9 @@ reg('arithmetik__ueberschlagsrechnung', (stage = 0) => {
 
 // ── 2. Grundrechenarten (kleine Zahlen) ───────────────────────────────────────
 
-reg('arithmetik__addition_subtraktion_bis_10', () => {
-	const op = rand(0, 1);
+reg('arithmetik__addition_subtraktion_bis_10', (stage = 0) => {
+	// Expanding sequence: erst nur Addition, dann Addition und Subtraktion gemischt.
+	const op = stage === 0 ? 0 : rand(0, 1);
 	if (op === 0) {
 		const a = rand(1, 9), b = rand(1, 10 - a);
 		return { atomId: 'arithmetik__addition_subtraktion_bis_10', prompt: `${a} + ${b} = ?`, answerType: 'integer', correctAnswer: String(a + b), why: `Zähle von ${a} aus ${b} weiter: ${a} + ${b} = ${a + b}.`, difficulty: 0.1 };
@@ -1286,9 +1301,10 @@ reg('arithmetik__addition_subtraktion_bis_10', () => {
 	}
 });
 
-reg('arithmetik__add_sub_bis_20_ohne_uebergang', () => {
+reg('arithmetik__add_sub_bis_20_ohne_uebergang', (stage = 0) => {
 	const atomId = 'arithmetik__add_sub_bis_20_ohne_uebergang';
-	if (rand(0, 1) === 0) {
+	// Expanding sequence: erst nur Addition, dann Addition und Subtraktion gemischt.
+	if (stage === 0 || rand(0, 1) === 0) {
 		// Addition stays below 20: ones digits must not reach ten
 		const a = rand(11, 18), b = rand(1, 9 - (a % 10));
 		return { atomId, prompt: `${a} + ${b} = ?`, answerType: 'integer', correctAnswer: String(a + b), why: `Die 10 bleibt stehen, du rechnest nur mit den Einern: ${a % 10} + ${b} = ${a % 10 + b}, also ${a + b}.`, difficulty: 0.15 };
@@ -1313,16 +1329,19 @@ reg('arithmetik__zehnerueberschreitung_bis_20', (stage = 0) => {
 	return { atomId, prompt: `${minuend} − ${sub} = ?`, answerType: 'integer', correctAnswer: String(result), hint: `Zerlege ${sub}: ${minuend} − ${minuend - 10} = 10, dann − ${sub - (minuend - 10)}.`, why: `Erst zurück zur 10: ${minuend} − ${minuend - 10} = 10. Dann noch ${sub - (minuend - 10)} weg: 10 − ${sub - (minuend - 10)} = ${result}.`, difficulty: 0.3 };
 });
 
-reg('arithmetik__verdoppeln_halbieren', () => {
+reg('arithmetik__verdoppeln_halbieren', (stage = 0) => {
+	// Expanding sequence on the number range: bis 10 → bis 25 → bis 50.
+	const maxN = [10, 25, 50][Math.min(stage, 2)];
 	const q = rand(0, 1);
-	if (q === 0) { const n = rand(1, 25); return { atomId: 'arithmetik__verdoppeln_halbieren', prompt: `Das Doppelte von ${n} = ?`, answerType: 'integer', correctAnswer: String(2 * n), why: `Das Doppelte heißt: zweimal die Zahl. ${n} + ${n} = ${2 * n}.`, difficulty: 0.2 }; }
-	const n = rand(1, 25) * 2;
+	if (q === 0) { const n = rand(1, maxN); return { atomId: 'arithmetik__verdoppeln_halbieren', prompt: `Das Doppelte von ${n} = ?`, answerType: 'integer', correctAnswer: String(2 * n), why: `Das Doppelte heißt: zweimal die Zahl. ${n} + ${n} = ${2 * n}.`, difficulty: 0.2 }; }
+	const n = rand(1, maxN) * 2;
 	return { atomId: 'arithmetik__verdoppeln_halbieren', prompt: `Die Hälfte von ${n} = ?`, answerType: 'integer', correctAnswer: String(n / 2), why: `Die Hälfte: in zwei gleiche Teile teilen. ${n / 2} + ${n / 2} = ${n}.`, difficulty: 0.2 };
 });
 
-reg('arithmetik__add_sub_zehnerzahlen', () => {
+reg('arithmetik__add_sub_zehnerzahlen', (stage = 0) => {
 	const atomId = 'arithmetik__add_sub_zehnerzahlen';
-	if (rand(0, 1) === 0) {
+	// Expanding sequence: erst nur Addition, dann Addition und Subtraktion gemischt.
+	if (stage === 0 || rand(0, 1) === 0) {
 		// Sum stays within the number range up to 100
 		const a = rand(1, 8), b = rand(1, 10 - a);
 		return { atomId, prompt: `${a * 10} + ${b * 10} = ?`, answerType: 'integer', correctAnswer: String((a + b) * 10), why: `Rechne mit Zehnern wie mit Einern: ${a} Zehner + ${b} Zehner = ${a + b} Zehner = ${(a + b) * 10}.`, difficulty: 0.2 };
@@ -1331,61 +1350,77 @@ reg('arithmetik__add_sub_zehnerzahlen', () => {
 	return { atomId, prompt: `${big * 10} − ${small * 10} = ?`, answerType: 'integer', correctAnswer: String((big - small) * 10), why: `Rechne mit Zehnern wie mit Einern: ${big} Zehner − ${small} Zehner = ${big - small} Zehner = ${(big - small) * 10}.`, difficulty: 0.2 };
 });
 
-reg('arithmetik__add_sub_bis_100_ohne_uebergang', () => {
+reg('arithmetik__add_sub_bis_100_ohne_uebergang', (stage = 0) => {
 	const atomId = 'arithmetik__add_sub_bis_100_ohne_uebergang';
-	const op = rand(0, 1);
+	// Expanding sequence: ZE + E → auch ZE − E → ZE ± ZE.
+	const lvl = Math.min(stage, 2);
+	const op = lvl === 0 ? 0 : rand(0, 1);
 	if (op === 0) {
 		// Addition without carry: ones digits must not cross ten
 		const aTens = rand(1, 8), aOnes = rand(0, 9);
 		const a = aTens * 10 + aOnes;
 		const bOnes = rand(0, 9 - aOnes); // guaranteed no carry in ones
 		const maxBTens = Math.floor((99 - a) / 10);
-		const bTens = rand(0, Math.max(0, maxBTens));
+		const bTens = lvl < 2 ? 0 : rand(0, Math.max(0, maxBTens));
 		const b = bTens * 10 + bOnes;
-		if (b === 0) return registry.get(atomId)!();
+		if (b === 0) return registry.get(atomId)!(stage);
 		return { atomId, prompt: `${a} + ${b} = ?`, answerType: 'integer', correctAnswer: String(a + b), why: chainWhy(a, b, 1), difficulty: 0.25 };
 	}
 	// Subtraction without borrowing: ones of minuend >= ones of subtrahend
 	const bigTens = rand(2, 9), bigOnes = rand(0, 9);
 	const big = bigTens * 10 + bigOnes;
 	const smallOnes = rand(0, bigOnes); // no borrowing needed
-	const smallTens = rand(0, bigTens - 1);
+	const smallTens = lvl < 2 ? 0 : rand(0, bigTens - 1);
 	const small = smallTens * 10 + smallOnes;
-	if (small === 0) return registry.get(atomId)!();
+	if (small === 0) return registry.get(atomId)!(stage);
 	return { atomId, prompt: `${big} − ${small} = ?`, answerType: 'integer', correctAnswer: String(big - small), why: chainWhy(big, small, -1), difficulty: 0.25 };
 });
 
-reg('arithmetik__add_sub_bis_100_mit_uebergang', () => {
+reg('arithmetik__add_sub_bis_100_mit_uebergang', (stage = 0) => {
 	const atomId = 'arithmetik__add_sub_bis_100_mit_uebergang';
-	const op = rand(0, 1);
+	// Expanding sequence: ZE + E → auch ZE − E → ZE ± ZE (jeweils mit Zehnerübergang).
+	const lvl = Math.min(stage, 2);
+	const op = lvl === 0 ? 0 : rand(0, 1);
 	if (op === 0) {
 		// ZE + ZE: ones digits must cross ten, sum stays below 100
 		const aOnes = rand(2, 9), aTens = rand(1, 7);
 		const a = aTens * 10 + aOnes;
-		const b = rand(1, 8 - aTens) * 10 + rand(10 - aOnes, 9);
+		const b = (lvl < 2 ? 0 : rand(1, 8 - aTens)) * 10 + rand(10 - aOnes, 9);
 		return { atomId, prompt: `${a} + ${b} = ?`, answerType: 'integer', correctAnswer: String(a + b), why: `${chainWhy(a, b, 1)} Die Einer ergeben mehr als 10 – ein neuer Zehner wird voll.`, difficulty: 0.35 };
 	}
 	// Subtraction with borrowing: ones of minuend < ones of subtrahend
 	const bigTens = rand(2, 9), bigOnes = rand(0, 8);
 	const big = bigTens * 10 + bigOnes;
 	const smallOnes = rand(bigOnes + 1, 9); // forces borrowing
-	const smallTens = rand(1, bigTens - 1);  // result stays >= 10
+	const smallTens = lvl < 2 ? 0 : rand(1, bigTens - 1);  // result stays >= 10
 	const small = smallTens * 10 + smallOnes;
 	return { atomId, prompt: `${big} − ${small} = ?`, answerType: 'integer', correctAnswer: String(big - small), why: `${chainWhy(big, small, -1)} Bei den Einern gehst du über einen Zehner zurück.`, difficulty: 0.35 };
 });
 
 // ── 3. Schriftliche Verfahren ─────────────────────────────────────────────────
 
-reg('arithmetik__schriftliche_addition', () => {
-	// Kl. 3: Zahlenraum bis 1 000
-	const a = rand(101, 599), b = rand(101, 999 - a);
-	return { atomId: 'arithmetik__schriftliche_addition', prompt: `${a} + ${b} = ?`, answerType: 'integer', correctAnswer: String(a + b), hint: 'Schreibe untereinander und addiere stellenweise von rechts.', why: addWhy(a, b), difficulty: 0.4 };
+reg('arithmetik__schriftliche_addition', (stage = 0) => {
+	const atomId = 'arithmetik__schriftliche_addition';
+	// Expanding sequence: ohne Übertrag → mit Übertrag (bis 1 000, Kl. 3) → vierstellig (Kl. 4).
+	const lvl = Math.min(stage, 2);
+	const carries = (x: number, y: number) => { for (; x > 0 || y > 0; x = Math.floor(x / 10), y = Math.floor(y / 10)) if ((x % 10) + (y % 10) > 9) return true; return false; };
+	let a: number, b: number;
+	if (lvl === 0) { do { a = rand(101, 599); b = rand(101, 999 - a); } while (carries(a, b)); }
+	else if (lvl === 1) { do { a = rand(101, 599); b = rand(101, 999 - a); } while (!carries(a, b)); }
+	else { a = rand(1001, 5999); b = rand(1001, 9999 - a); }
+	return { atomId, prompt: `${a} + ${b} = ?`, answerType: 'integer', correctAnswer: String(a + b), hint: 'Schreibe untereinander und addiere stellenweise von rechts.', why: addWhy(a, b), difficulty: [0.3, 0.4, 0.45][lvl] };
 });
 
-reg('arithmetik__schriftliche_subtraktion', () => {
-	// Kl. 3: Zahlenraum bis 1 000
-	const b = rand(101, 799), a = b + rand(101, 999 - b);
-	return { atomId: 'arithmetik__schriftliche_subtraktion', prompt: `${a} − ${b} = ?`, answerType: 'integer', correctAnswer: String(a - b), hint: 'Schreibe untereinander. Entbündele wenn nötig.', why: `Subtrahiere stellenweise von rechts. Ist die obere Ziffer zu klein, wird ein Zehner (oder Hunderter) der nächsten Stelle entbündelt. Probe: ${a - b} + ${b} = ${a}.`, difficulty: 0.4 };
+reg('arithmetik__schriftliche_subtraktion', (stage = 0) => {
+	const atomId = 'arithmetik__schriftliche_subtraktion';
+	// Expanding sequence: ohne Entbündeln → mit Entbündeln (bis 1 000, Kl. 3) → vierstellig (Kl. 4).
+	const lvl = Math.min(stage, 2);
+	const borrows = (x: number, y: number) => { for (; y > 0; x = Math.floor(x / 10), y = Math.floor(y / 10)) if (x % 10 < y % 10) return true; return false; };
+	let a: number, b: number;
+	if (lvl === 0) { do { b = rand(101, 799); a = b + rand(101, 999 - b); } while (borrows(a, b)); }
+	else if (lvl === 1) { do { b = rand(101, 799); a = b + rand(101, 999 - b); } while (!borrows(a, b)); }
+	else { b = rand(1001, 7999); a = b + rand(1001, 9999 - b); }
+	return { atomId, prompt: `${a} − ${b} = ?`, answerType: 'integer', correctAnswer: String(a - b), hint: 'Schreibe untereinander. Entbündele wenn nötig.', why: `Subtrahiere stellenweise von rechts. Ist die obere Ziffer zu klein, wird ein Zehner (oder Hunderter) der nächsten Stelle entbündelt. Probe: ${a - b} + ${b} = ${a}.`, difficulty: [0.3, 0.4, 0.45][lvl] };
 });
 
 reg('arithmetik__schriftliche_multiplikation', (stage = 0) => {
@@ -1404,16 +1439,20 @@ reg('arithmetik__schriftliche_multiplikation', (stage = 0) => {
 	return { atomId, prompt: `${a} · ${b} = ?`, answerType: 'integer', correctAnswer: String(a * b), hint: 'Berechne die Teilprodukte und addiere.', why: `${b < 10 ? partialWhy(b, a) : partialWhy(a, b)} Addiert: ${a * b}.`, difficulty: b > 99 ? 0.6 : 0.5 };
 });
 
-reg('arithmetik__schriftliche_division', () => {
-	const divisor = rand(2, 9), quotient = rand(10, 999);
+reg('arithmetik__schriftliche_division', (stage = 0) => {
+	// Expanding sequence: Divisor 2–5, zweistelliger Quotient → Divisor bis 9, Quotient bis 999 → Divisor 6–9, Quotient bis 2 999.
+	const lvl = Math.min(stage, 2);
+	const divisor = [rand(2, 5), rand(2, 9), rand(6, 9)][lvl];
+	const quotient = [rand(10, 99), rand(10, 999), rand(100, 2999)][lvl];
 	const dividend = divisor * quotient;
 	return { atomId: 'arithmetik__schriftliche_division', prompt: `${dividend} : ${divisor} = ?`, answerType: 'integer', correctAnswer: String(quotient), why: `Teile Stelle für Stelle von links. Probe mit der Umkehraufgabe: ${quotient} · ${divisor} = ${dividend}.`, difficulty: 0.5 };
 });
 
 // ── 4. Halbschriftlich / Kopfrechnen ─────────────────────────────────────────
 
-reg('arithmetik__halbschriftliches_rechnen', () => {
-	const strategy = rand(0, 2);
+reg('arithmetik__halbschriftliches_rechnen', (stage = 0) => {
+	// Expanding sequence: HZ + ZE → H − ZE → HZE − HZ; frühere Strategien bleiben in der Mischung.
+	const strategy = stageVariant(stage, 3);
 	if (strategy === 0) {
 		const a = rand(1, 9) * 100 + rand(1, 9) * 10, b = rand(1, 9) * 10 + rand(1, 9);
 		return { atomId: 'arithmetik__halbschriftliches_rechnen', prompt: `${a} + ${b} = ?`, answerType: 'integer', correctAnswer: String(a + b), why: chainWhy(a, b, 1), difficulty: 0.45 };
@@ -1447,9 +1486,11 @@ reg('arithmetik__rechengesetze_rechenvorteile', (stage = 0) => {
 
 // ── 5. Multiplikation & Division ─────────────────────────────────────────────
 
-reg('arithmetik__multiplikationsverstaendnis', () => {
-	const a = rand(2, 5), b = rand(2, 6);
-	const type = rand(0, 1);
+reg('arithmetik__multiplikationsverstaendnis', (stage = 0) => {
+	// Expanding sequence: Plusaufgabe sichtbar → Punktefeld (Reihen) → beides mit größeren Faktoren.
+	const lvl = Math.min(stage, 2);
+	const a = lvl < 2 ? rand(2, 5) : rand(3, 6), b = lvl < 2 ? rand(2, 6) : rand(4, 9);
+	const type = lvl < 2 ? lvl : rand(0, 1);
 	if (type === 0) return { atomId: 'arithmetik__multiplikationsverstaendnis', prompt: `${a} · ${b} = ?  (${a}-mal die ${b}: ${Array(a).fill(b).join(' + ')})`, answerType: 'integer', correctAnswer: String(a * b), why: `${a} · ${b} heißt: ${a}-mal die ${b}. ${Array(a).fill(b).join(' + ')} = ${a * b}.`, difficulty: 0.2 };
 	return { atomId: 'arithmetik__multiplikationsverstaendnis', prompt: `${a} Reihen mit je ${b} Feldern — wie viele Felder insgesamt?`, answerType: 'integer', correctAnswer: String(a * b), why: `${a} Reihen mit je ${b} Feldern: ${Array(a).fill(b).join(' + ')} = ${a} · ${b} = ${a * b}.`, difficulty: 0.2 };
 });
@@ -1485,8 +1526,10 @@ reg('arithmetik__einmaleins_ableiten', (stage = 0) => {
 	return { atomId, prompt: `Wenn ${base} · ${b} = ${base * b}, was ist dann ${derived} · ${b}?`, answerType: 'integer', correctAnswer: String(derived * b), hint: `${base} · ${b} = ${base * b} → ${hintFn(b)}.`, why: `${base} · ${b} = ${base * b} kennst du schon. Für ${derived} · ${b}: ${hintFn(b)} → ${derived * b}.`, difficulty: 0.3 };
 });
 
-reg('arithmetik__einmaleins_automatisierung', () => {
-	const a = rand(2, 9), b = rand(2, 9);
+reg('arithmetik__einmaleins_automatisierung', (stage = 0) => {
+	// Expanding sequence: Faktoren bis 5 → bis 9 → die schweren Aufgaben (beide Faktoren 6–9).
+	const [lo, hi] = [[2, 5], [2, 9], [6, 9]][Math.min(stage, 2)];
+	const a = rand(lo, hi), b = rand(lo, hi);
 	return { atomId: 'arithmetik__einmaleins_automatisierung', prompt: `${a} · ${b} = ?`, answerType: 'integer', correctAnswer: String(a * b), why: einmaleinsWhy(a, b), difficulty: 0.35 };
 });
 
@@ -1565,7 +1608,7 @@ reg('arithmetik__muster_zahlenfolgen_grundschule', (stage = 0) => {
 
 // ── 8. Sachaufgaben ───────────────────────────────────────────────────────────
 
-reg('arithmetik__sachaufgaben_grundschule', () => {
+reg('arithmetik__sachaufgaben_grundschule', (stage = 0) => {
 	const templates = [
 		() => { const n = rand(2, 8), p = rand(1, 5); const total = n * p; return { q: `Ein Buch kostet ${p} €. ${n} Kinder kaufen je ein Buch. Wie viel kostet das insgesamt?`, a: total, w: `${n} Bücher zu je ${p} €: ${n} · ${p} = ${total} €.` }; },
 		() => { const total = rand(10, 50), per = rand(2, 8); const left = total % per; return { q: `${total} Bonbons werden auf ${per} Kinder verteilt. Wie viele Bonbons bleiben übrig?`, a: left, w: left === 0 ? `${total} : ${per} = ${total / per} – es geht genau auf, nichts bleibt übrig.` : `${total} : ${per} = ${Math.floor(total / per)} Rest ${left}. Der Rest bleibt übrig.` }; },
@@ -1577,7 +1620,9 @@ reg('arithmetik__sachaufgaben_grundschule', () => {
 		() => { const price = rand(2, 9), n = rand(2, 5), paid = pick([20, 50]); return { q: `${n} Eintrittskarten kosten je ${price} €. Bezahlt wird mit einem ${paid}-€-Schein. Wie viel Euro gibt es zurück?`, a: paid - n * price, w: `Die Karten kosten ${n} · ${price} = ${n * price} €. Rückgeld: ${paid} − ${n * price} = ${paid - n * price} €.` }; },
 		() => { const days = rand(2, 6), pages = rand(8, 25); return { q: `Mia liest jeden Tag ${pages} Seiten. Wie viele Seiten hat sie nach ${days} Tagen gelesen?`, a: days * pages, w: `Jeden Tag gleich viele Seiten: ${days} · ${pages} = ${days * pages}.` }; }
 	];
-	const t = pick(templates)();
+	// Expanding sequence: einschrittig ± → einschrittig · (und Umfang) → zweischrittig / mit Rest.
+	const groups = [[2, 4], [0, 8, 3], [1, 5, 6, 7]];
+	const t = templates[pick(groups[stageVariant(stage, groups.length)])]();
 	return { atomId: 'arithmetik__sachaufgaben_grundschule', prompt: t.q, answerType: 'integer', correctAnswer: String(t.a), why: t.w, difficulty: 0.4 };
 });
 
@@ -1611,7 +1656,7 @@ reg('arithmetik__teiler_vielfache', (stage = 0) => {
 	}
 });
 
-reg('arithmetik__teilbarkeitsregeln', () => {
+reg('arithmetik__teilbarkeitsregeln', (stage = 0) => {
 	const rules: Array<{ rule: number; check: (n: number) => boolean; hint: string }> = [
 		{ rule: 2, check: n => n % 2 === 0, hint: 'Letzte Ziffer ist 0, 2, 4, 6 oder 8.' },
 		{ rule: 5, check: n => n % 5 === 0, hint: 'Letzte Ziffer ist 0 oder 5.' },
@@ -1619,7 +1664,8 @@ reg('arithmetik__teilbarkeitsregeln', () => {
 		{ rule: 3, check: n => n % 3 === 0, hint: 'Quersumme ist durch 3 teilbar.' },
 		{ rule: 9, check: n => n % 9 === 0, hint: 'Quersumme ist durch 9 teilbar.' }
 	];
-	const r = pick(rules);
+	// Expanding sequence: Endstellenregeln (2, 5, 10) → Quersummenregel 3 → auch 9.
+	const r = pick(rules.slice(0, [3, 4, 5][Math.min(stage, 2)]));
 	// Balance yes/no: random numbers are divisible by 9 or 10 only about one time in ten.
 	const n = rand(0, 1) === 0 ? r.rule * rand(Math.ceil(10 / r.rule), Math.floor(999 / r.rule)) : rand(10, 999);
 	const answer = r.check(n) ? 'ja' : 'nein';
@@ -1669,34 +1715,43 @@ reg('arithmetik__ggt_kgv', (stage = 0) => {
 
 // ── 10. Bruchrechnung ─────────────────────────────────────────────────────────
 
-reg('arithmetik__bruchteile_im_alltag', () => {
+reg('arithmetik__bruchteile_im_alltag', (stage = 0) => {
 	const fracs: Array<[number, number]> = [[1,2],[1,4],[3,4],[1,3],[2,3]];
-	const [n, d] = pick(fracs);
-	const total = d * rand(1, 5);
+	// Expanding sequence: Hälfte/Viertel → plus Drittel und Dreiviertel → alle, größere Mengen.
+	const lvl = Math.min(stage, 2);
+	const [n, d] = pick(fracs.slice(0, [2, 4, 5][lvl]));
+	const total = d * (lvl < 2 ? rand(1, 5) : rand(2, 10));
 	const result = (n * total) / d;
 	const labels = pick(['Kinder', 'Äpfel', 'Schüler', 'Bonbons']);
 	return { atomId: 'arithmetik__bruchteile_im_alltag', prompt: `${fmtFrac(n, d)} von ${total} ${labels} = ?`, answerType: 'integer', correctAnswer: String(result), hint: `Teile durch ${d}, dann mal ${n}.`, why: anteilWhy(n, d, total), difficulty: 0.3 };
 });
 
-reg('arithmetik__bruch_anteil_eines_ganzen', () => {
-	const d = pick([2, 3, 4, 5, 6, 8, 10]);
-	const n = rand(1, d - 1);
-	const wholeTotal = d * rand(1, 4);
+reg('arithmetik__bruch_anteil_eines_ganzen', (stage = 0) => {
+	// Expanding sequence: Stammbrüche mit Nenner 2–4 → Nenner bis 6 → alle Nenner, größere Ganze.
+	const lvl = Math.min(stage, 2);
+	const d = pick([[2, 3, 4], [2, 3, 4, 5, 6], [2, 3, 4, 5, 6, 8, 10]][lvl]);
+	const n = lvl === 0 ? 1 : rand(1, d - 1);
+	const wholeTotal = d * (lvl < 2 ? rand(1, 4) : rand(2, 6));
 	const result = (n * wholeTotal) / d;
 	return { atomId: 'arithmetik__bruch_anteil_eines_ganzen', prompt: `Ein Ganzes hat ${wholeTotal} gleiche Teile. Wie viele Teile sind ${fmtFrac(n, d)} davon?`, answerType: 'integer', correctAnswer: String(result), why: anteilWhy(n, d, wholeTotal), difficulty: 0.35 };
 });
 
-reg('arithmetik__bruch_anteil_einer_menge', () => {
-	const d = pick([2, 3, 4, 5, 6, 8, 10]);
-	const n = rand(1, d - 1);
-	const total = d * rand(2, 8);
+reg('arithmetik__bruch_anteil_einer_menge', (stage = 0) => {
+	// Expanding sequence: Stammbrüche mit Nenner 2–4 → Nenner bis 6 → alle Nenner, größere Mengen.
+	const lvl = Math.min(stage, 2);
+	const d = pick([[2, 3, 4], [2, 3, 4, 5, 6], [2, 3, 4, 5, 6, 8, 10]][lvl]);
+	const n = lvl === 0 ? 1 : rand(1, d - 1);
+	const total = d * (lvl < 2 ? rand(2, 6) : rand(3, 10));
 	return { atomId: 'arithmetik__bruch_anteil_einer_menge', prompt: `${fmtFrac(n, d)} von ${total} = ?`, answerType: 'integer', correctAnswer: String((n * total) / d), hint: `Erst durch ${d}, dann mal ${n}.`, why: anteilWhy(n, d, total), difficulty: 0.4 };
 });
 
-reg('arithmetik__brueche_am_zahlenstrahl', () => {
-	const d = pick([2, 3, 4, 5, 8, 10]);
-	let n = rand(1, 2 * d - 1);
-	while (n === d) n = rand(1, 2 * d - 1); // avoid the trivial 1/1
+reg('arithmetik__brueche_am_zahlenstrahl', (stage = 0) => {
+	// Expanding sequence: Nenner 2/4/10 zwischen 0 und 1 → alle Nenner zwischen 0 und 1 → auch über 1 hinaus.
+	const lvl = Math.min(stage, 2);
+	const d = pick(lvl === 0 ? [2, 4, 10] : [2, 3, 4, 5, 8, 10]);
+	const maxN = lvl < 2 ? d - 1 : 2 * d - 1;
+	let n = rand(1, maxN);
+	while (n === d) n = rand(1, maxN); // avoid the trivial 1/1
 	const g = gcd(n, d);
 	const rn = n / g, rd = d / g;
 	const q = rand(0, 1);
@@ -1912,10 +1967,13 @@ reg('arithmetik__division_durch_bruch', (stage = 0) => {
 
 // ── 11. Dezimalzahlen ─────────────────────────────────────────────────────────
 
-reg('arithmetik__dezimalzahlen_stellenwert', () => {
-	const whole = rand(1, 99), dec1 = rand(0, 9), dec2 = rand(0, 9);
+reg('arithmetik__dezimalzahlen_stellenwert', (stage = 0) => {
+	// Expanding sequence: Zehntel, kleine ganze Zahl → Zehntel oder Hundertstel → größere Zahlen, oft mit 0 nach dem Komma.
+	const lvl = Math.min(stage, 2);
+	const whole = [rand(1, 9), rand(1, 99), rand(10, 999)][lvl];
+	const dec1 = lvl === 2 && rand(0, 1) === 0 ? 0 : rand(lvl === 0 ? 1 : 0, 9), dec2 = rand(lvl === 0 ? 1 : 0, 9);
 	const n = parseFloat(`${whole}.${dec1}${dec2}`);
-	const q = rand(0, 1);
+	const q = lvl === 0 ? 0 : rand(0, 1);
 	if (q === 0) return { atomId: 'arithmetik__dezimalzahlen_stellenwert', prompt: `Welche Ziffer steht an der Zehntelstelle von ${dec(n)}?`, answerType: 'integer', correctAnswer: String(dec1), why: `Direkt nach dem Komma stehen die Zehntel, danach die Hundertstel: ${dec(n)} hat ${dec1} Zehntel und ${dec2} Hundertstel.`, difficulty: 0.35 };
 	return { atomId: 'arithmetik__dezimalzahlen_stellenwert', prompt: `Welche Ziffer steht an der Hundertstelstelle von ${dec(n)}?`, answerType: 'integer', correctAnswer: String(dec2), why: `Direkt nach dem Komma stehen die Zehntel, danach die Hundertstel: ${dec(n)} hat ${dec1} Zehntel und ${dec2} Hundertstel${dec2 === 0 ? ' (eine fehlende Stelle zählt als 0)' : ''}.`, difficulty: 0.35 };
 });
@@ -1942,28 +2000,44 @@ reg('arithmetik__dezimalzahlen_vergleichen_ordnen_runden', (stage = 0) => {
 	return { atomId: 'arithmetik__dezimalzahlen_vergleichen_ordnen_runden', prompt: `Runde ${dec(n)} auf eine Nachkommastelle: ___`, answerType: 'number', correctAnswer: dec(Math.round(n * 10) / 10), why: `Die Hundertstelstelle entscheidet: ${Math.round(n * 100) % 10}. ${Math.round(n * 100) % 10 >= 5 ? 'Ab 5 wird aufgerundet' : 'Unter 5 wird abgerundet'} → ${dec(Math.round(n * 10) / 10)}.`, difficulty: 0.4 };
 });
 
-reg('arithmetik__dezimalzahlen_addieren_subtrahieren', () => {
-	const a = parseFloat((rand(1, 20) + rand(0, 9) / 10).toFixed(1));
-	const b = parseFloat((rand(1, 10) + rand(0, 9) / 10).toFixed(1));
-	const op = rand(0, 1);
-	if (op === 0) return { atomId: 'arithmetik__dezimalzahlen_addieren_subtrahieren', prompt: `${dec(a)} + ${dec(b)} = ?`, answerType: 'number', correctAnswer: dec(a + b), hint: 'Komma unter Komma schreiben.', why: `Rechne in Zehnteln: ${Math.round(a * 10)} Zehntel + ${Math.round(b * 10)} Zehntel = ${Math.round((a + b) * 10)} Zehntel = ${dec(a + b)}.`, difficulty: 0.4 };
-	const [big, small] = a >= b ? [a, b] : [b, a];
-	return { atomId: 'arithmetik__dezimalzahlen_addieren_subtrahieren', prompt: `${dec(big)} − ${dec(small)} = ?`, answerType: 'number', correctAnswer: dec(big - small), why: `Rechne in Zehnteln: ${Math.round(big * 10)} Zehntel − ${Math.round(small * 10)} Zehntel = ${Math.round((big - small) * 10)} Zehntel = ${dec(big - small)}.`, difficulty: 0.4 };
+reg('arithmetik__dezimalzahlen_addieren_subtrahieren', (stage = 0) => {
+	const atomId = 'arithmetik__dezimalzahlen_addieren_subtrahieren';
+	// Expanding sequence: Addition ohne Übertrag über das Komma → Addition und Subtraktion mit Zehnteln →
+	// verschieden viele Nachkommastellen (Komma unter Komma, Lücke mit 0 füllen).
+	const lvl = Math.min(stage, 2);
+	if (lvl === 2) {
+		const aH = rand(100, 2000) + rand(1, 9), bZ = rand(10, 100); // a in Hundertsteln, b in Zehnteln
+		const a = aH / 100, b = bZ / 10;
+		const sub = rand(0, 1) === 1 && a > b;
+		const res = sub ? aH - bZ * 10 : aH + bZ * 10;
+		return { atomId, prompt: `${dec(a)} ${sub ? '−' : '+'} ${dec(b)} = ?`, answerType: 'number', correctAnswer: dec(res / 100), hint: 'Komma unter Komma schreiben, fehlende Stellen mit 0 auffüllen.', why: `Komma unter Komma, ${dec(b)} = ${dec(b)}0: in Hundertsteln ${aH} ${sub ? '−' : '+'} ${bZ * 10} = ${res} Hundertstel = ${dec(res / 100)}.`, difficulty: 0.5 };
+	}
+	let a10: number, b10: number;
+	do { a10 = rand(1, 20) * 10 + rand(0, 9); b10 = rand(1, 10) * 10 + rand(0, 9); } while (lvl === 0 && (a10 % 10) + (b10 % 10) > 9);
+	const a = a10 / 10, b = b10 / 10;
+	const op = lvl === 0 ? 0 : rand(0, 1);
+	if (op === 0) return { atomId, prompt: `${dec(a)} + ${dec(b)} = ?`, answerType: 'number', correctAnswer: dec((a10 + b10) / 10), hint: 'Komma unter Komma schreiben.', why: `Rechne in Zehnteln: ${a10} Zehntel + ${b10} Zehntel = ${a10 + b10} Zehntel = ${dec((a10 + b10) / 10)}.`, difficulty: 0.4 };
+	const [big, small] = a10 >= b10 ? [a10, b10] : [b10, a10];
+	return { atomId, prompt: `${dec(big / 10)} − ${dec(small / 10)} = ?`, answerType: 'number', correctAnswer: dec((big - small) / 10), why: `Rechne in Zehnteln: ${big} Zehntel − ${small} Zehntel = ${big - small} Zehntel = ${dec((big - small) / 10)}.`, difficulty: 0.4 };
 });
 
-reg('arithmetik__kommaverschiebung', () => {
+reg('arithmetik__kommaverschiebung', (stage = 0) => {
 	const n = parseFloat((rand(1, 99) + rand(1, 9) / 10).toFixed(1));
-	const factor = pick([10, 100, 1000]);
-	const op = rand(0, 1);
+	// Expanding sequence: · 10 → · und : mit 10/100 → auch 1000.
+	const lvl = Math.min(stage, 2);
+	const factor = pick([[10], [10, 100], [10, 100, 1000]][lvl]);
+	const op = lvl === 0 ? 0 : rand(0, 1);
 	if (op === 0) return { atomId: 'arithmetik__kommaverschiebung', prompt: `${dec(n)} · ${factor} = ?`, answerType: 'number', correctAnswer: dec(n * factor), hint: `Komma um ${Math.log10(factor)} Stelle(n) nach rechts.`, why: `Mal ${factor} macht jede Ziffer ${factor}-mal so viel wert: Das Komma rückt ${Math.log10(factor)} ${factor === 10 ? 'Stelle' : 'Stellen'} nach rechts (leere Stellen mit 0 füllen).`, difficulty: 0.4 };
 	return { atomId: 'arithmetik__kommaverschiebung', prompt: `${dec(n * factor)} : ${factor} = ?`, answerType: 'number', correctAnswer: dec(n), hint: `Komma um ${Math.log10(factor)} Stelle(n) nach links.`, why: `Geteilt durch ${factor} macht jede Ziffer ${factor}-mal weniger wert: Das Komma rückt ${Math.log10(factor)} ${factor === 10 ? 'Stelle' : 'Stellen'} nach links.`, difficulty: 0.4 };
 });
 
-reg('arithmetik__dezimal_division_natuerliche_zahl', () => {
+reg('arithmetik__dezimal_division_natuerliche_zahl', (stage = 0) => {
 	// Build dividend from d × answer so the result is always a clean 1-decimal number.
 	// Skip combinations where d·r is divisible by 10 (dividend would have no decimal part).
 	let d: number, q: number, r: number;
-	do { d = rand(2, 8); q = rand(1, 9); r = rand(1, 9); } while ((d * r) % 10 === 0);
+	// Expanding sequence: Divisor 2–4 → bis 8 → Divisor bis 9 mit zweistelligem Ganzteil.
+	const lvl = Math.min(stage, 2);
+	do { d = [rand(2, 4), rand(2, 8), rand(3, 9)][lvl]; q = lvl < 2 ? rand(1, 9) : rand(10, 30); r = rand(1, 9); } while ((d * r) % 10 === 0);
 	const dividend = d * q + (d * r) / 10;
 	const answer = q + r / 10;
 	return { atomId: 'arithmetik__dezimal_division_natuerliche_zahl', prompt: `${dec(dividend)} : ${d} = ?`, answerType: 'number', correctAnswer: dec(answer), hint: `Schriftlich: ${dec(dividend)} : ${d}`, why: `Teile wie bei ganzen Zahlen und setze das Komma, sobald du es überschreitest. Probe: ${dec(answer)} · ${d} = ${dec(dividend)}.`, difficulty: 0.5 };
@@ -1983,11 +2057,14 @@ reg('arithmetik__dezimal_mal_dezimal', (stage = 0) => {
 	return { atomId, prompt: `${dec(a)} · ${dec(b)} = ?`, answerType: 'number', correctAnswer: dec(res), hint: `Rechne ${aInt} · ${bInt} = ${aInt * bInt}, dann : 1000`, why: `Erst ohne Komma: ${aInt} · ${bInt} = ${aInt * bInt}. Die Faktoren haben zusammen 3 Nachkommastellen, das Ergebnis auch: ${dec(res)}.`, difficulty: 0.6 };
 });
 
-reg('arithmetik__dezimal_division_dezimalzahl', () => {
-	const b = pick([0.1, 0.2, 0.5, 0.25, 0.4]);
-	const q = rand(2, 10);
+reg('arithmetik__dezimal_division_dezimalzahl', (stage = 0) => {
+	// Expanding sequence: durch 0,1 / 0,2 / 0,5 → auch 0,25 und 0,4 → krumme Divisoren, größere Quotienten.
+	const lvl = Math.min(stage, 2);
+	const b = pick([[0.1, 0.2, 0.5], [0.1, 0.2, 0.5, 0.25, 0.4], [0.25, 0.4, 0.3, 0.6, 0.75, 1.5]][lvl]);
+	const q = lvl < 2 ? rand(2, 10) : rand(4, 20);
 	const a = round(b * q, 2);
-	return { atomId: 'arithmetik__dezimal_division_dezimalzahl', prompt: `${dec(a)} : ${dec(b)} = ?`, answerType: 'integer', correctAnswer: String(q), hint: `Verschiebe in beiden Zahlen das Komma, bis der Divisor ganzzahlig ist: ${dec(a * (b === 0.25 ? 100 : 10))} : ${dec(b * (b === 0.25 ? 100 : 10))}`, why: `Beide Zahlen mit ${b === 0.25 ? 100 : 10} malnehmen – der Quotient bleibt gleich: ${dec(a * (b === 0.25 ? 100 : 10))} : ${dec(b * (b === 0.25 ? 100 : 10))} = ${q}.`, difficulty: 0.6 };
+	const f = Number.isInteger(round(b * 10, 6)) ? 10 : 100;
+	return { atomId: 'arithmetik__dezimal_division_dezimalzahl', prompt: `${dec(a)} : ${dec(b)} = ?`, answerType: 'integer', correctAnswer: String(q), hint: `Verschiebe in beiden Zahlen das Komma, bis der Divisor ganzzahlig ist: ${dec(a * f)} : ${dec(b * f)}`, why: `Beide Zahlen mit ${f} malnehmen – der Quotient bleibt gleich: ${dec(a * f)} : ${dec(b * f)} = ${q}.`, difficulty: 0.6 };
 });
 
 reg('arithmetik__bruch_zu_dezimalzahl', (stage = 0) => {
@@ -2064,9 +2141,12 @@ reg('arithmetik__negative_zahlen_zahlengerade', (stage = 0) => {
 	}
 });
 
-reg('arithmetik__betrag_gegenzahl', () => {
-	const n = pick([-8, -6, -5, -4, -3, -2, -1, 1, 2, 3, 4, 5, 6, 7, 8]);
-	const q = rand(0, 1);
+reg('arithmetik__betrag_gegenzahl', (stage = 0) => {
+	// Expanding sequence: Betrag kleiner Zahlen → Betrag oder Gegenzahl → größere Zahlen.
+	const lvl = Math.min(stage, 2);
+	const max = lvl < 2 ? 8 : 50;
+	const n = rand(1, max) * (rand(0, 1) === 0 ? -1 : 1);
+	const q = lvl === 0 ? 0 : rand(0, 1);
 	if (q === 0) return { atomId: 'arithmetik__betrag_gegenzahl', prompt: `|${n}| = ?`, answerType: 'integer', correctAnswer: String(Math.abs(n)), why: `Der Betrag ist der Abstand zur 0: ${n} liegt ${Math.abs(n)} Schritte von der 0 entfernt. Ein Abstand ist nie negativ.`, difficulty: 0.3 };
 	return { atomId: 'arithmetik__betrag_gegenzahl', prompt: `Die Gegenzahl von ${n} = ?`, answerType: 'integer', correctAnswer: String(-n), why: `Die Gegenzahl liegt gleich weit von der 0 entfernt, aber auf der anderen Seite: aus ${n} wird ${-n}.`, difficulty: 0.3 };
 });
@@ -2088,8 +2168,11 @@ reg('arithmetik__rationale_addition_ungleiche_vorzeichen', (stage = 0) => {
 	return { atomId: 'arithmetik__rationale_addition_ungleiche_vorzeichen', prompt: `(${pos}) + (${negV}) = ?`, answerType: 'integer', correctAnswer: String(pos + negV), hint: 'Verschiedene Vorzeichen: Beträge subtrahieren, Vorzeichen des Größeren.', why: `Die Zahlen zeigen in entgegengesetzte Richtungen: Beträge voneinander abziehen (${Math.max(a, b)} − ${Math.min(a, b)} = ${Math.abs(a - b)}). ${a === b ? 'Sie heben sich genau auf → 0.' : `Das Vorzeichen kommt von der Zahl mit dem größeren Betrag (${Math.abs(pos) > Math.abs(negV) ? pos : negV}) → ${pos + negV}.`}`, difficulty: 0.45 };
 });
 
-reg('arithmetik__subtraktion_als_addition_gegenzahl', () => {
-	const a = rand(-8, 8), b = rand(-8, 8);
+reg('arithmetik__subtraktion_als_addition_gegenzahl', (stage = 0) => {
+	// Expanding sequence: positive Zahl abziehen → negative Zahl abziehen → gemischt bis ±20.
+	const lvl = Math.min(stage, 2);
+	const a = lvl < 2 ? rand(-8, 8) : rand(-20, 20);
+	const b = [rand(1, 8), -rand(1, 8), rand(-20, 20)][lvl];
 	if (b >= 0) return { atomId: 'arithmetik__subtraktion_als_addition_gegenzahl', prompt: `${a} − (${b}) = ?`, answerType: 'integer', correctAnswer: String(a - b), hint: `Subtraktion = Addition der Gegenzahl: ${a} + (${-b})`, why: `Eine Zahl abziehen heißt ihre Gegenzahl addieren: ${a} − (${b}) = ${a} + ${paren(-b)} = ${a - b}.`, difficulty: 0.5 };
 	return { atomId: 'arithmetik__subtraktion_als_addition_gegenzahl', prompt: `${a} − (${b}) = ?`, answerType: 'integer', correctAnswer: String(a - b), hint: `${a} − (${b}) = ${a} + ${-b}`, why: `Eine Zahl abziehen heißt ihre Gegenzahl addieren: ${a} − (${b}) = ${a} + ${-b} = ${a - b}.`, difficulty: 0.5 };
 });
@@ -2106,11 +2189,14 @@ reg('arithmetik__vorzeichenregeln_mult_div', (stage = 0) => {
 	return { atomId: 'arithmetik__vorzeichenregeln_mult_div', prompt: `(${sa * a * b}) : (${sb * a}) = ?`, answerType: 'integer', correctAnswer: String(sa * sb * b), hint: 'Gleiches Vorzeichen → positiv, verschiedene → negativ.', why: `Erst ohne Vorzeichen: ${a * b} : ${a} = ${b}. ${sa === sb ? 'Gleiche Vorzeichen → das Ergebnis ist positiv.' : 'Verschiedene Vorzeichen → das Ergebnis ist negativ.'}`, difficulty: 0.45 };
 });
 
-reg('arithmetik__vorzeichen_klammerregeln', () => {
-	const a = rand(1, 10), b = rand(1, 10);
-	const type = rand(0, 1);
+reg('arithmetik__vorzeichen_klammerregeln', (stage = 0) => {
+	// Expanding sequence: −(a − b) mit kleinen Zahlen → auch c − (a − b) → Zahlen bis 20.
+	const lvl = Math.min(stage, 2);
+	const max = [5, 10, 20][lvl];
+	const a = rand(1, max), b = rand(1, max);
+	const type = lvl === 0 ? 0 : rand(0, 1);
 	if (type === 0) return { atomId: 'arithmetik__vorzeichen_klammerregeln', prompt: `−(${a} − ${b}) = ?`, answerType: 'integer', correctAnswer: String(-(a - b)), hint: 'Minus vor der Klammer dreht alle Vorzeichen um.', why: `Das Minus vor der Klammer dreht jedes Vorzeichen um: −(${a} − ${b}) = −${a} + ${b} = ${b - a}.`, difficulty: 0.5 };
-	const c = rand(1, 5);
+	const c = rand(1, lvl < 2 ? 5 : 10);
 	return { atomId: 'arithmetik__vorzeichen_klammerregeln', prompt: `${c} − (${a} − ${b}) = ?`, answerType: 'integer', correctAnswer: String(c - a + b), why: `Das Minus vor der Klammer dreht die Vorzeichen in der Klammer um: ${c} − ${a} + ${b} = ${c - a + b}.`, difficulty: 0.5 };
 });
 
@@ -2132,11 +2218,13 @@ reg('arithmetik__verbindung_rechenarten_rationale', (stage = 0) => {
 
 // ── 13. Prozentrechnung ───────────────────────────────────────────────────────
 
-reg('arithmetik__prozentschreibweise', () => {
+reg('arithmetik__prozentschreibweise', (stage = 0) => {
 	// Denominators that divide 100 → whole-number percentages
-	const [num, den] = rand(0, 3) === 0 ? [rand(1, 99), 100] : terminatingFraction([2, 4, 5, 10, 20, 25, 50]);
+	// Expanding sequence: Bruch → Prozent mit Nenner 100/2/4/10 → auch Dezimalzahlen → alle Nenner.
+	const lvl = Math.min(stage, 2);
+	const [num, den] = rand(0, 3) === 0 ? [rand(1, 99), 100] : terminatingFraction(lvl < 2 ? [2, 4, 10] : [2, 4, 5, 10, 20, 25, 50]);
 	const percent = num * 100 / den;
-	const q = rand(0, 2);
+	const q = lvl === 0 ? 0 : rand(0, 2);
 	if (q === 0) return { atomId: 'arithmetik__prozentschreibweise', prompt: `${fmtFrac(num, den)} = ___ %`, answerType: 'integer', correctAnswer: String(percent), hint: 'Prozent bedeutet Hundertstel: erweitere auf den Nenner 100.', why: `Prozent heißt „von 100": ${den === 100 ? '' : `${fmtFrac(num, den)} = `}${fmtFrac(percent, 100)} = ${percent} %.`, difficulty: 0.35 };
 	if (q === 1) return { atomId: 'arithmetik__prozentschreibweise', prompt: `${percent} % als Dezimalzahl = ?`, answerType: 'number', correctAnswer: dec(percent / 100), hint: 'Teile durch 100 (Komma um zwei Stellen nach links).', why: `${percent} % = ${fmtFrac(percent, 100)} = ${dec(percent / 100)} – das Komma rückt zwei Stellen nach links.`, difficulty: 0.35 };
 	return { atomId: 'arithmetik__prozentschreibweise', prompt: `${dec(percent / 100)} = ___ %`, answerType: 'integer', correctAnswer: String(percent), hint: 'Multipliziere mit 100 (Komma um zwei Stellen nach rechts).', why: `${dec(percent / 100)} = ${fmtFrac(percent, 100)} = ${percent} % – das Komma rückt zwei Stellen nach rechts.`, difficulty: 0.35 };
@@ -2265,15 +2353,19 @@ reg('arithmetik__zehnerpotenzen_normdarstellung', (stage = 0) => {
 // arithmetik__groessen_geld_laenge_zeit ist seit Graph v4 ein Cluster; die Teilfertigkeiten
 // (…_geld, …_laengen, …_zeit) stehen in Abschnitt 33.
 
-reg('arithmetik__groessen_masse_volumen', () => {
+reg('arithmetik__groessen_masse_volumen', (stage = 0) => {
 	const tasks = [
 		() => { const kg = rand(1, 9), g = rand(100, 900); return { q: `${kg} kg ${g} g = ___ g insgesamt?`, a: String(kg * 1000 + g), w: `1 kg = 1000 g: ${kg} kg = ${kg * 1000} g, dazu ${g} g → ${kg * 1000 + g} g.` }; },
 		() => { const l = rand(1, 5), ml = rand(100, 900); return { q: `${l} l ${ml} ml = ___ ml?`, a: String(l * 1000 + ml), w: `1 l = 1000 ml: ${l} l = ${l * 1000} ml, dazu ${ml} ml → ${l * 1000 + ml} ml.` }; },
 		() => { const g = rand(1, 9) * 1000; return { q: `${g} g = ___ kg?`, a: String(g / 1000), w: `1000 g = 1 kg, also ${g} g = ${g / 1000} kg.` }; },
-		() => { const t = rand(1, 3); return { q: `${t} t = ___ kg?`, a: String(t * 1000), w: `1 t = 1000 kg, also ${t} t = ${t * 1000} kg.` }; }
+		() => { const t = rand(1, 3); return { q: `${t} t = ___ kg?`, a: String(t * 1000), w: `1 t = 1000 kg, also ${t} t = ${t * 1000} kg.` }; },
+		() => { const g = rand(11, 99) * 100; return { q: `${g} g = ___ kg?`, a: dec(g / 1000), w: `1000 g = 1 kg: ${g} g = ${dec(g / 1000)} kg (Komma drei Stellen nach links).` }; },
+		() => { const ml = rand(11, 49) * 100; return { q: `${ml} ml = ___ l?`, a: dec(ml / 1000), w: `1000 ml = 1 l: ${ml} ml = ${dec(ml / 1000)} l (Komma drei Stellen nach links).` }; }
 	];
-	const t = pick(tasks)();
-	return { atomId: 'arithmetik__groessen_masse_volumen', prompt: t.q, answerType: t.a.includes('.') ? 'number' : 'integer', correctAnswer: t.a, why: t.w, difficulty: 0.4 };
+	// Expanding sequence: ganze Umrechnungen (t → kg, g → kg) → zusammengesetzte Angaben (kg und g) → Kommazahlen.
+	const groups = [[3, 2], [0, 1], [4, 5]];
+	const t = tasks[pick(groups[stageVariant(stage, groups.length)])]();
+	return { atomId: 'arithmetik__groessen_masse_volumen', prompt: t.q, answerType: t.a.includes(',') ? 'number' : 'integer', correctAnswer: t.a, why: t.w, difficulty: 0.4 };
 });
 
 // ── 16. Verhältnisse ──────────────────────────────────────────────────────────
@@ -2308,8 +2400,10 @@ reg('arithmetik__arithmetisches_mittel', (stage = 0) => {
 
 // ── 18. Algebra: Terme ────────────────────────────────────────────────────────
 
-reg('algebra__variablenbegriff', () => {
-	const type = rand(0, 4);
+reg('algebra__variablenbegriff', (stage = 0) => {
+	// Expanding sequence: Vielfaches im Alltag (Preis, Anzahl) → Umfang, Geschwindigkeit → Differenz („jünger“).
+	const groups = [[0, 1], [4, 3], [2]];
+	const type = pick(groups[stageVariant(stage, groups.length)]);
 	let q: string, a: string, w: string[]; let expl: string;
 	if (type === 0) {
 		// n Stück zum Preis v
@@ -2450,21 +2544,25 @@ reg('algebra__binomische_formeln_vorwaerts', (stage = 0) => {
 	}
 });
 
-reg('algebra__binomische_formeln_rueckwaerts', () => {
-	const type = rand(0, 1);
+reg('algebra__binomische_formeln_rueckwaerts', (stage = 0) => {
+	// Expanding sequence: 3. binomische Formel mit Quadratzahlen bis 36 → dazu die 1. → Quadratzahlen bis 144.
+	const lvl = Math.min(stage, 2);
+	const type = lvl === 0 ? 0 : rand(0, 1);
+	const maxA = lvl < 2 ? 6 : 12;
 	if (type === 0) {
-		const a = rand(2, 12);
+		const a = rand(2, maxA);
 		const choices = [String(a), String(a + 1), String(a - 1), String(a * 2)].sort(() => Math.random() - 0.5);
 		return { atomId: 'algebra__binomische_formeln_rueckwaerts', prompt: `\\(x^2 − ${a * a}\\) lässt sich schreiben als \\((x + \\_\\_)(x − \\_\\_ )\\). Welche Zahl fehlt?`, answerType: 'integer', correctAnswer: String(a), choices, hint: `3. binomische Formel rückwärts: \\(x^2−${a * a} = (x+${a})(x−${a})\\)`, why: `\\(${a * a} = ${a}^2\\), also \\(x^2 − ${a}^2 = (x + ${a})(x − ${a})\\).`, difficulty: 0.55 };
 	} else {
-		const a = rand(2, 12);
+		const a = rand(2, maxA);
 		const choices = [String(a), String(a + 1), String(a - 1), String(a * 2)].sort(() => Math.random() - 0.5);
 		return { atomId: 'algebra__binomische_formeln_rueckwaerts', prompt: `\\(x^2 + ${2 * a}x + ${a * a} = (x + \\_\\_)^2\\). Welche Zahl fehlt?`, answerType: 'integer', correctAnswer: String(a), choices, hint: `1. binomische Formel rückwärts: \\(x^2+${2 * a}x+${a * a} = (x+${a})^2\\)`, why: `\\(${a * a} = ${a}^2\\) und \\(${2 * a}x = 2 \\cdot ${a} \\cdot x\\) – das passt genau zu \\((x + ${a})^2\\).`, difficulty: 0.55 };
 	}
 });
 
-reg('algebra__gleichungen_inhaltlich_loesen', () => {
-	const type = rand(0, 2);
+reg('algebra__gleichungen_inhaltlich_loesen', (stage = 0) => {
+	// Expanding sequence: x + b → x − b → a · x; frühere Formen bleiben in der Mischung.
+	const type = [0, 2, 1][stageVariant(stage, 3)];
 	if (type === 0) {
 		const x = rand(2, 15), b = rand(3, 12);
 		return { atomId: 'algebra__gleichungen_inhaltlich_loesen', prompt: `\\(x + ${b} = ${x + b}\\)  →  \\(x = ?\\)`, answerType: 'integer', correctAnswer: String(x), hint: `Umkehroperation: ${x + b} − ${b} = ${x}`, why: `Welche Zahl plus ${b} ergibt ${x + b}? Rückwärts rechnen: ${x + b} − ${b} = ${x}. Probe: ${x} + ${b} = ${x + b}.`, difficulty: 0.25 };
@@ -2479,17 +2577,31 @@ reg('algebra__gleichungen_inhaltlich_loesen', () => {
 
 // ── 19. Algebra: Gleichungen ──────────────────────────────────────────────────
 
-reg('algebra__aequivalenzumformung_prinzip', () => {
-	const type = rand(0, 1);
+reg('algebra__aequivalenzumformung_prinzip', (stage = 0) => {
+	const atomId = 'algebra__aequivalenzumformung_prinzip';
+	// Expanding sequence: x + b und a·x mit kleinen Zahlen → größere Zahlen → auch x − b und x : a.
+	// Each stage mixes at least two operations, so the answer can't be guessed from its sign.
+	const lvl = Math.min(stage, 2);
+	const type = rand(0, lvl < 2 ? 1 : 3);
+	const big = lvl > 0;
 	if (type === 0) {
-		const b = rand(2, 9), rhs = rand(b + 1, 15);
+		const b = rand(2, big ? 9 : 5), rhs = rand(b + 1, big ? 15 : 10);
 		const choices = [`−${b}`, `+${b}`, `·${b}`, `:${b}`];
-		return { atomId: 'algebra__aequivalenzumformung_prinzip', prompt: `Von \\(x + ${b} = ${rhs}\\) zu \\(x = ${rhs - b}\\): Welche Umformung wurde auf beiden Seiten durchgeführt?`, answerType: 'text', correctAnswer: `−${b}`, choices: choices.sort(() => Math.random() - 0.5), why: `Um das + ${b} bei x loszuwerden, rechnet man auf beiden Seiten − ${b}: links bleibt x, rechts ${rhs} − ${b} = ${rhs - b}.`, difficulty: 0.35 };
-	} else {
-		const a = rand(2, 7), rhs = rand(1, 6) * a;
-		const choices = [`:${a}`, `·${a}`, `+${a}`, `−${a}`];
-		return { atomId: 'algebra__aequivalenzumformung_prinzip', prompt: `Von \\(${a}x = ${rhs}\\) zu \\(x = ${rhs / a}\\): Welche Umformung?`, answerType: 'text', correctAnswer: `:${a}`, choices: choices.sort(() => Math.random() - 0.5), why: `${a}x bedeutet ${a} · x. Die Umkehrung von „mal ${a}" ist „geteilt durch ${a}": ${rhs} : ${a} = ${rhs / a}.`, difficulty: 0.35 };
+		return { atomId, prompt: `Von \\(x + ${b} = ${rhs}\\) zu \\(x = ${rhs - b}\\): Welche Umformung wurde auf beiden Seiten durchgeführt?`, answerType: 'text', correctAnswer: `−${b}`, choices: shuffled(choices), why: `Um das + ${b} bei x loszuwerden, rechnet man auf beiden Seiten − ${b}: links bleibt x, rechts ${rhs} − ${b} = ${rhs - b}.`, difficulty: 0.35 };
 	}
+	if (type === 1) {
+		const a = rand(2, big ? 7 : 4), rhs = rand(1, big ? 6 : 4) * a;
+		const choices = [`:${a}`, `·${a}`, `+${a}`, `−${a}`];
+		return { atomId, prompt: `Von \\(${a}x = ${rhs}\\) zu \\(x = ${rhs / a}\\): Welche Umformung?`, answerType: 'text', correctAnswer: `:${a}`, choices: shuffled(choices), why: `${a}x bedeutet ${a} · x. Die Umkehrung von „mal ${a}" ist „geteilt durch ${a}": ${rhs} : ${a} = ${rhs / a}.`, difficulty: 0.35 };
+	}
+	if (type === 2) {
+		const b = rand(2, 9), rhs = rand(1, 12);
+		const choices = [`+${b}`, `−${b}`, `·${b}`, `:${b}`];
+		return { atomId, prompt: `Von \\(x − ${b} = ${rhs}\\) zu \\(x = ${rhs + b}\\): Welche Umformung?`, answerType: 'text', correctAnswer: `+${b}`, choices: shuffled(choices), why: `Um das − ${b} bei x loszuwerden, rechnet man auf beiden Seiten + ${b}: rechts ${rhs} + ${b} = ${rhs + b}.`, difficulty: 0.4 };
+	}
+	const a = rand(2, 6), rhs = rand(2, 9);
+	const choices = [`·${a}`, `:${a}`, `+${a}`, `−${a}`];
+	return { atomId, prompt: `Von \\(x : ${a} = ${rhs}\\) zu \\(x = ${rhs * a}\\): Welche Umformung?`, answerType: 'text', correctAnswer: `·${a}`, choices: shuffled(choices), why: `Die Umkehrung von „geteilt durch ${a}" ist „mal ${a}": ${rhs} · ${a} = ${rhs * a}.`, difficulty: 0.4 };
 });
 
 reg('algebra__lineare_gleichung_zweischritt', (stage = 0) => {
@@ -2531,15 +2643,19 @@ reg('algebra__lineare_gleichung_zweischritt', (stage = 0) => {
 	};
 });
 
-reg('algebra__lineare_gleichung_variablen_beidseitig', () => {
+reg('algebra__lineare_gleichung_variablen_beidseitig', (stage = 0) => {
+	// Expanding sequence: Differenz der x-Koeffizienten 1 (kein Teilen nötig) → Differenz bis 4 →
+	// auch negative Lösungen und negative Konstanten.
+	const lvl = Math.min(stage, 2);
 	// Generate x first → uniform distribution instead of bias toward 1/2
-	const x = rand(1, 9);
-	const diff = rand(1, 4);  // a - c
+	const x = lvl < 2 ? rand(1, 9) : pick([-6, -5, -4, -3, -2, -1, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+	const diff = lvl === 0 ? 1 : rand(1, 4);  // a - c
 	const a = rand(diff + 2, Math.min(diff + 5, 9));
 	const c = a - diff;
-	const b = rand(1, 8);
+	const b = lvl < 2 ? rand(1, 8) : pick([-8, -6, -5, -4, -3, -2, -1, 1, 2, 3, 4, 5, 6, 7, 8]);
 	const d = x * diff + b;
 	const sign = (n: number) => n >= 0 ? `+${n}` : `${n}`;
+	const undo = b >= 0 ? `−${b}` : `+${-b}`;
 	return {
 		atomId: 'algebra__lineare_gleichung_variablen_beidseitig',
 		prompt: `Löse: \\(${a}x ${sign(b)} = ${c}x ${sign(d)}\\)`,
@@ -2548,12 +2664,12 @@ reg('algebra__lineare_gleichung_variablen_beidseitig', () => {
 		inputData: {
 			steps: [
 				`\\(${a}x ${sign(b)} = ${c}x ${sign(d)}\\)`,
-				`\\(−${c}x\\) auf beiden Seiten: \\(${diff}x ${sign(b)} = ${d}\\)`,
-				`\\(−${b}\\) auf beiden Seiten: \\(${diff}x = ${d - b}\\)`,
+				`\\(−${c}x\\) auf beiden Seiten: \\(${diff === 1 ? '' : diff}x ${sign(b)} = ${d}\\)`,
+				`\\(${undo}\\) auf beiden Seiten: \\(${diff === 1 ? '' : diff}x = ${d - b}\\)`,
 				diff === 1 ? `\\(x = ${x}\\)` : `\\(:${diff}\\): \\(x = ${x}\\)`
 			]
 		},
-		difficulty: 0.55
+		difficulty: [0.45, 0.55, 0.6][lvl]
 	};
 });
 
@@ -2597,10 +2713,13 @@ reg('algebra__lineare_gleichung_klammern_brueche', (stage = 0) => {
 	};
 });
 
-reg('algebra__lineare_gleichung_sonderfaelle', () => {
+reg('algebra__lineare_gleichung_sonderfaelle', (stage = 0) => {
 	// type=2 added so "genau eine Lösung" is sometimes correct (previously never, reducing effective choices to 2)
-	const type = rand(0, 2);
-	const a = rand(2, 5), b = rand(1, 6);
+	// Expanding sequence: keine vs. genau eine Lösung → alle drei Fälle → größere Zahlen.
+	// Stage 0 still mixes two answers, so the answer can't be learned by rote.
+	const lvl = Math.min(stage, 2);
+	const type = lvl === 0 ? pick([0, 2]) : rand(0, 2);
+	const a = lvl < 2 ? rand(2, 5) : rand(3, 9), b = lvl < 2 ? rand(1, 6) : rand(4, 15);
 	const choices = ['keine Lösung', 'genau eine Lösung', 'unendlich viele Lösungen'];
 	if (type === 0) {
 		return { atomId: 'algebra__lineare_gleichung_sonderfaelle', prompt: `Wie viele Lösungen hat \\(${a}x + ${b} = ${a}x + ${b + 1}\\)?`, answerType: 'text', correctAnswer: 'keine Lösung', choices, hint: `Nach Umformen: ${b} = ${b + 1} — unmöglich!`, why: `Auf beiden Seiten \\(${a}x\\) abziehen: Es bleibt ${b} = ${b + 1}. Das stimmt nie → keine Lösung.`, difficulty: 0.5 };
@@ -2667,12 +2786,14 @@ reg('algebra__wurzelgleichungen', (stage = 0) => {
 
 // ── 20. Algebra: LGS ─────────────────────────────────────────────────────────
 
-reg('algebra__lgs_einsetzungsverfahren', () => {
-	const x = rand(1, 5), y = rand(1, 5);
-	const m = rand(1, 3);
+reg('algebra__lgs_einsetzungsverfahren', (stage = 0) => {
+	// Expanding sequence: y = x + b (b > 0) → Steigung bis 3, b auch negativ → auch negative Lösungen.
+	const lvl = Math.min(stage, 2);
+	const x = lvl < 2 ? rand(1, 5) : pick([-4, -3, -2, -1, 1, 2, 3, 4, 5, 6]), y = lvl < 2 ? rand(1, 5) : pick([-4, -3, -2, -1, 1, 2, 3, 4, 5, 6]);
+	const m = lvl === 0 ? 1 : rand(1, lvl < 2 ? 3 : 4);
 	const b = y - m * x;
-	if (b === 0) return registry.get('algebra__lgs_einsetzungsverfahren')!();
-	const a2 = rand(2, 4), c2 = a2 * x + y;
+	if (b === 0 || (lvl === 0 && b < 0)) return registry.get('algebra__lgs_einsetzungsverfahren')!(stage);
+	const a2 = rand(2, lvl === 0 ? 3 : lvl === 1 ? 4 : 5), c2 = a2 * x + y;
 	const bSign = (n: number) => n >= 0 ? `+ ${n}` : `- ${-n}`;
 	return {
 		atomId: 'algebra__lgs_einsetzungsverfahren',
@@ -2684,7 +2805,7 @@ reg('algebra__lgs_einsetzungsverfahren', () => {
 				`Gleichung I einsetzen in II: \\(${a2}x + (${m}x ${bSign(b)}) = ${c2}\\)`,
 				`\\(${a2 + m}x ${bSign(b)} = ${c2}\\)`,
 				`\\(${a2 + m}x = ${c2 - b}\\)  →  \\(x = ${x}\\)`,
-				`Einsetzen: \\(y = ${m}·${x} ${bSign(b)} = ${y}\\)`,
+				`Einsetzen: \\(y = ${m}·${paren(x)} ${bSign(b)} = ${y}\\)`,
 				`Lösung: \\(x = ${x},\\; y = ${y}\\)`
 			]
 		},
@@ -2692,12 +2813,17 @@ reg('algebra__lgs_einsetzungsverfahren', () => {
 	};
 });
 
-reg('algebra__lgs_additionsverfahren', () => {
-	const x = rand(1, 5), y = rand(1, 5);
-	const a1 = rand(1, 3), b1 = rand(1, 3);
-	const a2 = rand(1, 3), b2 = b1; // same y-coefficient so subtraction eliminates y
+reg('algebra__lgs_additionsverfahren', (stage = 0) => {
+	// Expanding sequence: y-Koeffizient 1, positive Differenz → Koeffizienten bis 3 → auch negative Lösungen, Koeffizienten bis 5.
+	const lvl = Math.min(stage, 2);
+	const x = lvl < 2 ? rand(1, 5) : pick([-4, -3, -2, -1, 1, 2, 3, 4, 5, 6]), y = lvl < 2 ? rand(1, 5) : pick([-4, -3, -2, -1, 1, 2, 3, 4, 5, 6]);
+	const maxC = lvl < 2 ? 3 : 5;
+	let a1 = rand(1, maxC), a2 = rand(1, maxC);
+	if (lvl === 0 && a1 < a2) [a1, a2] = [a2, a1];
+	const b1 = lvl === 0 ? 1 : rand(1, maxC);
+	const b2 = b1; // same y-coefficient so subtraction eliminates y
 	const c1 = a1 * x + b1 * y, c2 = a2 * x + b2 * y;
-	if (a1 === a2) return registry.get('algebra__lgs_additionsverfahren')!();
+	if (a1 === a2) return registry.get('algebra__lgs_additionsverfahren')!(stage);
 	return {
 		atomId: 'algebra__lgs_additionsverfahren',
 		prompt: `Löse mit dem Additionsverfahren:\n\\(${fmtPoly([[a1, 'x'], [b1, 'y']])} = ${c1}\\)\n\\(${fmtPoly([[a2, 'x'], [b2, 'y']])} = ${c2}\\)\nGesucht: \\(x = ?\\)`,
@@ -2708,7 +2834,7 @@ reg('algebra__lgs_additionsverfahren', () => {
 				`Gleichung I − II (y-Terme heben sich auf):`,
 				`\\((${a1}−${a2})x = ${c1}−${c2}\\)  →  \\(${a1 - a2}x = ${c1 - c2}\\)`,
 				`\\(x = ${x}\\)`,
-				`Einsetzen in I: \\(${a1}·${x} + ${b1}y = ${c1}\\)  →  \\(y = ${y}\\)`,
+				`Einsetzen in I: \\(${a1}·${paren(x)} + ${b1}y = ${c1}\\)  →  \\(y = ${y}\\)`,
 				`Lösung: \\(x = ${x},\\; y = ${y}\\)`
 			]
 		},
@@ -2716,11 +2842,15 @@ reg('algebra__lgs_additionsverfahren', () => {
 	};
 });
 
-reg('algebra__lgs_gleichsetzungsverfahren', () => {
-	const x = rand(1, 5), y = rand(1, 5);
-	const m1 = rand(1, 3), b1 = y - m1 * x;
-	const m2 = rand(1, 3);
-	if (m2 === m1) return registry.get('algebra__lgs_gleichsetzungsverfahren')!();
+reg('algebra__lgs_gleichsetzungsverfahren', (stage = 0) => {
+	// Expanding sequence: positive Steigungen, m₁ > m₂ → Steigungen bis 3 → auch negative Steigungen und Lösungen.
+	const lvl = Math.min(stage, 2);
+	const x = lvl < 2 ? rand(1, 5) : pick([-4, -3, -2, -1, 1, 2, 3, 4, 5, 6]), y = lvl < 2 ? rand(1, 5) : pick([-4, -3, -2, -1, 1, 2, 3, 4, 5, 6]);
+	let m1 = lvl < 2 ? rand(1, 3) : pick([-3, -2, -1, 1, 2, 3]);
+	let m2 = lvl < 2 ? rand(1, 3) : pick([-3, -2, -1, 1, 2, 3]);
+	if (m2 === m1) return registry.get('algebra__lgs_gleichsetzungsverfahren')!(stage);
+	if (lvl === 0 && m1 < m2) [m1, m2] = [m2, m1];
+	const b1 = y - m1 * x;
 	const b2 = y - m2 * x;
 	const bStr = (n: number) => n >= 0 ? `+${n}` : `${n}`;
 	return {
@@ -2733,7 +2863,7 @@ reg('algebra__lgs_gleichsetzungsverfahren', () => {
 				`Beide y-Terme gleichsetzen:`,
 				`\\(${m1}x ${bStr(b1)} = ${m2}x ${bStr(b2)}\\)`,
 				`\\(${m1 - m2}x = ${b2 - b1}\\)  →  \\(x = ${x}\\)`,
-				`Einsetzen: \\(y = ${m1}·${x} ${bStr(b1)} = ${y}\\)`,
+				`Einsetzen: \\(y = ${m1}·${paren(x)} ${bStr(b1)} = ${y}\\)`,
 				`Lösung: \\(x = ${x},\\; y = ${y}\\)`
 			]
 		},
@@ -2741,9 +2871,10 @@ reg('algebra__lgs_gleichsetzungsverfahren', () => {
 	};
 });
 
-reg('algebra__lgs_grafisch', () => {
+reg('algebra__lgs_grafisch', (stage = 0) => {
 	const slopes = [-2, -1, 1, 2];
-	const px = rand(-2, 2), py = rand(-2, 2);
+	// Expanding sequence: Schnittpunkt auf der y-Achse (x = 0) → beliebiger Gitterpunkt.
+	const px = stage === 0 ? 0 : rand(-2, 2), py = rand(-2, 2);
 	const m1 = pick(slopes);
 	const m2 = pick(slopes.filter(s => s !== m1));
 	const b1 = py - m1 * px, b2 = py - m2 * px;
@@ -2773,9 +2904,12 @@ reg('algebra__lgs_grafisch', () => {
 
 // ── 21. Algebra: Zuordnungen / Proportionalität ───────────────────────────────
 
-reg('algebra__proportionale_zuordnung', () => {
-	const rate = rand(2, 8);
-	const n1 = rand(2, 6), n2 = rand(n1 + 1, 10);
+reg('algebra__proportionale_zuordnung', (stage = 0) => {
+	// Expanding sequence: Vervielfachen (n₂ ist Vielfaches von n₁) → beliebige Mengen → größere Zahlen.
+	const lvl = Math.min(stage, 2);
+	const rate = lvl < 2 ? rand(2, 8) : rand(6, 15);
+	const n1 = lvl === 0 ? rand(2, 4) : rand(2, 6);
+	const n2 = lvl === 0 ? n1 * rand(2, 3) : lvl === 1 ? rand(n1 + 1, 10) : rand(n1 + 3, 20);
 	const c1 = rate * n1;
 	const ctx = pick([
 		{ q: `${n1} Hefte kosten ${c1} €. Wie viel Euro kosten ${n2} Hefte?`, per: 'Preis pro Heft', unit: '€' },
@@ -2798,11 +2932,26 @@ reg('algebra__proportionale_zuordnung', () => {
 	};
 });
 
-reg('algebra__antiproportionale_zuordnung', () => {
-	const x = rand(2, 6), y = rand(2, 5);
+reg('algebra__antiproportionale_zuordnung', (stage = 0) => {
+	const atomId = 'algebra__antiproportionale_zuordnung';
+	// Expanding sequence: doppelt so viele → halb so lange → eins mehr/weniger → beliebige Teiler des Produkts.
+	const lvl = Math.min(stage, 2);
+	let x: number, y: number, newX: number;
+	if (lvl === 0) {
+		x = rand(2, 5); y = 2 * rand(1, 4); newX = 2 * x;
+	} else if (lvl === 1) {
+		x = rand(2, 6); y = rand(2, 5);
+		const k0 = x * y;
+		newX = pick([k0 / (y + 1), k0 / (y - 1)].filter(v => Number.isInteger(v) && v > 0));
+		if (!newX) return registry.get(atomId)!(stage);
+	} else {
+		x = rand(3, 10); y = rand(3, 12);
+		const k0 = x * y;
+		const divs = Array.from({ length: k0 }, (_, i) => i + 1).filter(d => k0 % d === 0 && d !== x && d >= 2 && d <= 20 && k0 / d >= 2);
+		if (divs.length === 0) return registry.get(atomId)!(stage);
+		newX = pick(divs);
+	}
 	const k = x * y;
-	const newX = pick([k / (y + 1), k / (y - 1)].filter(v => Number.isInteger(v) && v > 0));
-	if (!newX) return registry.get('algebra__antiproportionale_zuordnung')!();
 	const newY = k / newX;
 	const context = pick([
 		{ t: 'Arbeiter', u: 'Tage' },
@@ -2812,7 +2961,7 @@ reg('algebra__antiproportionale_zuordnung', () => {
 		{ t: 'Erntehelfer', u: 'Tage' }
 	]);
 	return {
-		atomId: 'algebra__antiproportionale_zuordnung',
+		atomId,
 		prompt: `${x} ${context.t} brauchen ${y} ${context.u}. Wie lange brauchen ${newX} ${context.t}?`,
 		answerType: 'integer',
 		correctAnswer: String(newY),
@@ -2826,8 +2975,9 @@ reg('algebra__antiproportionale_zuordnung', () => {
 	};
 });
 
-reg('algebra__zuordnungen', () => {
-	const type = rand(0, 1);
+reg('algebra__zuordnungen', (stage = 0) => {
+	// Expanding sequence: Paare → Wertetabelle → beides gemischt (ja/nein ist in jeder Stufe gemischt).
+	const type = stageVariant(stage, 2);
 	if (type === 0) {
 		const pairs = [[1, rand(2, 5)], [2, rand(2, 5)], [3, rand(2, 5)]];
 		const dupX = rand(0, 1) === 1;
@@ -2872,11 +3022,14 @@ reg('algebra__funktion_eindeutige_zuordnung', (stage = 0) => {
 	};
 });
 
-reg('algebra__funktion_darstellungsformen', () => {
-	const a = rand(1, 4), b = rand(-4, 4);
-	const x = rand(1, 5);
+reg('algebra__funktion_darstellungsformen', (stage = 0) => {
+	// Expanding sequence: kleine positive Werte → b auch negativ → auch negative x und Steigungen.
+	const lvl = Math.min(stage, 2);
+	const a = [rand(1, 3), rand(1, 4), pick([-3, -2, -1, 1, 2, 3, 4])][lvl];
+	const b = [rand(0, 4), rand(-4, 4), rand(-6, 6)][lvl];
+	const x = lvl < 2 ? rand(1, lvl === 0 ? 4 : 5) : pick([-4, -3, -2, -1, 1, 2, 3, 4, 5]);
 	const y = a * x + b;
-	return { atomId: 'algebra__funktion_darstellungsformen', prompt: `\\(f(x) = ${fmtLin(a, b)}\\). Berechne \\(f(${x})\\).`, answerType: 'integer', correctAnswer: String(y), hint: `Setze ${x} für x ein: \\(${fmtLin(a, b).replace('x', ` \\cdot ${x}`)}\\)`, why: `Setze ${x} für x ein: ${a} · ${x} = ${a * x}${b !== 0 ? `, dann ${b > 0 ? '+' : '−'} ${Math.abs(b)} → ${y}` : ''}.`, difficulty: 0.35 };
+	return { atomId: 'algebra__funktion_darstellungsformen', prompt: `\\(f(x) = ${fmtLin(a, b)}\\). Berechne \\(f(${x})\\).`, answerType: 'integer', correctAnswer: String(y), hint: `Setze ${x} für x ein: \\(${fmtLin(a, b).replace('x', ` \\cdot ${paren(x)}`)}\\)`, why: `Setze ${x} für x ein: ${a} · ${paren(x)} = ${a * x}${b !== 0 ? `, dann ${b > 0 ? '+' : '−'} ${Math.abs(b)} → ${y}` : ''}.`, difficulty: [0.3, 0.35, 0.45][lvl] };
 });
 
 reg('algebra__definitions_wertebereich', (stage = 0) => {
@@ -2929,29 +3082,37 @@ reg('algebra__zahlenfolgen', (stage = 0) => {
 
 // ── 22. Algebra: Potenzen und Wurzeln ────────────────────────────────────────
 
-reg('algebra__potenzgesetz_gleiche_basis', () => {
-	const type = rand(0, 1);
-	const m = rand(2, 6), n = rand(2, 6);
+reg('algebra__potenzgesetz_gleiche_basis', (stage = 0) => {
+	// Expanding sequence: Multiplizieren mit kleinen Exponenten → auch Dividieren → Exponenten bis 9.
+	const lvl = Math.min(stage, 2);
+	const type = lvl === 0 ? 0 : rand(0, 1);
+	const maxE = [4, 6, 9][lvl];
+	const m = rand(2, maxE), n = rand(2, maxE);
 	if (type === 0) {
 		return { atomId: 'algebra__potenzgesetz_gleiche_basis', prompt: `\\(a^${m} \\cdot a^${n} = a^{?\\ }\\)`, answerType: 'integer', correctAnswer: String(m + n), hint: `Gleiche Basis: Exponenten addieren → ${m}+${n}=${m + n}`, why: `\\(a^${m}\\) sind ${m} Faktoren a, \\(a^${n}\\) sind ${n} Faktoren a – zusammen ${m} + ${n} = ${m + n} Faktoren.`, difficulty: 0.4 };
 	} else {
-		if (m <= n) return registry.get('algebra__potenzgesetz_gleiche_basis')!();
+		if (m <= n) return registry.get('algebra__potenzgesetz_gleiche_basis')!(stage);
 		return { atomId: 'algebra__potenzgesetz_gleiche_basis', prompt: `\\(a^${m} : a^${n} = a^{?\\ }\\)`, answerType: 'integer', correctAnswer: String(m - n), hint: `Gleiche Basis: Exponenten subtrahieren → ${m}−${n}=${m - n}`, why: `Von ${m} Faktoren a im Zähler kürzen sich ${n} weg. Übrig: ${m} − ${n} = ${m - n}.`, difficulty: 0.4 };
 	}
 });
 
-reg('algebra__potenzgesetz_potenz_einer_potenz', () => {
-	const m = rand(2, 4), n = rand(2, 4);
+reg('algebra__potenzgesetz_potenz_einer_potenz', (stage = 0) => {
+	// Expanding sequence on the exponents: bis 3 → bis 4 → bis 6.
+	const maxE = [3, 4, 6][Math.min(stage, 2)];
+	const m = rand(2, maxE), n = rand(2, maxE);
 	// single variables only: (2x^m)^n would not equal 2x^(m·n)
 	const base = pick(['a', 'x', 'b', 'y', 'z']);
 	return { atomId: 'algebra__potenzgesetz_potenz_einer_potenz', prompt: `\\((${base}^${m})^${n} = ${base}^{?\\ }\\)`, answerType: 'integer', correctAnswer: String(m * n), hint: `Potenz einer Potenz: Exponenten multiplizieren → ${m}·${n}=${m * n}`, why: `\\(${base}^${m}\\) steht ${n}-mal als Faktor da. Das sind ${n} · ${m} = ${m * n} Faktoren ${base}.`, difficulty: 0.45 };
 });
 
-reg('algebra__potenzen_negative_exponenten', () => {
-	const base = pick([2, 3, 5, 10]);
-	const exp = rand(1, 3);
+reg('algebra__potenzen_negative_exponenten', (stage = 0) => {
+	// Expanding sequence: Auswahl (Kehrwert erkennen) mit Basis 2/10 → Basis 2/3/5/10, Exponent bis 3, auch Eingabe → weitere Basen.
+	const lvl = Math.min(stage, 2);
+	const base = pick([[2, 10], [2, 3, 5, 10], [2, 3, 4, 5, 6, 10]][lvl]);
+	let exp = rand(1, [2, 3, 4][lvl]);
+	while (base ** exp > 10000) exp--;
 	const val = base ** exp;
-	const type = rand(0, 1);
+	const type = lvl === 0 ? 1 : rand(0, 1);
 	if (type === 0) {
 		return { atomId: 'algebra__potenzen_negative_exponenten', prompt: `\\(${base}^{-${exp}} = \\frac{1}{\\_\\_}\\)`, answerType: 'integer', correctAnswer: String(val), hint: `\\(a^{-n} = \\frac{1}{a^n}\\) → \\(\\frac{1}{${base}^{${exp}}} = \\frac{1}{${val}}\\)`, why: `Ein negativer Exponent bedeutet Kehrwert, nicht negative Zahl: \\(${base}^{-${exp}} = \\frac{1}{${base}^{${exp}}} = \\frac{1}{${val}}\\).`, difficulty: 0.45 };
 	} else {
@@ -2976,11 +3137,13 @@ reg('algebra__potenzen_rationale_exponenten', (stage = 0) => {
 	return { atomId: 'algebra__potenzen_rationale_exponenten', prompt: `\\(${base}^{\\frac{${m}}{${k}}} = ?\\)`, answerType: 'integer', correctAnswer: String(r ** m), hint, why: m === 1 ? `Der Exponent \\(\\frac{1}{${k}}\\) bedeutet die ${k}. Wurzel: Welche Zahl ergibt ${k}-mal mit sich selbst multipliziert ${base}? \\(${r}^${k} = ${base}\\).` : `Nenner = Wurzel, Zähler = Potenz: erst \\(${root} = ${r}\\), dann \\(${r}^${m} = ${r ** m}\\).`, difficulty: m === 1 ? 0.5 : 0.6 };
 });
 
-reg('algebra__quadratwurzel_begriff', () => {
-	const squares = [1, 4, 9, 16, 25, 36, 49, 64, 81, 100, 121, 144];
+reg('algebra__quadratwurzel_begriff', (stage = 0) => {
+	// Expanding sequence: Wurzeln bis 25 → bis 100, auch als Gleichung x² = n → größere Quadratzahlen.
+	const lvl = Math.min(stage, 2);
+	const squares = [[1, 4, 9, 16, 25], [4, 9, 16, 25, 36, 49, 64, 81, 100], [121, 144, 169, 196, 225, 400, 900, 2500]][lvl];
 	const n = pick(squares);
 	const root = Math.sqrt(n);
-	const type = rand(0, 1);
+	const type = lvl === 0 ? 0 : rand(0, 1);
 	if (type === 0) {
 		return { atomId: 'algebra__quadratwurzel_begriff', prompt: `\\(\\sqrt{${n}} = ?\\)`, answerType: 'integer', correctAnswer: String(root), hint: `\\(${root}^2 = ${n}\\)`, why: `Gesucht ist die positive Zahl, die mit sich selbst multipliziert ${n} ergibt: ${root} · ${root} = ${n}.`, difficulty: 0.35 };
 	} else {
@@ -3006,32 +3169,42 @@ reg('algebra__irrationale_reelle_zahlen', (stage = 0) => {
 	return { atomId, prompt: 'Welche der folgenden Zahlen ist rational?', answerType: 'text', correctAnswer: rat, choices, hint, why: rat.startsWith('√') ? `${rat} = ${Math.sqrt(Number(rat.slice(1)))} – die Wurzel einer Quadratzahl ist eine ganze Zahl, also rational.` : `${rat} lässt sich als Bruch schreiben. Die anderen Zahlen haben unendlich viele Nachkommastellen ohne Periode.`, difficulty: 0.5 };
 });
 
-reg('algebra__wurzelterme_umformen', () => {
+reg('algebra__wurzelterme_umformen', (stage = 0) => {
 	// √(f²·rest) with a square-free rest → f·√rest
-	let f = rand(2, 7), rest = pick([2, 3, 5, 6, 7, 10]);
-	while (f * f * rest > 300) { f = rand(2, 7); rest = pick([2, 3, 5, 6, 7, 10]); }
+	// Expanding sequence: √8, √12, √18, √27 … → Original-Zahlenraum bis 300 → Faktoren bis 10, bis 500.
+	const lvl = Math.min(stage, 2);
+	const [maxF, rests, maxN] = ([[3, [2, 3], 50], [7, [2, 3, 5, 6, 7, 10], 300], [10, [2, 3, 5, 6, 7, 10, 11], 500]] as const)[lvl];
+	let f = rand(2, maxF), rest: number = pick([...rests]);
+	while (f * f * rest > maxN) { f = rand(2, maxF); rest = pick([...rests]); }
 	const n = f * f * rest;
 	return { atomId: 'algebra__wurzelterme_umformen', prompt: `\\(\\sqrt{${n}} = \\_\\_ \\cdot \\sqrt{${rest}}\\)`, answerType: 'integer', correctAnswer: String(f), hint: `Zerlege ${n} in eine Quadratzahl mal ${rest}: \\(${n} = \\_\\_ \\cdot ${rest}\\)`, why: `\\(${n} = ${f * f} \\cdot ${rest}\\), und \\(\\sqrt{${f * f}} = ${f}\\). Also \\(\\sqrt{${n}} = ${f} \\cdot \\sqrt{${rest}}\\).`, difficulty: 0.5 };
 });
 
 // ── 23. Algebra: Lineare Funktionen ──────────────────────────────────────────
 
-reg('algebra__lineare_funktion_steigung_achsenabschnitt', () => {
-	const m = rand(-4, 4), n = rand(-5, 5);
-	while (m === 0) return registry.get('algebra__lineare_funktion_steigung_achsenabschnitt')!();
+reg('algebra__lineare_funktion_steigung_achsenabschnitt', (stage = 0) => {
+	const atomId = 'algebra__lineare_funktion_steigung_achsenabschnitt';
+	// Expanding sequence: positive m und n → auch negative → Sonderfälle (m = ±1, n = 0) und
+	// vertauschte Schreibweise n + mx.
+	const lvl = Math.min(stage, 2);
+	const m = [rand(2, 4), pick([-4, -3, -2, 2, 3, 4]), pick([-4, -3, -2, -1, 1, 2, 3, 4])][lvl];
+	const n = [rand(1, 5), pick([-5, -4, -3, -2, -1, 1, 2, 3, 4, 5]), rand(-5, 5)][lvl];
+	const term = lvl === 2 && rand(0, 1) === 0 ? fmtPoly([[n, ''], [m, 'x']]) : fmtLin(m, n);
 	const type = rand(0, 1);
 	if (type === 0) {
-		return { atomId: 'algebra__lineare_funktion_steigung_achsenabschnitt', prompt: `\\(f(x) = ${fmtLin(m, n)}\\). Wie groß ist die Steigung \\(m\\)?`, answerType: 'integer', correctAnswer: String(m), hint: `In \\(y=mx+n\\) ist \\(m\\) der Koeffizient vor \\(x\\).`, why: `In \\(f(x) = mx + n\\) steht die Steigung direkt vor dem x: hier ${m}.${Math.abs(m) === 1 ? ' (Steht nur x oder −x da, ist m = 1 bzw. −1.)' : ''}`, difficulty: 0.35 };
+		return { atomId, prompt: `\\(f(x) = ${term}\\). Wie groß ist die Steigung \\(m\\)?`, answerType: 'integer', correctAnswer: String(m), hint: `In \\(y=mx+n\\) ist \\(m\\) der Koeffizient vor \\(x\\).`, why: `In \\(f(x) = mx + n\\) steht die Steigung direkt vor dem x: hier ${m}.${Math.abs(m) === 1 ? ' (Steht nur x oder −x da, ist m = 1 bzw. −1.)' : ''}`, difficulty: 0.35 };
 	} else {
-		return { atomId: 'algebra__lineare_funktion_steigung_achsenabschnitt', prompt: `\\(f(x) = ${fmtLin(m, n)}\\). Wie groß ist der y-Achsenabschnitt \\(n\\)?`, answerType: 'integer', correctAnswer: String(n), hint: `In \\(y=mx+n\\) ist \\(n\\) der y-Achsenabschnitt (konstantes Glied).`, why: `Der y-Achsenabschnitt ist die Zahl ohne x: hier ${n}${n === 0 ? ' (es steht keine da)' : ''}. Dort schneidet die Gerade die y-Achse, denn f(0) = ${n}.`, difficulty: 0.35 };
+		return { atomId, prompt: `\\(f(x) = ${term}\\). Wie groß ist der y-Achsenabschnitt \\(n\\)?`, answerType: 'integer', correctAnswer: String(n), hint: `In \\(y=mx+n\\) ist \\(n\\) der y-Achsenabschnitt (konstantes Glied).`, why: `Der y-Achsenabschnitt ist die Zahl ohne x: hier ${n}${n === 0 ? ' (es steht keine da)' : ''}. Dort schneidet die Gerade die y-Achse, denn f(0) = ${n}.`, difficulty: 0.35 };
 	}
 });
 
-reg('algebra__lineare_funktion_nullstelle', () => {
+reg('algebra__lineare_funktion_nullstelle', (stage = 0) => {
 	// Generate x0 first for uniform distribution (retry-loop on n%m===0 heavily biases toward x0=±1)
-	const x0 = rand(-5, 5);
-	if (x0 === 0) return registry.get('algebra__lineare_funktion_nullstelle')!();
-	const m = rand(1, 5);
+	// Expanding sequence: positive Nullstelle, kleine Steigung → Original → Steigung bis 8, Nullstelle bis ±8.
+	const lvl = Math.min(stage, 2);
+	const x0 = [rand(1, 5), rand(-5, 5), rand(-8, 8)][lvl];
+	if (x0 === 0) return registry.get('algebra__lineare_funktion_nullstelle')!(stage);
+	const m = [rand(1, 3), rand(1, 5), rand(2, 8)][lvl];
 	const n = -x0 * m;
 	const nSign = (v: number) => v >= 0 ? `+${v}` : `${v}`;
 	return {
@@ -3077,10 +3250,12 @@ reg('algebra__lineare_funktion_gleichung_aufstellen', (stage = 0) => {
 	}
 });
 
-reg('algebra__lineare_funktion_graph_zeichnen', () => {
-	const m = rand(-3, 3), n = rand(-4, 4);
-	while (m === 0) return registry.get('algebra__lineare_funktion_graph_zeichnen')!();
-	const testX = rand(1, 3);
+reg('algebra__lineare_funktion_graph_zeichnen', (stage = 0) => {
+	// Expanding sequence: positive Steigung und Achsenabschnitt → Original → auch negative x-Werte.
+	const lvl = Math.min(stage, 2);
+	const m = lvl === 0 ? rand(1, 3) : rand(-3, 3), n = lvl === 0 ? rand(0, 4) : rand(-4, 4);
+	while (m === 0) return registry.get('algebra__lineare_funktion_graph_zeichnen')!(stage);
+	const testX = lvl < 2 ? rand(1, lvl === 0 ? 2 : 3) : pick([-2, -1, 1, 2, 3]);
 	const correctY = m * testX + n;
 	const choices = [
 		`(${testX} | ${correctY})`,
@@ -3088,7 +3263,7 @@ reg('algebra__lineare_funktion_graph_zeichnen', () => {
 		`(${testX} | ${correctY - 1})`,
 		`(${testX + 1} | ${correctY})`
 	].sort(() => Math.random() - 0.5);
-	return { atomId: 'algebra__lineare_funktion_graph_zeichnen', prompt: `Welcher Punkt liegt auf dem Graphen von \\(f(x) = ${fmtLin(m, n)}\\)?`, answerType: 'text', correctAnswer: `(${testX} | ${correctY})`, choices, hint: `Setze \\(x = ${testX}\\) ein und berechne \\(f(${testX})\\).`, why: `Einsetzen: \\(f(${testX}) = ${m} \\cdot ${testX} ${n >= 0 ? '+' : '-'} ${Math.abs(n)} = ${correctY}\\). Der Punkt (${testX} | ${correctY}) erfüllt die Gleichung.`, difficulty: 0.4 };
+	return { atomId: 'algebra__lineare_funktion_graph_zeichnen', prompt: `Welcher Punkt liegt auf dem Graphen von \\(f(x) = ${fmtLin(m, n)}\\)?`, answerType: 'text', correctAnswer: `(${testX} | ${correctY})`, choices, hint: `Setze \\(x = ${testX}\\) ein und berechne \\(f(${testX})\\).`, why: `Einsetzen: \\(f(${testX}) = ${m} \\cdot ${paren(testX)} ${n >= 0 ? '+' : '-'} ${Math.abs(n)} = ${correctY}\\). Der Punkt (${testX} | ${correctY}) erfüllt die Gleichung.`, difficulty: 0.4 };
 });
 
 // ── 24. Algebra: Quadratische Funktionen und Gleichungen ─────────────────────
@@ -3113,19 +3288,24 @@ reg('algebra__normalparabel_streckung', (stage = 0) => {
 	return { atomId, prompt: `Wie ist der Graph von \\(f(x) = (x ${right ? '-' : '+'} ${c})^2\\) gegenüber \\(y = x^2\\) verschoben?`, answerType: 'text', correctAnswer: choices[right ? 0 : 1], choices: shuffled(choices), hint: `\\((x-c)^2\\): um \\(c\\) nach rechts; \\((x+c)^2\\): um \\(c\\) nach links.`, why: `Der Scheitel liegt dort, wo die Klammer 0 wird: bei x = ${right ? c : -c}. Also um ${c} nach ${right ? 'rechts' : 'links'} – entgegen dem Vorzeichen in der Klammer.`, difficulty: 0.45 };
 });
 
-reg('algebra__scheitelpunktform', () => {
-	const d = rand(-4, 4), e = rand(-4, 4), a = pick([1, -1, 2]);
+reg('algebra__scheitelpunktform', (stage = 0) => {
+	// Expanding sequence: (x − d)² ± e mit a = 1 → d beliebig → Streckfaktor a ≠ 1 und größere Werte.
+	const lvl = Math.min(stage, 2);
+	const d = [rand(1, 4), rand(-4, 4), rand(-6, 6)][lvl], e = lvl < 2 ? rand(-4, 4) : rand(-6, 6);
+	const a = lvl < 2 ? 1 : pick([-1, 2, -2, 3]);
 	// d=0 or e=0 causes duplicate choices: (0|e)==(-0|e) and (d|0)==(d|-0)
-	if (d === 0 || e === 0) return registry.get('algebra__scheitelpunktform')!();
+	if (d === 0 || e === 0) return registry.get('algebra__scheitelpunktform')!(stage);
 	// written the way it appears in textbooks: (x + 3)² instead of (x − (−3))²
 	const aStr = a === 1 ? '' : a === -1 ? '-' : String(a);
 	const choices = [`(${d} | ${e})`, `(${-d} | ${e})`, `(${d} | ${-e})`, `(${-d} | ${-e})`];
 	return { atomId: 'algebra__scheitelpunktform', prompt: `Lies den Scheitelpunkt ab: \\(f(x) = ${aStr}(x ${d > 0 ? '-' : '+'} ${Math.abs(d)})^2 ${e > 0 ? '+' : '-'} ${Math.abs(e)}\\)`, answerType: 'text', correctAnswer: `(${d} | ${e})`, choices: choices.sort(() => Math.random() - 0.5), hint: `Scheitelpunktform \\(y=a(x−d)^2+e\\) → Scheitel \\(S(d \\mid e)\\)`, why: `Die Klammer wird 0 für x = ${d} (Vorzeichen umdrehen!), dort ist f(x) = ${e}. Scheitel: (${d} | ${e}).`, difficulty: 0.5 };
 });
 
-reg('algebra__scheitelform_umwandeln', () => {
-	const d = rand(-4, 4), e = rand(-4, 4);
-	if (d === 0 || e === 0) return registry.get('algebra__scheitelform_umwandeln')!();
+reg('algebra__scheitelform_umwandeln', (stage = 0) => {
+	// Expanding sequence: (x − d)² + e mit kleinen positiven d, e → Original → Werte bis ±6.
+	const lvl = Math.min(stage, 2);
+	const d = [rand(1, 3), rand(-4, 4), rand(-6, 6)][lvl], e = [rand(1, 4), rand(-4, 4), rand(-6, 6)][lvl];
+	if (d === 0 || e === 0) return registry.get('algebra__scheitelform_umwandeln')!(stage);
 	// (x-d)² + e = x² - 2dx + d² + e
 	const p = -2 * d, q = d * d + e;
 	const correct = `\\(${fmtQuad(1, p, q)}\\)`;
@@ -3184,7 +3364,7 @@ reg('algebra__parabel_nullstellen', (stage = 0) => {
 	}
 });
 
-reg('algebra__parametereinfluss_graphen', () => {
+reg('algebra__parametereinfluss_graphen', (stage = 0) => {
 	const templates = [
 		{ q: 'Was bewirkt \\(a > 1\\) in \\(f(x) = a \\cdot x^2\\)?', a: 'Graph wird schmaler', w: ['Graph wird breiter', 'Graph verschiebt sich nach oben', 'Graph spiegelt sich'], e: 'Jeder y-Wert wird mit a vervielfacht: Die Parabel steigt schneller, wirkt also schmaler.' },
 		{ q: 'Was bewirkt \\(c > 0\\) in \\(f(x) = x^2 + c\\)?', a: 'Verschiebung nach oben um \\(c\\)', w: ['Verschiebung nach unten um \\(c\\)', 'Verschiebung nach rechts', 'Streckung um \\(c\\)'], e: 'Zu jedem y-Wert wird c addiert – der ganze Graph rutscht um c nach oben.' },
@@ -3196,7 +3376,9 @@ reg('algebra__parametereinfluss_graphen', () => {
 		{ q: 'Was bewirkt \\(m > 0\\) in \\(f(x) = m \\cdot x + n\\)?', a: 'Gerade steigt', w: ['Gerade fällt', 'Gerade verläuft waagerecht', 'Gerade wird nach oben verschoben'], e: 'm gibt an, um wie viel y wächst, wenn x um 1 wächst. Ist m positiv, geht es bergauf.' },
 		{ q: 'Was bewirkt ein größeres \\(n\\) in \\(f(x) = m \\cdot x + n\\)?', a: 'Gerade wird nach oben verschoben', w: ['Gerade wird steiler', 'Gerade wird flacher', 'Gerade wird nach rechts verschoben'], e: 'n ist der y-Achsenabschnitt. Ein größeres n hebt jeden Punkt der Geraden gleich weit an.' },
 	];
-	const t = pick(templates);
+	// Expanding sequence: Geraden und Verschiebung nach oben/unten → Streckung/Spiegelung → Verschiebung nach links/rechts.
+	const groups = [[7, 8, 1, 5], [0, 4, 2], [3, 6]];
+	const t = templates[pick(groups[stageVariant(stage, groups.length)])];
 	const choices = [t.a, ...t.w].sort(() => Math.random() - 0.5);
 	return { atomId: 'algebra__parametereinfluss_graphen', prompt: t.q, answerType: 'text', correctAnswer: t.a, choices, why: t.e, difficulty: 0.45 };
 });
@@ -3264,27 +3446,34 @@ reg('algebra__quadratische_gleichung_reinquadratisch', (stage = 0) => {
 	}
 });
 
-reg('algebra__quadratische_gleichung_faktorisiert', () => {
-	const x1 = rand(-5, 5), x2 = rand(-5, 5);
+reg('algebra__quadratische_gleichung_faktorisiert', (stage = 0) => {
+	const atomId = 'algebra__quadratische_gleichung_faktorisiert';
+	// Expanding sequence: x(x − a) = 0 → (x − a)(x − b) = 0 → mit Faktor vor x, z. B. (2x − 6)(x + 1) = 0.
+	const lvl = Math.min(stage, 2);
+	const x1 = rand(-5, 5), x2 = lvl === 0 ? 0 : rand(-5, 5);
 	// x1+x2===0 guard: distractor "-x1 oder -x2" would equal correct in reversed order
-	while (x1 === x2 || x1 === 0 || x1 + x2 === 0) return registry.get('algebra__quadratische_gleichung_faktorisiert')!();
-	const term = (r: number) => r === 0 ? 'x' : r > 0 ? `x − ${r}` : `x + ${-r}`;
-	const t1 = term(x1), t2 = term(x2);
+	if (x1 === x2 || x1 === 0 || x1 + x2 === 0 || (lvl > 0 && x2 === 0)) return registry.get(atomId)!(stage);
+	const k = lvl === 2 ? pick([2, 3]) : 1;
+	const term = (r: number, c = 1) => r === 0 ? 'x' : `${c === 1 ? '' : c}x ${r > 0 ? '−' : '+'} ${Math.abs(c * r)}`;
+	const t1 = term(x1, k), t2 = term(x2);
 	const correct = `\\(x = ${x1}\\) oder \\(x = ${x2}\\)`;
-	const choices = [correct, `\\(x = ${-x1}\\) oder \\(x = ${-x2}\\)`, `\\(x = ${x1}\\)`, `\\(x = ${x1 + 1}\\) oder \\(x = ${x2 + 1}\\)`].sort(() => Math.random() - 0.5);
-	return { atomId: 'algebra__quadratische_gleichung_faktorisiert', prompt: `Löse: \\(${x2 === 0 ? `x(${t1})` : `(${t1})(${t2})`} = 0\\)`, answerType: 'text', correctAnswer: correct, choices, hint: `Satz vom Nullprodukt: \\(${t1} = 0\\) oder \\(${t2} = 0\\)`, why: `Ein Produkt ist 0, wenn ein Faktor 0 ist: \\(${t1} = 0\\) für \\(x = ${x1}\\)${x2 === 0 ? ', und x selbst ist 0 für \\(x = 0\\)' : `, \\(${t2} = 0\\) für \\(x = ${x2}\\)`}.`, difficulty: 0.45 };
+	const choices = shuffled([correct, `\\(x = ${-x1}\\) oder \\(x = ${-x2}\\)`, `\\(x = ${x1}\\)`, `\\(x = ${x1 + 1}\\) oder \\(x = ${x2 + 1}\\)`]);
+	return { atomId, prompt: `Löse: \\(${x2 === 0 ? `x(${t1})` : `(${t1})(${t2})`} = 0\\)`, answerType: 'text', correctAnswer: correct, choices, hint: `Satz vom Nullprodukt: \\(${t1} = 0\\) oder \\(${t2} = 0\\)`, why: `Ein Produkt ist 0, wenn ein Faktor 0 ist: \\(${t1} = 0\\) für \\(x = ${x1}\\)${x2 === 0 ? ', und x selbst ist 0 für \\(x = 0\\)' : `, \\(${t2} = 0\\) für \\(x = ${x2}\\)`}.`, difficulty: [0.4, 0.45, 0.55][lvl] };
 });
 
-reg('algebra__quadratische_gleichung_loesungsformel', () => {
-	const x1 = rand(-4, 4), x2 = rand(-4, 4);
+reg('algebra__quadratische_gleichung_loesungsformel', (stage = 0) => {
+	// Expanding sequence: positive Lösungen bis 5 → Lösungen zwischen −4 und 4 → zwischen −7 und 7.
+	const lvl = Math.min(stage, 2);
+	const [lo, hi] = [[1, 5], [-4, 4], [-7, 7]][lvl];
+	const x1 = rand(lo, hi), x2 = rand(lo, hi);
 	const p = -(x1 + x2), q = x1 * x2;
 	// p=0: step-1 choices degenerate; q=0: step-1 choices collapse to 2 options
-	if (x1 === x2 || p % 2 !== 0 || x1 + x2 === 0 || q === 0) return registry.get('algebra__quadratische_gleichung_loesungsformel')!();
+	if (x1 === x2 || p % 2 !== 0 || x1 + x2 === 0 || q === 0) return registry.get('algebra__quadratische_gleichung_loesungsformel')!(stage);
 	const [s, l] = x1 < x2 ? [x1, x2] : [x2, x1];
 	const half = -p / 2;
 	const disc = half * half - q;
 	const sqrtDisc = Math.sqrt(disc);
-	if (!Number.isInteger(sqrtDisc) || sqrtDisc === 0) return registry.get('algebra__quadratische_gleichung_loesungsformel')!();
+	if (!Number.isInteger(sqrtDisc) || sqrtDisc === 0) return registry.get('algebra__quadratische_gleichung_loesungsformel')!(stage);
 
 	const correct = `x₁=${s}; x₂=${l}`;
 	const shuf = <T>(a: T[]) => a.sort(() => Math.random() - 0.5);
@@ -3665,11 +3854,18 @@ reg('geometrie__pythagoras_kathete', (stage = 0) => {
 	return { atomId: 'geometrie__pythagoras_kathete', prompt: `Berechne die Länge der fehlenden Kathete.`, answerType: 'number', correctAnswer: String(unknown), svg, hint: `Kathete = √(c² − ${known}²) = √(${c}² − ${known}²)`, why: `Die Hypotenuse ist die längste Seite – für eine Kathete wird subtrahiert: ${c}² − ${known}² = ${c * c} − ${known * known} = ${unknown * unknown}, √${unknown * unknown} = ${unknown} cm.`, difficulty: 0.55 };
 });
 
-reg('geometrie__pythagoras_umkehrung', () => {
+reg('geometrie__pythagoras_umkehrung', (stage = 0) => {
+	// Expanding sequence: kleine Tripel, längste Seite zuletzt → alle Tripel bis c = 17 → längste Seite an
+	// beliebiger Stelle, „Beinahe-Tripel“ (c ± 1) als Gegenbeispiele.
+	const lvl = Math.min(stage, 2);
 	const isRight = rand(0, 1) === 0;
 	let a: number, b: number, c: number;
 	if (isRight) {
-		[a, b, c] = pick(PYTHAG_TRIPLES);
+		[a, b, c] = pick(PYTHAG_TRIPLES.filter(t => t[2] <= [13, 17, Infinity][lvl]));
+		if (lvl === 2) [a, b, c] = shuffled([a, b, c]);
+	} else if (lvl === 2) {
+		const [p, q, r] = pick(PYTHAG_TRIPLES);
+		[a, b, c] = shuffled([p, q, r + pick([-1, 1])]);
 	} else {
 		let sides = randomTriangleSides();
 		let sorted = [...sides].sort((p, q) => p - q);
@@ -3768,12 +3964,15 @@ reg('geometrie__sin_cos_tan_definition', (stage = 0) => {
 	};
 });
 
-reg('geometrie__trigonometrie_seiten_berechnen', () => {
+reg('geometrie__trigonometrie_seiten_berechnen', (stage = 0) => {
 	const alphaDeg = pick([25, 30, 35, 40, 50, 55, 60, 65]);
 	const alpha = alphaDeg * Math.PI / 180;
 	const kinds = ['ankathete', 'gegenkathete', 'hypotenuse'] as const;
-	const given = pick([...kinds]);
-	const ask = pick(kinds.filter(x => x !== given));
+	// Expanding sequence: Hypotenuse gegeben, Kathete gesucht (sin/cos, nur multiplizieren) →
+	// Kathete aus Kathete (tan) → alle Kombinationen, auch Hypotenuse gesucht (dividieren).
+	const lvl = Math.min(stage, 2);
+	const given = lvl === 0 ? 'hypotenuse' : lvl === 1 ? pick(['ankathete', 'gegenkathete'] as const) : pick([...kinds]);
+	const ask = lvl === 1 ? (given === 'ankathete' ? 'gegenkathete' : 'ankathete') : pick(kinds.filter(x => x !== given));
 	const k = rand(5, 20);
 	let legA: number, legB: number, hyp: number;
 	if (given === 'ankathete') { legA = k; legB = k * Math.tan(alpha); hyp = k / Math.cos(alpha); }
@@ -3798,11 +3997,12 @@ reg('geometrie__trigonometrie_seiten_berechnen', () => {
 	};
 });
 
-reg('geometrie__trigonometrie_winkel_berechnen', () => {
+reg('geometrie__trigonometrie_winkel_berechnen', (stage = 0) => {
 	const [a, b, c] = pick(PYTHAG_TRIPLES);
 	const atB = rand(0, 1) === 0;
 	const gegen = atB ? b : a, anka = atB ? a : b;
-	const pair = pick(['ga', 'gh', 'ah'] as const);
+	// Expanding sequence: sin (Gegenkathete/Hypotenuse) → cos → tan; frühere bleiben in der Mischung.
+	const pair = (['gh', 'ah', 'ga'] as const)[stageVariant(stage, 3)];
 	const rad2deg = (r: number) => r * 180 / Math.PI;
 	let labelGegen: string, labelAnka: string, labelHyp: string, hintText: string, correct: number, fnName: string;
 	if (pair === 'ga') {
@@ -3836,16 +4036,20 @@ reg('geometrie__trigonometrie_winkel_berechnen', () => {
 	};
 });
 
-reg('geometrie__sinussatz', () => {
-	const Adeg = rand(35, 75);
+reg('geometrie__sinussatz', (stage = 0) => {
+	// Expanding sequence: Seite b zum gegebenen Winkel β (direkt einsetzen) → Seite c (erst γ berechnen) →
+	// beides gemischt mit beliebigen Gradzahlen (vorher Fünferwinkel).
+	const lvl = Math.min(stage, 2);
+	const step = lvl < 2 ? 5 : 1;
+	const Adeg = randStep(35, 75, step);
 	const remaining = 180 - Adeg;
-	const Bdeg = rand(25, remaining - 25);
+	const Bdeg = randStep(25, remaining - 25, step);
 	const Cdeg = 180 - Adeg - Bdeg;
 	const a = rand(6, 16);
 	const k = a / Math.sin(Adeg * Math.PI / 180);
 	const b = k * Math.sin(Bdeg * Math.PI / 180);
 	const c = k * Math.sin(Cdeg * Math.PI / 180);
-	const askC = rand(0, 1) === 0;
+	const askC = lvl === 0 ? false : lvl === 1 ? true : rand(0, 1) === 0;
 	const svg = svgTriangleSSS(a, b, c, {
 		labelA: `a = ${a} cm`,
 		labelB: askC ? `${dec(round(b, 1))} cm` : '?',
@@ -3890,10 +4094,12 @@ reg('geometrie__kosinussatz', (stage = 0) => {
 
 // ── 29. Geometrie: Ähnlichkeit ────────────────────────────────────────────────
 
-reg('geometrie__strahlensaetze', () => {
-	const a = rand(2, 6), k = rand(2, 4), b = rand(3, 10);
+reg('geometrie__strahlensaetze', (stage = 0) => {
+	// Expanding sequence: Verdoppeln (k = 2), äußere Strecke gesucht → k bis 4 → auch innere Strecke gesucht (teilen).
+	const lvl = Math.min(stage, 2);
+	const a = rand(2, 6), k = lvl === 0 ? 2 : rand(2, 4), b = rand(3, 10);
 	const c = a * k, d = b * k;
-	const hideIdx = rand(0, 3);
+	const hideIdx = lvl < 2 ? rand(2, 3) : rand(0, 3);
 	const vals = { a, b, c, d };
 	const labels = {
 		a: hideIdx === 0 ? '?' : `${a} cm`,
@@ -3952,25 +4158,39 @@ reg('geometrie__neben_scheitelwinkel', (stage = 0) => {
 	};
 });
 
-reg('geometrie__stufen_wechselwinkel', () => {
-	const theta = rand(25, 80);
+reg('geometrie__stufen_wechselwinkel', (stage = 0) => {
+	// Expanding sequence: Stufenwinkel (Zehnerwinkel) → auch Wechselwinkel (Fünferwinkel) →
+	// Winkelart selbst erkennen, auch Nebenwinkel eines Stufenwinkels (180° − θ), beliebige Gradzahlen.
+	const lvl = Math.min(stage, 2);
+	const theta = randStep(25, 80, stageStep(stage));
 	const value = (i: number) => i % 2 === 0 ? theta : 180 - theta;
-	const isStufen = rand(0, 1) === 0;
 	const idx1 = rand(0, 3);
-	const idx2 = isStufen ? idx1 : (idx1 + 2) % 4;
+	const kind = lvl === 0 ? 'stufen' : lvl === 1 ? pick(['stufen', 'wechsel'] as const) : pick(['stufen', 'wechsel', 'neben'] as const);
+	const idx2 = kind === 'stufen' ? idx1 : kind === 'wechsel' ? (idx1 + 2) % 4 : (idx1 + pick([1, 3])) % 4;
 	const z1: [string, string, string, string] = ['', '', '', ''];
 	const z2: [string, string, string, string] = ['', '', '', ''];
 	z1[idx1] = `${value(idx1)}°`;
 	z2[idx2] = '?';
 	const svg = svgParallelsTransversal(theta, z1, z2);
+	const name = kind === 'stufen' ? 'Stufenwinkel' : 'Wechselwinkel';
+	const relWhy = kind === 'stufen'
+		? 'Stufenwinkel liegen an beiden Parallelen an derselben Stelle (wie verschoben)'
+		: 'Wechselwinkel liegen zwischen den Parallelen auf verschiedenen Seiten der schneidenden Geraden (wie in einem Z)';
 	return {
 		atomId: 'geometrie__stufen_wechselwinkel',
-		prompt: `Die beiden Geraden sind parallel. Wie groß ist der markierte ${isStufen ? 'Stufenwinkel' : 'Wechselwinkel'} (?)?`,
+		prompt: lvl < 2
+			? `Die beiden Geraden sind parallel. Wie groß ist der markierte ${name} (?)?`
+			: `Die beiden Geraden sind parallel. Wie groß ist der markierte Winkel (?)?`,
 		answerType: 'integer',
 		correctAnswer: String(value(idx2)),
 		svg,
-		hint: isStufen ? 'Stufenwinkel an Parallelen sind gleich groß.' : 'Wechselwinkel an Parallelen sind gleich groß.',
-		why: `${isStufen ? 'Stufenwinkel liegen an beiden Parallelen an derselben Stelle (wie verschoben)' : 'Wechselwinkel liegen zwischen den Parallelen auf verschiedenen Seiten der schneidenden Geraden (wie in einem Z)'} und sind gleich groß: ${value(idx2)}°.`, difficulty: 0.45
+		hint: lvl < 2
+			? `${name} an Parallelen sind gleich groß.`
+			: 'Suche erst den Stufenwinkel zum gegebenen Winkel. Liegt der gesuchte Winkel daneben, ergänzen sich beide zu 180°.',
+		why: kind === 'neben'
+			? `Der Stufenwinkel zu ${value(idx1)}° ist ebenfalls ${value(idx1)}°. Der gesuchte Winkel liegt daneben (Nebenwinkel): 180° − ${value(idx1)}° = ${value(idx2)}°.`
+			: `${relWhy} und sind gleich groß: ${value(idx2)}°.`,
+		difficulty: [0.35, 0.45, 0.55][lvl]
 	};
 });
 
@@ -4169,7 +4389,7 @@ reg('geometrie__kreissaetze', (stage = 0) => {
 	};
 });
 
-reg('geometrie__vierecke_systematisieren', () => {
+reg('geometrie__vierecke_systematisieren', (stage = 0) => {
 	const names = ['Quadrat', 'Rechteck', 'Raute', 'Parallelogramm', 'Drachen', 'Trapez', 'Viereck'];
 	const parents: Record<string, string[]> = {
 		Quadrat: ['Rechteck', 'Raute'], Rechteck: ['Parallelogramm'], Raute: ['Parallelogramm', 'Drachen'],
@@ -4184,7 +4404,9 @@ reg('geometrie__vierecke_systematisieren', () => {
 		}
 		return result;
 	};
-	const x = pick(names.filter(n => n !== 'Viereck'));
+	// Expanding sequence: Quadrat und Rechteck → dazu Raute und Parallelogramm → alle Vierecke.
+	const xs = [['Quadrat', 'Rechteck'], ['Quadrat', 'Rechteck', 'Raute', 'Parallelogramm'], names.filter(n => n !== 'Viereck')][Math.min(stage, 2)];
+	const x = pick(xs);
 	// yes and no roughly balanced
 	const supers = [...ancestorsOf(x)];
 	const others = names.filter(n => n !== x && !supers.includes(n));
@@ -4249,12 +4471,21 @@ reg('geometrie__besondere_linien_dreieck', (stage = 0) => {
 	};
 });
 
-reg('geometrie__dreieck_konstruieren', () => {
+reg('geometrie__dreieck_konstruieren', (stage = 0) => {
 	// No drawing on purpose: a sketch would give the answer away.
+	// Expanding sequence: eindeutige Fälle (deutlich zu lang) → mit Grenzfall „genau so lang“ →
+	// knappe Fälle auf beiden Seiten (Summe um 1 größer bzw. gleich).
+	const lvl = Math.min(stage, 2);
 	const constructible = rand(0, 1) === 0;
 	let sides: number[];
-	if (constructible) {
+	if (lvl === 2) {
+		const x = rand(3, 9), y = rand(3, 9);
+		sides = shuffled([x, y, x + y + (constructible ? -1 : rand(0, 1))]);
+	} else if (constructible) {
 		sides = randomTriangleSides();
+	} else if (lvl === 0) {
+		const x = rand(3, 9), y = rand(3, 9);
+		sides = shuffled([x, y, x + y + rand(3, 6)]);
 	} else {
 		// The longest side is at least as long as the other two together (including the
 		// borderline case "exactly as long"); its position in the list is random.

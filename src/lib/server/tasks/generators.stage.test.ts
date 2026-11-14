@@ -253,3 +253,66 @@ describe('signed numbers start with small absolute values', () => {
 		}
 	});
 });
+
+// Every generator takes a stage now: each stage (and stages beyond the last one) must
+// produce well-formed, self-consistent tasks.
+import { registeredAtomIds } from '$lib/server/tasks/generators.js';
+import { checkAnswer } from '$lib/server/tasks/index.js';
+
+describe('all generators: every stage yields valid tasks', () => {
+	for (const atomId of registeredAtomIds) {
+		it(atomId, () => {
+			for (let stage = 0; stage <= 6; stage++) {
+				for (let i = 0; i < 30; i++) {
+					const t = generateTask(atomId, stage)!;
+					const label = `stage ${stage}: ${t.prompt}`;
+					expect(t.atomId, label).toBe(atomId);
+					expect(t.prompt, label).not.toMatch(/undefined|NaN|Infinity|\[object/);
+					expect(t.correctAnswer, label).not.toMatch(/^$|undefined|NaN|Infinity/);
+					if (t.answerType === 'integer') expect(Number.isInteger(Number(t.correctAnswer.replace(',', '.'))), label).toBe(true);
+					// exactly one button is accepted (labels may carry units, e.g. "-9 °C")
+					if (t.choices) expect(t.choices.filter((c) => checkAnswer(c, t.correctAnswer, t.answerType, t.tolerance)).length, label).toBe(1);
+					if (t.choices) expect(new Set(t.choices).size, label).toBe(t.choices.length);
+					expect(checkAnswer(t.correctAnswer, t.correctAnswer, t.answerType, t.tolerance), label).toBe(true);
+				}
+			}
+		});
+	}
+});
+
+describe('selected stage-0 simplifications', () => {
+	it('schriftliche Addition stage 0 has no carry, stage 1 always one', () => {
+		const carries = (a: number, b: number) => { for (; a || b; a = Math.floor(a / 10), b = Math.floor(b / 10)) if ((a % 10) + (b % 10) > 9) return true; return false; };
+		for (const stage of [0, 1]) {
+			for (const t of samples('arithmetik__schriftliche_addition', stage)) {
+				const [a, b] = t.prompt.split('=')[0].split('+').map((x) => Number(x.trim()));
+				expect(carries(a, b)).toBe(stage === 1);
+			}
+		}
+	});
+	it('Stufen-/Wechselwinkel stage 0 asks only for Stufenwinkel with multiples of 10', () => {
+		for (const t of samples('geometrie__stufen_wechselwinkel', 0)) {
+			expect(t.prompt).toContain('Stufenwinkel');
+			expect(Number(t.correctAnswer) % 10).toBe(0);
+		}
+	});
+	it('Trigonometrie stage 0 always gives the hypotenuse', () => {
+		for (const t of samples('geometrie__trigonometrie_seiten_berechnen', 0)) {
+			expect(t.prompt).toMatch(/Ankathete|Gegenkathete/);
+		}
+	});
+	it('Strahlensätze stage 0 only asks for an outer segment', () => {
+		for (const t of samples('geometrie__strahlensaetze', 0)) expect(t.prompt).toMatch(/\((c|d)\)/);
+	});
+	it('lineare Gleichung beidseitig stage 0 needs no division', () => {
+		for (const t of samples('algebra__lineare_gleichung_variablen_beidseitig', 0)) {
+			const steps = t.inputData!.steps as string[];
+			expect(steps[3]).not.toContain(':');
+		}
+	});
+	it('Einmaleins stage 0 keeps factors up to 5', () => {
+		for (const t of samples('arithmetik__einmaleins_automatisierung', 0)) {
+			expect(Number(t.correctAnswer)).toBeLessThanOrEqual(25);
+		}
+	});
+});
