@@ -3142,8 +3142,9 @@ reg('algebra__zuordnungen', (stage = 0) => {
 		if (kind === 'dupx') xs[rand(1, 3)] = xs[0];
 		if (kind === 'samey') ys[rand(1, 3)] = ys[0];
 		xs.sort((u, v) => u - v);
-		const tbl = { t: `x | ${xs.join(' | ')}\ny | ${ys.join(' | ')}`, isF: kind !== 'dupx' };
-		return { atomId: 'algebra__zuordnungen', prompt: `Ist diese Tabelle eine Funktion?\n${tbl.t}`, answerType: 'text', correctAnswer: tbl.isF ? 'ja' : 'nein', choices: ['ja', 'nein'], hint: 'Prüfe: Gibt es einen \\(x\\)-Wert, der zweimal mit verschiedenen \\(y\\)-Werten auftaucht? Gleiche \\(y\\)-Werte sind erlaubt.', why: kind === 'dupx' ? `Der x-Wert ${xs[0]} kommt zweimal vor – mit verschiedenen y-Werten. Das ist nicht eindeutig.` : kind === 'samey' ? 'Jeder x-Wert kommt nur einmal vor. Dass ein y-Wert doppelt auftritt, ist erlaubt.' : 'Jeder x-Wert kommt genau einmal vor – zu jedem x gehört genau ein y.', difficulty: 0.4 };
+		// render as a real value table (MathJax array) instead of plain text with pipes
+		const tbl = { t: `\\[\\begin{array}{c|${xs.map(() => 'c').join('|')}} x & ${xs.join(' & ')} \\\\ \\hline y & ${ys.join(' & ')} \\end{array}\\]`, isF: kind !== 'dupx' };
+		return { atomId: 'algebra__zuordnungen', prompt: `Ist diese Tabelle eine Funktion? ${tbl.t}`, answerType: 'text', correctAnswer: tbl.isF ? 'ja' : 'nein', choices: ['ja', 'nein'], hint: 'Prüfe: Gibt es einen \\(x\\)-Wert, der zweimal mit verschiedenen \\(y\\)-Werten auftaucht? Gleiche \\(y\\)-Werte sind erlaubt.', why: kind === 'dupx' ? `Der x-Wert ${xs[0]} kommt zweimal vor – mit verschiedenen y-Werten. Das ist nicht eindeutig.` : kind === 'samey' ? 'Jeder x-Wert kommt nur einmal vor. Dass ein y-Wert doppelt auftritt, ist erlaubt.' : 'Jeder x-Wert kommt genau einmal vor – zu jedem x gehört genau ein y.', difficulty: 0.4 };
 	}
 });
 
